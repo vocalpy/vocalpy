@@ -14,6 +14,11 @@
 dist/
 build/
 
+# tests
+.coverage
+coverage
+coverage.xml
+
 # Sphinx
 doc/_build/
 
