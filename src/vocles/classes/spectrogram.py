@@ -36,7 +36,7 @@ class Spectrogram:
         self.audio_path = audio_path
 
     @classmethod
-    def from_file(cls, audio_path):
+    def from_file(cls, spect_path):
         audio_path = Path(audio_path)
         if not audio_path.exists():
             raise FileNotFoundError(
