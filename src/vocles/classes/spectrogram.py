@@ -43,7 +43,3 @@ class Spectrogram:
                 f'file not found: {audio_path}'
             )
         data, samplerate = sf.read(audio_path)
-
-    def to_spect(self,
-                 spect_maker=None):
-        return spect
