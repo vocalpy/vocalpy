@@ -1,2 +1,2 @@
-from .classes import Audio, Spectrogram
+from .dataclasses import Audio, Spectrogram
 from . import validators
