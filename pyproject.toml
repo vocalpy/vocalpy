@@ -1,44 +1,51 @@
-[tool.poetry]
-name = "vocles"
+[build-system]
+requires = ["flit_core >=3.2,<4"]
+build-backend = "flit_core.buildapi"
+
+[project]
+name = "vocalpy"
+authors = [
+    {name = "David Nicholson", email = "nickledave@users.noreply.github.com"}
+]
+description = "common core package for computational vocal learning research in Python"
 version = "0.1.0"
-description = "tool for building and processing datasets of animal vocalizations"
-authors = ["David Nicholson <nickledave@users.noreply.github.com>"]
-license = "BSD"
 classifiers = [
         'License :: OSI Approved :: BSD License',
-        'Development Status :: 4 - Beta',
+        'Development Status :: 5 - Production/Stable',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.6',
         'Programming Language :: Python :: 3.7',
         'Programming Language :: Python :: 3.8',
+        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: Implementation :: CPython'
 ]
+requires-python = ">=3.7"
+readme = "README.md"
+license = {file = "LICENSE"}
+dependencies = [
+    "attrs >=21.4.0",
+    "crowsetta >=3.2",
+    "dask >=2.10.1",
+    "pandas >=1.3.5",
+    "numpy >=1.18.1",
+    "scipy >=1.4.1",
+    "SoundFile >=0.10.3",
+]
 
-[tool.poetry.dependencies]
-python = "^3.6.2"
-crowsetta = ">=3.1.0"
-matplotlib = ">=3.3.3"
-numpy = ">=1.18.1"
-pandas = ">=1.0.1"
-pandas-path = ">=0.2.0"
-scipy = ">=1.4.1"
-SoundFile = ">=0.10.3"
+[project.urls]
+Home = "https://github.com/NickleDave/vocalpy"
 
-[tool.poetry.dev-dependencies]
-pytest = "^6.2.2"
-pytest-cov = "^2.11.1"
-ipython = ">=7.0"
-sphinx = ">=3.4.1"
-jedi = "!=0.18"
-
-[build-system]
-requires = ["poetry-core>=1.0.0"]
-build-backend = "poetry.core.masonry.api"
-
-[tool.pytest.ini_options]
-minversion = "6.0"
-addopts = "--cov=./ --cov-report=xml"
-testpaths = [
-    "tests",
+[project.optional-dependencies]
+dev = [
+    "twine >=3.7.1",
+    "black >=21.12b0",
+    "ipython >=8.0.0",
+    "nox >= 2022.1.7",
+]
+test = [
+    "pytest >=6.2.5",
+    "pytest-cov >=2.11.1",
+]
+doc = [
+    "sphinx >=4.4.0"
 ]
