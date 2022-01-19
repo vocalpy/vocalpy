@@ -13,7 +13,7 @@ def test_data_root():
 
 @pytest.fixture
 def source_test_data_root(test_data_root):
-    """'source' test data, i.e., files **not** created by ``vocles``,
+    """'source' test data, i.e., files **not** created by ``vocalpy``,
     that is, the input data used when vak does create files (csv files, logs,
     neural network checkpoints, etc.)
     """
