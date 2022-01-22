@@ -1,78 +1,73 @@
-from pathlib import Path
-from typing import Optional
+import pathlib
+import reprlib
 
-import numpy as np
+import evfuncs
 import soundfile
-
-from .. import validators
 
 
 class Audio:
-    def __init__(self,
-                 path: [str, Path],
-                 data: Optional[np.array] = None,
-                 samplerate: Optional[int] = None,
-                 ):
-        if data and samplerate is None:
-            raise ValueError(
-                f'must provide sampling rate with audio data'
-            )
-        if samplerate and data is None:
-            raise ValueError(
-                f'must provide audio data with sampling rate'
-            )
+    """class that represents audio saved in a file.
 
-        self.data = data
-        self.samplerate = samplerate
-        self.path = path
+    Attributes
+    ----------
+    data : numpy.ndarray
+        audio data
+    samplerate : int
+        sampling rate in Hertz
+    audio_path : str, pathlib.Path
+        path to a file containing saved arrays.
+
+    Examples
+    --------
+    >>> audio = vocalpy.Audio("1291.WAV")
+    >>> audio
+    Audio(data=array([ 0.   ... -0.00115967]), samplerate=44100, audio_path=PosixPath('1291.WAV'))
+    """
+
+    def __init__(self,
+                 audio_path: [str, pathlib.Path],
+                 ):
+        self.audio_path = pathlib.Path(audio_path)
+
+        self._data = None
+        self._samplerate = None
 
     def __repr__(self):
+        if any([getattr(self, attr) is None for attr in ('_data', '_samplerate')]):
+            self._load()
+
         return (f'{self.__class__.__name__}('
-                f'path={self.path!r}, data={self.data!r}), samplerate={self.samplerate}')
+                f'data={reprlib.repr(self._data)}, '
+                f'samplerate={reprlib.repr(self._samplerate)}, '
+                f'audio_path={self.audio_path!r})'
+                )
 
-    @property
-    def path(self):
-        return self._path
+    def _load(self):
+        """function that lazy loads"""
+        if not self.audio_path.exists():
+            raise FileNotFoundError(
+                f'audio file not found: {self.audio_path}'
+            )
 
-    @path.setter
-    def path(self, value):
-        value = Path(value)
-        self._path = value
+        try:
+            self._data, self._samplerate = soundfile.read(self.audio_path)
+        except RuntimeError:
+            self._data, self._samplerate = evfuncs.load_cbin(self.audio_path)
 
     @property
     def data(self):
-        return self._data
+        if self._data is None:
+            self._load()
 
-    @data.setter
-    def data(self, value):
-        if value is not None:
-            value = np.array(value)
-            if not validators.is_1d_or_row_or_column(value):
-                raise ValueError(
-                    f'data for audio should be a 1-dimensional array, '
-                    f'but number of dimensions was {value.ndim}'
-                )
-        self._data = value
+        return self._data
 
     @property
     def samplerate(self):
-        return self._samplerate
+        if self._samplerate is None:
+            self._load()
 
-    @samplerate.setter
-    def samplerate(self, value):
-        if value is not None:
-            if not isinstance(value, int):
-                raise TypeError(f'sampling rate should be an integer but was {type(value)}')
-            if value < 0:
-                raise ValueError(f'sampling rate should be a positive integer but was {value}')
-        self._samplerate = value
+        return self._samplerate
 
     @classmethod
     def from_file(cls, audio_path):
-        audio_path = Path(audio_path)
-        if not audio_path.exists():
-            raise FileNotFoundError(
-                f'file not found: {audio_path}'
-            )
-        data, samplerate = soundfile.read(audio_path)
-        return cls(data, samplerate, audio_path)
+        return cls(audio_path)
