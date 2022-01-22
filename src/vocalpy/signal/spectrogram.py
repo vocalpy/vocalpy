@@ -6,22 +6,20 @@ spectrogram adapted from code by Kyle Kastner and Tim Sainburg
 https://github.com/timsainb/python_spectrograms_and_inversion
 """
 import numpy as np
-
-from scipy.signal import butter, lfilter
-from matplotlib.mlab import specgram
+import scipy.signal
 
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
     nyq = 0.5 * fs
     low = lowcut / nyq
     high = highcut / nyq
-    b, a = butter(order, [low, high], btype='band')
+    b, a = scipy.signal.butter(order, [low, high], btype='band')
     return b, a
 
 
 def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
     b, a = butter_bandpass(lowcut, highcut, fs, order=order)
-    y = lfilter(b, a, data)
+    y = scipy.signal.lfilter(b, a, data)
     return y
 
 
@@ -66,13 +64,13 @@ def spectrogram(data,
     noverlap = fft_size - step_size
 
     if freq_cutoffs:
-        dat = butter_bandpass_filter(data,
-                                     freq_cutoffs[0],
-                                     freq_cutoffs[1],
-                                     samplerate)
+        data = butter_bandpass_filter(data,
+                                      freq_cutoffs[0],
+                                      freq_cutoffs[1],
+                                      samplerate)
 
     # below only take [:3] from return of specgram because we don't need the image
-    spect, freqbins, timebins = specgram(data, fft_size, samplerate, noverlap=noverlap)[:3]
+    freqbins, timebins, spect = scipy.signal.spectrogram(data, samplerate, nperseg=fft_size, noverlap=noverlap)
 
     if transform_type:
         if transform_type == 'log_spect':
