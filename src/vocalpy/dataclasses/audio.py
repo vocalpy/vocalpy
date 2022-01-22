@@ -2,11 +2,9 @@ from pathlib import Path
 from typing import Optional
 
 import numpy as np
-import soundfile as sf
+import soundfile
 
 from .. import validators
-from ..signal.spectrogram import spectrogram
-from .spectrogram import Spectrogram
 
 
 class Audio:
@@ -76,15 +74,5 @@ class Audio:
             raise FileNotFoundError(
                 f'file not found: {audio_path}'
             )
-        data, samplerate = sf.read(audio_path)
+        data, samplerate = soundfile.read(audio_path)
         return cls(data, samplerate, audio_path)
-
-    def to_spect(self,
-                 spect_kwargs,
-                 spect_maker=None,
-                 ):
-        if spect_maker is None:
-            spect_maker = spectrogram
-        s, t, f = spect_maker(self.data, self.samplerate, **spect_kwargs)
-        spect = Spectrogram(s, t, f, audio_path=self.path)
-        return spect
