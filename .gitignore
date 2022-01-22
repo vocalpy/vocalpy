@@ -24,6 +24,6 @@ coverage.xml
 doc/_build/
 
 # test data
-tests/test_data/source/
-tests/test_data/generated/
+tests/data_for_tests/source/
+tests/data_for_tests/generated/
 *.tar.gz
