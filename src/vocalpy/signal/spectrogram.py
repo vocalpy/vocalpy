@@ -9,6 +9,13 @@ import numpy as np
 import scipy.signal
 
 
+__all__ = [
+    'butter_bandpass',
+    'butter_bandpass_filter',
+    'spectrogram'
+]
+
+
 def butter_bandpass(lowcut, highcut, fs, order=5):
     nyq = 0.5 * fs
     low = lowcut / nyq
@@ -54,12 +61,12 @@ def spectrogram(data,
 
     Return
     ------
-    spect : numpy.ndarray
+    s : numpy.ndarray
         spectrogram
-    freqbins : numpy.ndarray
-        vector of centers of frequency bins from spectrogram
-    timebins : numpy.ndarray
+    f : numpy.ndarray
         vector of centers of time bins from spectrogram
+    t : numpy.ndarray
+        vector of centers of frequency bins from spectrogram
     """
     noverlap = fft_size - step_size
 
@@ -70,27 +77,27 @@ def spectrogram(data,
                                       samplerate)
 
     # below only take [:3] from return of specgram because we don't need the image
-    freqbins, timebins, spect = scipy.signal.spectrogram(data, samplerate, nperseg=fft_size, noverlap=noverlap)
+    f, t, s = scipy.signal.spectrogram(data, samplerate, nperseg=fft_size, noverlap=noverlap)
 
     if transform_type:
         if transform_type == 'log_spect':
-            spect /= spect.max()  # volume normalize to max 1
-            spect = np.log10(spect)  # take log
+            s /= s.max()  # volume normalize to max 1
+            s = np.log10(s)  # take log
             if thresh:
                 # I know this is weird, maintaining 'legacy' behavior
-                spect[spect < -thresh] = -thresh
+                s[s < -thresh] = -thresh
         elif transform_type == 'log_spect_plus_one':
-            spect = np.log10(spect + 1)
+            s = np.log10(s + 1)
             if thresh:
-                spect[spect < thresh] = thresh
+                s[s < thresh] = thresh
     else:
         if thresh:
-            spect[spect < thresh] = thresh  # set anything less than the threshold as the threshold
+            s[s < thresh] = thresh  # set anything less than the threshold as the threshold
 
     if freq_cutoffs:
-        f_inds = np.nonzero((freqbins >= freq_cutoffs[0]) &
-                            (freqbins < freq_cutoffs[1]))[0]  # returns tuple
-        spect = spect[f_inds, :]
-        freqbins = freqbins[f_inds]
+        f_inds = np.nonzero((f >= freq_cutoffs[0]) &
+                            (f < freq_cutoffs[1]))[0]  # returns tuple
+        s = s[f_inds, :]
+        f = f[f_inds]
 
-    return spect, freqbins, timebins
+    return s, f, t
