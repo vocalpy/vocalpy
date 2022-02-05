@@ -1,5 +1,6 @@
 import pathlib
 import reprlib
+from typing import Union
 
 import numpy as np
 import scipy.io
@@ -25,8 +26,7 @@ def are_key_map_keys_valid(key_map: dict) -> bool:
 
 def default_key_map() -> dict:
     """maps the valid keys to themselves"""
-    default = {k: k for k in ('s', 't', 'f')}
-    default['audio_path'] = None
+    default = {k: k for k in VALID_KEYS}
     return default
 
 
@@ -73,20 +73,39 @@ class Spectrogram:
     """
 
     def __init__(self,
-                 spect_path: [str, pathlib.Path],
-                 format: str,
+                 spect_path: Union[str, pathlib.Path] = None,
+                 format: str = None,
+                 s: np.ndarray = None,
+                 t: np.ndarray = None,
+                 f: np.ndarray = None,
+                 audio_path: Union[str, pathlib.Path] = None,
                  key_map: dict = None):
+        if format not in VALID_SPECT_FILE_FORMATS:
+            raise ValueError(
+                f'invalid extension for spectrogram file format: {format}. '
+                f'Valid extensions are: {VALID_SPECT_FILE_FORMATS}'
+            )
 
-        self.spect_path = pathlib.Path(spect_path)
-        self.format = format
+        if key_map:
+            if not are_key_map_keys_valid(key_map):
+                raise ValueError(
+                    f'invalid key map: {key_map}.\n Valid keys for mapping are: {VALID_KEYS}'
+                )
+            key_map = add_default_key_mappings(key_map)
         if key_map is None:
             key_map = default_key_map()
+
+        if spect_path is not None:
+            spect_path = pathlib.Path(spect_path)
+
+        self.spect_path = spect_path
+        self.format = format
         self.key_map = key_map
 
-        self._s = None
-        self._f = None
-        self._t = None
-        self._audio_path = None
+        self._s = s
+        self._f = t
+        self._t = f
+        self._audio_path = audio_path
 
     def __repr__(self):
         if any([getattr(self, attr) is None for attr in ('_s', '_t', '_f')]):
@@ -104,26 +123,47 @@ class Spectrogram:
         """function that lazy loads"""
         if not self.spect_path.exists():
             raise FileNotFoundError(
-                f'did not find spectrogram file at path specified: {self.spect_path}'
+                f"did not find spectrogram file at path specified: {self.spect_path}"
             )
 
         spect_file_dict = SPECT_FILE_LOADING_FUNCTIONS[self.format](self.spect_path)
 
-        s = np.array(spect_file_dict[self.key_map['s']])
+        try:
+            s = np.array(spect_file_dict[self.key_map['s']])
+        except KeyError as e:
+            raise KeyError(
+                f"Did not find spectrogram using key '{self.key_map['s']}' "
+                f"in file loaded from spect_path: {self.spect_path}"
+            ) from e
+
         if s.ndim < 2:
             raise ValueError(
                 f'spectrogram `s` should have at least 2 dimensions, '
                 f'but number of dimensions was {s.ndim}'
             )
 
-        t = np.array(spect_file_dict[self.key_map['t']])
+        try:
+            t = np.array(spect_file_dict[self.key_map['t']])
+        except KeyError as e:
+            raise KeyError(
+                f"Did not find time bins vector using key '{self.key_map['t']}' "
+                f"in file loaded from spect_path: {self.spect_path}"
+            ) from e
+
         if not validators.is_1d_or_row_or_column(t):
             raise ValueError(
                 f'time bins vector `t` should be a 1-dimensional array, '
                 f'but number of dimensions was {t.ndim}'
             )
 
-        f = np.array(spect_file_dict[self.key_map['f']])
+        try:
+            f = np.array(spect_file_dict[self.key_map['f']])
+        except KeyError as e:
+            raise KeyError(
+                f"Did not find frequency bins vector using key '{self.key_map['f']}' "
+                f"in file loaded from spect_path: {self.spect_path}"
+            ) from e
+
         if not validators.is_1d_or_row_or_column(f):
             raise ValueError(
                 f'frequency bins vector `f` should be a 1-dimensional array, '
@@ -131,8 +171,11 @@ class Spectrogram:
             )
 
         try:
-            audio_path = pathlib.Path(spect_file_dict[self.key_map['audio_path']])
-        except KeyError:
+            audio_path = spect_file_dict[self.key_map['audio_path']]
+            if isinstance(audio_path, np.ndarray):
+                audio_path = np.squeeze(audio_path).item()
+            audio_path = pathlib.Path(audio_path)
+        except KeyError:  # for audio_path only we default to None if it is not found
             audio_path = None
 
         self._s = s
@@ -169,7 +212,7 @@ class Spectrogram:
         return self._audio_path
 
     @classmethod
-    def from_file(cls, spect_path: [str, pathlib.Path], format: str = None, key_map: dict = None):
+    def from_file(cls, spect_path: Union[str, pathlib.Path], format: str = None, key_map: dict = None):
         spect_path = pathlib.Path(spect_path)
         if format is None:
             format = spect_path.suffix[1:]  # [1:] to remove period from extension
@@ -195,3 +238,20 @@ class Spectrogram:
     @classmethod
     def from_npz(cls, npz_path: [str, pathlib.Path], key_map: dict = None):
         return cls.from_file(npz_path, 'npz', key_map)
+
+    def to_file(self, spect_path: [str, pathlib.Path], key_map: dict = None, exist_ok: bool = False):
+        spect_path = pathlib.Path(spect_path)
+        if spect_path.exists() and not exist_ok:
+            raise FileExistsError(
+                f'spect_path already exists:\n{spect_path}.\nTo overwrite, set exist_ok argument to False.'
+            )
+
+        # in most(?) cases this won't be true
+        # since we don't expect to be using `to_file` for something loaded from a file,
+        # but we need to handle it gracefully
+        if any([getattr(self, attr) is None for attr in ('_s', '_t', '_f')]):
+            self._load()
+
+        np.savez(
+            spect_path, s=self._s, f=self._f, t=self._t
+        )
