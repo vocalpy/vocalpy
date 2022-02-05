@@ -1,6 +1,6 @@
 import pathlib
 import reprlib
-from typing import Union
+from typing import Optional, Union
 
 import numpy as np
 import scipy.io
