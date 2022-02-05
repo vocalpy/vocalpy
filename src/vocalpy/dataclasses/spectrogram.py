@@ -15,7 +15,7 @@ SPECT_FILE_LOADING_FUNCTIONS = {
 
 VALID_SPECT_FILE_FORMATS = tuple(SPECT_FILE_LOADING_FUNCTIONS.keys())
 
-VALID_KEYS = ('s', 't', 'f', 'audio_path')
+VALID_KEYS = ('s', 'f', 't', 'audio_path')
 
 
 def are_key_map_keys_valid(key_map: dict) -> bool:
@@ -73,39 +73,16 @@ class Spectrogram:
     """
 
     def __init__(self,
+                 s: np.ndarray,
+                 t: np.ndarray,
+                 f: np.ndarray,
                  spect_path: Union[str, pathlib.Path] = None,
-                 format: str = None,
-                 s: np.ndarray = None,
-                 t: np.ndarray = None,
-                 f: np.ndarray = None,
-                 audio_path: Union[str, pathlib.Path] = None,
-                 key_map: dict = None):
-        if format not in VALID_SPECT_FILE_FORMATS:
-            raise ValueError(
-                f'invalid extension for spectrogram file format: {format}. '
-                f'Valid extensions are: {VALID_SPECT_FILE_FORMATS}'
-            )
-
-        if key_map:
-            if not are_key_map_keys_valid(key_map):
-                raise ValueError(
-                    f'invalid key map: {key_map}.\n Valid keys for mapping are: {VALID_KEYS}'
-                )
-            key_map = add_default_key_mappings(key_map)
-        if key_map is None:
-            key_map = default_key_map()
-
-        if spect_path is not None:
-            spect_path = pathlib.Path(spect_path)
-
+                 audio_path: Union[str, pathlib.Path] = None):
+        self.s = s
+        self.f = t
+        self.t = f
         self.spect_path = spect_path
-        self.format = format
-        self.key_map = key_map
-
-        self._s = s
-        self._f = t
-        self._t = f
-        self._audio_path = audio_path
+        self.audio_path = audio_path
 
     def __repr__(self):
         if any([getattr(self, attr) is None for attr in ('_s', '_t', '_f')]):
@@ -119,101 +96,81 @@ class Spectrogram:
                 f'audio_path={self._audio_path!r})'
                 )
 
-    def _load(self):
-        """function that lazy loads"""
-        if not self.spect_path.exists():
-            raise FileNotFoundError(
-                f"did not find spectrogram file at path specified: {self.spect_path}"
-            )
-
-        spect_file_dict = SPECT_FILE_LOADING_FUNCTIONS[self.format](self.spect_path)
-
-        try:
-            s = np.array(spect_file_dict[self.key_map['s']])
-        except KeyError as e:
-            raise KeyError(
-                f"Did not find spectrogram using key '{self.key_map['s']}' "
-                f"in file loaded from spect_path: {self.spect_path}"
-            ) from e
-
-        if s.ndim < 2:
-            raise ValueError(
-                f'spectrogram `s` should have at least 2 dimensions, '
-                f'but number of dimensions was {s.ndim}'
-            )
-
-        try:
-            t = np.array(spect_file_dict[self.key_map['t']])
-        except KeyError as e:
-            raise KeyError(
-                f"Did not find time bins vector using key '{self.key_map['t']}' "
-                f"in file loaded from spect_path: {self.spect_path}"
-            ) from e
-
-        if not validators.is_1d_or_row_or_column(t):
-            raise ValueError(
-                f'time bins vector `t` should be a 1-dimensional array, '
-                f'but number of dimensions was {t.ndim}'
-            )
-
-        try:
-            f = np.array(spect_file_dict[self.key_map['f']])
-        except KeyError as e:
-            raise KeyError(
-                f"Did not find frequency bins vector using key '{self.key_map['f']}' "
-                f"in file loaded from spect_path: {self.spect_path}"
-            ) from e
-
-        if not validators.is_1d_or_row_or_column(f):
-            raise ValueError(
-                f'frequency bins vector `f` should be a 1-dimensional array, '
-                f'but number of dimensions was {t.ndim}'
-            )
-
-        try:
-            audio_path = spect_file_dict[self.key_map['audio_path']]
-            if isinstance(audio_path, np.ndarray):
-                audio_path = np.squeeze(audio_path).item()
-            audio_path = pathlib.Path(audio_path)
-        except KeyError:  # for audio_path only we default to None if it is not found
-            audio_path = None
-
-        self._s = s
-        self._t = t
-        self._f = f
-        self._audio_path = audio_path
-
     @property
     def s(self) -> np.array:
         """spectrogram, a matrix"""
-        if self._s is None:
-            self._load()
         return self._s
+
+    @s.setter
+    def s(self, value: np.array):
+        value = np.array(value)
+        if value.ndim < 2:
+            raise ValueError(
+                f'spectrogram `s` should have at least 2 dimensions, '
+                f'but number of dimensions was {value.ndim}'
+            )
+        self._s = value
 
     @property
     def t(self) -> np.array:
         """vector of times at the center of each time bin"""
-        if self._t is None:
-            self._load()
         return self._t
+
+    @t.setter
+    def t(self, value: np.array):
+        value = np.array(value)
+        if not validators.is_1d_or_row_or_column(value):
+            raise ValueError(
+                f'time bins vector `t` should be a 1-dimensional array, '
+                f'but number of dimensions was {value.ndim}'
+            )
+        self._t = value
 
     @property
     def f(self) -> np.array:
         """vector of frequencies at the center of each frequency bin"""
-        if self._f is None:
-            self._load()
         return self._f
+
+    @f.setter
+    def f(self, value: np.array):
+        value = np.array(value)
+        if not validators.is_1d_or_row_or_column(value):
+            raise ValueError(
+                f'frequency bins vector `f` should be a 1-dimensional array, '
+                f'but number of dimensions was {value.ndim}'
+            )
+        self._f = value
+
+    @property
+    def spect_path(self) -> pathlib.Path:
+        """path to a file containing saved arrays"""
+        return self._spect_path
+
+    @spect_path.setter
+    def spect_path(self, path: Union[str, pathlib.Path]):
+        if path is not None:
+            path = pathlib.Path(path)
+        self._spect_path = path
 
     @property
     def audio_path(self) -> pathlib.Path:
         """path to audio file from which spectrogram was generated"""
-        if self._audio_path is None:
-            self._load()
         return self._audio_path
+
+    @audio_path.setter
+    def audio_path(self, path: Optional[pathlib.Path] = None):
+        if path is not None:
+            path = pathlib.Path(path)
+        self._audio_path = path
 
     @classmethod
     def from_file(cls, spect_path: Union[str, pathlib.Path], format: str = None, key_map: dict = None):
         spect_path = pathlib.Path(spect_path)
+        if not spect_path.exists():
+            raise FileNotFoundError(
+                f"did not find spectrogram file at path specified: {spect_path}"
+            )
+
         if format is None:
             format = spect_path.suffix[1:]  # [1:] to remove period from extension
             if format not in VALID_SPECT_FILE_FORMATS:
@@ -229,28 +186,75 @@ class Spectrogram:
             key_map = add_default_key_mappings(key_map)
         else:
             key_map = default_key_map()
-        return cls(spect_path, format, key_map)
+
+        spect_file_dict = SPECT_FILE_LOADING_FUNCTIONS[format](spect_path)
+
+        try:
+            s = np.array(spect_file_dict[key_map['s']])
+        except KeyError as e:
+            raise KeyError(
+                f"Did not find spectrogram using key '{key_map['s']}' "
+                f"in file loaded from spect_path: {spect_path}"
+            ) from e
+
+        try:
+            t = np.array(spect_file_dict[key_map['t']])
+        except KeyError as e:
+            raise KeyError(
+                f"Did not find time bins vector using key '{key_map['t']}' "
+                f"in file loaded from spect_path: {spect_path}"
+            ) from e
+
+        try:
+            f = np.array(spect_file_dict[key_map['f']])
+        except KeyError as e:
+            raise KeyError(
+                f"Did not find frequency bins vector using key '{key_map['f']}' "
+                f"in file loaded from spect_path: {spect_path}"
+            ) from e
+
+        if not validators.is_1d_or_row_or_column(f):
+            raise ValueError(
+                f'frequency bins vector `f` should be a 1-dimensional array, '
+                f'but number of dimensions was {t.ndim}'
+            )
+
+        try:
+            audio_path = spect_file_dict[key_map['audio_path']]
+            if isinstance(audio_path, np.ndarray):
+                audio_path = np.squeeze(audio_path).item()
+            audio_path = pathlib.Path(audio_path)
+        except KeyError:  # for audio_path only we default to None if it is not found
+            audio_path = None
+
+        return cls(s, f, t, spect_path, audio_path)
 
     @classmethod
     def from_mat(cls, mat_path: [str, pathlib.Path], key_map: dict = None):
+        """load a spectrogram from a Matlab .mat file"""
         return cls.from_file(mat_path, 'mat', key_map)
 
     @classmethod
     def from_npz(cls, npz_path: [str, pathlib.Path], key_map: dict = None):
+        """load a spectrogram from a Numpy .npz file"""
         return cls.from_file(npz_path, 'npz', key_map)
 
     def to_file(self, spect_path: [str, pathlib.Path], key_map: dict = None, exist_ok: bool = False):
+        """save a spectrogram to a Numpy .npz file"""
         spect_path = pathlib.Path(spect_path)
         if spect_path.exists() and not exist_ok:
             raise FileExistsError(
-                f'spect_path already exists:\n{spect_path}.\nTo overwrite, set exist_ok argument to False.'
+                f'spect_path already exists:\n{spect_path}.\nTo overwrite, set exist_ok argument to True.'
             )
 
-        # in most(?) cases this won't be true
-        # since we don't expect to be using `to_file` for something loaded from a file,
-        # but we need to handle it gracefully
-        if any([getattr(self, attr) is None for attr in ('_s', '_t', '_f')]):
-            self._load()
+        if key_map:
+            if not are_key_map_keys_valid(key_map):
+                raise ValueError(
+                    f'invalid key map: {key_map}.\n Valid keys for mapping are: {VALID_KEYS}'
+                )
+            key_map = add_default_key_mappings(key_map)
+        else:
+            key_map = default_key_map()
 
         np.savez(
             spect_path, s=self._s, f=self._f, t=self._t
