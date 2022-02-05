@@ -25,7 +25,8 @@ def are_key_map_keys_valid(key_map: dict) -> bool:
 
 
 def default_key_map() -> dict:
-    """maps the valid keys to themselves"""
+    """default key mapping,
+    maps VALID_KEYS to themselves"""
     default = {k: k for k in VALID_KEYS}
     return default
 
@@ -40,6 +41,7 @@ def add_default_key_mappings(key_map: dict) -> dict:
     return key_map_copy
 
 
+@dataclasses.dataclass
 class Spectrogram:
     """class that represents a spectrogram saved in a file.
 
@@ -53,14 +55,6 @@ class Spectrogram:
         vector of size n where values are times at center of time bins in spectrogram
     spect_path : str, pathlib.Path
         path to a file containing saved arrays.
-    format : str
-        format of file, one of {'npz', 'mat'}.
-    key_map : dict
-        that maps standard keys for accessing
-        arrays in file to a different set of keys.
-        Standard keys are {'s', 'f', 't', 'audio_path'} (defined below).
-        Defaults to None, in which case the default mapping is used:
-        `{'s': 's', 'f': 'f', 't': 't', 'audio_path': None}`.
     audio_path : pathlib.Path
         path to audio file from which spectrogram was generated. Optional, default is None.
 
@@ -71,7 +65,6 @@ class Spectrogram:
     Spectrogram(s=array([[0.561... 0.        ]]), f=array([[    0...50.        ]]), t=array([[0.000...6053968e+01]]),
     spect_path=PosixPath('llb3_0066_2018_04_23_17_31_55.wav.mat'), audio_path=None)
     """
-
     def __init__(self,
                  s: np.ndarray,
                  t: np.ndarray,
@@ -85,9 +78,6 @@ class Spectrogram:
         self.audio_path = audio_path
 
     def __repr__(self):
-        if any([getattr(self, attr) is None for attr in ('_s', '_t', '_f')]):
-            self._load()
-
         return (f'{self.__class__.__name__}('
                 f's={reprlib.repr(self._s)}, '
                 f'f={reprlib.repr(self._f)}, '
@@ -163,8 +153,57 @@ class Spectrogram:
             path = pathlib.Path(path)
         self._audio_path = path
 
+    def asdict(self):
+        """spectrogram as a Python ``dict``
+
+        Returns
+        -------
+        spect_dict : dict
+            with keys {'s', 'f', 't', 'spect_path', 'audio_path'}
+            that map to the corresponding ``vocalpy.Spectrogram`` attributes
+        """
+        return {
+            's': self.s,
+            'f': self.f,
+            't': self.t,
+            'spect_path': self.spect_path,
+            'audio_path': self.audio_path
+        }
+
+    def __eq__(self, other):
+        if other.__class__ is self.__class__:
+            return (self.s, self.f, self.t, self.spect_path, self.audio_path) == (
+                other.s, other.t, other.f, other.spect_path, other.audio_path)
+        return NotImplemented
+
+    def __ne__(self, other):
+        if other.__class__ is self.__class__:
+            return (self.s, self.f, self.t, self.spect_path, self.audio_path) != (
+                other.s, other.t, other.f, other.spect_path, other.audio_path)
+        return NotImplemented
+
     @classmethod
     def from_file(cls, spect_path: Union[str, pathlib.Path], format: str = None, key_map: dict = None):
+        """load spectrogram and associated arrays from a file
+
+        Parameters
+        ----------
+        spect_path : str, pathlib.Path
+            path to a file containing saved arrays.
+        format : str
+            format of file, one of {'npz', 'mat'}.
+        key_map : dict
+            that maps standard keys for accessing
+            arrays in file to a different set of keys.
+            Standard keys are {'s', 'f', 't', 'audio_path'}.
+            Defaults to None, in which case the default mapping is used,
+            that maps the standard keys to themselves.
+
+        Returns
+        -------
+        spect : vocalpy.Spectrogram
+            instance loaded from file
+        """
         spect_path = pathlib.Path(spect_path)
         if not spect_path.exists():
             raise FileNotFoundError(
@@ -231,16 +270,69 @@ class Spectrogram:
 
     @classmethod
     def from_mat(cls, mat_path: [str, pathlib.Path], key_map: dict = None):
-        """load a spectrogram from a Matlab .mat file"""
+        """load a spectrogram from a Matlab .mat file
+
+        Parameters
+        ----------
+        mat_path : str, pathlib.Path
+            path to a .mat file containing saved arrays.
+        format : str
+            format of file, one of {'npz', 'mat'}.
+        key_map : dict
+            that maps standard keys for accessing
+            arrays in file to a different set of keys.
+            Standard keys are {'s', 'f', 't', 'audio_path'}.
+            Defaults to None, in which case the default mapping is used,
+            that maps the standard keys to themselves.
+
+        Returns
+        -------
+        spect : vocalpy.Spectrogram
+            instance loaded from file
+        """
         return cls.from_file(mat_path, 'mat', key_map)
 
     @classmethod
     def from_npz(cls, npz_path: [str, pathlib.Path], key_map: dict = None):
-        """load a spectrogram from a Numpy .npz file"""
+        """load a spectrogram from a Numpy .npz file
+
+        Parameters
+        ----------
+        npz_path : str, pathlib.Path
+            path to a .npz file containing saved arrays.
+        format : str
+            format of file, one of {'npz', 'mat'}.
+        key_map : dict
+            that maps standard keys for accessing
+            arrays in file to a different set of keys.
+            Standard keys are {'s', 'f', 't', 'audio_path'}.
+            Defaults to None, in which case the default mapping is used,
+            that maps the standard keys to themselves.
+
+        Returns
+        -------
+        spect : vocalpy.Spectrogram
+            instance loaded from file
+        """
         return cls.from_file(npz_path, 'npz', key_map)
 
     def to_file(self, spect_path: [str, pathlib.Path], key_map: dict = None, exist_ok: bool = False):
-        """save a spectrogram to a Numpy .npz file"""
+        """save a spectrogram to a Numpy .npz file
+
+        Parameters
+        ----------
+        spect_path : str, pathlib.Path
+            path to a file containing saved arrays.
+        format : str
+            format of file, one of {'npz', 'mat'}.
+        key_map : dict
+            that maps standard keys for accessing
+            arrays in file to an alternative set of keys.
+            Standard keys are {'s', 'f', 't', 'audio_path'}.
+            If provided, arrays will be saved using the
+            alternative keys that the standard keys map to.
+            Defaults to None, in which case standard keys are used.
+        """
         spect_path = pathlib.Path(spect_path)
         if spect_path.exists() and not exist_ok:
             raise FileExistsError(
@@ -253,9 +345,20 @@ class Spectrogram:
                     f'invalid key map: {key_map}.\n Valid keys for mapping are: {VALID_KEYS}'
                 )
             key_map = add_default_key_mappings(key_map)
-        else:
-            key_map = default_key_map()
+
+        spect_dict = self.asdict()
+        del spect_dict['spect_path']
+        if spect_dict['audio_path'] is None:
+            del spect_dict['audio_path']
+
+        if key_map:
+            # map to user-provided keys
+            spect_dict = {
+                key_map[k]:
+                spect_dict[k]
+                for k in key_map
+            }
 
         np.savez(
-            spect_path, s=self._s, f=self._f, t=self._t
+            spect_path, **spect_dict
         )
