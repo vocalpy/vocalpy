@@ -1,10 +1,39 @@
-from typing import Callable
+from typing import Callable, List, Sequence, Union
 import pathlib
 
 import dask.bag
 import dask.diagnostics
 
+import vocalpy.constants
 from vocalpy.dataclasses import Audio, Spectrogram
+from vocalpy.signal.spectrogram import spectrogram as default_spect_func
+
+
+def default_spect_fname_func(audio_path: Union[str, pathlib.Path]):
+    """default function for naming spectrogram files.
+    Adds the extension `.spect.npz` to an audio path.
+
+    Parameters
+    ----------
+    audio_path : str, pathlib.Path
+
+    Returns
+    -------
+    spect_path : pathlib.Path
+        audio path with the extension `.spect.npz` added.
+
+    Notes
+    -----
+    Adding an extension to the audio path
+    (instead of changing it)
+    makes it possible to recover the audio path
+    from the spectrogram path.
+    Adding a longer extension `.spect.npz`
+    makes it less likely that the spectrogram file
+    will overwrite an existing `.npz` file.
+    """
+    audio_path = pathlib.Path(audio_path)
+    return audio_path.parent / (audio_path.name + vocalpy.constants.SPECT_FILE_EXT)
 
 
 class SpectMaker:
@@ -14,30 +43,45 @@ class SpectMaker:
     ----------
     spect_func : Callable
     default_spect_kwargs : dict
-        of keywoard arguments
+        of keyword arguments
     """
     def __init__(self,
                  spect_func: Callable = default_spect_func,
                  default_spect_kwargs: dict = None):
         self.spect_func = spect_func
+
+        if default_spect_kwargs is None:
+            default_spect_kwargs = {}  # avoids mutable as arg default
         self.default_spect_kwargs = default_spect_kwargs
 
     def make(self,
-             audio: [Audio, list[Audio], tuple[Audio]],
-             spect_kwargs: dict=None,
-             output_dir: [str, pathlib.Path] = None,
-             key: Callable = None) -> [Spectrogram, list[Spectrogram]]:
-        """make spectrograms from audio
+             audio: Union[Audio, Sequence[Audio], Sequence[pathlib.Path]],
+             spect_kwargs: dict = None,
+             output_dir: Union[str, pathlib.Path] = None,
+             spect_fname_func: Callable = default_spect_func) -> Union[Spectrogram, List[Spectrogram]]:
+        """make spectrograms from audio.
+
+        takes as input ``vocalpy.Audio``,
+        a sequence of ``vocalpy.Audio``,
+        or a sequence of paths to audio files,
+        and returns either ``vocalpy.Spectrogram``
+        or a list of ``vocalpy.Spectrogram``s.
 
         Parameters
         ----------
-        audio: vocalpy.Audio or list of vocalpy.Audio
+        audio: vocalpy.Audio, sequence of vocalpy.Audio, or sequence of paths to audio files
         spect_kwargs : dict
             keyword arguments to pass in to SpectMaker.spect_func.
             Default is None, in which case
             SpectMaker.default_spect_kwargs will be used
-        dir : str, pathlib.Path
-            directory where
+        output_dir : str, pathlib.Path
+            directory where spectrograms should be saved.
+            Default is None, in which case spectrograms
+            are not saved,
+        spect_fname_func : callable
+            function that creates filename for spectrogram file,
+            given audio.path as an input.
+            Default is ``vocalpy.spect_maker.default_spect_fname_func``.
 
         Returns
         -------
@@ -63,16 +107,33 @@ class SpectMaker:
                     f'Please make sure only vocalpy.Audio instances are in the list/tuple.'
                 )
 
+        if output_dir is not None:
+            output_dir = pathlib.Path(output_dir)
+            if not output_dir.exists():
+                raise NotADirectoryError(
+                    f"`output_dir` not found or recognized as a directory: {output_dir}"
+                )
+
         # ---- actually make the spectrograms ----
         # define nested function so vars are in scope and ``dask`` can call it
         def _to_spect(audio_):
             """compute a ``Spectrogram`` from an ``Audio`` instance,
             using self.spect_func"""
+            if isinstance(audio_, str) or isinstance(audio_, pathlib.Path):
+                try:
+                    audio_ = Audio.from_file(audio_)
+                except FileNotFoundError as e:
+                    raise FileNotFoundError(f"did not find audio file: {audio_}") from e
+
             if spect_kwargs:
                 s, t, f = self.spect_func(audio_.data, **spect_kwargs)
             else:
                 s, t, f = self.spect_func(audio_.data, **self.default_spect_kwargs)
-            return Spectrogram(s=s, t=t, f=f, audio_path=audio_.path)
+            spect = Spectrogram(s=s, t=t, f=f, audio_path=audio_.path)
+            if output_dir is not None:
+                spect_path = spect_fname_func(audio_.path)
+                spect.to_file(spect_path)
+            return spect
 
         if isinstance(audio, Audio):
             return _to_spect(audio)
