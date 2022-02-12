@@ -8,7 +8,7 @@ HERE = Path(__file__).parent
 @pytest.fixture
 def test_data_root():
     """Path that points to root of test_data directory"""
-    return HERE.joinpath('..', 'test_data')
+    return HERE.joinpath('..', 'data_for_tests')
 
 
 @pytest.fixture

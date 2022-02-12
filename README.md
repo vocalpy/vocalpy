@@ -1,9 +1,9 @@
 # `vocalpy`
 goal: a community effort to develop a common core package for 
-computational vocal learning research in Python,  
+computational vocal communication and learning research in Python,  
 and to foster an ecosystem of interoperable packages.
 
-model: `astropy
+model: `astropy`
 * focus on interoperability, modularity + composability, open standards
     * https://docs.astropy.org/en/latest/development/vision.html
     * https://www.aanda.org/articles/aa/abs/2013/10/aa22068-13/aa22068-13.html
