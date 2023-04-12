@@ -5,10 +5,15 @@ import pytest
 HERE = Path(__file__).parent
 
 
+TEST_DATA_ROOT = HERE.joinpath('..', 'data-for-tests')
+
 @pytest.fixture
 def test_data_root():
     """Path that points to root of test_data directory"""
-    return HERE.joinpath('..', 'data_for_tests')
+    return TEST_DATA_ROOT
+
+
+SOURCE_TEST_DATA_ROOT = TEST_DATA_ROOT / 'source'
 
 
 @pytest.fixture
@@ -17,7 +22,10 @@ def source_test_data_root(test_data_root):
     that is, the input data used when vak does create files (csv files, logs,
     neural network checkpoints, etc.)
     """
-    return test_data_root.joinpath('source')
+    return SOURCE_TEST_DATA_ROOT
+
+
+GENERATED_TEST_DATA_ROOT = TEST_DATA_ROOT / 'generated'
 
 
 @pytest.fixture
@@ -26,4 +34,4 @@ def generated_test_data_root(test_data_root):
     the input data used when vak does create files (csv files, logs,
     neural network checkpoints, etc.)
     """
-    return test_data_root.joinpath('generated')
+    return GENERATED_TEST_DATA_ROOT

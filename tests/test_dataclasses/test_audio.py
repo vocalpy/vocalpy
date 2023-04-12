@@ -175,30 +175,25 @@ class TestAudio:
 
         assert audio != other
 
-    @pytest.mark.parametrize(
-        'data, samplerate, channels',
-        [
-            (RNG.normal(size=(int(32000 * 2.17))), 32000, 1),
-            (RNG.normal(size=(int(32000 * 2.17))), 32000, 1),
-            (RNG.normal(size=(int(32000 * 2.17), 1)), 32000, 1),
-            (RNG.normal(size=(int(32000 * 2.17), 1)), 32000, 1),
-            (RNG.normal(size=(int(32000 * 2.17), 2)), 32000, 2),
-            (RNG.normal(size=(int(32000 * 2.17), 2)), 32000, 2),
-            (RNG.normal(size=(int(48000 * 2.17), 2)), 48000, 2),
-            (RNG.normal(size=(int(48000 * 2.17), 2)), 48000, 2),
-            (RNG.normal(size=(int(48000 * 2.17), 6)), 48000, 6),
-            (RNG.normal(size=(int(48000 * 2.17), 6)), 48000, 6),
-        ]
-    )
-    def test_read(self, data, samplerate, channels, tmp_path):
+    def test_read(self, a_wav_path, tmp_path):
         """Test that :meth:`vocalpy.Spectrogram.read` works as expected.
 
         To do this we make an audio file "by hand".
         """
-        path = tmp_path / 'audio.wav'
-        soundfile.write(path, data, samplerate)
+        data, samplerate = soundfile.read(a_wav_path)
+        if data.ndim == 1:
+            channels = 1
+        else:
+            channels = data.shape[1]
 
-        audio = vocalpy.Audio.read(path)
+        # to make sure round-tripping works as we'd expect,
+        # we first write what we read with soundfile to a temporary file
+        # then use `vocalpy.Audio` to read that temporary file
+        # and test that it matches what we read directly from the original file
+        tmp_wav_path = tmp_path / a_wav_path.name
+        soundfile.write(tmp_wav_path, data, samplerate)
+
+        audio = vocalpy.Audio.read(tmp_wav_path)
         assert isinstance(audio, vocalpy.Audio)
         for attr_name, attr_val in zip(
                 ('data', 'samplerate', 'channels'),
@@ -206,49 +201,44 @@ class TestAudio:
         ):
             assert hasattr(audio, attr_name)
             if isinstance(attr_val, np.ndarray):
-                assert np.testing.assert_allclose(
+                np.testing.assert_allclose(
                     getattr(audio, attr_name), attr_val
                 )
             else:
                 assert getattr(audio, attr_name) == attr_val
 
-    @pytest.mark.parametrize(
-        'data, samplerate, channels, specify_channels',
-        [
-            (RNG.normal(size=(int(32000 * 2.17))), 32000, 1, True),
-            (RNG.normal(size=(int(32000 * 2.17))), 32000, 1, False),
-            (RNG.normal(size=(int(32000 * 2.17), 1)), 32000, 1, True),
-            (RNG.normal(size=(int(32000 * 2.17), 1)), 32000, 1, False),
-            (RNG.normal(size=(int(32000 * 2.17), 2)), 32000, 2, True),
-            (RNG.normal(size=(int(32000 * 2.17), 2)), 32000, 2, False),
-            (RNG.normal(size=(int(48000 * 2.17), 2)), 48000, 2, True),
-            (RNG.normal(size=(int(48000 * 2.17), 2)), 48000, 2, False),
-            (RNG.normal(size=(int(48000 * 2.17), 6)), 48000, 6, True),
-            (RNG.normal(size=(int(48000 * 2.17), 6)), 48000, 6, False),
-        ]
-    )
-    def test_write(self, data, samplerate, channels, specify_channels, tmp_path):
+    def test_write(self, a_wav_path, tmp_path):
         """Test that :meth:`vocalpy.Audio.write` works as expected.
 
         To do this we make a spectrogram file "by hand".
         """
-        if specify_channels:
-            audio = vocalpy.Audio(data=data, samplerate=samplerate, channels=channels)
+        data, samplerate = soundfile.read(a_wav_path)
+        if data.ndim == 1:
+            channels = 1
         else:
-            audio = vocalpy.Audio(data=data, samplerate=samplerate)
-        path = tmp_path / 'audio.wav'
-        audio.write(path)
-        assert path.exists()
+            channels = data.shape[1]
 
-        audio_loaded = vocalpy.Spectrogram.read(path)
-        assert isinstance(audio_loaded, vocalpy.Spectrogram)
+        # to make sure round-tripping works as we'd expect,
+        # we first write what we read with soundfile to a temporary file
+        # then use `vocalpy.Audio` to read that temporary file
+        # and test that it matches what we read directly from the original file
+        audio = vocalpy.Audio(data=data, samplerate=samplerate, channels=channels)
+        tmp_wav_path = tmp_path / a_wav_path.name
+        assert not tmp_wav_path.exists()
+
+        audio.write(tmp_wav_path)
+
+        assert tmp_wav_path.exists()
+
+        audio_loaded = vocalpy.Audio.read(tmp_wav_path)
+        assert isinstance(audio_loaded, vocalpy.Audio)
         for attr_name, attr_val in zip(
                 ('data', 'samplerate', 'channels'),
                 (data, samplerate, channels)
         ):
             assert hasattr(audio_loaded, attr_name)
             if isinstance(attr_val, np.ndarray):
-                assert np.testing.assert_allclose(
+                np.testing.assert_allclose(
                     getattr(audio_loaded, attr_name), attr_val
                 )
             else:

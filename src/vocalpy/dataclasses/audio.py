@@ -192,5 +192,4 @@ class Audio:
             Refer to :module:`soundfile` documentation for details.
         """
         path = pathlib.Path(path)
-        with path.open('w') as fp:
-            soundfile.write(file=fp, data=self.data, samplerate=self.samplerate, **kwargs)
+        soundfile.write(file=path, data=self.data, samplerate=self.samplerate, **kwargs)
