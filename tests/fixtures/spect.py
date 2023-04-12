@@ -1,10 +1,15 @@
 """fixtures relating to array files containing spectrograms"""
 import pytest
 
+from .test_data import SOURCE_TEST_DATA_ROOT
+
+
+SPECT_DIR_MAT = SOURCE_TEST_DATA_ROOT / 'spect_mat_annot_yarden' / 'llb3' / 'spect'
+
 
 @pytest.fixture
 def spect_dir_mat(source_test_data_root):
-    return source_test_data_root.joinpath('spect_mat_annot_yarden', 'llb3', 'spect')
+    return SPECT_DIR_MAT
 
 
 @pytest.fixture
@@ -28,9 +33,12 @@ def specific_spect_dir(spect_dir_mat,
     return _specific_spect_dir
 
 
+SPECT_LIST_MAT = sorted(SPECT_DIR_MAT.glob('*.mat'))
+
+
 @pytest.fixture
-def spect_list_mat(spect_dir_mat):
-    return sorted(spect_dir_mat.glob('*.mat'))
+def spect_list_mat():
+    return SPECT_LIST_MAT
 
 
 @pytest.fixture
