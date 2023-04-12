@@ -1,6 +1,8 @@
 """fixtures relating to audio files"""
 import pytest
 
+from .test_data import SOURCE_TEST_DATA_ROOT
+
 
 @pytest.fixture
 def default_spect_params():
@@ -15,14 +17,25 @@ def default_spect_params():
                 )
 
 
+AUDIO_DIR_CBIN = SOURCE_TEST_DATA_ROOT / 'audio_cbin_annot_notmat' / 'gy6or6' / '032312'
+
+
 @pytest.fixture
 def audio_dir_cbin(source_test_data_root):
-    return source_test_data_root.joinpath('audio_cbin_annot_notmat', 'gy6or6', '032312')
+    return AUDIO_DIR_CBIN
+
+
+AUDIO_LIST_CBIN = sorted(AUDIO_DIR_CBIN.glob('*.cbin'))
 
 
 @pytest.fixture
 def audio_list_cbin(audio_dir_cbin):
-    return sorted(audio_dir_cbin.glob('*.cbin'))
+    return AUDIO_LIST_CBIN
+
+
+@pytest.fixture(params=AUDIO_LIST_CBIN)
+def a_cbin_path(request):
+    return request.param
 
 
 @pytest.fixture
@@ -61,15 +74,26 @@ def audio_list_cbin_labels_not_in_labelset(audio_list_cbin,
     return audio_list_labels_in_labelset
 
 
+AUDIO_DIR_WAV =  SOURCE_TEST_DATA_ROOT / 'audio_wav_annot_birdsongrec' / 'Bird0' / 'Wave'
+
+
 # TODO: add .WAV from TIMIT
 @pytest.fixture
 def audio_dir_wav(source_test_data_root):
-    return source_test_data_root.joinpath('audio_wav_annot_koumura', 'Bird0', 'Wave')
+    return AUDIO_DIR_WAV
+
+
+AUDIO_LIST_WAV = sorted(AUDIO_DIR_WAV.glob('*.wav'))
 
 
 @pytest.fixture
 def audio_list_wav(audio_dir_wav):
-    return sorted(audio_dir_wav.glob('*.wav'))
+    return AUDIO_LIST_WAV
+
+
+@pytest.fixture(params=AUDIO_LIST_WAV)
+def a_wav_path(request):
+    return request.param
 
 
 @pytest.fixture
