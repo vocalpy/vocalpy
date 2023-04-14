@@ -1,14 +1,18 @@
 from .domain_model import (
     AnnotationFile,
     AudioFile,
+    Dataset,
+    FeatureFile,
     SpectrogramFile,
-    Dataset
+    SpectrogramParameters,
 )
 
 
 __all__ = [
     'AnnotationFile',
     'AudioFile',
-    'SpectrogramFile',
     'Dataset',
+    'FeatureFile',
+    'SpectrogramFile',
+    'SpectrogramParameters',
 ]
