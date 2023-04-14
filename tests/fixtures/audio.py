@@ -1,7 +1,10 @@
 """fixtures relating to audio files"""
 import pytest
 
-from .test_data import SOURCE_TEST_DATA_ROOT
+from .test_data import (
+    DATA_ROOTS_WITH_SUBDIRS,
+    SOURCE_TEST_DATA_ROOT
+)
 
 
 @pytest.fixture
@@ -134,3 +137,12 @@ def specific_audio_list(audio_list_cbin,
         return FORMAT_AUDIO_LIST_FIXTURE_MAP[format]
 
     return _specific_audio_list
+
+
+AUDIO_DIR_WAV_WITH_SUBDIRS = DATA_ROOTS_WITH_SUBDIRS / 'wav'
+
+AUDIO_LIST_WAV_WITH_SUBDIRS = sorted(AUDIO_DIR_WAV_WITH_SUBDIRS.glob('**/*wav'))
+
+AUDIO_DIR_CBIN_WITH_SUBDIRS = DATA_ROOTS_WITH_SUBDIRS / 'cbin'
+
+AUDIO_LIST_CBIN_WITH_SUBDIRS = sorted(AUDIO_DIR_CBIN_WITH_SUBDIRS.glob('**/*cbin'))
