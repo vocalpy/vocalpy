@@ -1,7 +1,10 @@
 """fixtures relating to array files containing spectrograms"""
 import pytest
 
-from .test_data import SOURCE_TEST_DATA_ROOT
+from .test_data import (
+    GENERATED_TEST_DATA_ROOT,
+    SOURCE_TEST_DATA_ROOT
+)
 
 
 SPECT_DIR_MAT = SOURCE_TEST_DATA_ROOT / 'spect_mat_annot_yarden' / 'llb3' / 'spect'
@@ -12,11 +15,37 @@ def spect_dir_mat(source_test_data_root):
     return SPECT_DIR_MAT
 
 
+SPECT_LIST_MAT = sorted(SPECT_DIR_MAT.glob('*.mat'))
+
+
+@pytest.fixture
+def spect_list_mat():
+    return SPECT_LIST_MAT
+
+
+@pytest.fixture(params=SPECT_LIST_MAT)
+def a_mat_spect_path(request):
+    return request.param
+
+
+SPECT_DIR_NPZ = GENERATED_TEST_DATA_ROOT / 'spect_npz'
+
 @pytest.fixture
 def spect_dir_npz(generated_test_data_root):
-    return sorted(generated_test_data_root.joinpath('prep',
-                                                    'train',
-                                                    'audio_cbin_annot_notmat').glob('spectrograms_generated*'))[0]
+    return SPECT_DIR_NPZ
+
+
+SPECT_LIST_NPZ = sorted(SPECT_DIR_NPZ.glob('*.npz'))
+
+
+@pytest.fixture
+def spect_list_npz():
+    return SPECT_LIST_NPZ
+
+
+@pytest.fixture(params=SPECT_LIST_NPZ)
+def an_npz_spect_path(request):
+    return request.param
 
 
 @pytest.fixture
