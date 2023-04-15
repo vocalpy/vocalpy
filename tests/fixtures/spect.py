@@ -1,5 +1,8 @@
 """fixtures relating to array files containing spectrograms"""
+import inspect
+
 import pytest
+import vocalpy
 
 from .test_data import (
     GENERATED_TEST_DATA_ROOT,
@@ -178,3 +181,10 @@ def specific_spect_list(spect_list_mat,
         return MAP[spect_format][qualifier]
 
     return _specific_spect_list
+
+
+@pytest.fixture
+def default_spect_params():
+    spect_sig = inspect.signature(vocalpy.signal.spectrogram)
+    default_fft_size, default_step_size = spect_sig.parameters['fft_size'], spect_sig.parameters['step_size']
+    return vocalpy.dataset.SpectrogramParameters(fft_size=default_fft_size, step_size=default_step_size)
