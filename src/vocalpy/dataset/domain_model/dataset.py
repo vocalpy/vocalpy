@@ -6,6 +6,7 @@ import attrs
 from sqlalchemy import create_engine
 
 from ... import paths
+from ..repository import SqlAlchemyRepository
 
 from .dataset_file import (
     DatasetFile,
@@ -66,10 +67,13 @@ class Dataset:
         Session.configure(bind=engine)
         session = Session()
 
-        repo = repository()
+        # note we replace class with instance
+        repository = repository(session=session)
 
         for file in self.files:
-            repo.add(file, session)
+            repository.add(file, session)
+
+        # repository.commit()
 
         @classmethod
         def from_dir(cls, dir: str | pathlib.Path,
