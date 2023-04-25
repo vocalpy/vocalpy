@@ -10,7 +10,7 @@ from vocalpy.signal.spectrogram import spectrogram as default_spect_func
 
 
 def default_spect_fname_func(audio_path: Union[str, pathlib.Path]):
-    """default function for naming spectrogram files.
+    """Default function for naming spectrogram files.
     Adds the extension `.spect.npz` to an audio path.
 
     Parameters
@@ -36,18 +36,19 @@ def default_spect_fname_func(audio_path: Union[str, pathlib.Path]):
     return audio_path.parent / (audio_path.name + vocalpy.constants.SPECT_FILE_EXT)
 
 
-class SpectMaker:
-    """class that makes spectrograms from audio
+class SpectrogramMaker:
+    """Class that makes spectrograms from audio.
 
     Attributes
     ----------
-    spect_func : Callable
+    spectrogram_callable : Callable
     default_spect_kwargs : dict
         of keyword arguments
     """
 
-    def __init__(self, spect_func: Callable = default_spect_func, default_spect_kwargs: dict = None):
-        self.spect_func = spect_func
+    def __init__(self, spectrogram_callable: Callable = default_spect_func,
+                 spectrogram_config: dict = None):
+        self.spectrogram_callable = spectrogram_callable
 
         if default_spect_kwargs is None:
             default_spect_kwargs = {}  # avoids mutable as arg default
@@ -60,19 +61,19 @@ class SpectMaker:
         output_dir: Union[str, pathlib.Path] = None,
         spect_fname_func: Callable = default_spect_func,
     ) -> Union[Spectrogram, List[Spectrogram]]:
-        """make spectrograms from audio.
+        """Make spectrogram(s) from audio.
 
-        takes as input ``vocalpy.Audio``,
-        a sequence of ``vocalpy.Audio``,
+        Takes as input :class:`vocalpy.Audio`,
+        a sequence of :class:`vocalpy.Audio`,
         or a sequence of paths to audio files,
-        and returns either ``vocalpy.Spectrogram``
-        or a list of ``vocalpy.Spectrogram``s.
+        and returns either a :class:`vocalpy.Spectrogram`
+        or a list of :class:`vocalpy.Spectrogram` instances.
 
         Parameters
         ----------
         audio: vocalpy.Audio, sequence of vocalpy.Audio, or sequence of paths to audio files
         spect_kwargs : dict
-            keyword arguments to pass in to SpectMaker.spect_func.
+            keyword arguments to pass in to SpectMaker.spectrogram_callable.
             Default is None, in which case
             SpectMaker.default_spect_kwargs will be used
         output_dir : str, pathlib.Path
@@ -115,7 +116,7 @@ class SpectMaker:
         # define nested function so vars are in scope and ``dask`` can call it
         def _to_spect(audio_):
             """compute a ``Spectrogram`` from an ``Audio`` instance,
-            using self.spect_func"""
+            using self.spectrogram_callable"""
             if isinstance(audio_, str) or isinstance(audio_, pathlib.Path):
                 try:
                     audio_ = Audio.from_file(audio_)
@@ -123,9 +124,9 @@ class SpectMaker:
                     raise FileNotFoundError(f"did not find audio file: {audio_}") from e
 
             if spect_kwargs:
-                s, t, f = self.spect_func(audio_.data, **spect_kwargs)
+                s, t, f = self.spectrogram_callable(audio_.data, **spect_kwargs)
             else:
-                s, t, f = self.spect_func(audio_.data, **self.default_spect_kwargs)
+                s, t, f = self.spectrogram_callable(audio_.data, **self.default_spect_kwargs)
             spect = Spectrogram(s=s, t=t, f=f, audio_path=audio_.path)
             if output_dir is not None:
                 spect_path = spect_fname_func(audio_.path)
@@ -139,3 +140,7 @@ class SpectMaker:
             with dask.diagnostics.ProgressBar():
                 spects = list(audio_bag.map(_to_spect))
             return spects
+
+    def write(self):
+        ...
+

@@ -1,7 +1,7 @@
 from . import constants, dataset, paths, signal, validators
 from .dataclasses import Audio
 from .dataset import Dataset
-from .spect_maker import SpectMaker
+from .spectrogram_maker import SpectrogramMaker
 
 __all__ = [
     "Audio",
@@ -10,7 +10,6 @@ __all__ = [
     "Dataset",
     "paths",
     "signal",
-    "SpectMaker",
-    "spect_maker",
+    "SpectrogramMaker",
     "validators",
 ]
