@@ -1,10 +1,7 @@
 """fixtures relating to audio files"""
 import pytest
 
-from .test_data import (
-    DATA_ROOTS_WITH_SUBDIRS,
-    SOURCE_TEST_DATA_ROOT
-)
+from .test_data import DATA_ROOTS_WITH_SUBDIRS, SOURCE_TEST_DATA_ROOT
 
 
 @pytest.fixture

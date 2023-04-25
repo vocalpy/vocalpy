@@ -13,11 +13,8 @@ sys.path.append(
 )
 
 
+from fixtures.audio import AUDIO_LIST_CBIN, AUDIO_LIST_WAV
 from fixtures.test_data import GENERATED_TEST_DATA_ROOT
-from fixtures.audio import (
-    AUDIO_LIST_CBIN,
-    AUDIO_LIST_WAV
-)
 
 DATA_ROOTS_WITH_SUBDIRS = GENERATED_TEST_DATA_ROOT / 'root_with_subdirs_to_test_paths'
 SPECT_NPZ_DIR = GENERATED_TEST_DATA_ROOT / 'spect_npz'

@@ -1,25 +1,13 @@
-import shutil
 
 import pytest
 
 import vocalpy as voc
 
-from .fixtures.audio import (
-    AUDIO_DIR_CBIN,
-    AUDIO_DIR_CBIN_WITH_SUBDIRS,
-    AUDIO_LIST_CBIN,
-    AUDIO_LIST_CBIN_WITH_SUBDIRS,
-    AUDIO_DIR_WAV,
-    AUDIO_DIR_WAV_WITH_SUBDIRS,
-    AUDIO_LIST_WAV,
-    AUDIO_LIST_WAV_WITH_SUBDIRS,
-
-)
-
-from .fixtures.spect import (
-    SPECT_DIR_MAT,
-    SPECT_LIST_MAT
-)
+from .fixtures.audio import (AUDIO_DIR_CBIN, AUDIO_DIR_CBIN_WITH_SUBDIRS,
+                             AUDIO_DIR_WAV, AUDIO_DIR_WAV_WITH_SUBDIRS,
+                             AUDIO_LIST_CBIN, AUDIO_LIST_CBIN_WITH_SUBDIRS,
+                             AUDIO_LIST_WAV, AUDIO_LIST_WAV_WITH_SUBDIRS)
+from .fixtures.spect import SPECT_DIR_MAT, SPECT_LIST_MAT
 
 
 @pytest.mark.parametrize(

@@ -1,8 +1,8 @@
 import pytest
 
-from .test_data import SOURCE_TEST_DATA_ROOT
 from .annot import ANNOT_PATHS_LIST_NOTMAT
 from .audio import AUDIO_LIST_CBIN
+from .test_data import SOURCE_TEST_DATA_ROOT
 
 # note we convert iterator to a list so it's not consumed by one unit test then left empty
 CBIN_NOTMAT_PAIRS = list(zip(AUDIO_LIST_CBIN, ANNOT_PATHS_LIST_NOTMAT))

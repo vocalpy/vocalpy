@@ -2,13 +2,10 @@
 import inspect
 
 import pytest
+
 import vocalpy
 
-from .test_data import (
-    GENERATED_TEST_DATA_ROOT,
-    SOURCE_TEST_DATA_ROOT
-)
-
+from .test_data import GENERATED_TEST_DATA_ROOT, SOURCE_TEST_DATA_ROOT
 
 SPECT_DIR_MAT = SOURCE_TEST_DATA_ROOT / 'spect_mat_annot_yarden' / 'llb3' / 'spect'
 

@@ -4,7 +4,6 @@ import pytest
 
 from .test_data import SOURCE_TEST_DATA_ROOT
 
-
 ANNOT_FILE_YARDEN = SOURCE_TEST_DATA_ROOT.joinpath('spect_mat_annot_yarden', 'llb3', 'llb3_annot_subset.mat')
 
 
