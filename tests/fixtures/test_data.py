@@ -35,3 +35,6 @@ def generated_test_data_root(test_data_root):
     neural network checkpoints, etc.)
     """
     return GENERATED_TEST_DATA_ROOT
+
+
+DATA_ROOTS_WITH_SUBDIRS = GENERATED_TEST_DATA_ROOT / 'root_with_subdirs_to_test_paths'

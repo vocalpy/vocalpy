@@ -2,10 +2,14 @@
 import crowsetta
 import pytest
 
+from .test_data import SOURCE_TEST_DATA_ROOT
+
+ANNOT_FILE_YARDEN = SOURCE_TEST_DATA_ROOT.joinpath('spect_mat_annot_yarden', 'llb3', 'llb3_annot_subset.mat')
+
 
 @pytest.fixture
-def annot_file_yarden(source_test_data_root):
-    return source_test_data_root.joinpath('spect_mat_annot_yarden', 'llb3', 'llb3_annot_subset.mat')
+def annot_file_yarden():
+    return ANNOT_FILE_YARDEN
 
 
 @pytest.fixture
@@ -24,29 +28,35 @@ def labelset_yarden():
     return [str(an_int) for an_int in [1, 2, 3, 6, 7, 8, 9, 10, 11, 12, 13, 14, 16, 17, 18, 19]]
 
 
-@pytest.fixture
-def annot_dir_notmat(source_test_data_root):
-    return source_test_data_root.joinpath('audio_cbin_annot_notmat',
-                                          'gy6or6',
-                                          '032312')
+ANNOT_DIR_NOTMAT = SOURCE_TEST_DATA_ROOT.joinpath('audio_cbin_annot_notmat', 'gy6or6', '032312')
 
 
 @pytest.fixture
-def annot_files_notmat(annot_dir_notmat):
-    return sorted(annot_dir_notmat.glob('*.not.mat'))
+def annot_dir_notmat():
+    return ANNOT_DIR_NOTMAT
+
+
+ANNOT_PATHS_LIST_NOTMAT = sorted(ANNOT_DIR_NOTMAT.glob('*.not.mat'))
 
 
 @pytest.fixture
-def annot_list_notmat(annot_files_notmat):
+def annot_paths_list_notmat():
+    return ANNOT_PATHS_LIST_NOTMAT
+
+
+@pytest.fixture
+def annot_list_notmat():
     scribe = crowsetta.Transcriber(format='notmat')
-    annot_list = scribe.from_file(annot_files_notmat)
+    annot_list = scribe.from_file(ANNOT_PATHS_LIST_NOTMAT)
     return annot_list
 
+
+ANNOT_FILE_KOUMURA = SOURCE_TEST_DATA_ROOT.joinpath('audio_wav_annot_koumura', 'Bird0', 'Annotation.xml')
 
 
 @pytest.fixture
 def annot_file_koumura(source_test_data_root):
-    return source_test_data_root.joinpath('audio_wav_annot_koumura', 'Bird0', 'Annotation.xml')
+    return ANNOT_FILE_KOUMURA
 
 
 @pytest.fixture

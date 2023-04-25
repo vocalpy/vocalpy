@@ -1,7 +1,7 @@
 # Vocalpy
 ## Core package for acoustic communication in Python
 
-goal: a core package for acoustic communication research in Python; 
+goal: a core package for acoustic communication research in Python;
 a community effort to develop and to foster an ecosystem of interoperable packages.
 
 model: `astropy`
@@ -11,4 +11,4 @@ model: `astropy`
     * https://arxiv.org/abs/1610.03159
     * https://iopscience.iop.org/article/10.3847/1538-3881/aabc4f/meta
 
-Currently proof-of-concept and in development, contributors are more than welcome.  
+Currently proof-of-concept and in development, contributors are more than welcome.

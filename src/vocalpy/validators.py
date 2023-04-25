@@ -13,13 +13,10 @@ def is_1d_ndarray(instance, attribute, value):
     1-dimensional :class:`numpy.ndarray`.
     """
     if not isinstance(value, np.ndarray):
-        raise TypeError(
-            f'{attribute} of {instance} should be a numpy array, '
-            f'but type was: {type(value)}'
-        )
+        raise TypeError(f"{attribute} of {instance} should be a numpy array, " f"but type was: {type(value)}")
 
     if not value.ndim == 1:
         raise ValueError(
-            f'{attribute} of {instance} should be a 1-dimensional numpy array, '
-            f'but number of dimensions was: {value.ndim}'
+            f"{attribute} of {instance} should be a 1-dimensional numpy array, "
+            f"but number of dimensions was: {value.ndim}"
         )

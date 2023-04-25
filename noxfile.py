@@ -2,9 +2,10 @@ import os
 import pathlib
 import shutil
 import sys
+import tarfile
+import urllib
 
 import nox
-
 
 # ---- keep this at top of noxfile
 nox.options.sessions = ["lint", "tests"]
@@ -15,6 +16,8 @@ DIR = pathlib.Path(__file__).parent.resolve()
 
 VENV_DIR = pathlib.Path('./.venv').resolve()
 
+
+# ---- the top half of this noxfile are more standard sessions: dev, lint, tests, docs, build --------------------------
 
 @nox.session(python="3.10")
 def dev(session: nox.Session) -> None:
@@ -42,32 +45,6 @@ def dev(session: nox.Session) -> None:
     # Use the venv's interpreter to install the project along with
     # all it's dev dependencies, this ensures it's installed in the right way
     session.run(python, "-m", "pip", "install", "-e", ".[dev]", external=True)
-
-
-DATA_FOR_TESTS_DIR = pathlib.Path("./tests/data_for_tests/")
-SOURCE_TEST_DATA_DIR = DATA_FOR_TESTS_DIR / "source"
-GENERATED_TEST_DATA_DIR = DATA_FOR_TESTS_DIR / "generated"
-
-SOURCE_TEST_DATA_URL = "https://osf.io/hbg4k/download"
-
-SOURCE_TEST_DATA_TAR = SOURCE_TEST_DATA_DIR / "source_test_data.tar.gz"
-# GENERATED_TEST_DATA_TAR = GENERATED_TEST_DATA_DIR / 'generated_test_data.tar.gz'
-
-
-def is_test_data_subdir_empty(test_data_subdir):
-    listdir = [path.name for path in sorted(test_data_subdir.iterdir())]
-    return listdir == [".gitkeep"] or len(listdir) < 1
-
-
-@nox.session
-def download_test_data(session: nox.Session) -> None:
-    """
-    Download data for tests.
-    """
-    session.run(
-        "wget", "-q", f"{SOURCE_TEST_DATA_URL}", "-O", f"{SOURCE_TEST_DATA_TAR}"
-    )
-    session.run("tar", "-xzf", f"{SOURCE_TEST_DATA_TAR}")
 
 
 @nox.session
@@ -99,15 +76,16 @@ def docs(session: nox.Session) -> None:
     """
     Build the docs.
     """
-    session.install("-e", ".[doc]")
+    session.install(".[doc]")
 
     if session.posargs:
-        if "serve" in session.posargs:
-            session.run("mkdocs", "serve")
+        if "autobuild" in session.posargs:
+            print("Building docs at http://127.0.0.1:8000 with sphinx-autobuild -- use Ctrl-C to quit")
+            session.run("sphinx-autobuild", "doc", "doc/_build/html")
         else:
-            session.error("Unrecognized args, use 'serve'")
+            print("Unsupported argument to docs")
     else:
-        session.run("mkdocs", "build")
+        session.run("sphinx-build", "-nW", "--keep-going", "-b", "html", "doc/", "doc/_build/html")
 
 
 @nox.session
@@ -131,3 +109,109 @@ def build(session: nox.Session) -> None:
 
     session.install("flit")
     session.run("flit", "build")
+
+
+# ---- the bottom half of the noxfile, the rest of the sessions have to do with data for tests -------------------------
+# either generating, downloading, or archiving
+
+DATA_FOR_TESTS_DIR = pathlib.Path("./tests/data-for-tests/")
+SOURCE_TEST_DATA_DIR = DATA_FOR_TESTS_DIR / "source"
+SOURCE_TEST_DATA_DIRS = [
+    dir_ for dir_
+    in sorted(pathlib.Path(SOURCE_TEST_DATA_DIR).glob('*/'))
+    if dir_.is_dir()
+]
+
+
+# ---- used by sessions that "clean up" data for tests
+def clean_dir(dir_path):
+    """
+    "clean" a directory by removing all files
+    (that are not hidden)
+    without removing the directory itself
+    """
+    dir_path = pathlib.Path(dir_path)
+    dir_contents = dir_path.glob('*')
+    for content in dir_contents:
+        if content.is_dir():
+            shutil.rmtree(content)
+        else:
+            if content.name.startswith('.'):
+                # e.g., .gitkeep file we don't want to delete
+                continue
+            content.unlink()
+
+
+@nox.session(name='test-data-clean-source')
+def test_data_clean_source(session) -> None:
+    """
+    Clean (remove) 'source' test data, used by TEST_DATA_GENERATE_SCRIPT.
+    """
+    clean_dir(SOURCE_TEST_DATA_DIR)
+
+
+def copy_url(url: str, path: str) -> None:
+    """Copy data from a url to a local file."""
+    urllib.request.urlretrieve(url, path)
+
+
+# TODO: fix this url! don't use vak data!!!
+SOURCE_TEST_DATA_URL = "https://osf.io/hbg4k/download"
+SOURCE_TEST_DATA_TAR = SOURCE_TEST_DATA_DIR / "source-test-data.tar.gz"
+
+
+@nox.session(name='test-data-tar-source')
+def test_data_tar_source(session) -> None:
+    """
+    Make a .tar.gz file of just the 'generated' test data used to run tests on CI.
+    """
+    session.log(f"Making tarfile with source data: {SOURCE_TEST_DATA_TAR}")
+    make_tarfile(SOURCE_TEST_DATA_TAR, SOURCE_TEST_DATA_DIRS)
+
+
+def is_test_data_subdir_empty(test_data_subdir):
+    listdir = [path.name for path in sorted(test_data_subdir.iterdir())]
+    return listdir == [".gitkeep"] or len(listdir) < 1
+
+
+@nox.session(name='test-data-download-source')
+def test_data_download_source(session) -> None:
+    """
+    Download and extract a .tar.gz file of 'source' test data, used by TEST_DATA_GENERATE_SCRIPT.
+    """
+    session.log(f'Downloading: {SOURCE_TEST_DATA_URL}')
+    copy_url(url=SOURCE_TEST_DATA_URL, path=SOURCE_TEST_DATA_TAR)
+    session.log(f'Extracting downloaded tar: {SOURCE_TEST_DATA_TAR}')
+    with tarfile.open(SOURCE_TEST_DATA_TAR, "r:gz") as tf:
+        tf.extractall(path='.')
+
+
+TEST_DATA_GENERATE_SCRIPT = './tests/scripts/generate_data_for_tests.py'
+
+
+@nox.session(name='test-data-generate', python="3.10")
+def test_data_generate(session) -> None:
+    """
+    Produced 'generated' test data, by running TEST_DATA_GENERATE_SCRIPT on 'source' test data.
+    """
+    session.install(".[test]")
+    session.run("python", TEST_DATA_GENERATE_SCRIPT)
+
+
+# TODO: fix this url!
+GENERATED_TEST_DATA_DIR = DATA_FOR_TESTS_DIR / "generated"
+GENERATED_TEST_DATA_TAR = GENERATED_TEST_DATA_DIR / 'generated_test_data.tar.gz'
+
+
+@nox.session(name='test-data-clean-generated')
+def test_data_clean_generated(session) -> None:
+    """
+    Clean (remove) 'generated' test data.
+    """
+    clean_dir(GENERATED_TEST_DATA_DIR)
+
+
+def make_tarfile(name: str, to_add: list):
+    with tarfile.open(name, "w:gz") as tf:
+        for add_name in to_add:
+            tf.add(name=add_name)

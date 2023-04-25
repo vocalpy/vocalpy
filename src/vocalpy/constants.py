@@ -1,1 +1,1 @@
-SPECT_FILE_EXT = '.spect.npz'
+SPECT_FILE_EXT = ".spect.npz"

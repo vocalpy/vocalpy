@@ -8,7 +8,6 @@ import numpy.typing as npt
 
 from .. import validators
 
-
 VALID_SPECT_FILE_EXTENSION = '.npz'
 
 
