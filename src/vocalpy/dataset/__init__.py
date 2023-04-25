@@ -1,18 +1,6 @@
-from . import (
-    domain_model,
-    orm,
-    repository,
-)
-
-from .domain_model import (
-    AnnotationFile,
-    AudioFile,
-    Dataset,
-    FeatureFile,
-    SpectrogramFile,
-    SpectrogramParameters,
-)
-
+from . import orm, repository
+from .domain_model import (AnnotationFile, AudioFile, Dataset, FeatureFile,
+                           SpectrogramFile, SpectrogramParameters)
 
 __all__ = [
     'AnnotationFile',

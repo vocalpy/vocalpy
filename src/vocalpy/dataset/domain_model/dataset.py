@@ -7,13 +7,7 @@ from sqlalchemy import create_engine
 
 from ... import paths
 from ..repository import SqlAlchemyRepository
-
-from .dataset_file import (
-    DatasetFile,
-    DatasetFileType,
-    DatasetFileTypeEnum,
-)
-
+from .dataset_file import DatasetFile, DatasetFileType, DatasetFileTypeEnum
 
 
 @attrs.define
@@ -143,4 +137,3 @@ class Dataset:
             engine = create_engine(
                 f"sqlite+pysqlite:///{sqlite_path}"
             )
-

@@ -8,7 +8,6 @@ https://github.com/timsainb/python_spectrograms_and_inversion
 import numpy as np
 import scipy.signal
 
-
 __all__ = [
     'butter_bandpass',
     'butter_bandpass_filter',

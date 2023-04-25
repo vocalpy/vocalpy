@@ -8,12 +8,11 @@ e.g. a database.
 """
 from .annotation_file import AnnotationFile
 from .audio_file import AudioFile
-from .dataset_file import DatasetFile, DatasetFileType, DatasetFileTypeEnum
 from .dataset import Dataset
+from .dataset_file import DatasetFile, DatasetFileType, DatasetFileTypeEnum
 from .feature_file import FeatureFile
 from .spectrogram_file import SpectrogramFile
 from .spectrogram_parameters import SpectrogramParameters
-
 
 __all__ = [
     'AnnotationFile',
