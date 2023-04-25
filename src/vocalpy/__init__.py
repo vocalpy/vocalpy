@@ -1,6 +1,15 @@
 from . import constants, dataset, paths, signal, validators
-from .dataclasses import Audio
-from .dataset import Dataset
+from .domain_model import (
+    AnnotationFile,
+    Audio,
+    AudioFile,
+    Dataset,
+    DatasetFile,
+    FeatureFile,
+    Spectrogram,
+    SpectrogramFile,
+    SpectrogramParameters,
+)
 from .spectrogram_maker import SpectrogramMaker
 
 __all__ = [
