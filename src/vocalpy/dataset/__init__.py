@@ -1,3 +1,9 @@
+from . import (
+    domain_model,
+    orm,
+    repository,
+)
+
 from .domain_model import (
     AnnotationFile,
     AudioFile,
