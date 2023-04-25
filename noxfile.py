@@ -7,7 +7,6 @@ import urllib
 
 import nox
 
-
 # ---- keep this at top of noxfile
 nox.options.sessions = ["lint", "tests"]
 
