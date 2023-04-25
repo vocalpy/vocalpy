@@ -1,11 +1,18 @@
 import pathlib
 from typing import Callable, List, Sequence, Union
 
-import dask.bag
+import dask
 import dask.diagnostics
 
 import vocalpy.constants
-from vocalpy.dataclasses import Audio, Spectrogram
+from vocalpy.domain_model import (
+    Audio,
+    AudioFile,
+    Dataset,
+    Spectrogram,
+    SpectrogramFile,
+    SpectrogramParameters,
+)
 from vocalpy.signal.spectrogram import spectrogram as default_spect_func
 
 
@@ -36,111 +43,198 @@ def default_spect_fname_func(audio_path: Union[str, pathlib.Path]):
     return audio_path.parent / (audio_path.name + vocalpy.constants.SPECT_FILE_EXT)
 
 
+def validate_audio_source(audio_source):
+    if not isinstance(audio_source, (Audio, AudioFile, Dataset, list, tuple)):
+        raise TypeError(
+            "`audio_source` must be a `vocalpy.Audio` instance, "
+            "or a list/tuple of vocalpy.Audio instances, "
+            f"but type was : {type(audio_source)}"
+        )
+
+    if isinstance(audio_source, list) or isinstance(audio_source, tuple):
+        if not all([isinstance(item, (Audio, AudioFile)) for item in audio_source]):
+            types_in_audio = set([type(item) for item in audio_source])
+            raise TypeError(
+                "if ``audio`` is a list or tuple, "
+                "then all items in ``audio`` must be instances of vocalpy.Audio."
+                f"Instead found the following types: {types_in_audio}."
+                f"Please make sure only vocalpy.Audio instances are in the list/tuple."
+            )
+
+
 class SpectrogramMaker:
     """Class that makes spectrograms from audio.
 
     Attributes
     ----------
     spectrogram_callable : Callable
-    default_spect_kwargs : dict
-        of keyword arguments
+        Callable that takes audio and returns spectrograms.
+        Default is :func:`vocalpy.signal.spectrogram.spectrogram`.
+    params : SpectrogramConfig, dict
+        Parameters for making spectrograms.
     """
 
-    def __init__(self, spectrogram_callable: Callable = default_spect_func,
-                 spectrogram_config: dict = None):
-        self.spectrogram_callable = spectrogram_callable
+    def __init__(self, callback: Callable = default_spect_func,
+                 params: SpectrogramParameters | dict = None):
+        self.spectrogram_callable = callback
 
-        if default_spect_kwargs is None:
-            default_spect_kwargs = {}  # avoids mutable as arg default
-        self.default_spect_kwargs = default_spect_kwargs
+        if params is None:
+            # FIXME: fix magic number -- default kwarg?
+            params = SpectrogramParameters(fft_size=512)
+        elif isinstance(params, dict):
+            params = SpectrogramParameters(**params)
+        self.params = params
 
     def make(
         self,
-        audio: Union[Audio, Sequence[Audio], Sequence[pathlib.Path]],
-        spect_kwargs: dict = None,
-        output_dir: Union[str, pathlib.Path] = None,
-        spect_fname_func: Callable = default_spect_func,
-    ) -> Union[Spectrogram, List[Spectrogram]]:
+        audio_source: Audio | AudioFile | Sequence[Audio | AudioFile] | Dataset,
+        parallelize: bool = True,
+    ) -> Spectrogram | List[Spectrogram]:
         """Make spectrogram(s) from audio.
 
-        Takes as input :class:`vocalpy.Audio`,
-        a sequence of :class:`vocalpy.Audio`,
-        or a sequence of paths to audio files,
+        Makes the spectrograms with `self.callback`
+        using the parameters `self.params`.
+
+        Takes as input :class:`vocalpy.Audio` or :class:`vocalpy.AudioFile`,
+        a sequence of either, or a :class:`vocalpy.Dataset` with an
+        ``audio_files`` attribute,
         and returns either a :class:`vocalpy.Spectrogram`
-        or a list of :class:`vocalpy.Spectrogram` instances.
+        (given a single :class:`vocalpy.Audio` or :class:`vocalpy.AudioFile` instance)
+        or a list of :class:`vocalpy.Spectrogram` instances (given a sequence).
 
         Parameters
         ----------
-        audio: vocalpy.Audio, sequence of vocalpy.Audio, or sequence of paths to audio files
-        spect_kwargs : dict
-            keyword arguments to pass in to SpectMaker.spectrogram_callable.
-            Default is None, in which case
-            SpectMaker.default_spect_kwargs will be used
-        output_dir : str, pathlib.Path
-            directory where spectrograms should be saved.
-            Default is None, in which case spectrograms
-            are not saved,
-        spect_fname_func : callable
-            function that creates filename for spectrogram file,
-            given audio.path as an input.
-            Default is ``vocalpy.spect_maker.default_spect_fname_func``.
+        audio_source: vocalpy.Audio, vocalpy.AudioFile, a sequence of either, or a Dataset
+            Source of audio used to make spectrograms.
 
         Returns
         -------
-        spect : vocalpy.Spectrogram or list of vocalpy.Spectrogram
+        spectrogram : vocalpy.Spectrogram or list of vocalpy.Spectrogram
         """
-        # ---- pre-conditions ----
-        if not isinstance(audio, Audio) and not (isinstance(audio, list) or isinstance(audio, tuple)):
-            raise TypeError(
-                "audio must be a vocalpy.Audio instance, "
-                "or a list/tuple of vocalpy.Audio instances, "
-                f"but type was : {type(audio)}"
-            )
+        validate_audio_source(audio_source)
 
-        if isinstance(audio, list) or isinstance(audio, tuple):
-            if not all([isinstance(item, Audio) for item in audio]):
-                types_in_audio = set([type(item) for item in audio])
-                raise TypeError(
-                    "if ``audio`` is a list or tuple, "
-                    "then all items in ``audio`` must be instances of vocalpy.Audio."
-                    f"Instead found the following types: {types_in_audio}."
-                    f"Please make sure only vocalpy.Audio instances are in the list/tuple."
-                )
-
-        if output_dir is not None:
-            output_dir = pathlib.Path(output_dir)
-            if not output_dir.exists():
-                raise NotADirectoryError(f"`output_dir` not found or recognized as a directory: {output_dir}")
-
-        # ---- actually make the spectrograms ----
         # define nested function so vars are in scope and ``dask`` can call it
         def _to_spect(audio_):
-            """compute a ``Spectrogram`` from an ``Audio`` instance,
-            using self.spectrogram_callable"""
-            if isinstance(audio_, str) or isinstance(audio_, pathlib.Path):
-                try:
-                    audio_ = Audio.from_file(audio_)
-                except FileNotFoundError as e:
-                    raise FileNotFoundError(f"did not find audio file: {audio_}") from e
-
-            if spect_kwargs:
-                s, t, f = self.spectrogram_callable(audio_.data, **spect_kwargs)
-            else:
-                s, t, f = self.spectrogram_callable(audio_.data, **self.default_spect_kwargs)
-            spect = Spectrogram(s=s, t=t, f=f, audio_path=audio_.path)
-            if output_dir is not None:
-                spect_path = spect_fname_func(audio_.path)
-                spect.to_file(spect_path)
+            """Make a ``Spectrogram`` from an ``Audio`` instance,
+            using self.callback"""
+            if isinstance(audio_, AudioFile):
+                audio_ = Audio.read(audio_.path)
+            spect = self.spectrogram_callable(audio_, **self.params)
+            spect.source_audio_path = audio.path
             return spect
 
-        if isinstance(audio, Audio):
-            return _to_spect(audio)
+        if isinstance(audio_source, (Audio, AudioFile)):
+            return _to_spect(audio_source)
+
+        if isinstance(audio_source, Dataset):
+            if not hasattr(audio_source, 'audio_files'):
+                raise AttributeError(
+                    f"`audio_source` was a `vocalpy.Dataset` but it does "
+                    f"not have an `audio_files` attribute. Please supply "
+                    f"a dataset with `audio_files` or pass audio "
+                    f"or audio files directly into `make` method"
+                )
+            audios = audio_source.audio_files
         else:
-            audio_bag = dask.bag.from_sequence(audio)
+            audios = audio_source
+
+        spects = []
+        for audio in audios:
+            if parallelize:
+                spects.append(
+                    dask.delayed(_to_spect(audio))
+                )
+            else:
+                spects.append(
+                    _to_spect(audio)
+                )
+
+        if parallelize:
+            graph = dask.delayed()(spects)
             with dask.diagnostics.ProgressBar():
-                spects = list(audio_bag.map(_to_spect))
+                return graph.compute()
+        else:
             return spects
 
-    def write(self):
-        ...
+    def write(self,
+              audio_source: Audio | AudioFile | Sequence[Audio | AudioFile] | Dataset,
+              dir_path : str | pathlib.Path,
+              parallelize: bool = True,
+    ) -> SpectrogramFile | List[SpectrogramFile]:
+        """Make spectrogram(s) from audio, and write to file.
+        Writes directly to file without returning the spectrograms,
+        so that datasets can be generated that are too big
+        to fit in memory.
 
+        Makes the spectrograms with `self.callback`
+        using the parameters `self.params`.
+
+        Takes as input :class:`vocalpy.Audio` or :class:`vocalpy.AudioFile`,
+        a sequence of either, or a :class:`vocalpy.Dataset` with an
+        ``audio_files`` attribute,
+        and returns either a :class:`vocalpy.SpectrogramFile`
+        (given a single :class:`vocalpy.Audio` or :class:`vocalpy.AudioFile` instance)
+        or a list of :class:`vocalpy.Spectrogram` instances (given a sequence).
+
+        Parameters
+        ----------
+        audio_source: vocalpy.Audio, vocalpy.AudioFile, a sequence of either, or a Dataset
+            Source of audio used to make spectrograms.
+        dir_path : string, pathlib.Path
+            The directory where the spectrogram files should be saved.
+
+        Returns
+        -------
+        spectrogram_file : SpectrogramFile, list of SpectrogramFile
+            The file(s) containing the spectrogram(s).
+        """
+        validate_audio_source(audio_source)
+        dir_path = pathlib.Path(dir_path)
+        if not dir_path.exists() or not dir_path.is_dir():
+            raise NotADirectoryError(
+                f"`dir_path` not found or not recognized as a directory:\n{dir_path}"
+            )
+
+        # define nested function so vars are in scope and ``dask`` can call it
+        def _to_spect_file(audio_):
+            """compute a ``Spectrogram`` from an ``Audio`` instance,
+            using self.callback"""
+            if isinstance(audio_, AudioFile):
+                audio_ = Audio.read(audio_.path)
+            spect = self.spectrogram_callable(audio_, **self.params)
+            spect_file = spect.write(dir_path)
+            return spect_file
+
+        if isinstance(audio_source, (Audio, AudioFile)):
+            return _to_spect_file(audio_source)
+
+        if isinstance(audio_source, Dataset):
+            if not hasattr(audio_source, 'audio_files'):
+                raise AttributeError(
+                    f"`audio_source` was a `vocalpy.Dataset` but it does "
+                    f"not have an `audio_files` attribute. Please supply "
+                    f"a dataset with `audio_files` or pass audio "
+                    f"or audio files directly into `make` method"
+                )
+            audios = audio_source.audio_files
+
+        spect_files = []
+        for audio in audios:
+            if parallelize:
+                spects.append(
+                    dask.delayed(_to_spect(audio))
+                )
+            else:
+                spects.append(
+                    _to_spect(audio)
+                )
+
+        if parallelize:
+            graph = dask.delayed()(spects)
+            with dask.diagnostics.ProgressBar():
+                return graph.compute()
+        else:
+            return spects
+
+        # TODO: if Dataset, add spectrogram_files to dataset
+        return spects
