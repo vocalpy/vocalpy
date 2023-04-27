@@ -9,6 +9,8 @@ import numpy as np
 import numpy.typing as npt
 import soundfile
 
+from .audio_file import AudioFile
+
 
 def get_channels_from_data(data: npt.NDArray) -> int:
     """Determine the number of audio channels
@@ -99,6 +101,11 @@ class Audio:
                                            attrs.validators.gt(0),
                                        ]),
                                        default=None)
+    source_path : pathlib.Path = attrs.field(converter=attrs.converter.optional(pathlib.Path),
+                                             validator=attrs.validators.optional(
+                                                 attrs.validators.instance_of(pathlib.Path)
+                                             ),
+                                             default=None)
 
     def __attrs_post_init__(self):
         channels_from_data = get_channels_from_data(self.data)
@@ -126,7 +133,7 @@ class Audio:
         Returns
         -------
         audio_dict : dict
-            A :class:`dict` with keys {'data', 'samplerate', 'channels'} that map
+            A :class:`dict` with keys {'data', 'samplerate', 'channels', 'source_path'} that map
             to the corresponding attributes of this :class:`vocalpy.Audio`.
         """
         return attrs.asdict(self)
@@ -137,7 +144,9 @@ class Audio:
         return all(
             [np.array_equal(self.data, other.data),
              self.samplerate == other.samplerate,
-             self.channels == other.channels]
+             self.channels == other.channels,
+             self.source_path == other.source_path,
+             ]
         )
 
     def __ne__(self, other):
@@ -176,9 +185,14 @@ class Audio:
 
         channels = get_channels_from_data(data)
 
-        return cls(data=data, samplerate=samplerate, channels=channels)
+        return cls(
+            data=data,
+            samplerate=samplerate,
+            channels=channels,
+            source_path=path
+        )
 
-    def write(self, path: str | pathlib.Path, **kwargs) -> None:
+    def write(self, path: str | pathlib.Path, **kwargs) -> AudioFile:
         """Write audio data to a file.
 
         Uses the :func:`audiofile.write` function.
@@ -192,4 +206,9 @@ class Audio:
             Refer to :module:`soundfile` documentation for details.
         """
         path = pathlib.Path(path)
-        soundfile.write(file=path, data=self.data, samplerate=self.samplerate, **kwargs)
+        soundfile.write(file=path,
+                        data=self.data,
+                        samplerate=self.samplerate,
+                        **kwargs)
+        return AudioFile(path=path)
+
