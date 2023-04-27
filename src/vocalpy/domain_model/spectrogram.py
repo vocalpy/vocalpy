@@ -7,6 +7,8 @@ import numpy as np
 import numpy.typing as npt
 
 from .. import validators
+from .audio_file import AudioFile
+from .spectrogram_file import SpectrogramFile
 
 VALID_SPECT_FILE_EXTENSION = '.npz'
 
@@ -67,6 +69,17 @@ class Spectrogram:
     frequencies: npt.NDArray = attrs.field(validator=validators.is_1d_ndarray)
     times: npt.NDArray = attrs.field(validator=validators.is_1d_ndarray)
 
+    source_path : pathlib.Path = attrs.field(converter=attrs.converter.optional(pathlib.Path),
+                                             validator=attrs.validators.optional(
+                                                 attrs.validators.instance_of(pathlib.Path)
+                                             ),
+                                             default=None)
+    source_audio_path : pathlib.Path = attrs.field(converter=attrs.converter.optional(pathlib.Path),
+                                                   validator=attrs.validators.optional(
+                                                       attrs.validators.instance_of(pathlib.Path)
+                                                   ),
+                                                   default=None)
+
     def __attrs_post_init__(self):
         if not self.data.shape[0] == self.frequencies.shape[0]:
             raise ValueError(
@@ -116,7 +129,7 @@ class Spectrogram:
         return not self.__eq__(other)
 
     @classmethod
-    def read(cls, path: Union[str, pathlib.Path]):
+    def read(cls, path: str | pathlib.Path, source_audio_path: str | pathlib.Path | None = None):
         """Read spectrogram and associated arrays from a Numpy npz file
         at the given ``path``.
 
@@ -155,7 +168,7 @@ class Spectrogram:
                     f"Did not find key '{key}' in path: {path}"
                 ) from e
 
-        return cls(**kwargs)
+        return cls(source_path=path, source_audio_path=source_audio_path, **kwargs)
 
     def write(self, path: [str, pathlib.Path]):
         """Write this :class:`vocalpy.Spectrogram`
@@ -168,8 +181,13 @@ class Spectrogram:
             containing the spectrogram ``data``
             and associated arrays ``frequencies`` and ``times``.
         """
+        # TODO: deal with extension here
         path = pathlib.Path(path)
-        spect_dict = self.asdict()
         np.savez(
-            path, **spect_dict
+            path, data=self.data, frequencies=self.frequencies, times=self.times
         )
+        if self.source_audio_path:
+            source_audio_file = AudioFile(path=self.source_audio_path)
+        else:
+            source_audio_file = None
+        return SpectrogramFile(path=path, source_audio_file=source_audio_file)
