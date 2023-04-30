@@ -13,7 +13,6 @@ from vocalpy.domain_model.entities import (
     SpectrogramFile,
     SpectrogramParameters,
 )
-from vocalpy.signal.spectrogram import spectrogram as default_spect_func
 
 
 def default_spect_fname_func(audio_path: Union[str, pathlib.Path]):
@@ -74,8 +73,11 @@ class SpectrogramMaker:
         Parameters for making spectrograms.
     """
 
-    def __init__(self, callback: Callable = default_spect_func,
+    def __init__(self, callback: Callable | None = None,
                  params: SpectrogramParameters | dict = None):
+        if callback is None:
+            from vocalpy.signal.spectrogram import spectrogram as default_spect_func
+            callback = default_spect_fname_func
         self.spectrogram_callable = callback
 
         if params is None:
