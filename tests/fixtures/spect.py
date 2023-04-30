@@ -184,4 +184,4 @@ def specific_spect_list(spect_list_mat,
 def default_spect_params():
     spect_sig = inspect.signature(vocalpy.signal.spectrogram)
     default_fft_size, default_step_size = spect_sig.parameters['fft_size'], spect_sig.parameters['step_size']
-    return vocalpy.dataset.SpectrogramParameters(fft_size=default_fft_size, step_size=default_step_size)
+    return vocalpy.domain_model.entities.SpectrogramParameters(fft_size=default_fft_size, step_size=default_step_size)
