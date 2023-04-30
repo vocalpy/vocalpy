@@ -5,7 +5,7 @@ import dask
 import dask.diagnostics
 
 import vocalpy.constants
-from vocalpy.domain_model import (
+from vocalpy.domain_model.entities import (
     Audio,
     AudioFile,
     Dataset,

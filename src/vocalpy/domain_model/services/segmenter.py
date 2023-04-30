@@ -1,6 +1,6 @@
 from typing import Callable
 
-from .domain_model import Dataset, Sequence
+from vocalpy.domain_model.entities import Dataset, Sequence
 
 
 class Segmenter:
