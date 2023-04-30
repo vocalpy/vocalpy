@@ -7,12 +7,14 @@ decoupling the dataset itself from the means of persistent storage,
 e.g. a database.
 """
 from .entities import (
-    AnnotationFile, AudioFile, AudioFile, Dataset,
+    AnnotationFile, Audio, AudioFile, AudioFile, Dataset,
     DatasetFile, DatasetFileType, DatasetFileTypeEnum,
     FeatureFile, Sequence, Spectrogram,
     SpectrogramFile, SpectrogramParameters, Unit
 )
-
+from .services import (
+    Segmenter, SpectrogramMaker,
+)
 
 __all__ = [
     'AnnotationFile',
@@ -23,9 +25,11 @@ __all__ = [
     'DatasetFileType',
     'DatasetFileTypeEnum',
     'FeatureFile',
+    'Segmenter',
     'Sequence',
     'Spectrogram',
     'SpectrogramFile',
+    'SpectrogramMaker',
     'SpectrogramParameters',
     'Unit',
 ]
