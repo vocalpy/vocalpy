@@ -44,13 +44,13 @@ class TestAudio:
         ]
     )
     def test_init(self, data, samplerate, channels, specify_channels):
-        """Test that we can initialize a :class:`vocalpy.Audio` instance."""
+        """Test that we can initialize a :class:`vocalpy.domain_model.entities.Audio` instance."""
         if specify_channels:
-            audio = vocalpy.Audio(data=data, samplerate=samplerate, channels=channels)
+            audio = vocalpy.domain_model.entities.Audio(data=data, samplerate=samplerate, channels=channels)
         else:
-            audio = vocalpy.Audio(data=data, samplerate=samplerate)
+            audio = vocalpy.domain_model.entities.Audio(data=data, samplerate=samplerate)
 
-        assert isinstance(audio, vocalpy.Audio)
+        assert isinstance(audio, vocalpy.domain_model.entities.Audio)
 
         for attr_name, attr_val in zip(
                 ('data', 'samplerate', 'channels'),
@@ -85,7 +85,7 @@ class TestAudio:
     def test_init_raises(self, data, samplerate, channels, expected_exception):
         """Test that :class:`vocalpy.Spectrogram` raises expected errors"""
         with pytest.raises(expected_exception):
-            vocalpy.Audio(data=data, samplerate=samplerate, channels=channels)
+            vocalpy.domain_model.entities.Audio(data=data, samplerate=samplerate, channels=channels)
 
     @pytest.mark.parametrize(
         'data, samplerate, channels, specify_channels',
@@ -104,10 +104,10 @@ class TestAudio:
     )
     def test_asdict(self, data, samplerate, channels, specify_channels):
         if specify_channels:
-            audio = vocalpy.Audio(data=data, samplerate=samplerate, channels=channels)
+            audio = vocalpy.domain_model.entities.Audio(data=data, samplerate=samplerate, channels=channels)
         else:
-            audio = vocalpy.Audio(data=data, samplerate=samplerate)
-        assert isinstance(audio, vocalpy.Audio)
+            audio = vocalpy.domain_model.entities.Audio(data=data, samplerate=samplerate)
+        assert isinstance(audio, vocalpy.domain_model.entities.Audio)
 
         asdict = audio.asdict()
         assert isinstance(asdict, dict)
@@ -136,14 +136,14 @@ class TestAudio:
     )
     def test___eq__(self, data, samplerate, channels, specify_channels):
         if specify_channels:
-            audio = vocalpy.Audio(data=data, samplerate=samplerate, channels=channels)
+            audio = vocalpy.domain_model.entities.Audio(data=data, samplerate=samplerate, channels=channels)
         else:
-            audio = vocalpy.Audio(data=data, samplerate=samplerate)
+            audio = vocalpy.domain_model.entities.Audio(data=data, samplerate=samplerate)
 
         if specify_channels:
-            other = vocalpy.Audio(data=data.copy(), samplerate=samplerate, channels=channels)
+            other = vocalpy.domain_model.entities.Audio(data=data.copy(), samplerate=samplerate, channels=channels)
         else:
-            other = vocalpy.Audio(data=data.copy(), samplerate=samplerate)
+            other = vocalpy.domain_model.entities.Audio(data=data.copy(), samplerate=samplerate)
 
         assert audio == other
 
@@ -164,14 +164,14 @@ class TestAudio:
     )
     def test___ne__(self, data, samplerate, channels, specify_channels):
         if specify_channels:
-            audio = vocalpy.Audio(data=data, samplerate=samplerate, channels=channels)
+            audio = vocalpy.domain_model.entities.Audio(data=data, samplerate=samplerate, channels=channels)
         else:
-            audio = vocalpy.Audio(data=data, samplerate=samplerate)
+            audio = vocalpy.domain_model.entities.Audio(data=data, samplerate=samplerate)
 
         if specify_channels:
-            other = vocalpy.Audio(data=data.copy() + 0.001, samplerate=samplerate, channels=channels)
+            other = vocalpy.domain_model.entities.Audio(data=data.copy() + 0.001, samplerate=samplerate, channels=channels)
         else:
-            other = vocalpy.Audio(data=data.copy() + 0.001, samplerate=samplerate)
+            other = vocalpy.domain_model.entities.Audio(data=data.copy() + 0.001, samplerate=samplerate)
 
         assert audio != other
 
@@ -188,13 +188,13 @@ class TestAudio:
 
         # to make sure round-tripping works as we'd expect,
         # we first write what we read with soundfile to a temporary file
-        # then use `vocalpy.Audio` to read that temporary file
+        # then use `vocalpy.domain_model.entities.Audio` to read that temporary file
         # and test that it matches what we read directly from the original file
         tmp_wav_path = tmp_path / a_wav_path.name
         soundfile.write(tmp_wav_path, data, samplerate)
 
-        audio = vocalpy.Audio.read(tmp_wav_path)
-        assert isinstance(audio, vocalpy.Audio)
+        audio = vocalpy.domain_model.entities.Audio.read(tmp_wav_path)
+        assert isinstance(audio, vocalpy.domain_model.entities.Audio)
         for attr_name, attr_val in zip(
                 ('data', 'samplerate', 'channels'),
                 (data, samplerate, channels)
@@ -208,7 +208,7 @@ class TestAudio:
                 assert getattr(audio, attr_name) == attr_val
 
     def test_write(self, a_wav_path, tmp_path):
-        """Test that :meth:`vocalpy.Audio.write` works as expected.
+        """Test that :meth:`vocalpy.domain_model.entities.Audio.write` works as expected.
 
         To do this we make a spectrogram file "by hand".
         """
@@ -220,9 +220,9 @@ class TestAudio:
 
         # to make sure round-tripping works as we'd expect,
         # we first write what we read with soundfile to a temporary file
-        # then use `vocalpy.Audio` to read that temporary file
+        # then use `vocalpy.domain_model.entities.Audio` to read that temporary file
         # and test that it matches what we read directly from the original file
-        audio = vocalpy.Audio(data=data, samplerate=samplerate, channels=channels)
+        audio = vocalpy.domain_model.entities.Audio(data=data, samplerate=samplerate, channels=channels)
         tmp_wav_path = tmp_path / a_wav_path.name
         assert not tmp_wav_path.exists()
 
@@ -230,8 +230,8 @@ class TestAudio:
 
         assert tmp_wav_path.exists()
 
-        audio_loaded = vocalpy.Audio.read(tmp_wav_path)
-        assert isinstance(audio_loaded, vocalpy.Audio)
+        audio_loaded = vocalpy.domain_model.entities.Audio.read(tmp_wav_path)
+        assert isinstance(audio_loaded, vocalpy.domain_model.entities.Audio)
         for attr_name, attr_val in zip(
                 ('data', 'samplerate', 'channels'),
                 (data, samplerate, channels)
