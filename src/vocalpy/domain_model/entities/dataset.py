@@ -28,7 +28,7 @@ class Dataset:
     def validate_files(self, attribute, value):
         if not isinstance(value, list):
             raise TypeError(
-                f"Dataset `files` must be a list but type was: {type(files)}"
+                f"Dataset `files` must be a list but type was: {type(value)}"
             )
 
         if not all(
@@ -36,7 +36,8 @@ class Dataset:
         ):
             types_in_files = set([type(element) for element in value])
             raise TypeError(
-                f"All elements in the list `files` should be of type DatasetFile but found the following types: {types_in_files}"
+                f"All elements in the list `files` should be of type DatasetFile "
+                f"but found the following types: {types_in_files}"
             )
 
     @classmethod
