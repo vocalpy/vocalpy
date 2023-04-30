@@ -101,7 +101,7 @@ class Audio:
                                            attrs.validators.gt(0),
                                        ]),
                                        default=None)
-    source_path : pathlib.Path = attrs.field(converter=attrs.converter.optional(pathlib.Path),
+    source_path : pathlib.Path = attrs.field(converter=attrs.converters.optional(pathlib.Path),
                                              validator=attrs.validators.optional(
                                                  attrs.validators.instance_of(pathlib.Path)
                                              ),
