@@ -1,12 +1,13 @@
+from __future__ import annotations
+
 import pathlib
 import reprlib
-from typing import Union
 
 import attrs
 import numpy as np
 import numpy.typing as npt
 
-from .. import validators
+from ... import validators
 from .audio_file import AudioFile
 from .spectrogram_file import SpectrogramFile
 
@@ -69,12 +70,12 @@ class Spectrogram:
     frequencies: npt.NDArray = attrs.field(validator=validators.is_1d_ndarray)
     times: npt.NDArray = attrs.field(validator=validators.is_1d_ndarray)
 
-    source_path : pathlib.Path = attrs.field(converter=attrs.converter.optional(pathlib.Path),
+    source_path : pathlib.Path = attrs.field(converter=attrs.converters.optional(pathlib.Path),
                                              validator=attrs.validators.optional(
                                                  attrs.validators.instance_of(pathlib.Path)
                                              ),
                                              default=None)
-    source_audio_path : pathlib.Path = attrs.field(converter=attrs.converter.optional(pathlib.Path),
+    source_audio_path : pathlib.Path = attrs.field(converter=attrs.converters.optional(pathlib.Path),
                                                    validator=attrs.validators.optional(
                                                        attrs.validators.instance_of(pathlib.Path)
                                                    ),
