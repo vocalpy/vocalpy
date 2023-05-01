@@ -54,20 +54,20 @@ def test_validate_audio_not_audio_raises(not_audio, expected_exception):
 
 class TestSpectrogramMaker:
     @pytest.mark.parametrize(
-        'callback, params',
+        'callback, spect_params',
         [
             (None, None),
         ]
     )
-    def test_init(self, callback, params):
-        spect_maker = vocalpy.SpectrogramMaker(callback=callback, params=params)
+    def test_init(self, callback, spect_params):
+        spect_maker = vocalpy.SpectrogramMaker(callback=callback, spect_params=spect_params)
         assert isinstance(spect_maker, vocalpy.SpectrogramMaker)
-        if callback is None and params is None:
+        if callback is None and spect_params is None:
             assert spect_maker.callback is vocalpy.signal.spectrogram.spectrogram
-            assert spect_maker.params = vocalpy.SpectrogramParameters(fft_size=512)
+            assert spect_maker.spect_params == vocalpy.domain_model.services.spectrogram_maker.DEFAULT_SPECT_PARAMS
         else:
             assert spect_maker.callback is callback
-            assert spect_maker.params == params
+            assert spect_maker.spect_params == spect_params
 
     @pytest.mark.parametrize(
         "audio",
@@ -79,7 +79,7 @@ class TestSpectrogramMaker:
         ],
     )
     def test_make(self, audio):
-        spect_maker = vocalpy.SpectrogramMaker
+        spect_maker = vocalpy.SpectrogramMaker()
         out = spect_maker.make(audio)
         if isinstance(audio, (vocalpy.Audio, vocalpy.AudioFile)):
             assert isinstance(out, vocalpy.Spectrogram)
@@ -96,7 +96,7 @@ class TestSpectrogramMaker:
         ],
     )
     def test_write(self, audio, tmp_path):
-        spect_maker = vocalpy.SpectrogramMaker
+        spect_maker = vocalpy.SpectrogramMaker()
 
         out = spect_maker.write(audio, dir_path=tmp_path)
 
@@ -104,12 +104,18 @@ class TestSpectrogramMaker:
             assert isinstance(out, vocalpy.SpectrogramFile)
             path = out.path
             assert path.exists()
-            assert out.source_audio_file.path == audio.path
+            if isinstance(audio, vocalpy.Audio):
+                assert out.source_audio_file.path == audio.source_path
+            elif isinstance(audio, vocalpy.AudioFile):
+                assert out.source_audio_file.path == audio.path
 
         elif isinstance(audio, list):
+            assert isinstance(out, list)
             assert all([isinstance(spect_file, vocalpy.SpectrogramFile) for spect_file in out])
             for spect_file in out:
-                assert spect_file.path is not None
-                spect_path = spect_file.path
-                assert spect_path.exists()
-                source_audio_path = spect_file.source_audio_file.path
+                path = spect_file.path
+                assert path.exists()
+                if isinstance(audio, vocalpy.Audio):
+                    assert spect_file.source_audio_file.path == audio.source_path
+                elif isinstance(audio, vocalpy.AudioFile):
+                    assert spect_file.source_audio_file.path == audio.path
