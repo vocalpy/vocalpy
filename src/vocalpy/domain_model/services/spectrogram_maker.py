@@ -12,7 +12,6 @@ from vocalpy.domain_model.entities import (
     AudioFile,
     Spectrogram,
     SpectrogramFile,
-    SpectrogramParameters,
 )
 
 
@@ -70,31 +69,43 @@ def validate_audio(audio: Audio | AudioFile | Sequence[Audio | AudioFile]) -> No
             )
 
 
+DEFAULT_SPECT_PARAMS = {
+    'fft_size': 512,
+    'step_size': 64
+}
+
+
 class SpectrogramMaker:
     """Class that makes spectrograms from audio.
 
     Attributes
     ----------
-    spectrogram_callable : Callable
+    callback : Callable
         Callable that takes audio and returns spectrograms.
         Default is :func:`vocalpy.signal.spectrogram.spectrogram`.
-    params : SpectrogramConfig, dict
+    spect_params : dict
         Parameters for making spectrograms.
+        Passed as keyword arguments to ``callback``.
     """
 
     def __init__(self, callback: Callable | None = None,
-                 params: SpectrogramParameters | dict = None):
+                 spect_params: dict | None = None):
         if callback is None:
             from vocalpy.signal.spectrogram import spectrogram as default_spect_func
             callback = default_spect_func
+        if not callable(callback):
+            raise ValueError(
+                f"`callback` should be callable, but `callable({callback})` returns False"
+            )
         self.callback = callback
 
-        if params is None:
-            # FIXME: fix magic number -- default kwarg?
-            params = SpectrogramParameters(fft_size=512)
-        elif isinstance(params, dict):
-            params = SpectrogramParameters(**params)
-        self.params = params
+        if spect_params is None:
+            spect_params = DEFAULT_SPECT_PARAMS
+        if not isinstance(spect_params, dict):
+            raise TypeError(
+                f"`spect_params` should be a `dict` but type was: {type(spect_params)}"
+            )
+        self.spect_params = spect_params
 
     def make(
         self,
@@ -130,8 +141,8 @@ class SpectrogramMaker:
             using self.callback"""
             if isinstance(audio_, AudioFile):
                 audio_ = Audio.read(audio_.path)
-            spect = self.callback(audio_, **self.params)
-            spect.source_audio_path = audio.path
+            spect = self.callback(audio_, **self.spect_params)
+            spect.source_audio_path = audio_.source_path
             return spect
 
         if isinstance(audio, (Audio, AudioFile)):
@@ -205,7 +216,7 @@ class SpectrogramMaker:
             using self.callback"""
             if isinstance(audio_, AudioFile):
                 audio_ = Audio.read(audio_.path)
-            spect = self.callback(audio_, **self.params)
+            spect = self.callback(audio_, **self.spect_params)
             spect_fname = namer(audio_.source_path)
             spect_path = dir_path / spect_fname
             spect_file = spect.write(spect_path)
