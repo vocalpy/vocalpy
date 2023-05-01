@@ -178,7 +178,7 @@ class Audio:
                 f'Audio file not found at path: {path}'
             )
 
-        if path.suffix == '.cbin':
+        if path.name.endswith('cbin'):
             data, samplerate = evfuncs.load_cbin(path)
         else:
             data, samplerate = soundfile.read(path, **kwargs)
