@@ -31,6 +31,13 @@ class Spectrogram:
     times : numpy.ndarray
         Vector of size :math:`t` where values are times
         at center of time bins in spectrogram.
+    source_path : pathlib.Path, optional
+        Path to .npz file that spectrogram was loaded from.
+        Optional, added automatically by the :meth:`~vocalpy.Spectrogram.read` method.
+    source_audio_path : pathlib.Path, optional
+        Path to audio file from which spectrogram was generated.
+        Optional, default None. Can be specified as argument
+        to :meth:`~vocalpy.Spectrogram.read` method.
 
     Examples
     --------
