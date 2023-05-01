@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 import pathlib
 from typing import Callable, List, Sequence, Union
 
@@ -8,7 +10,6 @@ import vocalpy.constants
 from vocalpy.domain_model.entities import (
     Audio,
     AudioFile,
-    Dataset,
     Spectrogram,
     SpectrogramFile,
     SpectrogramParameters,
@@ -22,11 +23,13 @@ def default_spect_fname_func(audio_path: Union[str, pathlib.Path]):
     Parameters
     ----------
     audio_path : str, pathlib.Path
+        A path to an audio file.
 
     Returns
     -------
-    spect_path : pathlib.Path
-        audio path with the extension `.spect.npz` added.
+    spect_fname : pathlib.Path
+        Audio filename with extension added.
+        Default extension is :data:`vocalpy.constants.SPECT_FILE_EXT`.
 
     Notes
     -----
@@ -39,25 +42,31 @@ def default_spect_fname_func(audio_path: Union[str, pathlib.Path]):
     will overwrite an existing `.npz` file.
     """
     audio_path = pathlib.Path(audio_path)
-    return audio_path.parent / (audio_path.name + vocalpy.constants.SPECT_FILE_EXT)
+    return audio_path.name + vocalpy.constants.SPECT_FILE_EXT
 
 
-def validate_audio_source(audio_source):
-    if not isinstance(audio_source, (Audio, AudioFile, Dataset, list, tuple)):
+def validate_audio(audio: Audio | AudioFile | Sequence[Audio | AudioFile]) -> None:
+    if not isinstance(audio, (Audio, AudioFile, list, tuple)):
         raise TypeError(
-            "`audio_source` must be a `vocalpy.Audio` instance, "
-            "or a list/tuple of vocalpy.Audio instances, "
-            f"but type was : {type(audio_source)}"
+            "`audio` must be a `vocalpy.Audio` instance, "
+            "a `vocalpy.AudioFile` instance, "
+            "or a list/tuple of such instances, "
+            f"but type was : {type(audio)}"
         )
 
-    if isinstance(audio_source, list) or isinstance(audio_source, tuple):
-        if not all([isinstance(item, (Audio, AudioFile)) for item in audio_source]):
-            types_in_audio = set([type(item) for item in audio_source])
+    if isinstance(audio, list) or isinstance(audio, tuple):
+        if not (all([isinstance(item, Audio) for item in audio]) or
+                all([isinstance(item, AudioFile) for item in audio])):
+            types_in_audio = set(
+                [type(audio) for audio in audio]
+            )
             raise TypeError(
-                "if ``audio`` is a list or tuple, "
-                "then all items in ``audio`` must be instances of vocalpy.Audio."
+                "If `audio` is a list or tuple, "
+                "then items in `audio` must either "
+                "all be instances of `vocalpy.Audio`"
+                "or all be instances of `vocalpy.AudioFile`."
                 f"Instead found the following types: {types_in_audio}."
-                f"Please make sure only vocalpy.Audio instances are in the list/tuple."
+                f"Please make sure only `vocalpy.Audio instances are in the list/tuple."
             )
 
 
@@ -77,8 +86,8 @@ class SpectrogramMaker:
                  params: SpectrogramParameters | dict = None):
         if callback is None:
             from vocalpy.signal.spectrogram import spectrogram as default_spect_func
-            callback = default_spect_fname_func
-        self.spectrogram_callable = callback
+            callback = default_spect_func
+        self.callback = callback
 
         if params is None:
             # FIXME: fix magic number -- default kwarg?
@@ -89,7 +98,7 @@ class SpectrogramMaker:
 
     def make(
         self,
-        audio_source: Audio | AudioFile | Sequence[Audio | AudioFile] | Dataset,
+        audio: Audio | AudioFile | Sequence[Audio | AudioFile],
         parallelize: bool = True,
     ) -> Spectrogram | List[Spectrogram]:
         """Make spectrogram(s) from audio.
@@ -106,14 +115,14 @@ class SpectrogramMaker:
 
         Parameters
         ----------
-        audio_source: vocalpy.Audio, vocalpy.AudioFile, a sequence of either, or a Dataset
+        audio: vocalpy.Audio, vocalpy.AudioFile, or a sequence of either
             Source of audio used to make spectrograms.
 
         Returns
         -------
         spectrogram : vocalpy.Spectrogram or list of vocalpy.Spectrogram
         """
-        validate_audio_source(audio_source)
+        validate_audio(audio)
 
         # define nested function so vars are in scope and ``dask`` can call it
         def _to_spect(audio_):
@@ -121,34 +130,22 @@ class SpectrogramMaker:
             using self.callback"""
             if isinstance(audio_, AudioFile):
                 audio_ = Audio.read(audio_.path)
-            spect = self.spectrogram_callable(audio_, **self.params)
+            spect = self.callback(audio_, **self.params)
             spect.source_audio_path = audio.path
             return spect
 
-        if isinstance(audio_source, (Audio, AudioFile)):
-            return _to_spect(audio_source)
-
-        if isinstance(audio_source, Dataset):
-            if not hasattr(audio_source, 'audio_files'):
-                raise AttributeError(
-                    f"`audio_source` was a `vocalpy.Dataset` but it does "
-                    f"not have an `audio_files` attribute. Please supply "
-                    f"a dataset with `audio_files` or pass audio "
-                    f"or audio files directly into `make` method"
-                )
-            audios = audio_source.audio_files
-        else:
-            audios = audio_source
+        if isinstance(audio, (Audio, AudioFile)):
+            return _to_spect(audio)
 
         spects = []
-        for audio in audios:
+        for audio_ in audio:
             if parallelize:
                 spects.append(
-                    dask.delayed(_to_spect(audio))
+                    dask.delayed(_to_spect(audio_))
                 )
             else:
                 spects.append(
-                    _to_spect(audio)
+                    _to_spect(audio_)
                 )
 
         if parallelize:
@@ -159,9 +156,10 @@ class SpectrogramMaker:
             return spects
 
     def write(self,
-              audio_source: Audio | AudioFile | Sequence[Audio | AudioFile] | Dataset,
+              audio: Audio | AudioFile | Sequence[Audio | AudioFile],
               dir_path : str | pathlib.Path,
               parallelize: bool = True,
+              namer: Callable = default_spect_fname_func
     ) -> SpectrogramFile | List[SpectrogramFile]:
         """Make spectrogram(s) from audio, and write to file.
         Writes directly to file without returning the spectrograms,
@@ -180,17 +178,21 @@ class SpectrogramMaker:
 
         Parameters
         ----------
-        audio_source: vocalpy.Audio, vocalpy.AudioFile, a sequence of either, or a Dataset
+        audio: vocalpy.Audio, vocalpy.AudioFile, a sequence of either, or a Dataset
             Source of audio used to make spectrograms.
         dir_path : string, pathlib.Path
             The directory where the spectrogram files should be saved.
+        namer : callable
+            Function or class that determines spectrogram file name
+            from audio file name. Default is
+            :func:`vocalpy.domain_model.services.spectrogram_maker.default_spect_name_func`.
 
         Returns
         -------
         spectrogram_file : SpectrogramFile, list of SpectrogramFile
             The file(s) containing the spectrogram(s).
         """
-        validate_audio_source(audio_source)
+        validate_audio(audio)
         dir_path = pathlib.Path(dir_path)
         if not dir_path.exists() or not dir_path.is_dir():
             raise NotADirectoryError(
@@ -199,44 +201,33 @@ class SpectrogramMaker:
 
         # define nested function so vars are in scope and ``dask`` can call it
         def _to_spect_file(audio_):
-            """compute a ``Spectrogram`` from an ``Audio`` instance,
+            """Compute a `Spectrogram` from an `Audio` instance,
             using self.callback"""
             if isinstance(audio_, AudioFile):
                 audio_ = Audio.read(audio_.path)
-            spect = self.spectrogram_callable(audio_, **self.params)
-            spect_file = spect.write(dir_path)
+            spect = self.callback(audio_, **self.params)
+            spect_fname = namer(audio_.source_path)
+            spect_path = dir_path / spect_fname
+            spect_file = spect.write(spect_path)
             return spect_file
 
-        if isinstance(audio_source, (Audio, AudioFile)):
-            return _to_spect_file(audio_source)
-
-        if isinstance(audio_source, Dataset):
-            if not hasattr(audio_source, 'audio_files'):
-                raise AttributeError(
-                    f"`audio_source` was a `vocalpy.Dataset` but it does "
-                    f"not have an `audio_files` attribute. Please supply "
-                    f"a dataset with `audio_files` or pass audio "
-                    f"or audio files directly into `make` method"
-                )
-            audios = audio_source.audio_files
+        if isinstance(audio, (Audio, AudioFile)):
+            return _to_spect_file(audio)
 
         spect_files = []
-        for audio in audios:
+        for audio_ in audio:
             if parallelize:
-                spects.append(
-                    dask.delayed(_to_spect(audio))
+                spect_files.append(
+                    dask.delayed(_to_spect_file(audio_))
                 )
             else:
-                spects.append(
-                    _to_spect(audio)
+                spect_files.append(
+                    _to_spect_file(audio_)
                 )
 
         if parallelize:
-            graph = dask.delayed()(spects)
+            graph = dask.delayed()(spect_files)
             with dask.diagnostics.ProgressBar():
                 return graph.compute()
         else:
-            return spects
-
-        # TODO: if Dataset, add spectrogram_files to dataset
-        return spects
+            return spect_files
