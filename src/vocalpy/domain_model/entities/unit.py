@@ -1,4 +1,5 @@
 import attrs
+import numpy as np
 
 from. audio import Audio
 from .spectrogram import Spectrogram
