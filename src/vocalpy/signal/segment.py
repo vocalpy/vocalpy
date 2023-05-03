@@ -1,11 +1,12 @@
 from __future__ import annotations
 
 import numpy as np
+import numpy.typing as npt
 
 from ..domain_model import Audio, Sequence, Unit
 
 
-def smooth(audio: Audio, smooth_win: int = 2) -> Audio:
+def smooth(data: npt.NDArray, samplerate: int, smooth_win: int = 2) -> npt.NDArray:
     """Filter raw audio and smooth signal
     used to calculate amplitude.
 
@@ -33,13 +34,12 @@ def smooth(audio: Audio, smooth_win: int = 2) -> Audio:
     This is a very literal translation from the Matlab function SmoothData.m
     by Evren Tumer. Uses the Thomas-Santana algorithm.
     """
-    squared = np.power(audio.data, 2)
-    len = np.round(audio.samplerate * smooth_win / 1000).astype(int)
+    squared = np.power(data, 2)
+    len = np.round(samplerate * smooth_win / 1000).astype(int)
     h = np.ones((len,)) / len
     smooth = np.convolve(squared, h)
-    offset = round((smooth.shape[-1] - audio.data.shape[-1]) / 2)
-    smooth = smooth[offset:audio.data.shape[-1] + offset]
-    return Audio(data=smooth, samplerate=audio.samplerate, source_path=audio.source_path)
+    offset = round((smooth.shape[-1] - data.shape[-1]) / 2)
+    return smooth[offset:data.shape[-1] + offset]
 
 
 def segment(audio: Audio, threshold: int = 5000, min_dur: float = 0.02,
@@ -79,8 +79,8 @@ def segment(audio: Audio, threshold: int = 5000, min_dur: float = 0.02,
         A :class:`vocalpy.Sequence` made up of `vocalpy.Unit` instances.
     """
     audio_data, samplerate = audio.data, audio.samplerate
-    smoothed = smooth(audio_data)
-    above_th = smoothed.data > threshold
+    smoothed = smooth(audio_data, samplerate)
+    above_th = smoothed > threshold
     h = [1, -1]
     # convolving with h causes:
     # +1 whenever above_th changes from 0 to 1
