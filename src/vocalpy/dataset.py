@@ -5,8 +5,8 @@ import pathlib
 import attrs
 from sqlalchemy import create_engine
 
-from ... import paths
-from ...dataset.repository import SqlAlchemyRepository
+from . import paths
+from .dataset.repository import SqlAlchemyRepository
 from .dataset_file import DatasetFile, DatasetFileType, DatasetFileTypeEnum
 
 
@@ -130,11 +130,11 @@ class Dataset:
 
             return cls(files=files)
 
-        @classmethod
-        def from_sqlite(cls, sqlite_path):
-            pass
+    @classmethod
+    def from_sqlite(cls, sqlite_path):
+        pass
 
-        def to_sqlite(self, sqlite_path: str | pathlib.Path):
-            engine = create_engine(
-                f"sqlite+pysqlite:///{sqlite_path}"
-            )
+    def to_sqlite(self, sqlite_path: str | pathlib.Path):
+        engine = create_engine(
+            f"sqlite+pysqlite:///{sqlite_path}"
+        )

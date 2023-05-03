@@ -7,7 +7,7 @@ import attrs
 import numpy as np
 import numpy.typing as npt
 
-from ... import validators
+from . import validators
 from .audio_file import AudioFile
 from .spectrogram_file import SpectrogramFile
 
