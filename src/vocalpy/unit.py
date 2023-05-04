@@ -40,6 +40,10 @@ class Unit:
     )
 
     def __attrs_post_init__(self):
+        if self.offset < self.onset:
+            raise ValueError(
+                f"Onset should be less than offset, but onset was {self.onset} and offset was {self.offset}."
+            )
         if self.onset and self.offset is None:
             raise ValueError(f"onset specified as {self.onset} but offset is None")
         if self.onset_s is None and self.offset_s:
