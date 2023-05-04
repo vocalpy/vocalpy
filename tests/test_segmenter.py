@@ -17,7 +17,7 @@ class TestSegmenter:
         assert isinstance(segmenter, vocalpy.Segmenter)
         if callback is None and segment_params is None:
             assert segmenter.callback is vocalpy.signal.segment.segment
-            assert segmenter.segment_params == vocalpy.domain_model.services.segmenter.DEFAULT_SEGMENT_PARAMS
+            assert segmenter.segment_params == vocalpy.segmenter.DEFAULT_SEGMENT_PARAMS
         else:
             assert segmenter.callback is callback
             assert segmenter.segment_params == segment_params

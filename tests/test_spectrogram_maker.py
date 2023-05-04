@@ -18,7 +18,7 @@ def test_default_spect_fname_func(specific_audio_dir, audio_format):
     audio_paths = sorted(audio_dir.glob(f"*{audio_format}"))
 
     for audio_path in audio_paths:
-        spect_fname = vocalpy.domain_model.services.spectrogram_maker.default_spect_fname_func(audio_path)
+        spect_fname = vocalpy.spectrogram_maker.default_spect_fname_func(audio_path)
         assert spect_fname == audio_path.name + vocalpy.constants.SPECT_FILE_EXT
 
 
@@ -32,7 +32,7 @@ def test_default_spect_fname_func(specific_audio_dir, audio_format):
     ]
 )
 def test_validate_audio(audio):
-    assert vocalpy.domain_model.services.spectrogram_maker.validate_audio(audio) is None
+    assert vocalpy.spectrogram_maker.validate_audio(audio) is None
 
 
 @pytest.mark.parametrize(
@@ -48,7 +48,7 @@ def test_validate_audio(audio):
 )
 def test_validate_audio_not_audio_raises(not_audio, expected_exception):
     with pytest.raises(expected_exception=expected_exception):
-        vocalpy.domain_model.services.spectrogram_maker.validate_audio(not_audio)
+        vocalpy.spectrogram_maker.validate_audio(not_audio)
 
 
 
@@ -64,7 +64,7 @@ class TestSpectrogramMaker:
         assert isinstance(spect_maker, vocalpy.SpectrogramMaker)
         if callback is None and spect_params is None:
             assert spect_maker.callback is vocalpy.signal.spectrogram.spectrogram
-            assert spect_maker.spect_params == vocalpy.domain_model.services.spectrogram_maker.DEFAULT_SPECT_PARAMS
+            assert spect_maker.spect_params == vocalpy.spectrogram_maker.DEFAULT_SPECT_PARAMS
         else:
             assert spect_maker.callback is callback
             assert spect_maker.spect_params == spect_params

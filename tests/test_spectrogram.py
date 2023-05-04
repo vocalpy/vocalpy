@@ -13,9 +13,9 @@ TIMES = np.arange(N_T) / FS
 
 class TestSpectrogram:
     def test_init(self):
-        """Test that we can initialize a :class:`vocalpy.domain_model.entities.Audio` instance."""
-        spect = vocalpy.domain_model.entities.Spectrogram(data=DATA, frequencies=FREQS, times=TIMES)
-        assert isinstance(spect, vocalpy.domain_model.entities.Spectrogram)
+        """Test that we can initialize a :class:`vocalpy.Audio` instance."""
+        spect = vocalpy.Spectrogram(data=DATA, frequencies=FREQS, times=TIMES)
+        assert isinstance(spect, vocalpy.Spectrogram)
 
         for attr_name, attr_val in zip(
                 ('data', 'frequencies', 'times'),
@@ -46,13 +46,13 @@ class TestSpectrogram:
         ]
     )
     def test_init_raises(self, data, times, frequencies, expected_exception):
-        """Test that :class:`vocalpy.domain_model.entities.Spectrogram` raises expected errors"""
+        """Test that :class:`vocalpy.Spectrogram` raises expected errors"""
         with pytest.raises(expected_exception):
-            vocalpy.domain_model.entities.Spectrogram(data=data, frequencies=frequencies, times=times)
+            vocalpy.Spectrogram(data=data, frequencies=frequencies, times=times)
 
     def test_asdict(self):
-        spect = vocalpy.domain_model.entities.Spectrogram(data=DATA, frequencies=FREQS, times=TIMES)
-        assert isinstance(spect, vocalpy.domain_model.entities.Spectrogram)
+        spect = vocalpy.Spectrogram(data=DATA, frequencies=FREQS, times=TIMES)
+        assert isinstance(spect, vocalpy.Spectrogram)
 
         asdict = spect.asdict()
         assert isinstance(asdict, dict)
@@ -65,17 +65,17 @@ class TestSpectrogram:
             assert asdict[attr_name] is attr_val
 
     def test___eq__(self):
-        spect = vocalpy.domain_model.entities.Spectrogram(data=DATA, frequencies=FREQS, times=TIMES)
-        other = vocalpy.domain_model.entities.Spectrogram(data=DATA.copy(), frequencies=FREQS.copy(), times=TIMES.copy())
+        spect = vocalpy.Spectrogram(data=DATA, frequencies=FREQS, times=TIMES)
+        other = vocalpy.Spectrogram(data=DATA.copy(), frequencies=FREQS.copy(), times=TIMES.copy())
         assert spect == other
 
     def test___ne__(self):
-        spect = vocalpy.domain_model.entities.Spectrogram(data=DATA, frequencies=FREQS, times=TIMES)
-        other = vocalpy.domain_model.entities.Spectrogram(data=DATA.copy() + 0.001, frequencies=FREQS.copy(), times=TIMES.copy())
+        spect = vocalpy.Spectrogram(data=DATA, frequencies=FREQS, times=TIMES)
+        other = vocalpy.Spectrogram(data=DATA.copy() + 0.001, frequencies=FREQS.copy(), times=TIMES.copy())
         assert spect != other
 
     def test_read(self, tmp_path):
-        """Test that :meth:`vocalpy.domain_model.entities.Spectrogram.read` works as expected.
+        """Test that :meth:`vocalpy.Spectrogram.read` works as expected.
 
         To do this we make a spectrogram file "by hand".
         """
@@ -83,8 +83,8 @@ class TestSpectrogram:
         path = tmp_path / 'spect.npz'
         np.savez(path, **spect_dict)
 
-        spect = vocalpy.domain_model.entities.Spectrogram.read(path)
-        assert isinstance(spect, vocalpy.domain_model.entities.Spectrogram)
+        spect = vocalpy.Spectrogram.read(path)
+        assert isinstance(spect, vocalpy.Spectrogram)
         for attr_name, attr_val in zip(
                 ('data', 'frequencies', 'times'),
                 (DATA, FREQS, TIMES)
@@ -95,18 +95,18 @@ class TestSpectrogram:
             )
 
     def test_write(self, tmp_path):
-        """Test that :meth:`vocalpy.domain_model.entities.Spectrogram.write` works as expected.
+        """Test that :meth:`vocalpy.Spectrogram.write` works as expected.
 
         To do this we make a spectrogram file "by hand".
         """
-        spect = vocalpy.domain_model.entities.Spectrogram(data=DATA, frequencies=FREQS, times=TIMES)
+        spect = vocalpy.Spectrogram(data=DATA, frequencies=FREQS, times=TIMES)
         path = tmp_path / 'spect.npz'
 
         spect.write(path)
         assert path.exists()
 
-        spect_loaded = vocalpy.domain_model.entities.Spectrogram.read(path)
-        assert isinstance(spect_loaded, vocalpy.domain_model.entities.Spectrogram)
+        spect_loaded = vocalpy.Spectrogram.read(path)
+        assert isinstance(spect_loaded, vocalpy.Spectrogram)
         for attr_name, attr_val in zip(
                 ('data', 'frequencies', 'times'),
                 (DATA, FREQS, TIMES)
