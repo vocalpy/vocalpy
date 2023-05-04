@@ -3,7 +3,9 @@ from __future__ import annotations
 import numpy as np
 import numpy.typing as npt
 
-from ..domain_model import Audio, Sequence, Unit
+from ..audio import Audio
+from ..sequence import Sequence
+from ..unit import Unit
 
 
 def smooth(data: npt.NDArray, samplerate: int, smooth_win: int = 2) -> npt.NDArray:

@@ -10,7 +10,8 @@ from __future__ import annotations
 import numpy as np
 import scipy.signal
 
-from ..domain_model import Audio, Spectrogram
+from ..audio import Audio
+from ..spectrogram import Spectrogram
 
 
 __all__ = [

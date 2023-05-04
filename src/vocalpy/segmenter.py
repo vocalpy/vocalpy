@@ -7,7 +7,9 @@ import dask
 import dask.diagnostics
 
 
-from vocalpy.domain_model.entities import Audio, AudioFile, Sequence
+from .audio import Audio
+from .audio_file import AudioFile
+from .sequence import Sequence
 from .spectrogram_maker import validate_audio
 
 

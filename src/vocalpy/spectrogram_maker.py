@@ -7,12 +7,10 @@ import dask
 import dask.diagnostics
 
 import vocalpy.constants
-from vocalpy.domain_model.entities import (
-    Audio,
-    AudioFile,
-    Spectrogram,
-    SpectrogramFile,
-)
+from .audio import Audio
+from .audio_file import AudioFile
+from .spectrogram import Spectrogram
+from .spectrogram_file import SpectrogramFile
 
 
 def default_spect_fname_func(audio_path: Union[str, pathlib.Path]):
