@@ -12,6 +12,28 @@ from .spectrogram import Spectrogram
 
 @attrs.define
 class Sequence:
+    """A sequence of units,
+    as analyzed in acoustic communication research.
+
+    Attributes
+    ----------
+    units: list
+        A :class:`list` of `vocalpy.Unit` instances.
+        Produced by segmenting audio, e.g. with
+        :func:`vocalpy.signal.segment.segment_audio_amplitude`.
+    audio_path : pathlib.Path, optional.
+        Path to the audio from which this sequence was segmented.
+        Optional, default is None.
+    spectrogram_path : pathlib.Path, optional.
+        Path to the spectrogram from which this sequence was segmented.
+        Optional, default is None.
+    audio : vocalpy.Audio, optional
+        The audio for this sequence.
+        Optional, default is None.
+    spectrogram : vocalpy.Spectrogram, optional
+        The spectrogram for this sequence.
+        Optional, default is None.
+    """
     units: list[Unit] = attrs.field()
 
     @units.validator
@@ -31,37 +53,20 @@ class Sequence:
         default=None,
     )
 
+    audio: Audio = attrs.field(validator=attrs.validators.optional(attrs.validators.instance_of(Audio)), default=None)
+    spectrogram: Spectrogram = attrs.field(
+        validator=attrs.validators.optional(attrs.validators.instance_of(Spectrogram)), default=None
+    )
+
     def __attrs_post_init__(self):
-        units = sorted(self.units, key=lambda unit: unit.onset_s or unit.onset_sample)
+        units = sorted(self.units, key=lambda unit: unit.onset)
         onsets = [unit.onset for unit in units]
-        if not np.all(onsets[1:] > onsets[:-1]):
-            raise ValueError(
-                f""
-            )
-        self._audio = None
-        self._spectrogram = None
-
-    @property
-    def audio(self):
-        if self._audio is None:
-            if self.audio_path is None:
+        if len(onsets) > 1:
+            if not np.all(onsets[1:] > onsets[:-1]):
+                import pdb;pdb.set_trace()
                 raise ValueError(
-                    f'Cannot load audio because the `audio_path` attribute of this Sequence is None. '
-                    f'Please create a Sequence with an `audio_path`'
+                    f"Onsets of units are not strictly increasing"
                 )
-            self._audio = Audio.read(self.audio_path)
-        return self._audio
-
-    @property
-    def spectrogram(self):
-        if self._spectrogram is None:
-            if self.spectrogram_path is None:
-                raise ValueError(
-                    f'Cannot load spectrogram because the `spectrogram_path` attribute of this Sequence is None. '
-                    f'Please create a Sequence with an `spectrogram_path`'
-                )
-            self._spectrogram = Spectrogram.read(self.spectrogram_path)
-        return self._audio
 
     @property
     def onset(self):
