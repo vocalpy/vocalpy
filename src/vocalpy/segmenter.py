@@ -11,6 +11,7 @@ from .audio_file import AudioFile
 from .sequence import Sequence
 from .spectrogram_maker import validate_audio
 
+
 DEFAULT_SEGMENT_PARAMS = {
     "threshold": 5000,
     "min_dur": 0.02,
@@ -21,7 +22,7 @@ DEFAULT_SEGMENT_PARAMS = {
 class Segmenter:
     def __init__(self, callback: Callable | None = None, segment_params: dict | None = None):
         if callback is None:
-            from vocalpy.signal.segment import segment as default_segment_func
+            from vocalpy.signal.segment import segment_audio_amplitude as default_segment_func
 
             callback = default_segment_func
         if not callable(callback):
@@ -48,7 +49,7 @@ class Segmenter:
                 audio_ = Audio.read(audio_.path)
             seq = self.callback(audio_, **self.segment_params)
             # TODO: add source path(s?) attribute to Sequence
-            seq.source_audio_path = audio_.source_path
+            seq.audio_path = audio_.source_path
             return seq
 
         if isinstance(audio, (Audio, AudioFile)):
