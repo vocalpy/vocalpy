@@ -6,7 +6,7 @@ import attrs
 from sqlalchemy import create_engine
 
 from . import paths
-from .dataset.repository import SqlAlchemyRepository
+from .repository import SqlAlchemyRepository
 from .dataset_file import DatasetFile, DatasetFileType, DatasetFileTypeEnum
 
 
