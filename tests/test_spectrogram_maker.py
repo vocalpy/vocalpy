@@ -2,8 +2,8 @@ import pytest
 
 import vocalpy
 
-from ...fixtures.audio import AUDIO_LIST_WAV
-from ...fixtures.spect import SPECT_LIST_NPZ
+from .fixtures.audio import AUDIO_LIST_WAV
+from .fixtures.spect import SPECT_LIST_NPZ
 
 
 @pytest.mark.parametrize(

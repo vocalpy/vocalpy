@@ -2,7 +2,7 @@ import pytest
 
 import vocalpy
 
-from ...fixtures.audio import AUDIO_LIST_WAV
+from .fixtures.audio import AUDIO_LIST_WAV
 
 
 class TestSegmenter:
