@@ -24,5 +24,5 @@ class AudioFile:
     path : pathlib.Path
         The path to the audio file.
     """
-    path: pathlib.Path = attrs.field(converter=pathlib.Path,
-                                     validator=attrs.validators.instance_of(pathlib.Path))
+
+    path: pathlib.Path = attrs.field(converter=pathlib.Path, validator=attrs.validators.instance_of(pathlib.Path))

@@ -8,7 +8,7 @@ RNG = np.random.default_rng()
 
 
 @pytest.mark.parametrize(
-    'data, expected_channels',
+    "data, expected_channels",
     [
         (RNG.normal(size=(int(32000 * 2.17))), 1),
         (RNG.normal(size=(int(32000 * 2.17))), 1),
@@ -20,16 +20,16 @@ RNG = np.random.default_rng()
         (RNG.normal(size=(int(48000 * 2.17), 2)), 2),
         (RNG.normal(size=(int(48000 * 2.17), 6)), 6),
         (RNG.normal(size=(int(48000 * 2.17), 6)), 6),
-    ]
+    ],
 )
 def test_get_channels_from_data(data, expected_channels):
-    channels = vocalpy.dataclasses.audio.get_channels_from_data(data)
+    channels = vocalpy.audio.get_channels_from_data(data)
     assert channels == expected_channels
 
 
 class TestAudio:
     @pytest.mark.parametrize(
-        'data, samplerate, channels, specify_channels',
+        "data, samplerate, channels, specify_channels",
         [
             (RNG.normal(size=(int(32000 * 2.17))), 32000, 1, True),
             (RNG.normal(size=(int(32000 * 2.17))), 32000, 1, False),
@@ -41,7 +41,7 @@ class TestAudio:
             (RNG.normal(size=(int(48000 * 2.17), 2)), 48000, 2, False),
             (RNG.normal(size=(int(48000 * 2.17), 6)), 48000, 6, True),
             (RNG.normal(size=(int(48000 * 2.17), 6)), 48000, 6, False),
-        ]
+        ],
     )
     def test_init(self, data, samplerate, channels, specify_channels):
         """Test that we can initialize a :class:`vocalpy.Audio` instance."""
@@ -52,15 +52,12 @@ class TestAudio:
 
         assert isinstance(audio, vocalpy.Audio)
 
-        for attr_name, attr_val in zip(
-                ('data', 'samplerate', 'channels'),
-                (data, samplerate, channels)
-        ):
+        for attr_name, attr_val in zip(("data", "samplerate", "channels"), (data, samplerate, channels)):
             assert hasattr(audio, attr_name)
             assert getattr(audio, attr_name) is attr_val
 
     @pytest.mark.parametrize(
-        'data, samplerate, channels, expected_exception',
+        "data, samplerate, channels, expected_exception",
         [
             # `data` is not a numpy array
             (RNG.normal(size=(int(32000 * 2.17))).tolist(), 32000, 1, TypeError),
@@ -70,17 +67,17 @@ class TestAudio:
             (RNG.normal(size=(int(32000 * 2.17)))[:, np.newaxis, np.newaxis], 32000, 1, ValueError),
             # `samplerate` is not an int
             # this raises a ValueError because the converter can't cast the string to an int
-            (RNG.normal(size=(int(32000 * 2.17), 1)), 'f', 1, ValueError),
+            (RNG.normal(size=(int(32000 * 2.17), 1)), "f", 1, ValueError),
             # `samplerate` is less than zero
             (RNG.normal(size=(int(32000 * 2.17), 1)), -32000, 1, ValueError),
             # `channels` is not an int
             # this raises a ValueError because the converter can't cast the string to an int
-            (RNG.normal(size=(int(32000 * 2.17), 1)), 32000, 'f', ValueError),
+            (RNG.normal(size=(int(32000 * 2.17), 1)), 32000, "f", ValueError),
             # `channels` is less than zero
             (RNG.normal(size=(int(32000 * 2.17), 1)), 32000, -1, ValueError),
             # `channels` does not match `data.shape[1]`
             (RNG.normal(size=(int(48000 * 2.17), 6)), 48000, 16, ValueError),
-        ]
+        ],
     )
     def test_init_raises(self, data, samplerate, channels, expected_exception):
         """Test that :class:`vocalpy.Spectrogram` raises expected errors"""
@@ -88,7 +85,7 @@ class TestAudio:
             vocalpy.Audio(data=data, samplerate=samplerate, channels=channels)
 
     @pytest.mark.parametrize(
-        'data, samplerate, channels, specify_channels',
+        "data, samplerate, channels, specify_channels",
         [
             (RNG.normal(size=(int(32000 * 2.17))), 32000, 1, True),
             (RNG.normal(size=(int(32000 * 2.17))), 32000, 1, False),
@@ -100,7 +97,7 @@ class TestAudio:
             (RNG.normal(size=(int(48000 * 2.17), 2)), 48000, 2, False),
             (RNG.normal(size=(int(48000 * 2.17), 6)), 48000, 6, True),
             (RNG.normal(size=(int(48000 * 2.17), 6)), 48000, 6, False),
-        ]
+        ],
     )
     def test_asdict(self, data, samplerate, channels, specify_channels):
         if specify_channels:
@@ -112,15 +109,12 @@ class TestAudio:
         asdict = audio.asdict()
         assert isinstance(asdict, dict)
 
-        for attr_name, attr_val in zip(
-                ('data', 'samplerate', 'channels'),
-                (data, samplerate, channels)
-        ):
+        for attr_name, attr_val in zip(("data", "samplerate", "channels"), (data, samplerate, channels)):
             assert attr_name in asdict
             assert asdict[attr_name] is attr_val
 
     @pytest.mark.parametrize(
-        'data, samplerate, channels, specify_channels',
+        "data, samplerate, channels, specify_channels",
         [
             (RNG.normal(size=(int(32000 * 2.17))), 32000, 1, True),
             (RNG.normal(size=(int(32000 * 2.17))), 32000, 1, False),
@@ -132,7 +126,7 @@ class TestAudio:
             (RNG.normal(size=(int(48000 * 2.17), 2)), 48000, 2, False),
             (RNG.normal(size=(int(48000 * 2.17), 6)), 48000, 6, True),
             (RNG.normal(size=(int(48000 * 2.17), 6)), 48000, 6, False),
-        ]
+        ],
     )
     def test___eq__(self, data, samplerate, channels, specify_channels):
         if specify_channels:
@@ -148,7 +142,7 @@ class TestAudio:
         assert audio == other
 
     @pytest.mark.parametrize(
-        'data, samplerate, channels, specify_channels',
+        "data, samplerate, channels, specify_channels",
         [
             (RNG.normal(size=(int(32000 * 2.17))), 32000, 1, True),
             (RNG.normal(size=(int(32000 * 2.17))), 32000, 1, False),
@@ -160,7 +154,7 @@ class TestAudio:
             (RNG.normal(size=(int(48000 * 2.17), 2)), 48000, 2, False),
             (RNG.normal(size=(int(48000 * 2.17), 6)), 48000, 6, True),
             (RNG.normal(size=(int(48000 * 2.17), 6)), 48000, 6, False),
-        ]
+        ],
     )
     def test___ne__(self, data, samplerate, channels, specify_channels):
         if specify_channels:
@@ -195,15 +189,10 @@ class TestAudio:
 
         audio = vocalpy.Audio.read(tmp_wav_path)
         assert isinstance(audio, vocalpy.Audio)
-        for attr_name, attr_val in zip(
-                ('data', 'samplerate', 'channels'),
-                (data, samplerate, channels)
-        ):
+        for attr_name, attr_val in zip(("data", "samplerate", "channels"), (data, samplerate, channels)):
             assert hasattr(audio, attr_name)
             if isinstance(attr_val, np.ndarray):
-                np.testing.assert_allclose(
-                    getattr(audio, attr_name), attr_val
-                )
+                np.testing.assert_allclose(getattr(audio, attr_name), attr_val)
             else:
                 assert getattr(audio, attr_name) == attr_val
 
@@ -232,14 +221,9 @@ class TestAudio:
 
         audio_loaded = vocalpy.Audio.read(tmp_wav_path)
         assert isinstance(audio_loaded, vocalpy.Audio)
-        for attr_name, attr_val in zip(
-                ('data', 'samplerate', 'channels'),
-                (data, samplerate, channels)
-        ):
+        for attr_name, attr_val in zip(("data", "samplerate", "channels"), (data, samplerate, channels)):
             assert hasattr(audio_loaded, attr_name)
             if isinstance(attr_val, np.ndarray):
-                np.testing.assert_allclose(
-                    getattr(audio_loaded, attr_name), attr_val
-                )
+                np.testing.assert_allclose(getattr(audio_loaded, attr_name), attr_val)
             else:
                 assert getattr(audio_loaded, attr_name) == attr_val

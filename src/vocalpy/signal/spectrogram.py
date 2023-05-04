@@ -5,21 +5,22 @@ https://scipy-cookbook.readthedocs.io/items/ButterworthBandpass.html
 spectrogram adapted from code by Kyle Kastner and Tim Sainburg
 https://github.com/timsainb/python_spectrograms_and_inversion
 """
+from __future__ import annotations
+
 import numpy as np
 import scipy.signal
 
-__all__ = [
-    'butter_bandpass',
-    'butter_bandpass_filter',
-    'spectrogram'
-]
+from ..audio import Audio
+from ..spectrogram import Spectrogram
+
+__all__ = ["butter_bandpass", "butter_bandpass_filter", "spectrogram"]
 
 
 def butter_bandpass(lowcut, highcut, fs, order=5):
     nyq = 0.5 * fs
     low = lowcut / nyq
     high = highcut / nyq
-    b, a = scipy.signal.butter(order, [low, high], btype='band')
+    b, a = scipy.signal.butter(order, [low, high], btype="band")
     return b, a
 
 
@@ -29,21 +30,15 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
     return y
 
 
-def spectrogram(data,
-                samplerate,
-                fft_size=512,
-                step_size=64,
-                thresh=None,
-                transform_type=None,
-                freq_cutoffs=None):
+def spectrogram(
+    audio: Audio, fft_size: int = 512, step_size: int = 64, thresh=None, transform_type=None, freq_cutoffs=None
+) -> Spectrogram:
     """creates a spectrogram
 
     Parameters
     ----------
-    data : numpy.ndarray
-        audio signal
-    samplerate : int
-        sampling frequency in Hz
+    audio : vocalpy.Audio
+        The audio from which a spectrogram should be generated.
     fft_size : int
         size of window for Fast Fourier transform, number of time bins.
     step_size : int
@@ -60,31 +55,28 @@ def spectrogram(data,
 
     Return
     ------
-    s : numpy.ndarray
-        spectrogram
-    f : numpy.ndarray
-        vector of centers of time bins from spectrogram
-    t : numpy.ndarray
-        vector of centers of frequency bins from spectrogram
+    spectrogram : vocalpy.Spectrogram
     """
+    if not isinstance(audio, Audio):
+        raise TypeError("`audio` must be a `vocalpy.Audio` instance")
+
     noverlap = fft_size - step_size
 
     if freq_cutoffs:
-        data = butter_bandpass_filter(data,
-                                      freq_cutoffs[0],
-                                      freq_cutoffs[1],
-                                      samplerate)
+        data = butter_bandpass_filter(audio.data, freq_cutoffs[0], freq_cutoffs[1], audio.samplerate)
+    else:
+        data = audio.data
 
-    f, t, s = scipy.signal.spectrogram(data, samplerate, nperseg=fft_size, noverlap=noverlap)
+    f, t, s = scipy.signal.spectrogram(data, audio.samplerate, nperseg=fft_size, noverlap=noverlap)
 
     if transform_type:
-        if transform_type == 'log_spect':
+        if transform_type == "log_spect":
             s /= s.max()  # volume normalize to max 1
             s = np.log10(s)  # take log
             if thresh:
                 # I know this is weird, maintaining 'legacy' behavior
                 s[s < -thresh] = -thresh
-        elif transform_type == 'log_spect_plus_one':
+        elif transform_type == "log_spect_plus_one":
             s = np.log10(s + 1)
             if thresh:
                 s[s < thresh] = thresh
@@ -93,9 +85,10 @@ def spectrogram(data,
             s[s < thresh] = thresh  # set anything less than the threshold as the threshold
 
     if freq_cutoffs:
-        f_inds = np.nonzero((f >= freq_cutoffs[0]) &
-                            (f < freq_cutoffs[1]))[0]  # returns tuple
+        f_inds = np.nonzero((f >= freq_cutoffs[0]) & (f < freq_cutoffs[1]))[0]  # returns tuple
         s = s[f_inds, :]
         f = f[f_inds]
 
-    return s, f, t
+    spect = Spectrogram(data=s, frequencies=f, times=t, source_audio_path=audio.source_path)
+
+    return spect

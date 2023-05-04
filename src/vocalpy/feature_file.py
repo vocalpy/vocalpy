@@ -33,26 +33,21 @@ class FeatureFile:
         A feature file can have either a single `source_file`
         or a :class:`tuple` of `source_files`.
     """
+
     path: pathlib.Path = attrs.field()
     source_file: AudioFile | SpectrogramFile | AnnotationFile = attrs.field(
-        validator=attrs.validators.optional(attrs.validators.instance_of(
-            (AudioFile, SpectrogramFile, AnnotationFile)
-        )),
-        default=None
+        validator=attrs.validators.optional(attrs.validators.instance_of((AudioFile, SpectrogramFile, AnnotationFile))),
+        default=None,
     )
     source_files: tuple = attrs.field(default=None)
+
     @source_files.validator
     def is_tuple_of_files(self, attribute, value):
-        if not all(
-            [isinstance(el, (AudioFile, SpectrogramFile, AnnotationFile)) for el in value]
-        ):
-            raise TypeError(
-                f"source files must be all AudioFile, SpectrogramFile, or AnnotationFile"
-            )
+        if not all([isinstance(el, (AudioFile, SpectrogramFile, AnnotationFile)) for el in value]):
+            raise TypeError("source files must be all AudioFile, SpectrogramFile, or AnnotationFile")
 
     def __attrs_post_init__(self):
         if self.source_file is not None and self.source_files is not None:
             raise ValueError(
-                "A feature file can have either a single `source_file` "
-                "or a tuple of `source_files`, but not both."
+                "A feature file can have either a single `source_file` " "or a tuple of `source_files`, but not both."
             )

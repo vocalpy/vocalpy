@@ -1,9 +1,13 @@
 """Module that implements the repository pattern.
 
 """
-import abc
+from __future__ import annotations
 
-from .domain_model import DatasetFile
+import abc
+from typing import TYPE_CHECKING
+
+if TYPE_CHECKING:
+    from ..domain_model import DatasetFile
 
 
 class AbstractRepository(abc.ABC):
@@ -24,7 +28,11 @@ class SqlAlchemyRepository(AbstractRepository):
         self.session.add(file)
 
     def get(self, reference):
+        from ..domain_model import DatasetFile
+
         return self.session.query(DatasetFile).filter_by(reference=reference).one()
 
     def list(self):
+        from ..domain_model import DatasetFile
+
         return self.session.query(DatasetFile).all()

@@ -14,9 +14,9 @@ class SpectrogramParameters:
     step_size : int
     sandbox : dict
     """
+
     fft_size: int
     step_size: int
-    sandbox : dict | None = attrs.field(
-        validator=attrs.validators.optional(attrs.validators.instance_of(dict)),
-        default=None
+    sandbox: dict | None = attrs.field(
+        validator=attrs.validators.optional(attrs.validators.instance_of(dict)), default=None
     )

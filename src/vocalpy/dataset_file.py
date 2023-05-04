@@ -20,7 +20,6 @@ representing the dataset.
 from __future__ import annotations
 
 import enum
-import pathlib
 from typing import TypeAlias
 
 import attrs
@@ -43,10 +42,36 @@ DatasetFileType: TypeAlias = AnnotationFile | AudioFile | FeatureFile | Spectrog
 
 @attrs.define
 class DatasetFile:
-    file: DatasetFileType = attrs.field(
-        validator=attrs.validators.instance_of(
-            (AnnotationFile, AudioFile, FeatureFile, SpectrogramFile)
-        )
-    )
+    """A class that represents any file in a dataset.
+    Used when building a :class:`vocalpy.Dataset`.
+
+    Attributes
+    ----------
+    file : AudioFile, SpectrogramFile, AnnotationFile, or FeatureFile
+        An instance of one of the specific file types.
+        This is the only required argument when instantiating a
+        :class:`vocalpy.DatasetFile`; other attributes are determined
+        from this argument.
     file_type: DatasetFileTypeEnum
-    path: pathlib.Path
+        The file type, represented as an enum.
+        Used when saving the dataset to a database,
+        to specify which table the file's metadata should go into.
+    path : pathlib.Path
+        The path to the file, taken from ``file.path``.
+
+    Examples
+    --------
+    >>> import vocalpy as voc
+    >>> audio_paths = voc.paths.from_dir('./dir', 'wav')
+    >>> audio_files = [voc.AudioFile(path=path) for path in audio_paths]
+    >>> dataset_files = [voc.DatasetFile(file=audio_file) for audio_file in audio_files]
+    >>> dataset = voc.Dataset(files=dataset_files)
+    """
+
+    file: DatasetFileType = attrs.field(
+        validator=attrs.validators.instance_of((AnnotationFile, AudioFile, FeatureFile, SpectrogramFile))
+    )
+
+    def __attrs_post_init__(self):
+        self.file_type = DatasetFileTypeEnum[self.file.__class__.__name__]
+        self.path = self.file.path
