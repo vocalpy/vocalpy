@@ -1,7 +1,7 @@
 import attrs
 import numpy as np
 
-from. audio import Audio
+from .audio import Audio
 from .spectrogram import Spectrogram
 
 
@@ -21,46 +21,22 @@ def convert_int(val):
 @attrs.define
 class Unit:
     """A unit in a sequence,
-     as studied in animal acoustic communication."""
-    audio: Audio = attrs.field(
-        validator=attrs.validators.optional(
-            attrs.validators.instance_of(Audio)
-        ),
-        default=None
-    )
+    as studied in animal acoustic communication."""
+
+    audio: Audio = attrs.field(validator=attrs.validators.optional(attrs.validators.instance_of(Audio)), default=None)
     spectrogram: Spectrogram = attrs.field(
-        validator=attrs.validators.optional(
-            attrs.validators.instance_of(Spectrogram)
-        ),
-        default=None
+        validator=attrs.validators.optional(attrs.validators.instance_of(Spectrogram)), default=None
     )
-    label: str = attrs.field(
-        validator=attrs.validators.optional(
-            attrs.validators.instance_of(str)
-        ),
-        default=None
-    )
-    onset_s = attrs.field(validator=attrs.validators.optional(
-        attrs.validators.instance_of(float)
-        ),
-        default=None
-    )
-    offset_s = attrs.field(validator=attrs.validators.optional(
-        attrs.validators.instance_of(float)
-        ),
-        default=None
-    )
+    label: str = attrs.field(validator=attrs.validators.optional(attrs.validators.instance_of(str)), default=None)
+    onset_s = attrs.field(validator=attrs.validators.optional(attrs.validators.instance_of(float)), default=None)
+    offset_s = attrs.field(validator=attrs.validators.optional(attrs.validators.instance_of(float)), default=None)
     onset_sample = attrs.field(
-        validator=attrs.validators.optional(
-            attrs.validators.instance_of(int)
-        ),
+        validator=attrs.validators.optional(attrs.validators.instance_of(int)),
         converter=attrs.converters.optional(convert_int),
         default=None,
     )
     offset_sample = attrs.field(
-        validator=attrs.validators.optional(
-            attrs.validators.instance_of(int)
-        ),
+        validator=attrs.validators.optional(attrs.validators.instance_of(int)),
         converter=attrs.converters.optional(convert_int),
         default=None,
     )

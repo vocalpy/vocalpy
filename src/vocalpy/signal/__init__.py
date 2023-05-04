@@ -1,12 +1,7 @@
-from . import (
-    preprocess,
-    segment,
-    spectrogram,
-)
-
+from . import preprocess, segment, spectrogram
 
 __all__ = [
-    'preprocess',
-    'segment',
-    'spectrogram',
+    "preprocess",
+    "segment",
+    "spectrogram",
 ]

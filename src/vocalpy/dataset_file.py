@@ -20,7 +20,6 @@ representing the dataset.
 from __future__ import annotations
 
 import enum
-import pathlib
 from typing import TypeAlias
 
 import attrs
@@ -68,10 +67,9 @@ class DatasetFile:
     >>> dataset_files = [voc.DatasetFile(file=audio_file) for audio_file in audio_files]
     >>> dataset = voc.Dataset(files=dataset_files)
     """
+
     file: DatasetFileType = attrs.field(
-        validator=attrs.validators.instance_of(
-            (AnnotationFile, AudioFile, FeatureFile, SpectrogramFile)
-        )
+        validator=attrs.validators.instance_of((AnnotationFile, AudioFile, FeatureFile, SpectrogramFile))
     )
 
     def __attrs_post_init__(self):

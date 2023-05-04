@@ -6,8 +6,10 @@ import attrs
 from sqlalchemy import create_engine
 
 from . import paths
-from .repository import SqlAlchemyRepository
+from .annotation_file import AnnotationFile
+from .audio_file import AudioFile
 from .dataset_file import DatasetFile, DatasetFileType, DatasetFileTypeEnum
+from .repository import SqlAlchemyRepository
 
 
 @attrs.define
@@ -23,17 +25,15 @@ class Dataset:
         :class:`AudioFile`, :class:`SpectrogramFile`,
         :class:`AnnotationFile`, :class:`FeatureFile`.
     """
+
     files: list[DatasetFile] = attrs.field()
+
     @files.validator
     def validate_files(self, attribute, value):
         if not isinstance(value, list):
-            raise TypeError(
-                f"Dataset `files` must be a list but type was: {type(value)}"
-            )
+            raise TypeError(f"Dataset `files` must be a list but type was: {type(value)}")
 
-        if not all(
-                [isinstance(element, DatasetFile) for element in value]
-        ):
+        if not all([isinstance(element, DatasetFile) for element in value]):
             types_in_files = set([type(element) for element in value])
             raise TypeError(
                 f"All elements in the list `files` should be of type DatasetFile "
@@ -45,18 +45,14 @@ class Dataset:
         dataset_files = []
 
         for file in files:
-            dataset_file = DatasetFile(
-                file=file,
-                file_type=DatasetFileTypeEnum(type(file)),
-                path=file.path
-            )
+            dataset_file = DatasetFile(file=file, file_type=DatasetFileTypeEnum(type(file)), path=file.path)
             dataset_files.append(dataset_file)
 
         return cls(files=dataset_files)
 
     def to_sqlite(self, sqlite_path: str | pathlib.Path, repository=SqlAlchemyRepository):
-        if not str(sqlite_path).endswith('.db'):
-            sqlite_path = pathlib.Path(f'{sqlite_path}.db')
+        if not str(sqlite_path).endswith(".db"):
+            sqlite_path = pathlib.Path(f"{sqlite_path}.db")
         engine = create_engine(f"sqlite:///{sqlite_path}")
         Session = sessionmaker()
         Session.configure(bind=engine)
@@ -71,21 +67,22 @@ class Dataset:
         # repository.commit()
 
         @classmethod
-        def from_dir(cls, dir: str | pathlib.Path,
-                     audio_ext: str = 'wav', annot_ext: str = 'csv', spect_ext: str = 'npz', recurse: bool = False):
+        def from_dir(
+            cls,
+            dir: str | pathlib.Path,
+            audio_ext: str = "wav",
+            annot_ext: str = "csv",
+            spect_ext: str = "npz",
+            recurse: bool = False,
+        ):
             dir = pathlib.Path(dir)
             if not dir.is_dir(dir):
-                raise NotADirectoryError(
-                    f'Argument `dir` not recognized as a directory: {dir}'
-                )
+                raise NotADirectoryError(f"Argument `dir` not recognized as a directory: {dir}")
 
             # ---- look for audio files
             audio_paths = paths.from_dir(dir, audio_ext, recurse)
             if audio_paths:
-                audio_files = [
-                    AudioFile(path=audio_path)
-                    for audio_path in audio_paths
-                ]
+                audio_files = [AudioFile(path=audio_path) for audio_path in audio_paths]
             else:
                 audio_files = None
 
@@ -133,8 +130,3 @@ class Dataset:
     @classmethod
     def from_sqlite(cls, sqlite_path):
         pass
-
-    def to_sqlite(self, sqlite_path: str | pathlib.Path):
-        engine = create_engine(
-            f"sqlite+pysqlite:///{sqlite_path}"
-        )

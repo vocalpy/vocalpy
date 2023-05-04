@@ -15,10 +15,10 @@ def smooth(data: npt.NDArray, samplerate: int, smooth_win: int = 2) -> npt.NDArr
     Parameters
     ----------
     audio : vocalpy.Audio
-        An instance of :class:`vocalpy.Audio`. 
+        An instance of :class:`vocalpy.Audio`.
     freq_cutoffs : list
         Cutoff frequencies for bandpass filter.
-        Two-element sequence of integers, 
+        Two-element sequence of integers,
         (low frequency cutoff, high frequency cutoff).
         Default is [500, 10000].
         If None, bandpass filter is not applied.
@@ -41,17 +41,22 @@ def smooth(data: npt.NDArray, samplerate: int, smooth_win: int = 2) -> npt.NDArr
     h = np.ones((len,)) / len
     smooth = np.convolve(squared, h)
     offset = round((smooth.shape[-1] - data.shape[-1]) / 2)
-    return smooth[offset:data.shape[-1] + offset]
+    return smooth[offset : data.shape[-1] + offset]
 
 
-def segment(audio: Audio, threshold: int = 5000, min_dur: float = 0.02,
-            min_silent_dur: float = 0.002, return_sample: bool = False) -> Sequence:
+def segment(
+    audio: Audio,
+    threshold: int = 5000,
+    min_dur: float = 0.02,
+    min_silent_dur: float = 0.002,
+    return_sample: bool = False,
+) -> Sequence:
     """Segment audio into a sequence of units.
-    
-    Applies a threshold below which is considered silence, 
-    and finds all segments 
-    (periods below threshold) greater than a minimum sp 
-    by finding silent gaps greater than 
+
+    Applies a threshold below which is considered silence,
+    and finds all segments
+    (periods below threshold) greater than a minimum sp
+    by finding silent gaps greater than
 
     Parameters
     ----------
@@ -101,15 +106,11 @@ def segment(audio: Audio, threshold: int = 5000, min_dur: float = 0.02,
     # get rid of silent intervals that are shorter than min_silent_dur
     silent_gap_durs = onsets_s[1:] - offsets_s[:-1]  # duration of silent gaps
     keep_these = np.nonzero(silent_gap_durs > min_silent_dur)
-    onsets_s = np.concatenate(
-        (onsets_s[0, np.newaxis], onsets_s[1:][keep_these]))
-    offsets_s = np.concatenate(
-        (offsets_s[:-1][keep_these], offsets_s[-1, np.newaxis]))
+    onsets_s = np.concatenate((onsets_s[0, np.newaxis], onsets_s[1:][keep_these]))
+    offsets_s = np.concatenate((offsets_s[:-1][keep_these], offsets_s[-1, np.newaxis]))
     if return_sample:
-        onsets_sample = np.concatenate(
-            (onsets_sample[0, np.newaxis], onsets_sample[1:][keep_these]))
-        offsets_sample = np.concatenate(
-            (offsets_sample[:-1][keep_these], offsets_sample[-1, np.newaxis]))
+        onsets_sample = np.concatenate((onsets_sample[0, np.newaxis], onsets_sample[1:][keep_these]))
+        offsets_sample = np.concatenate((offsets_sample[:-1][keep_these], offsets_sample[-1, np.newaxis]))
 
     # eliminate syllables with duration shorter than min_dur
     unit_durs = offsets_s - onsets_s
@@ -121,11 +122,7 @@ def segment(audio: Audio, threshold: int = 5000, min_dur: float = 0.02,
     offsets_sample = offsets_sample[keep_these]
 
     units = []
-    for onset_s, offset_s, onset_sample, offset_sample in zip(
-        onsets_s, offsets_s, onsets_sample, offsets_sample
-    ):
-        units.append(
-            Unit(onset_s=onset_s, offset_s=offset_s, onset_sample=onset_sample, offset_sample=offset_sample)
-        )
+    for onset_s, offset_s, onset_sample, offset_sample in zip(onsets_s, offsets_s, onsets_sample, offsets_sample):
+        units.append(Unit(onset_s=onset_s, offset_s=offset_s, onset_sample=onset_sample, offset_sample=offset_sample))
 
     return Sequence(units=units)

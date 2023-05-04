@@ -29,8 +29,10 @@ class SqlAlchemyRepository(AbstractRepository):
 
     def get(self, reference):
         from ..domain_model import DatasetFile
+
         return self.session.query(DatasetFile).filter_by(reference=reference).one()
 
     def list(self):
         from ..domain_model import DatasetFile
+
         return self.session.query(DatasetFile).all()

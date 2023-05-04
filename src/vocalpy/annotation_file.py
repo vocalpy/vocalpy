@@ -26,8 +26,10 @@ class AnnotationFile:
     annotates : vocalpy.dataset.AudioFile or vocalpy.dataset.SpectrogramFile
         The file that this annotation file annotates.
     """
+
     path: pathlib.Path = attrs.field()
     annotates: AudioFile | SpectrogramFile | list[AudioFile] | list[SpectrogramFile] | None = attrs.field()
+
     @annotates.validator
     def is_file_or_list_of_files(self, attribute, value):
         if not isinstance(value, (AudioFile, SpectrogramFile, list)):
@@ -39,8 +41,8 @@ class AnnotationFile:
 
         if isinstance(value, list):
             if not (
-                    all([isinstance(el, AudioFile) for el in value]) or
-                    all([isinstance(el, SpectrogramFile) for el in value])
+                all([isinstance(el, AudioFile) for el in value])
+                or all([isinstance(el, SpectrogramFile) for el in value])
             ):
                 list_types = set([type(el) for el in value])
                 raise TypeError(

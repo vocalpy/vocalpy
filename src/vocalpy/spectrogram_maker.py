@@ -7,6 +7,7 @@ import dask
 import dask.diagnostics
 
 import vocalpy.constants
+
 from .audio import Audio
 from .audio_file import AudioFile
 from .spectrogram import Spectrogram
@@ -52,11 +53,10 @@ def validate_audio(audio: Audio | AudioFile | Sequence[Audio | AudioFile]) -> No
         )
 
     if isinstance(audio, list) or isinstance(audio, tuple):
-        if not (all([isinstance(item, Audio) for item in audio]) or
-                all([isinstance(item, AudioFile) for item in audio])):
-            types_in_audio = set(
-                [type(audio) for audio in audio]
-            )
+        if not (
+            all([isinstance(item, Audio) for item in audio]) or all([isinstance(item, AudioFile) for item in audio])
+        ):
+            types_in_audio = set([type(audio) for audio in audio])
             raise TypeError(
                 "If `audio` is a list or tuple, "
                 "then items in `audio` must either "
@@ -67,10 +67,7 @@ def validate_audio(audio: Audio | AudioFile | Sequence[Audio | AudioFile]) -> No
             )
 
 
-DEFAULT_SPECT_PARAMS = {
-    'fft_size': 512,
-    'step_size': 64
-}
+DEFAULT_SPECT_PARAMS = {"fft_size": 512, "step_size": 64}
 
 
 class SpectrogramMaker:
@@ -86,23 +83,19 @@ class SpectrogramMaker:
         Passed as keyword arguments to ``callback``.
     """
 
-    def __init__(self, callback: Callable | None = None,
-                 spect_params: dict | None = None):
+    def __init__(self, callback: Callable | None = None, spect_params: dict | None = None):
         if callback is None:
             from vocalpy.signal.spectrogram import spectrogram as default_spect_func
+
             callback = default_spect_func
         if not callable(callback):
-            raise ValueError(
-                f"`callback` should be callable, but `callable({callback})` returns False"
-            )
+            raise ValueError(f"`callback` should be callable, but `callable({callback})` returns False")
         self.callback = callback
 
         if spect_params is None:
             spect_params = DEFAULT_SPECT_PARAMS
         if not isinstance(spect_params, dict):
-            raise TypeError(
-                f"`spect_params` should be a `dict` but type was: {type(spect_params)}"
-            )
+            raise TypeError(f"`spect_params` should be a `dict` but type was: {type(spect_params)}")
         self.spect_params = spect_params
 
     def make(
@@ -149,13 +142,9 @@ class SpectrogramMaker:
         spects = []
         for audio_ in audio:
             if parallelize:
-                spects.append(
-                    dask.delayed(_to_spect(audio_))
-                )
+                spects.append(dask.delayed(_to_spect(audio_)))
             else:
-                spects.append(
-                    _to_spect(audio_)
-                )
+                spects.append(_to_spect(audio_))
 
         if parallelize:
             graph = dask.delayed()(spects)
@@ -164,11 +153,12 @@ class SpectrogramMaker:
         else:
             return spects
 
-    def write(self,
-              audio: Audio | AudioFile | Sequence[Audio | AudioFile],
-              dir_path : str | pathlib.Path,
-              parallelize: bool = True,
-              namer: Callable = default_spect_fname_func
+    def write(
+        self,
+        audio: Audio | AudioFile | Sequence[Audio | AudioFile],
+        dir_path: str | pathlib.Path,
+        parallelize: bool = True,
+        namer: Callable = default_spect_fname_func,
     ) -> SpectrogramFile | List[SpectrogramFile]:
         """Make spectrogram(s) from audio, and write to file.
         Writes directly to file without returning the spectrograms,
@@ -204,9 +194,7 @@ class SpectrogramMaker:
         validate_audio(audio)
         dir_path = pathlib.Path(dir_path)
         if not dir_path.exists() or not dir_path.is_dir():
-            raise NotADirectoryError(
-                f"`dir_path` not found or not recognized as a directory:\n{dir_path}"
-            )
+            raise NotADirectoryError(f"`dir_path` not found or not recognized as a directory:\n{dir_path}")
 
         # define nested function so vars are in scope and ``dask`` can call it
         def _to_spect_file(audio_):
@@ -226,13 +214,9 @@ class SpectrogramMaker:
         spect_files = []
         for audio_ in audio:
             if parallelize:
-                spect_files.append(
-                    dask.delayed(_to_spect_file(audio_))
-                )
+                spect_files.append(dask.delayed(_to_spect_file(audio_)))
             else:
-                spect_files.append(
-                    _to_spect_file(audio_)
-                )
+                spect_files.append(_to_spect_file(audio_))
 
         if parallelize:
             graph = dask.delayed()(spect_files)

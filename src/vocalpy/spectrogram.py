@@ -11,7 +11,7 @@ from . import validators
 from .audio_file import AudioFile
 from .spectrogram_file import SpectrogramFile
 
-VALID_SPECT_FILE_EXTENSION = '.npz'
+VALID_SPECT_FILE_EXTENSION = ".npz"
 
 
 @attrs.define
@@ -50,7 +50,7 @@ class Spectrogram:
     >>> frequencies = np.linspace(0, 10000, data.shape[0])
     >>> spect = voc.Spectrogram(data, frequencies, times)
     >>> print(spect)
-    Spectrogram(data=array([[0.354... 0.81988536]]), frequencies=array([    0....000.        ]), times=array([0.0000...3.121875e-02]))
+    Spectrogram(data=array([[0.354... 0.81988536]]), frequencies=array([    0....000.        ]), times=array([0.0000...3.121875e-02]))  # noqa: E501
 
     An example of reading a spectrogram from an npz file.
 
@@ -60,33 +60,31 @@ class Spectrogram:
     spect_path=PosixPath('llb3_0066_2018_04_23_17_31_55.wav.mat'), audio_path=None)
     """
     data: npt.NDArray = attrs.field()
+
     @data.validator
     def validate_data(self, attribute, value):
         if not isinstance(value, np.ndarray):
-            raise TypeError(
-                f'Spectrogram array `data` should be a numpy array, '
-                f'but type was {type(value)}.'
-            )
+            raise TypeError(f"Spectrogram array `data` should be a numpy array, " f"but type was {type(value)}.")
 
         if value.ndim < 2:
             raise ValueError(
-                f'Spectrogram array `data` should have at least 2 dimensions, '
-                f'but number of dimensions was {value.ndim}.'
+                f"Spectrogram array `data` should have at least 2 dimensions, "
+                f"but number of dimensions was {value.ndim}."
             )
 
     frequencies: npt.NDArray = attrs.field(validator=validators.is_1d_ndarray)
     times: npt.NDArray = attrs.field(validator=validators.is_1d_ndarray)
 
-    source_path : pathlib.Path = attrs.field(converter=attrs.converters.optional(pathlib.Path),
-                                             validator=attrs.validators.optional(
-                                                 attrs.validators.instance_of(pathlib.Path)
-                                             ),
-                                             default=None)
-    source_audio_path : pathlib.Path = attrs.field(converter=attrs.converters.optional(pathlib.Path),
-                                                   validator=attrs.validators.optional(
-                                                       attrs.validators.instance_of(pathlib.Path)
-                                                   ),
-                                                   default=None)
+    source_path: pathlib.Path = attrs.field(
+        converter=attrs.converters.optional(pathlib.Path),
+        validator=attrs.validators.optional(attrs.validators.instance_of(pathlib.Path)),
+        default=None,
+    )
+    source_audio_path: pathlib.Path = attrs.field(
+        converter=attrs.converters.optional(pathlib.Path),
+        validator=attrs.validators.optional(attrs.validators.instance_of(pathlib.Path)),
+        default=None,
+    )
 
     def __attrs_post_init__(self):
         if not self.data.shape[0] == self.frequencies.shape[0]:
@@ -104,11 +102,12 @@ class Spectrogram:
             )
 
     def __repr__(self):
-        return (f'{self.__class__.__name__}('
-                f'data={reprlib.repr(self.data)}, '
-                f'frequencies={reprlib.repr(self.frequencies)}, '
-                f'times={reprlib.repr(self.times)})'
-                )
+        return (
+            f"{self.__class__.__name__}("
+            f"data={reprlib.repr(self.data)}, "
+            f"frequencies={reprlib.repr(self.frequencies)}, "
+            f"times={reprlib.repr(self.times)})"
+        )
 
     def asdict(self):
         """Convert this :class:`vocalpy.Spectrogram`
@@ -126,9 +125,11 @@ class Spectrogram:
         if other.__class__ is not self.__class__:
             return NotImplemented
         return all(
-            [np.array_equal(self.data, other.data),
-             np.array_equal(self.frequencies, other.frequencies),
-             np.array_equal(self.times, other.times)]
+            [
+                np.array_equal(self.data, other.data),
+                np.array_equal(self.frequencies, other.frequencies),
+                np.array_equal(self.times, other.times),
+            ]
         )
 
     def __ne__(self, other):
@@ -155,9 +156,7 @@ class Spectrogram:
         """
         path = pathlib.Path(path)
         if not path.exists():
-            raise FileNotFoundError(
-                f"File with spectrogram not found at path specified:\n{path}"
-            )
+            raise FileNotFoundError(f"File with spectrogram not found at path specified:\n{path}")
 
         if not path.suffix == VALID_SPECT_FILE_EXTENSION:
             raise ValueError(
@@ -168,13 +167,11 @@ class Spectrogram:
         spect_file_dict = np.load(str(path))
 
         kwargs = {}
-        for key in ('data', 'frequencies', 'times'):
+        for key in ("data", "frequencies", "times"):
             try:
                 kwargs[key] = np.array(spect_file_dict[key])
             except KeyError as e:
-                raise KeyError(
-                    f"Did not find key '{key}' in path: {path}"
-                ) from e
+                raise KeyError(f"Did not find key '{key}' in path: {path}") from e
 
         return cls(source_path=path, source_audio_path=source_audio_path, **kwargs)
 
@@ -191,9 +188,7 @@ class Spectrogram:
         """
         # TODO: deal with extension here
         path = pathlib.Path(path)
-        np.savez(
-            path, data=self.data, frequencies=self.frequencies, times=self.times
-        )
+        np.savez(path, data=self.data, frequencies=self.frequencies, times=self.times)
         if self.source_audio_path:
             source_audio_file = AudioFile(path=self.source_audio_path)
         else:
