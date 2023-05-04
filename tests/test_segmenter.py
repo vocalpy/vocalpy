@@ -7,10 +7,10 @@ from .fixtures.audio import AUDIO_LIST_WAV
 
 class TestSegmenter:
     @pytest.mark.parametrize(
-        'callback, segment_params',
+        "callback, segment_params",
         [
             (None, None),
-        ]
+        ],
     )
     def test_init(self, callback, segment_params):
         segmenter = vocalpy.Segmenter(callback=callback, segment_params=segment_params)
@@ -34,9 +34,9 @@ class TestSegmenter:
     def test_segment(self, audio):
         # have to use different segment params from default for these .wav files
         segment_params = {
-            'threshold': 5e-05,
-            'min_dur': 0.02,
-            'min_silent_dur': 0.002,
+            "threshold": 5e-05,
+            "min_dur": 0.02,
+            "min_silent_dur": 0.002,
         }
         segmenter = vocalpy.Segmenter(segment_params=segment_params)
         out = segmenter.segment(audio)

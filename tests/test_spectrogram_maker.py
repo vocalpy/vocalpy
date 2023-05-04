@@ -23,41 +23,42 @@ def test_default_spect_fname_func(specific_audio_dir, audio_format):
 
 
 @pytest.mark.parametrize(
-    'audio',
+    "audio",
     [
         vocalpy.Audio.read(AUDIO_LIST_WAV[0]),
         vocalpy.AudioFile(path=AUDIO_LIST_WAV[0]),
         [vocalpy.Audio.read(path) for path in AUDIO_LIST_WAV[:3]],
-        [vocalpy.AudioFile(path=path) for path in AUDIO_LIST_WAV[:3]]
-    ]
+        [vocalpy.AudioFile(path=path) for path in AUDIO_LIST_WAV[:3]],
+    ],
 )
 def test_validate_audio(audio):
     assert vocalpy.spectrogram_maker.validate_audio(audio) is None
 
 
 @pytest.mark.parametrize(
-    'not_audio, expected_exception',
+    "not_audio, expected_exception",
     [
         (vocalpy.Spectrogram.read(SPECT_LIST_NPZ[0]), TypeError),
         (dict(), TypeError),
         ([vocalpy.Spectrogram.read(path) for path in SPECT_LIST_NPZ[:3]], TypeError),
-        ([vocalpy.Audio.read(path) for path in AUDIO_LIST_WAV[:3]] + [vocalpy.AudioFile(path=path) for path in AUDIO_LIST_WAV[:3]],
-         TypeError
-         )
-    ]
+        (
+            [vocalpy.Audio.read(path) for path in AUDIO_LIST_WAV[:3]]
+            + [vocalpy.AudioFile(path=path) for path in AUDIO_LIST_WAV[:3]],
+            TypeError,
+        ),
+    ],
 )
 def test_validate_audio_not_audio_raises(not_audio, expected_exception):
     with pytest.raises(expected_exception=expected_exception):
         vocalpy.spectrogram_maker.validate_audio(not_audio)
 
 
-
 class TestSpectrogramMaker:
     @pytest.mark.parametrize(
-        'callback, spect_params',
+        "callback, spect_params",
         [
             (None, None),
-        ]
+        ],
     )
     def test_init(self, callback, spect_params):
         spect_maker = vocalpy.SpectrogramMaker(callback=callback, spect_params=spect_params)
