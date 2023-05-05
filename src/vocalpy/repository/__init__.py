@@ -1,4 +1,4 @@
-from . import orm, repository
-from .repository import SqlAlchemyRepository
+from . import base, orm, sqlalchemy
+from .sqlalchemy import SqlAlchemyRepository
 
-__all__ = ["orm", "repository", "SqlAlchemyRepository"]
+__all__ = ["base", "orm", "sqlalchemy", "SqlAlchemyRepository"]
