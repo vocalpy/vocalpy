@@ -22,7 +22,7 @@ DEFAULT_SEGMENT_PARAMS = {
 class Segmenter:
     def __init__(self, callback: Callable | None = None, segment_params: dict | None = None):
         if callback is None:
-            from vocalpy.signal.segment import segment_audio_amplitude as default_segment_func
+            from vocalpy.signal.segment import audio_amplitude as default_segment_func
 
             callback = default_segment_func
         if not callable(callback):
