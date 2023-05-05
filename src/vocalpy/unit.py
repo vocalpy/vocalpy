@@ -44,7 +44,3 @@ class Unit:
             raise ValueError(
                 f"Onset should be less than offset, but onset was {self.onset} and offset was {self.offset}."
             )
-        if self.onset and self.offset is None:
-            raise ValueError(f"onset specified as {self.onset} but offset is None")
-        if self.onset is None and self.offset:
-            raise ValueError(f"offset specified as {self.offset} but onset is None")
