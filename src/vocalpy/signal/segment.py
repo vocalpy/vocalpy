@@ -1,50 +1,15 @@
 from __future__ import annotations
 
 import numpy as np
-import numpy.typing as npt
 
 from ..audio import Audio
 from ..sequence import Sequence
 from ..unit import Unit
 
-
-def smooth(data: npt.NDArray, samplerate: int, smooth_win: int = 2) -> npt.NDArray:
-    """Filter raw audio and smooth signal
-    used to calculate amplitude.
-
-    Parameters
-    ----------
-    audio : vocalpy.Audio
-        An instance of :class:`vocalpy.Audio`.
-    freq_cutoffs : list
-        Cutoff frequencies for bandpass filter.
-        Two-element sequence of integers,
-        (low frequency cutoff, high frequency cutoff).
-        Default is [500, 10000].
-        If None, bandpass filter is not applied.
-    smooth_win : integer
-        Size of smoothing window in milliseconds. Default is 2.
-
-    Returns
-    -------
-    audio_smoothed : vocalpy.Audio
-        With pre-processing applied to the `data` attribute.
-
-    Applies a bandpass filter with the frequency cutoffs in spect_params,
-    then rectifies the signal by squaring, and lastly smooths by taking
-    the average within a window of size sm_win.
-    This is a very literal translation from the Matlab function SmoothData.m
-    by Evren Tumer. Uses the Thomas-Santana algorithm.
-    """
-    squared = np.power(data, 2)
-    len = np.round(samplerate * smooth_win / 1000).astype(int)
-    h = np.ones((len,)) / len
-    smooth = np.convolve(squared, h)
-    offset = round((smooth.shape[-1] - data.shape[-1]) / 2)
-    return smooth[offset : data.shape[-1] + offset]
+from .audio import smooth
 
 
-def segment_audio_amplitude(
+def audio_amplitude(
     audio: Audio,
     threshold: int = 5000,
     min_dur: float = 0.02,
@@ -84,8 +49,7 @@ def segment_audio_amplitude(
     sequence : vocalpy.Sequence
         A :class:`vocalpy.Sequence` made up of `vocalpy.Unit` instances.
     """
-    audio_data, samplerate = audio.data, audio.samplerate
-    smoothed = smooth(audio_data, samplerate)
+    smoothed = smooth(audio)
     above_th = smoothed > threshold
     h = [1, -1]
     # convolving with h causes:
@@ -96,8 +60,8 @@ def segment_audio_amplitude(
     # always get in units of sample first, then convert to s
     onsets_sample = np.where(above_th_convoluted > 0)[0]
     offsets_sample = np.where(above_th_convoluted < 0)[0]
-    onsets_s = onsets_sample / samplerate
-    offsets_s = offsets_sample / samplerate
+    onsets_s = onsets_sample / audio.samplerate
+    offsets_s = offsets_sample / audio.samplerate
 
     if onsets_s.shape[0] < 1 or offsets_s.shape[0] < 1:
         return None  # because no onsets or offsets in this file
