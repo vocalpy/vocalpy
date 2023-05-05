@@ -17,10 +17,22 @@ class Sequence:
 
     Attributes
     ----------
-    units: list
+    units : list
         A :class:`list` of `vocalpy.Unit` instances.
         Produced by segmenting audio, e.g. with
         :func:`vocalpy.signal.segment.segment_audio_amplitude`.
+    segment_method : str
+        The method used to segment audio.
+        Either a string name of a method
+        or the name of a callback.
+        This attribute is added by a
+        :class:`vocalpy.Segmenter` when it
+        creates a :class:`vocalpy.Sequence`.
+    segment_params : dict
+        The parameters used with the segmenting method.
+        This attribute is added by a
+        :class:`vocalpy.Segmenter` when it
+        creates a :class:`vocalpy.Sequence`.
     audio_path : pathlib.Path, optional.
         Path to the audio from which this sequence was segmented.
         Optional, default is None.
@@ -40,6 +52,9 @@ class Sequence:
     def is_list_of_unit(self, attribute, value):
         if not isinstance(value, list) or not all([isinstance(item, Unit) for item in value]):
             raise ValueError("`units` must be a list of vocalpy.Unit instances")
+
+    segment_method: str = attrs.field(converter=str, validator=attrs.validators.instance_of(str))
+    segment_params: dict = attrs.field(converter=dict, validator=attrs.validators.instance_of(dict))
 
     audio_path: pathlib.Path = attrs.field(
         converter=attrs.converters.optional(pathlib.Path),
