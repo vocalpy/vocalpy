@@ -1,9 +1,9 @@
 from __future__ import annotations
 
+import contextlib
 import pathlib
 import reprlib
 
-import attrs
 import evfuncs
 import numpy as np
 import numpy.typing as npt
@@ -46,7 +46,17 @@ def get_channels_from_data(data: npt.NDArray) -> int:
     return channels
 
 
-@attrs.define
+def is_1d_or_2d_ndarray(data: npt.NDArray) -> None:
+    if not isinstance(data, np.ndarray):
+        raise TypeError(f"Audio array `data` should be a numpy array, " f"but type was {type(data)}.")
+
+    if not (data.ndim == 1 or data.ndim == 2):
+        raise ValueError(
+            f"Audio array `data` should have either 1 or 2 dimensions, "
+            f"but number of dimensions was {data.ndim}."
+        )
+
+
 class Audio:
     """Class that represents an audio signal.
 
@@ -65,6 +75,9 @@ class Audio:
         as specified above. If specified, the value
         must match what is determined from ``data``
         or a ValueError will be raised.
+    path : pathlib.Path
+        The path to the audio file that this
+        :class:`vocalpy.Audio` was read from.
 
     Examples
     --------
@@ -76,54 +89,66 @@ class Audio:
     >>> audio
     Audio(data=array([ 0.   ... -0.00115967]), samplerate=44100, channels=1)
     """
+    def __init__(self,
+                 data: npt.NDArray | None = None,
+                 samplerate: int | None = None,
+                 path : str | pathlib.Path | None = None,
+                 ):
+        if path:
+            path = pathlib.Path(path)
+        self.path = path
 
-    data: npt.NDArray = attrs.field()
-
-    @data.validator
-    def is_1d_or_2d(self, attribute, value):
-        if not isinstance(value, np.ndarray):
-            raise TypeError(f"Audio array `data` should be a numpy array, " f"but type was {type(value)}.")
-
-        if not (value.ndim == 1 or value.ndim == 2):
-            raise ValueError(
-                f"Audio array `data` should have either 1 or 2 dimensions, "
-                f"but number of dimensions was {value.ndim}."
-            )
-
-    samplerate: int = attrs.field(
-        converter=int,
-        validator=[
-            attrs.validators.instance_of(int),
-            attrs.validators.gt(0),
-        ],
-    )
-    channels: int | None = attrs.field(
-        converter=attrs.converters.optional(int),
-        validator=attrs.validators.optional(
-            [
-                attrs.validators.instance_of(int),
-                attrs.validators.gt(0),
-            ]
-        ),
-        default=None,
-    )
-    source_path: pathlib.Path = attrs.field(
-        converter=attrs.converters.optional(pathlib.Path),
-        validator=attrs.validators.optional(attrs.validators.instance_of(pathlib.Path)),
-        default=None,
-    )
-
-    def __attrs_post_init__(self):
-        channels_from_data = get_channels_from_data(self.data)
-
-        if self.channels is None:
-            self.channels = channels_from_data
-        else:
-            if channels_from_data != self.channels:
+        if any((data is not None, samplerate is not None)):
+            if not all((data is not None, samplerate is not None)):
                 raise ValueError(
-                    f"Value specified for channels, {self.channels}, "
-                    f"does not match value determined from data: {channels_from_data}"
+                    f"Must provide both `data` and `samplerate`."
                 )
+        if data is not None:
+            is_1d_or_2d_ndarray(data)
+        self._data = data
+
+        if samplerate is not None:
+            if not isinstance(samplerate, int) or samplerate < 1:
+                raise ValueError(
+                    f"`samplerate` must be a positive integer"
+                )
+        self._samplerate = samplerate
+
+        if data is not None:
+            channels_from_data = get_channels_from_data(self.data)
+            self._channels = channels_from_data
+        else:
+            self._channels = None
+
+    def _read(self, **kwargs):
+        if self.path.name.endswith("cbin"):
+            data, samplerate = evfuncs.load_cbin(self.path)
+        else:
+            data, samplerate = soundfile.read(self.path, **kwargs)
+
+        channels = get_channels_from_data(data)
+
+        self._data = data
+        self._samplerate = samplerate
+        self._channels = channels
+
+    @property
+    def data(self):
+        if self._data is None:
+            self._read()
+        return self._data
+
+    @property
+    def samplerate(self):
+        if self._samplerate is None:
+            self._read()
+        return self._samplerate
+
+    @property
+    def channels(self):
+        if self._channels is None:
+            self._read()
+        return self._channels
 
     def __repr__(self):
         return (
@@ -131,6 +156,7 @@ class Audio:
             f"data={reprlib.repr(self.data)}, "
             f"samplerate={reprlib.repr(self.samplerate)}, "
             f"channels={self.channels})"
+            f"path={self.path}"
         )
 
     def asdict(self):
@@ -140,10 +166,15 @@ class Audio:
         Returns
         -------
         audio_dict : dict
-            A :class:`dict` with keys {'data', 'samplerate', 'channels', 'source_path'} that map
+            A :class:`dict` with keys {'data', 'samplerate', 'channels', 'path'} that map
             to the corresponding attributes of this :class:`vocalpy.Audio`.
         """
-        return attrs.asdict(self)
+        return {
+            'data': self._data,
+            'samplerate': self._samplerate,
+            'channels': self._channels,
+            'path': self.path,
+        }
 
     def __eq__(self, other):
         if other.__class__ is not self.__class__:
@@ -153,7 +184,7 @@ class Audio:
                 np.array_equal(self.data, other.data),
                 self.samplerate == other.samplerate,
                 self.channels == other.channels,
-                self.source_path == other.source_path,
+                self.path == other.path,
             ]
         )
 
@@ -189,9 +220,7 @@ class Audio:
         else:
             data, samplerate = soundfile.read(path, **kwargs)
 
-        channels = get_channels_from_data(data)
-
-        return cls(data=data, samplerate=samplerate, channels=channels, source_path=path)
+        return cls(data=data, samplerate=samplerate, path=path)
 
     def write(self, path: str | pathlib.Path, **kwargs) -> AudioFile:
         """Write audio data to a file.
@@ -209,3 +238,11 @@ class Audio:
         path = pathlib.Path(path)
         soundfile.write(file=path, data=self.data, samplerate=self.samplerate, **kwargs)
         return AudioFile(path=path)
+
+    @contextlib.contextmanager
+    def open(self, **kwargs):
+        self._read(**kwargs)
+        yield
+        self._data = None
+        self._samplerate = None
+        self._channels = None
