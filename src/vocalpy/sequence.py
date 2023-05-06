@@ -53,7 +53,7 @@ class Sequence:
         if not isinstance(value, list) or not all([isinstance(item, Unit) for item in value]):
             raise ValueError("`units` must be a list of vocalpy.Unit instances")
 
-    segment_method: str = attrs.field(converter=str, validator=attrs.validators.instance_of(str))
+    method: str = attrs.field(converter=str, validator=attrs.validators.instance_of(str))
     segment_params: dict = attrs.field(converter=dict, validator=attrs.validators.instance_of(dict))
 
     audio_path: pathlib.Path = attrs.field(
