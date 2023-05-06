@@ -3,10 +3,8 @@ from __future__ import annotations
 import numpy as np
 import numpy.typing as npt
 
-from ..audio import Audio
 
-
-def smooth(audio: Audio, smooth_win: int = 2) -> npt.NDArray:
+def smooth(data: npt.NDArray, samplerate: int, smooth_win: int = 2) -> npt.NDArray:
     """Filter raw audio and smooth signal
     used to calculate amplitude.
 
@@ -15,8 +13,12 @@ def smooth(audio: Audio, smooth_win: int = 2) -> npt.NDArray:
 
     Parameters
     ----------
-    audio : numpy.ndarray
-        An instance of :class:`vocalpy.Audio`.
+    data : numpy.ndarray
+        An audio signal as a :class:`numpy.ndarray`.
+        Typically, the `data` attribute from a :class:`vocalpy.Audio` instance.
+    samplerate : int
+        The sampling rate.
+        Typically, the `samplerate` attribute from a :class:`vocalpy.Audio` instance.
     freq_cutoffs : list
         Cutoff frequencies for bandpass filter.
         Two-element sequence of integers,
@@ -37,7 +39,6 @@ def smooth(audio: Audio, smooth_win: int = 2) -> npt.NDArray:
     This is a very literal translation from the Matlab function SmoothData.m
     by Evren Tumer. Uses the Thomas-Santana algorithm.
     """
-    data, samplerate = audio.data, audio.samplerate
     squared = np.power(data, 2)
     len = np.round(samplerate * smooth_win / 1000).astype(int)
     h = np.ones((len,)) / len
