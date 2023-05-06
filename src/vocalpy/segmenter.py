@@ -64,7 +64,7 @@ class Segmenter:
         validate_audio(audio)
 
         # define nested function so vars are in scope and ``dask`` can call it
-        def _to_sequence(audio_):
+        def _to_sequence(audio_: Audio):
             if isinstance(audio_, AudioFile):
                 audio_ = Audio.read(audio_.path)
             onsets, offsets = self.callback(audio_.data, audio_.samplerate, **self.segment_params)
@@ -77,7 +77,8 @@ class Segmenter:
 
             return Sequence(
                 units=units,
-                audio_path=audio_.source_path,
+                # note we make a new audio instance **without** data loaded
+                audio=Audio(path=audio_.path),
                 method=self.callback.__name__,
                 segment_params=self.segment_params
             )
