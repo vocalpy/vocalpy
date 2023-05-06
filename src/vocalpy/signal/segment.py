@@ -67,8 +67,8 @@ def audio_amplitude(
     # always get in units of sample first, then convert to s
     onsets_sample = np.where(above_th_convoluted > 0)[0]
     offsets_sample = np.where(above_th_convoluted < 0)[0]
-    onsets_s = onsets_sample / audio.samplerate
-    offsets_s = offsets_sample / audio.samplerate
+    onsets_s = onsets_sample / samplerate
+    offsets_s = offsets_sample / samplerate
 
     if onsets_s.shape[0] < 1 or offsets_s.shape[0] < 1:
         return None  # because no onsets or offsets in this file
