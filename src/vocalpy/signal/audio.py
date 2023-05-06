@@ -1,5 +1,8 @@
 from __future__ import annotations
 
+import numbers
+import warnings
+
 import numpy as np
 import numpy.typing as npt
 
@@ -33,12 +36,21 @@ def smooth(data: npt.NDArray, samplerate: int, smooth_win: int = 2) -> npt.NDArr
     audio_smoothed : numpy.ndarray
         The `vocalpy.Audio.data` after smoothing.
 
-    Applies a bandpass filter with the frequency cutoffs in spect_params,
-    then rectifies the signal by squaring, and lastly smooths by taking
+    Rectifies audio signal by squaring, then smooths by taking
     the average within a window of size sm_win.
     This is a very literal translation from the Matlab function SmoothData.m
     by Evren Tumer. Uses the Thomas-Santana algorithm.
     """
+    data = np.array(data)
+    if issubclass(data.dtype.type, numbers.Integral):
+        while np.any(np.abs(data) > np.sqrt(np.iinfo(data.dtype).max)):
+            warnings.warn(
+                f'Values in `data` would overflow when squaring because of dtype, {data.dtype};'
+                f'casting to a larger integer dtype to avoid'
+            )
+            # make a new dtype string, endianness + type, plus the current itemsize squared
+            new_dtype_str = str(data.dtype)[:-1] + str(int(str(data.dtype)[-1]) ** 2)
+            data = data.astype(np.dtype(new_dtype_str))
     squared = np.power(data, 2)
     len = np.round(samplerate * smooth_win / 1000).astype(int)
     h = np.ones((len,)) / len
