@@ -7,16 +7,18 @@ from .fixtures.audio import AUDIO_LIST_WAV
 
 class TestSegmenter:
     @pytest.mark.parametrize(
-        "callback, segment_params",
+        "callback, method, segment_params",
         [
-            (None, None),
+            (None, None, None),
+            (vocalpy.signal.segment.audio_amplitude, None, {'smooth_win': 2}),
+            # TODO: test 'method'
         ],
     )
-    def test_init(self, callback, segment_params):
-        segmenter = vocalpy.Segmenter(callback=callback, segment_params=segment_params)
+    def test_init(self, callback, method, segment_params):
+        segmenter = vocalpy.Segmenter(callback=callback, method=method, segment_params=segment_params)
         assert isinstance(segmenter, vocalpy.Segmenter)
         if callback is None and segment_params is None:
-            assert segmenter.callback is vocalpy.signal.segment.segment
+            assert segmenter.callback is vocalpy.signal.segment.audio_amplitude
             assert segmenter.segment_params == vocalpy.segmenter.DEFAULT_SEGMENT_PARAMS
         else:
             assert segmenter.callback is callback
