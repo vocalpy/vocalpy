@@ -153,9 +153,9 @@ class Audio:
     def __repr__(self):
         return (
             f"{self.__class__.__name__}("
-            f"data={reprlib.repr(self.data)}, "
-            f"samplerate={reprlib.repr(self.samplerate)}, "
-            f"channels={self.channels})"
+            f"data={reprlib.repr(self._data)}, "
+            f"samplerate={reprlib.repr(self._samplerate)}, "
+            f"channels={self._channels}), "
             f"path={self.path}"
         )
 
