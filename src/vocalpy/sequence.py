@@ -33,17 +33,11 @@ class Sequence:
         This attribute is added by a
         :class:`vocalpy.Segmenter` when it
         creates a :class:`vocalpy.Sequence`.
-    audio_path : pathlib.Path, optional.
-        Path to the audio from which this sequence was segmented.
-        Optional, default is None.
-    spectrogram_path : pathlib.Path, optional.
-        Path to the spectrogram from which this sequence was segmented.
-        Optional, default is None.
     audio : vocalpy.Audio, optional
-        The audio for this sequence.
+        The audio from which this sequence was segmented.
         Optional, default is None.
     spectrogram : vocalpy.Spectrogram, optional
-        The spectrogram for this sequence.
+        The spectrogram from which this sequence was segmented.
         Optional, default is None.
     """
     units: list[Unit] = attrs.field()
@@ -55,18 +49,6 @@ class Sequence:
 
     method: str = attrs.field(converter=str, validator=attrs.validators.instance_of(str))
     segment_params: dict = attrs.field(converter=dict, validator=attrs.validators.instance_of(dict))
-
-    audio_path: pathlib.Path = attrs.field(
-        converter=attrs.converters.optional(pathlib.Path),
-        validator=attrs.validators.optional(attrs.validators.instance_of(pathlib.Path)),
-        default=None,
-    )
-
-    spectrogram_path: pathlib.Path = attrs.field(
-        converter=attrs.converters.optional(pathlib.Path),
-        validator=attrs.validators.optional(attrs.validators.instance_of(pathlib.Path)),
-        default=None,
-    )
 
     audio: Audio = attrs.field(validator=attrs.validators.optional(attrs.validators.instance_of(Audio)), default=None)
     spectrogram: Spectrogram = attrs.field(
