@@ -1,6 +1,7 @@
 from __future__ import annotations
 
 import numpy as np
+import numpy.typing as npt
 
 from ..audio import Audio
 from ..sequence import Sequence
@@ -10,7 +11,9 @@ from .audio import smooth
 
 
 def audio_amplitude(
-    audio: Audio,
+    data: npt.NDArray,
+    samplerate: int,
+    smooth_win: int = 2,
     threshold: int = 5000,
     min_dur: float = 0.02,
     min_silent_dur: float = 0.002,
@@ -30,10 +33,14 @@ def audio_amplitude(
 
     Parameters
     ----------
-    audio : vocalpy.Audio
-        A :class:`vocalpy.Audio` instance, to be segmented.
-    samp_freq : int
-        Sampling frequency at which audio was recorded.
+    data : numpy.ndarray
+        An audio signal as a :class:`numpy.ndarray`.
+        Typically, the `data` attribute from a :class:`vocalpy.Audio` instance.
+    samplerate : int
+        The sampling rate.
+        Typically, the `samplerate` attribute from a :class:`vocalpy.Audio` instance.
+    smooth_win : integer
+        Size of smoothing window in milliseconds. Default is 2.
     threshold : int
         Value above which amplitude is considered part of a segment.
         Default is 5000.
@@ -49,7 +56,7 @@ def audio_amplitude(
     sequence : vocalpy.Sequence
         A :class:`vocalpy.Sequence` made up of `vocalpy.Unit` instances.
     """
-    smoothed = smooth(audio)
+    smoothed = smooth(data, samplerate, smooth_win)
     above_th = smoothed > threshold
     h = [1, -1]
     # convolving with h causes:
@@ -78,10 +85,5 @@ def audio_amplitude(
     onsets_s = onsets_s[keep_these]
     offsets_s = offsets_s[keep_these]
 
-    units = []
-    for onset, offset in zip(onsets_s, offsets_s):
-        units.append(
-            Unit(onset=onset, offset=offset)
-        )
+    return onsets_s, offsets_s
 
-    return Sequence(units=units)
