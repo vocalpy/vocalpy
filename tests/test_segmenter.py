@@ -17,7 +17,7 @@ class TestSegmenter:
         "callback, method, segment_params",
         [
             (None, None, None),
-            (vocalpy.signal.segment.audio_amplitude, None, {'smooth_win': 2}),
+            (vocalpy.signal.segment.audio_amplitude, None, {"smooth_win": 2}),
             # TODO: test 'method'
         ],
     )
@@ -51,10 +51,7 @@ class TestSegmenter:
         out = segmenter.segment(audio)
         if isinstance(audio, (vocalpy.Audio, vocalpy.AudioFile)):
             assert_is_expected_sequence(
-                sequence=out,
-                audio=audio,
-                segment_params=segment_params,
-                method=segmenter.callback.__name__
+                sequence=out, audio=audio, segment_params=segment_params, method=segmenter.callback.__name__
             )
             assert isinstance(out, vocalpy.Sequence)
         elif isinstance(audio, list):

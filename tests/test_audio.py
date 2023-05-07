@@ -61,7 +61,7 @@ class TestAudio:
             # this raises a ValueError because the converter can't cast the string to an int
             (RNG.normal(size=(int(32000 * 2.17), 1)), "f", ValueError),
             # `samplerate` is less than zero
-            (RNG.normal(size=(int(32000 * 2.17), 1)), -32000,  ValueError),
+            (RNG.normal(size=(int(32000 * 2.17), 1)), -32000, ValueError),
         ],
     )
     def test_init_raises(self, data, samplerate, expected_exception):
