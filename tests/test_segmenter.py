@@ -5,18 +5,27 @@ import vocalpy
 from .fixtures.audio import AUDIO_LIST_WAV
 
 
+def assert_is_expected_sequence(sequence, audio, method, segment_params):
+    assert isinstance(sequence, vocalpy.Sequence)
+    assert sequence.audio.path == audio.path
+    assert sequence.method == method
+    assert sequence.segment_params == segment_params
+
+
 class TestSegmenter:
     @pytest.mark.parametrize(
-        "callback, segment_params",
+        "callback, method, segment_params",
         [
-            (None, None),
+            (None, None, None),
+            (vocalpy.signal.segment.audio_amplitude, None, {'smooth_win': 2}),
+            # TODO: test 'method'
         ],
     )
-    def test_init(self, callback, segment_params):
-        segmenter = vocalpy.Segmenter(callback=callback, segment_params=segment_params)
+    def test_init(self, callback, method, segment_params):
+        segmenter = vocalpy.Segmenter(callback=callback, method=method, segment_params=segment_params)
         assert isinstance(segmenter, vocalpy.Segmenter)
         if callback is None and segment_params is None:
-            assert segmenter.callback is vocalpy.signal.segment.segment
+            assert segmenter.callback is vocalpy.signal.segment.audio_amplitude
             assert segmenter.segment_params == vocalpy.segmenter.DEFAULT_SEGMENT_PARAMS
         else:
             assert segmenter.callback is callback
@@ -41,6 +50,11 @@ class TestSegmenter:
         segmenter = vocalpy.Segmenter(segment_params=segment_params)
         out = segmenter.segment(audio)
         if isinstance(audio, (vocalpy.Audio, vocalpy.AudioFile)):
+            assert_is_expected_sequence(
+                sequence=out,
+                audio=audio,
+
+            )
             assert isinstance(out, vocalpy.Sequence)
         elif isinstance(audio, list):
             assert all([isinstance(spect, vocalpy.Sequence) for spect in out])
