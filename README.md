@@ -84,4 +84,5 @@ The project is licensed under the [BSD license](./LICENSE).
 
 ### Citation
 If you use vocalpy, please cite the DOI:
-[![DOI](https://zenodo.org/badge/159904494.svg)](https://zenodo.org/badge/latestdoi/159904494)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7905426.svg)](https://doi.org/10.5281/zenodo.7905426)
+
