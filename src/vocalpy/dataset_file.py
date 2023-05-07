@@ -20,6 +20,7 @@ representing the dataset.
 from __future__ import annotations
 
 import enum
+from typing import Union
 
 import attrs
 
@@ -36,7 +37,7 @@ class DatasetFileTypeEnum(enum.Enum):
     SPECTROGRAM = SpectrogramFile
 
 
-DatasetFileType = AnnotationFile | AudioFile | FeatureFile | SpectrogramFile
+DatasetFileType = Union[AnnotationFile | AudioFile | FeatureFile | SpectrogramFile]
 
 
 @attrs.define
