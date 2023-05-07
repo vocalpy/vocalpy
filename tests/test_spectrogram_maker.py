@@ -106,7 +106,7 @@ class TestSpectrogramMaker:
             path = out.path
             assert path.exists()
             if isinstance(audio, vocalpy.Audio):
-                assert out.source_audio_file.path == audio.source_path
+                assert out.source_audio_file.path == audio.path
             elif isinstance(audio, vocalpy.AudioFile):
                 assert out.source_audio_file.path == audio.path
 
@@ -117,6 +117,6 @@ class TestSpectrogramMaker:
                 path = spect_file.path
                 assert path.exists()
                 if isinstance(audio, vocalpy.Audio):
-                    assert spect_file.source_audio_file.path == audio.source_path
+                    assert spect_file.source_audio_file.path == audio.path
                 elif isinstance(audio, vocalpy.AudioFile):
                     assert spect_file.source_audio_file.path == audio.path
