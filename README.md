@@ -1,6 +1,6 @@
 <br>
 <div align="center">
-<img src="https://github.com/vocalpy/vocalpy/blob/main/dosc/_static/vocalpy-primary.png?raw=True" width="400">
+<img src="https://github.com/vocalpy/vocalpy/blob/main/docs/_static/vocalpy-primary.png?raw=True" width="400">
 </div>
 <hr>
 
