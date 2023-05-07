@@ -203,7 +203,7 @@ class SpectrogramMaker:
             if isinstance(audio_, AudioFile):
                 audio_ = Audio.read(audio_.path)
             spect = self.callback(audio_, **self.spect_params)
-            spect_fname = namer(audio_.source_path)
+            spect_fname = namer(audio_.path)
             spect_path = dir_path / spect_fname
             spect_file = spect.write(spect_path)
             return spect_file
