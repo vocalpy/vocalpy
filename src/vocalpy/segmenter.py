@@ -12,7 +12,6 @@ from .sequence import Sequence
 from .spectrogram_maker import validate_audio
 from .unit import Unit
 
-
 DEFAULT_SEGMENT_PARAMS = {
     "threshold": 5000,
     "min_dur": 0.02,
@@ -21,17 +20,13 @@ DEFAULT_SEGMENT_PARAMS = {
 
 
 class Segmenter:
-    def __init__(self,
-                 callback: Callable | None = None,
-                 method: str | None = None,
-                 segment_params: dict | None = None):
+    def __init__(self, callback: Callable | None = None, method: str | None = None, segment_params: dict | None = None):
         if callback and method:
-            raise ValueError(
-                f"Cannot specify both `callback` and `method`, only one or the other."
-            )
+            raise ValueError(f"Cannot specify both `callback` and `method`, only one or the other.")
 
         if method:
             import vocalpy.signal.segment
+
             # TODO: fix this
             try:
                 callback = getattr(vocalpy.signal.segment, method)
@@ -42,6 +37,7 @@ class Segmenter:
 
         if callback is None:
             from vocalpy.signal.segment import audio_amplitude as default_segment_func
+
             callback = default_segment_func
 
         if callback is not None and not callable(callback):
@@ -71,16 +67,14 @@ class Segmenter:
 
             units = []
             for onset, offset in zip(onsets, offsets):
-                units.append(
-                    Unit(onset=onset, offset=offset)
-                )
+                units.append(Unit(onset=onset, offset=offset))
 
             return Sequence(
                 units=units,
                 # note we make a new audio instance **without** data loaded
                 audio=Audio(path=audio_.path),
                 method=self.callback.__name__,
-                segment_params=self.segment_params
+                segment_params=self.segment_params,
             )
 
         if isinstance(audio, (Audio, AudioFile)):

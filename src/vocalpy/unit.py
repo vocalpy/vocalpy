@@ -3,8 +3,7 @@ import attrs
 from .audio import Audio
 from .spectrogram import Spectrogram
 
-
-DEFAULT_LABEL = '-'
+DEFAULT_LABEL = "-"
 
 
 @attrs.define
@@ -28,6 +27,7 @@ class Unit:
         The spectrogram for this unit.
         Optional, default is None.
     """
+
     onset = attrs.field(validator=attrs.validators.optional(attrs.validators.instance_of(float)))
     offset = attrs.field(validator=attrs.validators.optional(attrs.validators.instance_of(float)))
 

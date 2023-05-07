@@ -1,13 +1,11 @@
 from __future__ import annotations
 
-import pathlib
-
 import attrs
 import numpy as np
 
-from .unit import Unit
 from .audio import Audio
 from .spectrogram import Spectrogram
+from .unit import Unit
 
 
 @attrs.define
@@ -40,6 +38,7 @@ class Sequence:
         The spectrogram from which this sequence was segmented.
         Optional, default is None.
     """
+
     units: list[Unit] = attrs.field()
 
     @units.validator
@@ -60,10 +59,10 @@ class Sequence:
         onsets = [unit.onset for unit in units]
         if len(onsets) > 1:
             if not np.all(onsets[1:] > onsets[:-1]):
-                import pdb;pdb.set_trace()
-                raise ValueError(
-                    f"Onsets of units are not strictly increasing"
-                )
+                import pdb
+
+                pdb.set_trace()
+                raise ValueError(f"Onsets of units are not strictly increasing")
 
     @property
     def onset(self):

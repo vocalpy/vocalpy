@@ -45,8 +45,9 @@ def smooth(data: npt.NDArray, samplerate: int, smooth_win: int = 2) -> npt.NDArr
     if issubclass(data.dtype.type, numbers.Integral):
         while np.any(np.abs(data) > np.sqrt(np.iinfo(data.dtype).max)):
             warnings.warn(
-                f'Values in `data` would overflow when squaring because of dtype, {data.dtype};'
-                f'casting to a larger integer dtype to avoid'
+                f"Values in `data` would overflow when squaring because of dtype, {data.dtype};"
+                f"casting to a larger integer dtype to avoid",
+                stacklevel=2,
             )
             # make a new dtype string, endianness + type, plus the current itemsize squared
             new_dtype_str = str(data.dtype)[:-1] + str(int(str(data.dtype)[-1]) ** 2)

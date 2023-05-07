@@ -3,10 +3,7 @@ from __future__ import annotations
 import numpy as np
 import numpy.typing as npt
 
-from ..audio import Audio
 from ..sequence import Sequence
-from ..unit import Unit
-
 from .audio import smooth
 
 
@@ -86,4 +83,3 @@ def audio_amplitude(
     offsets_s = offsets_s[keep_these]
 
     return onsets_s, offsets_s
-

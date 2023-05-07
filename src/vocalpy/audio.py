@@ -52,8 +52,7 @@ def is_1d_or_2d_ndarray(data: npt.NDArray) -> None:
 
     if not (data.ndim == 1 or data.ndim == 2):
         raise ValueError(
-            f"Audio array `data` should have either 1 or 2 dimensions, "
-            f"but number of dimensions was {data.ndim}."
+            f"Audio array `data` should have either 1 or 2 dimensions, " f"but number of dimensions was {data.ndim}."
         )
 
 
@@ -89,29 +88,27 @@ class Audio:
     >>> audio
     Audio(data=array([ 0.   ... -0.00115967]), samplerate=44100, channels=1)
     """
-    def __init__(self,
-                 data: npt.NDArray | None = None,
-                 samplerate: int | None = None,
-                 path : str | pathlib.Path | None = None,
-                 ):
+
+    def __init__(
+        self,
+        data: npt.NDArray | None = None,
+        samplerate: int | None = None,
+        path: str | pathlib.Path | None = None,
+    ):
         if path:
             path = pathlib.Path(path)
         self.path = path
 
         if any((data is not None, samplerate is not None)):
             if not all((data is not None, samplerate is not None)):
-                raise ValueError(
-                    f"Must provide both `data` and `samplerate`."
-                )
+                raise ValueError("Must provide both `data` and `samplerate`.")
         if data is not None:
             is_1d_or_2d_ndarray(data)
         self._data = data
 
         if samplerate is not None:
             if not isinstance(samplerate, int) or samplerate < 1:
-                raise ValueError(
-                    f"`samplerate` must be a positive integer"
-                )
+                raise ValueError("`samplerate` must be a positive integer")
         self._samplerate = samplerate
 
         if data is not None:
@@ -170,10 +167,10 @@ class Audio:
             to the corresponding attributes of this :class:`vocalpy.Audio`.
         """
         return {
-            'data': self._data,
-            'samplerate': self._samplerate,
-            'channels': self._channels,
-            'path': self.path,
+            "data": self._data,
+            "samplerate": self._samplerate,
+            "channels": self._channels,
+            "path": self.path,
         }
 
     def __eq__(self, other):
@@ -194,7 +191,7 @@ class Audio:
         return not self.__eq__(other)
 
     @classmethod
-    def read(cls, path: str | pathlib.Path, **kwargs) -> "vocalpy.Audio":
+    def read(cls, path: str | pathlib.Path, **kwargs) -> "vocalpy.Audio":  # noqa: F821
         """Read audio from ``path``.
 
         Parameters
