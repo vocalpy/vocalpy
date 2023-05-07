@@ -1,4 +1,15 @@
 from . import constants, dataset, paths, signal, validators
+from .__about__ import (
+    __author__,
+    __commit__,
+    __copyright__,
+    __email__,
+    __license__,
+    __summary__,
+    __title__,
+    __uri__,
+    __version__,
+)
 from .annotation_file import AnnotationFile
 from .audio import Audio
 from .audio_file import AudioFile
@@ -14,6 +25,15 @@ from .spectrogram_parameters import SpectrogramParameters
 from .unit import Unit
 
 __all__ = [
+    "__author__",
+    "__commit__",
+    "__copyright__",
+    "__email__",
+    "__license__",
+    "__summary__",
+    "__title__",
+    "__uri__",
+    "__version__",
     "AnnotationFile",
     "Audio",
     "AudioFile",
