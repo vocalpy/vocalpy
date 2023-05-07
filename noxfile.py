@@ -47,19 +47,20 @@ def dev(session: nox.Session) -> None:
     session.run(python, "-m", "pip", "install", "-e", ".[dev]", external=True)
 
 
-@nox.session
-def tests(session: nox.Session) -> None:
-    """
-    Run the unit tests.
-    """
-    if is_test_data_subdir_empty(SOURCE_TEST_DATA_DIR):
-        download_test_data(session)
+TEST_PYTHONS = [
+    "3.9",
+    "3.10",
+    "3.11"
+]
 
-    session.install("-e", ".[test]")
-    if session.posargs:
-        session.run("pytest", *session.posargs)
-    else:
-        session.run("pytest")
+
+@nox.session(python=TEST_PYTHONS)
+def test(session) -> None:
+    """
+    Run the unit and regular tests.
+    """
+    session.install(".[test]")
+    session.run("pytest", "-n", "auto", *session.posargs)
 
 
 @nox.session
