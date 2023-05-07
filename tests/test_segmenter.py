@@ -53,7 +53,8 @@ class TestSegmenter:
             assert_is_expected_sequence(
                 sequence=out,
                 audio=audio,
-
+                segment_params=segment_params,
+                method=segmenter.callback.__name__
             )
             assert isinstance(out, vocalpy.Sequence)
         elif isinstance(audio, list):
