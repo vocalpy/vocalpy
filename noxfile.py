@@ -156,7 +156,12 @@ def copy_url(url: str, path: str) -> None:
     urllib.request.urlretrieve(url, path)
 
 
-# TODO: fix this url! don't use vak data!!!
+def make_tarfile(name: str, to_add: list):
+    with tarfile.open(name, "w:gz") as tf:
+        for add_name in to_add:
+            tf.add(name=add_name)
+
+
 SOURCE_TEST_DATA_URL = "https://osf.io/km4xz/download"
 SOURCE_TEST_DATA_TAR = SOURCE_TEST_DATA_DIR / "source-test-data.tar.gz"
 
@@ -215,12 +220,6 @@ def test_data_clean_generated(session) -> None:
     Clean (remove) 'generated' test data.
     """
     clean_dir(GENERATED_TEST_DATA_DIR)
-
-
-def make_tarfile(name: str, to_add: list):
-    with tarfile.open(name, "w:gz") as tf:
-        for add_name in to_add:
-            tf.add(name=add_name)
 
 
 @nox.session(name='test-data-tar-generated')
