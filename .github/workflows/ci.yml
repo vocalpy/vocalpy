@@ -25,6 +25,8 @@ jobs:
         run: |
           pip install nox
           pip install '.[test]'
-          nox --session coverage
+          nox -s test-data-download-source
+          nox -s test-data-download-generated
+          nox -s coverage
       - name: upload coverage to Codecov
         uses: codecov/codecov-action@v3
