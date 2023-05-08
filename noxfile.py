@@ -90,9 +90,7 @@ def docs(session: nox.Session) -> None:
 def coverage(session: nox.Session) -> None:
     """Run tests and measure coverage"""
     session.run(
-        "pytest",
-        "--cov=./",
-        "--cov-report=xml",
+        "pytest", "-n", "auto", "--cov=./", "--cov-report=xml", *session.posargs
     )
 
 
