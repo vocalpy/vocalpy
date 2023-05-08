@@ -7,9 +7,6 @@ import urllib.request
 
 import nox
 
-# ---- keep this at top of noxfile
-nox.options.sessions = ["lint", "tests"]
-
 
 # ---- this constant is used by more than one session: dev, download-test-data
 DIR = pathlib.Path(__file__).parent.resolve()
@@ -190,6 +187,7 @@ def test_data_download_source(session) -> None:
     session.log(f'Extracting downloaded tar: {SOURCE_TEST_DATA_TAR}')
     with tarfile.open(SOURCE_TEST_DATA_TAR, "r:gz") as tf:
         tf.extractall(path='.')
+
 
 
 TEST_DATA_GENERATE_SCRIPT = './tests/scripts/generate_data_for_tests.py'
