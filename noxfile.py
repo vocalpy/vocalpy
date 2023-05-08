@@ -157,7 +157,7 @@ def copy_url(url: str, path: str) -> None:
 
 
 # TODO: fix this url! don't use vak data!!!
-SOURCE_TEST_DATA_URL = "https://osf.io/hbg4k/download"
+SOURCE_TEST_DATA_URL = "https://osf.io/km4xz/download"
 SOURCE_TEST_DATA_TAR = SOURCE_TEST_DATA_DIR / "source-test-data.tar.gz"
 
 
@@ -201,6 +201,11 @@ def test_data_generate(session) -> None:
 
 # TODO: fix this url!
 GENERATED_TEST_DATA_DIR = DATA_FOR_TESTS_DIR / "generated"
+GENERATED_TEST_DATA_SUBDIRS = [
+    dir_ for dir_
+    in sorted(pathlib.Path(GENERATED_TEST_DATA_DIR).glob('*/'))
+    if dir_.is_dir()
+]
 GENERATED_TEST_DATA_TAR = GENERATED_TEST_DATA_DIR / 'generated_test_data.tar.gz'
 
 
@@ -216,3 +221,28 @@ def make_tarfile(name: str, to_add: list):
     with tarfile.open(name, "w:gz") as tf:
         for add_name in to_add:
             tf.add(name=add_name)
+
+
+@nox.session(name='test-data-tar-generated')
+def test_data_tar_generated(session) -> None:
+    """
+    Make a .tar.gz file of all 'generated' test data.
+    """
+    session.log(f"Making tarfile with all generated data: {GENERATED_TEST_DATA_TAR}")
+    make_tarfile(GENERATED_TEST_DATA_TAR, GENERATED_TEST_DATA_SUBDIRS)
+
+
+GENERATED_TEST_DATA_URL = 'https://osf.io/3fzye/download'
+
+
+@nox.session(name='test-data-download-generated-all')
+def test_data_download_generated_all(session) -> None:
+    """
+    Download and extract a .tar.gz file of all 'generated' test data
+    """
+    session.install("pandas")
+    session.log(f'Downloading: {GENERATED_TEST_DATA_URL}')
+    copy_url(url=GENERATED_TEST_DATA_URL, path=GENERATED_TEST_DATA_TAR)
+    session.log(f'Extracting downloaded tar: {GENERATED_TEST_DATA_TAR}')
+    with tarfile.open(GENERATED_TEST_DATA_TAR, "r:gz") as tf:
+        tf.extractall(path='.')
