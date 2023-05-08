@@ -37,7 +37,7 @@ class DatasetFileTypeEnum(enum.Enum):
     SPECTROGRAM = SpectrogramFile
 
 
-DatasetFileType = Union[AnnotationFile | AudioFile | FeatureFile | SpectrogramFile]
+DatasetFileType = Union[AnnotationFile, AudioFile, FeatureFile, SpectrogramFile]
 
 
 @attrs.define
