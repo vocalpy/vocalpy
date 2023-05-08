@@ -162,7 +162,7 @@ def make_tarfile(name: str, to_add: list):
             tf.add(name=add_name)
 
 
-SOURCE_TEST_DATA_URL = "https://osf.io/km4xz/download"
+SOURCE_TEST_DATA_URL = "https://osf.io/xq6hf/download"
 SOURCE_TEST_DATA_TAR = SOURCE_TEST_DATA_DIR / "source-test-data.tar.gz"
 
 
