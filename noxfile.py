@@ -3,7 +3,7 @@ import pathlib
 import shutil
 import sys
 import tarfile
-import urllib
+import urllib.request
 
 import nox
 
