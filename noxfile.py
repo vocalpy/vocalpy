@@ -232,12 +232,11 @@ def test_data_tar_generated(session) -> None:
 GENERATED_TEST_DATA_URL = 'https://osf.io/3fzye/download'
 
 
-@nox.session(name='test-data-download-generated-all')
-def test_data_download_generated_all(session) -> None:
+@nox.session(name='test-data-download-generated')
+def test_data_download_generated(session) -> None:
     """
     Download and extract a .tar.gz file of all 'generated' test data
     """
-    session.install("pandas")
     session.log(f'Downloading: {GENERATED_TEST_DATA_URL}')
     copy_url(url=GENERATED_TEST_DATA_URL, path=GENERATED_TEST_DATA_TAR)
     session.log(f'Extracting downloaded tar: {GENERATED_TEST_DATA_TAR}')
