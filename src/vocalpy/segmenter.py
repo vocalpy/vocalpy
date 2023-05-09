@@ -54,7 +54,7 @@ class Segmenter:
 
     def segment(
         self,
-        audio: Audio | AudioFile | Sequence[Audio | AudioFile],
+        audio: Audio | AudioFile | list[Audio | AudioFile],
         parallelize: bool = True,
     ) -> Sequence | None | list[Sequence | None]:
         validate_audio(audio)
