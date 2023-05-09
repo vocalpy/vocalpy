@@ -1,4 +1,4 @@
-from . import constants, dataset, paths, signal, validators
+from . import constants, dataset, paths, plot, signal, validators
 from .__about__ import (
     __author__,
     __commit__,
@@ -47,6 +47,7 @@ __all__ = [
     "DatasetFileTypeEnum",
     "FeatureFile",
     "paths",
+    "plot",
     "Segmenter",
     "Sequence",
     "signal",
