@@ -61,9 +61,12 @@ def annotated_spectrogram(
     annot: Annotation,
     tlim: tuple | list | None = None,
     flim: tuple | list | None = None,
+    y_segments: float = 0.5,
+    h_segments: float = 0.4,
+    y_labels: float = 0.3,
+    label_color_map: dict | None = None,
     fig: plt.Figure | None = None,
     imshow_kwargs: dict | None = None,
-    line_kwargs=None,
     text_kwargs=None,
 ) -> tuple[plt.Figure, plt.Axes, plt.Axes]:
     """Plot a :class:`vocalpy.Spectrogram` with a :class:`vocalpy.Annotation` below it.
@@ -82,16 +85,24 @@ def annotated_spectrogram(
     flim : tuple, list
         limits of frequency axis (min, max) (i.e., x-axis).
         Default is None, in which case entire range of f will be plotted.
+    y_segments : float
+        Height at which segments should be plotted.
+        Default is 0.5 (assumes y-limits of 0 and 1).
+    h_segments : float, int
+        Height of rectangles that represent segments.
+        Default is 0.4.
+    y_labels : float
+        Height on y-axis at which segment labels (if any) are plotted.
+        Default is 0.4.
+    label_color_map : dict, optional
+        A :class:`dict` that maps string labels to colors
+        (that are valid `color` arguments for matplotlib).
     fig : matplotlib.pyplot.Figure
         A :class:`matplotlib.pyplot.Figure` instance on which
         the spectrogram and annotation should be plotted.
     imshow_kwargs : dict
         keyword arguments that will get passed to `matplotlib.axes.Axes.imshow`
         when using that method to plot spectrogram.
-    line_kwargs : dict
-        keyword arguments for `LineCollection`.
-        Passed to the function `vocalpy.plot.annot.segments` that plots segments
-        as a `LineCollection` instance. Default is None.
     text_kwargs : dict
         keyword arguments for `matplotlib.axes.Axes.text`.
         Passed to the function `vocalpy.plot.annot.labels` that plots labels
@@ -106,13 +117,29 @@ def annotated_spectrogram(
         and the annot_ax is the axes containing the
         annotated segments.
     """
-    fig = plt.figure()
+    if fig is None:
+        fig = plt.figure()
     gs = fig.add_gridspec(3, 3)
     spect_ax = fig.add_subplot(gs[:2, :])
     annot_ax = fig.add_subplot(gs[2, :])
 
-    spectrogram(spect, tlim, flim, ax=spect_ax, imshow_kwargs=imshow_kwargs)
+    spectrogram(
+        spect,
+        tlim,
+        flim,
+        ax=spect_ax,
+        imshow_kwargs=imshow_kwargs
+    )
 
-    annotation(annot, tlim, ax=annot_ax, line_kwargs=line_kwargs, text_kwargs=text_kwargs)
+    annotation(
+        annot,
+        tlim,
+        y_segments=y_segments,
+        h_segments=h_segments,
+        y_labels=y_labels,
+        text_kwargs=text_kwargs,
+        ax=annot_ax,
+        label_color_map=label_color_map,
+    )
 
     return fig, spect_ax, annot_ax

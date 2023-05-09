@@ -4,89 +4,172 @@ from __future__ import annotations
 import matplotlib.pyplot as plt
 import numpy as np
 import numpy.typing as npt
-from matplotlib.collections import LineCollection
 
 from ..annotation import Annotation
 
 
-def segments(
-    onsets: npt.NDArray,
-    offsets: npt.NDArray,
-    y: float = 0.5,
-    ax: plt.Axes | None = None,
-    line_kwargs: dict | None = None,
-) -> None:
-    """Plot segments on an axis.
-
-    Creates a collection of horizontal lines
-    with the specified `onsets` and `offsets`
-    all at height `y` and places them on the axes `ax`.
-
-    Parameters
-    ----------
-    onsets : numpy.ndarray
-        onset times of segments
-    offsets : numpy.ndarray
-        offset times of segments
-    y : float, int
-        height on y-axis at which segments should be plotted.
-        Default is 0.5.
-    ax : matplotlib.axes.Axes
-        axes on which to plot segment. Default is None,
-        in which case a new Axes instance is created
-    line_kwargs : dict
-        keyword arguments passed to the `LineCollection`
-        that represents the segments. Default is None.
-    """
-    if line_kwargs is None:
-        line_kwargs = {}
-
-    if ax is None:
-        fig, ax = plt.subplots
-    segments = []
-    for on, off in zip(onsets, offsets):
-        segments.append(((on, y), (off, y)))
-    lc = LineCollection(segments, **line_kwargs)
-    ax.add_collection(lc)
-
-
-def labels(labels: npt.ArrayLike, t: npt.NDArray, y=0.6, ax: plt.Axes | None = None, text_kwargs: dict | None = None):
-    """Plot labels on an axis.
+def labels(labels: npt.ArrayLike,
+           t: npt.NDArray,
+           t_shift_label: float = 0.01,
+           y: float = 0.4,
+           ax: plt.Axes | None = None,
+           text_kwargs: dict | None = None):
+    """Plot labels of segments on an axis.
 
     Parameters
     ----------
     labels : list, numpy.ndarray
-        Lables for units in sequence.
     t : numpy.ndarray
-        Times at which to plot labels
+        Times (in seconds) at which to plot labels
+    t_shift_label : float
+        Amount (in seconds) that labels should be shifted to the left, for centering.
+        Necessary because width of text box isn't known until rendering.
     y : float, int
-        Height on y-axis at which labels should be plotted.
-        Default is 0.6 (in range (0., 1.)).
+        Height on y-axis at which segments should be plotted.
+        Default is 0.5.
     ax : matplotlib.axes.Axes
         Axes on which to plot segment. Default is None,
-        in which case a new Axes instance is created
+        in which case a new Axes instance is created.
     text_kwargs : dict
         Keyword arguments passed to the `Axes.text` method
         that plots the labels. Default is None.
+
+    Returns
+    -------
+    text_list : list
+        of text objections, the matplotlib.Text instances for each label
     """
     if text_kwargs is None:
         text_kwargs = {}
 
     if ax is None:
         fig, ax = plt.subplots
+
+    text_list = []
+
     for label, t_lbl in zip(labels, t):
-        ax.text(t_lbl, y, label, **text_kwargs)
+        t_lbl -= t_shift_label
+        text = ax.text(t_lbl, y, label, **text_kwargs, label='label')
+        text_list.append(text)
+
+    return text_list
+
+
+def segments(
+    onsets: npt.NDArray,
+    offsets: npt.NDArray,
+    lbl: npt.NDArray | None,
+    tlim: list | tuple | None = None,
+    y_segments: float = 0.4,
+    h_segments: float = 0.4,
+    y_labels = 0.3,
+    ax: plt.Axes | None = None,
+    label_color_map: dict | None = None,
+    text_kwargs: dict | None = None,
+) -> tuple[list[plt.Rectangle], list[plt.Text] | None]:
+    """Plot segments on an axis.
+
+    Creates rectangles
+    with the specified `onsets` and `offsets`
+    all at height `y_labels`
+    and places them on the axes `ax`.
+    If `labels` are supplied,
+    these are plotted in the rectangles.
+
+    Parameters
+    ----------
+    onsets : numpy.ndarray
+        Onset times of segments.
+    offsets : numpy.ndarray
+        Offset times of segments.
+    lbl : list, numpy.ndarray
+        Labels of segments.
+    y_segments : float, int
+        Height on y-axis at which segments should be plotted.
+        Default is 0.4.
+    h_segments : float, int
+        Height of rectangles that represent segments.
+        Default is 0.4.
+    y_labels : float, int
+        Height on y-axis at which segment labels (if any) are plotted.
+        Default is 0.4.
+    ax : matplotlib.axes.Axes
+        axes on which to plot segment. Default is None,
+        in which case a new Axes instance is created
+    label_color_map : dict, optional
+        A :class:`dict` that maps string labels to colors
+        (that are valid `color` arguments for matplotlib).
+    text_kwargs : dict
+        Keyword arguments passed to the `Axes.text` method
+        that plots the labels. Default is None.
+    """
+    if ax is None:
+        fig, ax = plt.subplots
+
+    if label_color_map is None:
+        if lbl is not None:
+            labelset = set(lbl)
+            cmap = plt.cm.get_cmap('tab20')
+            colors = [cmap(ind) for ind in range(len(labelset))]
+            label_color_map = {label: color for label, color in zip(labelset, colors)}
+
+    labels_to_plot = []
+    label_plot_times = []
+    rectangles = []
+    if lbl is not None:
+        zipped = zip(lbl, onsets, offsets)
+    else:
+        zipped = zip(onsets, offsets)
+
+    for a_tuple in zipped:
+        if lbl is not None:
+            label, onset_s, offset_s = a_tuple
+        else:
+            onset_s, offset_s = a_tuple
+
+        if tlim:
+            if offset_s < tlim[0] or onset_s > tlim[1]:
+                continue
+
+        kwargs = {
+            'width': offset_s - onset_s,
+            'height': h_segments,
+        }
+        if lbl is not None:
+            labels_to_plot.append(label)
+            label_plot_times.append(
+                onset_s + ((offset_s - onset_s) / 2)
+            )
+            kwargs['facecolor'] = label_color_map[label]
+
+        rectangle = plt.Rectangle(
+            (onset_s, y_segments),
+            **kwargs
+        )
+        ax.add_patch(rectangle)
+        rectangles.append(rectangle)
+
+    if labels_to_plot is not None:
+        text_list = labels(labels_to_plot, t=label_plot_times, y=y_labels, text_kwargs=text_kwargs, ax=ax)
+    else:
+        text_list = None
+
+    if tlim:
+        ax.set_xlim(tlim)
+
+    return rectangles, text_list
 
 
 def annotation(
     annot: Annotation,
     tlim: tuple | list | None = None,
     y_segments: float = 0.5,
-    y_labels: float = 0.6,
-    line_kwargs: dict | None = None,
+    h_segments: float = 0.4,
+    y_labels: float = 0.3,
     text_kwargs: dict | None = None,
     ax: plt.Axes | None = None,
-) -> None:
+    label_color_map: dict | None = None,
+) -> tuple[list[plt.Rectangle], list[plt.Text] | None]:
     """Plot a :class:`vocalpy.Annotation`.
 
     Parameters
@@ -102,13 +185,12 @@ def annotation(
     y_segments : float
         Height at which segments should be plotted.
         Default is 0.5 (assumes y-limits of 0 and 1).
+    h_segments : float, int
+        Height of rectangles that represent segments.
+        Default is 0.4.
     y_labels : float
-        Height at which labels should be plotted.
-        Default is 0.6 (assumes y-limits of 0 and 1).
-    line_kwargs : dict
-        Keyword arguments for `LineCollection`.
-        Passed to the function :func:`vocalpy.plot.annot.segments` that plots segments
-        as a :class:`matplotlib.collections.LineCollection` instance. Default is None.
+        Height on y-axis at which segment labels (if any) are plotted.
+        Default is 0.4.
     text_kwargs : dict
         Keyword arguments for :meth:`matplotlib.axes.Axes.text`.
         Passed to the function :func:`vocalpy.plot.annot.labels` that plots labels
@@ -117,6 +199,12 @@ def annotation(
         Axes on which to plot segments.
         Default is None, in which case
         a new figure with a single axes is created.
+    label_color_map : dict, optional
+        A :class:`dict` that maps string labels to colors
+        (that are valid `color` arguments for matplotlib).
+    text_kwargs : dict
+        Keyword arguments passed to the `Axes.text` method
+        that plots the labels. Default is None.
     """
     if not hasattr(annot.data, "seq"):
         raise ValueError(
@@ -128,30 +216,17 @@ def annotation(
         fig, ax = plt.subplots()
         ax.set_ylim(0, 1)
 
-    segment_centers = []
-    for on, off in zip(annot.data.seq.onsets_s, annot.data.seq.offsets_s):
-        segment_centers.append(np.mean([on, off]))
-    segments(
+    rectangles, text_list = segments(
         onsets=annot.data.seq.onsets_s,
         offsets=annot.data.seq.offsets_s,
-        y=y_segments,
+        lbl=annot.data.seq.labels,
+        tlim=tlim,
+        y_segments=y_segments,
+        h_segments=h_segments,
+        y_labels=y_labels,
         ax=ax,
-        line_kwargs=line_kwargs,
+        label_color_map=label_color_map,
+        text_kwargs=text_kwargs,
     )
 
-    if tlim:
-        ax.set_xlim(tlim)
-        tmin, tmax = tlim
-
-        labels_ = []
-        segment_centers_tmp = []
-        for label, segment_center in zip(annot.data.seq.labels, segment_centers):
-            if tmin < segment_center < tmax:
-                labels_.append(label)
-                segment_centers_tmp.append(segment_center)
-        segment_centers = segment_centers_tmp
-    else:
-        labels_ = annot.data.seq.labels
-
-    segment_centers = np.array(segment_centers)
-    labels(labels=labels_, t=segment_centers, y=y_labels, ax=ax, text_kwargs=text_kwargs)
+    return rectangles, text_list
