@@ -149,11 +149,11 @@ class Audio:
 
     def __repr__(self):
         return (
-            f"{self.__class__.__name__}("
+            f"vocalpy.{self.__class__.__name__}("
             f"data={reprlib.repr(self._data)}, "
             f"samplerate={reprlib.repr(self._samplerate)}, "
             f"channels={self._channels}), "
-            f"path={self.path}"
+            f"path={self.path})"
         )
 
     def asdict(self):
