@@ -10,6 +10,7 @@ from .__about__ import (
     __uri__,
     __version__,
 )
+from .annotation import Annotation
 from .annotation_file import AnnotationFile
 from .audio import Audio
 from .audio_file import AudioFile
@@ -34,6 +35,7 @@ __all__ = [
     "__title__",
     "__uri__",
     "__version__",
+    "Annotation",
     "AnnotationFile",
     "Audio",
     "AudioFile",
