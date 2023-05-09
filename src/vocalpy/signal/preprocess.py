@@ -58,4 +58,4 @@ def bandpass_filtfilt(audio: Audio, freq_cutoffs: tuple[int, int] = (500, 10000)
     a[0] = 1  # make an "all-zero filter"
     padlen = np.max((b.shape[-1] - 1, a.shape[-1] - 1))
     filtdata = scipy.signal.filtfilt(b, a, data, padlen=padlen)
-    return Audio(data=filtdata, samplerate=audio.samplerate, source_path=audio.source_path)
+    return Audio(data=filtdata, samplerate=audio.samplerate, path=audio.path)
