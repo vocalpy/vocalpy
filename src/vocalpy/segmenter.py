@@ -22,7 +22,7 @@ DEFAULT_SEGMENT_PARAMS = {
 class Segmenter:
     def __init__(self, callback: Callable | None = None, method: str | None = None, segment_params: dict | None = None):
         if callback and method:
-            raise ValueError(f"Cannot specify both `callback` and `method`, only one or the other.")
+            raise ValueError("Cannot specify both `callback` and `method`, only one or the other.")
 
         if method:
             import vocalpy.signal.segment
@@ -54,16 +54,20 @@ class Segmenter:
 
     def segment(
         self,
-        audio: Audio | AudioFile | Sequence[Audio | AudioFile],
+        audio: Audio | AudioFile | list[Audio | AudioFile],
         parallelize: bool = True,
-    ) -> Sequence | list[Sequence]:
+    ) -> Sequence | None | list[Sequence | None]:
         validate_audio(audio)
 
         # define nested function so vars are in scope and ``dask`` can call it
         def _to_sequence(audio_: Audio):
             if isinstance(audio_, AudioFile):
                 audio_ = Audio.read(audio_.path)
-            onsets, offsets = self.callback(audio_.data, audio_.samplerate, **self.segment_params)
+            out = self.callback(audio_.data, audio_.samplerate, **self.segment_params)
+            if out is None:
+                return out
+            else:
+                onsets, offsets = out
 
             units = []
             for onset, offset in zip(onsets, offsets):

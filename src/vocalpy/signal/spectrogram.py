@@ -89,6 +89,6 @@ def spectrogram(
         s = s[f_inds, :]
         f = f[f_inds]
 
-    spect = Spectrogram(data=s, frequencies=f, times=t, source_audio_path=audio.path)
+    spect = Spectrogram(data=s, frequencies=f, times=t, audio_path=audio.path)
 
     return spect

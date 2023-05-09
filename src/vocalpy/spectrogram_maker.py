@@ -133,7 +133,7 @@ class SpectrogramMaker:
             if isinstance(audio_, AudioFile):
                 audio_ = Audio.read(audio_.path)
             spect = self.callback(audio_, **self.spect_params)
-            spect.source_audio_path = audio_.path
+            spect.audio_path = audio_.path
             return spect
 
         if isinstance(audio, (Audio, AudioFile)):

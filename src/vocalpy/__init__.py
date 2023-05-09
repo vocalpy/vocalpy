@@ -1,4 +1,4 @@
-from . import constants, dataset, paths, signal, validators
+from . import constants, dataset, paths, plot, signal, validators
 from .__about__ import (
     __author__,
     __commit__,
@@ -10,6 +10,7 @@ from .__about__ import (
     __uri__,
     __version__,
 )
+from .annotation import Annotation
 from .annotation_file import AnnotationFile
 from .audio import Audio
 from .audio_file import AudioFile
@@ -34,6 +35,7 @@ __all__ = [
     "__title__",
     "__uri__",
     "__version__",
+    "Annotation",
     "AnnotationFile",
     "Audio",
     "AudioFile",
@@ -45,6 +47,7 @@ __all__ = [
     "DatasetFileTypeEnum",
     "FeatureFile",
     "paths",
+    "plot",
     "Segmenter",
     "Sequence",
     "signal",
