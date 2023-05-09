@@ -31,10 +31,10 @@ class Spectrogram:
     times : numpy.ndarray
         Vector of size :math:`t` where values are times
         at center of time bins in spectrogram.
-    source_path : pathlib.Path, optional
+    path : pathlib.Path, optional
         Path to .npz file that spectrogram was loaded from.
         Optional, added automatically by the :meth:`~vocalpy.Spectrogram.read` method.
-    source_audio_path : pathlib.Path, optional
+    audio_path : pathlib.Path, optional
         Path to audio file from which spectrogram was generated.
         Optional, default None. Can be specified as argument
         to :meth:`~vocalpy.Spectrogram.read` method.
@@ -75,12 +75,12 @@ class Spectrogram:
     frequencies: npt.NDArray = attrs.field(validator=validators.is_1d_ndarray)
     times: npt.NDArray = attrs.field(validator=validators.is_1d_ndarray)
 
-    source_path: pathlib.Path = attrs.field(
+    path: pathlib.Path = attrs.field(
         converter=attrs.converters.optional(pathlib.Path),
         validator=attrs.validators.optional(attrs.validators.instance_of(pathlib.Path)),
         default=None,
     )
-    source_audio_path: pathlib.Path = attrs.field(
+    audio_path: pathlib.Path = attrs.field(
         converter=attrs.converters.optional(pathlib.Path),
         validator=attrs.validators.optional(attrs.validators.instance_of(pathlib.Path)),
         default=None,
@@ -103,10 +103,12 @@ class Spectrogram:
 
     def __repr__(self):
         return (
-            f"{self.__class__.__name__}("
+            f"vocalpy.{self.__class__.__name__}("
             f"data={reprlib.repr(self.data)}, "
             f"frequencies={reprlib.repr(self.frequencies)}, "
-            f"times={reprlib.repr(self.times)})"
+            f"times={reprlib.repr(self.times)}, "
+            f"path={self.path!r}, "
+            f"audio_path={self.audio_path!r})"
         )
 
     def asdict(self):
@@ -138,7 +140,7 @@ class Spectrogram:
         return not self.__eq__(other)
 
     @classmethod
-    def read(cls, path: str | pathlib.Path, source_audio_path: str | pathlib.Path | None = None):
+    def read(cls, path: str | pathlib.Path, audio_path: str | pathlib.Path | None = None):
         """Read spectrogram and associated arrays from a Numpy npz file
         at the given ``path``.
 
@@ -173,7 +175,7 @@ class Spectrogram:
             except KeyError as e:
                 raise KeyError(f"Did not find key '{key}' in path: {path}") from e
 
-        return cls(source_path=path, source_audio_path=source_audio_path, **kwargs)
+        return cls(path=path, audio_path=audio_path, **kwargs)
 
     def write(self, path: [str, pathlib.Path]):
         """Write this :class:`vocalpy.Spectrogram`
@@ -189,8 +191,8 @@ class Spectrogram:
         # TODO: deal with extension here
         path = pathlib.Path(path)
         np.savez(path, data=self.data, frequencies=self.frequencies, times=self.times)
-        if self.source_audio_path:
-            source_audio_file = AudioFile(path=self.source_audio_path)
+        if self.audio_path:
+            source_audio_file = AudioFile(path=self.audio_path)
         else:
             source_audio_file = None
         return SpectrogramFile(path=path, source_audio_file=source_audio_file)
