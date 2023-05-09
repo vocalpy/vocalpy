@@ -27,15 +27,12 @@ def bandpass_filtfilt(audio: Audio, freq_cutoffs: tuple[int, int] = (500, 10000)
         With pre-processing applied to the `data` attribute.
     """
     if freq_cutoffs[0] <= 0:
-        raise ValueError(
-            f"Low frequency cutoff {freq_cutoffs[0]} is invalid, " "must be greater than zero."
-        )
+        raise ValueError(f"Low frequency cutoff {freq_cutoffs[0]} is invalid, " "must be greater than zero.")
 
     nyquist_rate = audio.samplerate / 2
     if freq_cutoffs[1] >= nyquist_rate:
         raise ValueError(
-            f"High frequency cutoff {freq_cutoffs[1]} is invalid, "
-            f"must be less than Nyquist rate, {nyquist_rate}."
+            f"High frequency cutoff {freq_cutoffs[1]} is invalid, " f"must be less than Nyquist rate, {nyquist_rate}."
         )
 
     data = audio.data

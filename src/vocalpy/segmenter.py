@@ -22,7 +22,7 @@ DEFAULT_SEGMENT_PARAMS = {
 class Segmenter:
     def __init__(self, callback: Callable | None = None, method: str | None = None, segment_params: dict | None = None):
         if callback and method:
-            raise ValueError(f"Cannot specify both `callback` and `method`, only one or the other.")
+            raise ValueError("Cannot specify both `callback` and `method`, only one or the other.")
 
         if method:
             import vocalpy.signal.segment

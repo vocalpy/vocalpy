@@ -2,16 +2,20 @@
 from __future__ import annotations
 
 import matplotlib.pyplot as plt
-from matplotlib.collections import LineCollection
-
 import numpy as np
 import numpy.typing as npt
+from matplotlib.collections import LineCollection
 
 from ..annotation import Annotation
 
 
-def segments(onsets: npt.NDArray, offsets: npt.NDArray, y: float = 0.5, ax: plt.Axes | None = None,
-             line_kwargs: dict | None = None) -> None:
+def segments(
+    onsets: npt.NDArray,
+    offsets: npt.NDArray,
+    y: float = 0.5,
+    ax: plt.Axes | None = None,
+    line_kwargs: dict | None = None,
+) -> None:
     """Plot segments on an axis.
 
     Creates a collection of horizontal lines
@@ -114,7 +118,7 @@ def annotation(
         Default is None, in which case
         a new figure with a single axes is created.
     """
-    if not hasattr(annot.data, 'seq'):
+    if not hasattr(annot.data, "seq"):
         raise ValueError(
             "Currently only annotations in sequence-like formats are supported.\n"
             "Please see this issue and give it a 'thumbs up' if support for bounding boxes would help you:\n"
@@ -150,6 +154,4 @@ def annotation(
         labels_ = annot.data.seq.labels
 
     segment_centers = np.array(segment_centers)
-    labels(
-        labels=labels_, t=segment_centers, y=y_labels, ax=ax, text_kwargs=text_kwargs
-    )
+    labels(labels=labels_, t=segment_centers, y=y_labels, ax=ax, text_kwargs=text_kwargs)

@@ -3,13 +3,18 @@ from __future__ import annotations
 
 import matplotlib.pyplot as plt
 
-from ..spectrogram import Spectrogram
 from ..annotation import Annotation
+from ..spectrogram import Spectrogram
 from .annot import annotation
 
 
-def spectrogram(spect: Spectrogram, tlim: tuple | list | None = None, flim: tuple | list | None = None,
-          ax: plt.Axes | None = None, imshow_kwargs: dict | None = None) -> None:
+def spectrogram(
+    spect: Spectrogram,
+    tlim: tuple | list | None = None,
+    flim: tuple | list | None = None,
+    ax: plt.Axes | None = None,
+    imshow_kwargs: dict | None = None,
+) -> None:
     """Plot a spectrogram.
 
     Parameters
@@ -52,8 +57,14 @@ def spectrogram(spect: Spectrogram, tlim: tuple | list | None = None, flim: tupl
 
 
 def annotated_spectrogram(
-    spect: Spectrogram, annot: Annotation, tlim: tuple | list | None = None, flim: tuple | list | None = None,
-    fig: plt.Figure | None = None, imshow_kwargs: dict | None = None, line_kwargs=None, text_kwargs=None,
+    spect: Spectrogram,
+    annot: Annotation,
+    tlim: tuple | list | None = None,
+    flim: tuple | list | None = None,
+    fig: plt.Figure | None = None,
+    imshow_kwargs: dict | None = None,
+    line_kwargs=None,
+    text_kwargs=None,
 ) -> tuple[plt.Figure, plt.Axes, plt.Axes]:
     """Plot a :class:`vocalpy.Spectrogram` with a :class:`vocalpy.Annotation` below it.
 
@@ -102,8 +113,6 @@ def annotated_spectrogram(
 
     spectrogram(spect, tlim, flim, ax=spect_ax, imshow_kwargs=imshow_kwargs)
 
-    annotation(
-        annot, tlim, ax=annot_ax, line_kwargs=line_kwargs, text_kwargs=text_kwargs
-    )
+    annotation(annot, tlim, ax=annot_ax, line_kwargs=line_kwargs, text_kwargs=text_kwargs)
 
     return fig, spect_ax, annot_ax

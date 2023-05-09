@@ -59,10 +59,7 @@ class Sequence:
         onsets = [unit.onset for unit in units]
         if len(onsets) > 1:
             if not np.all(onsets[1:] > onsets[:-1]):
-                import pdb
-
-                pdb.set_trace()
-                raise ValueError(f"Onsets of units are not strictly increasing")
+                raise ValueError(f"Onsets of units are not strictly increasing.\nOnsets: {onsets}")
 
     @property
     def onset(self):
