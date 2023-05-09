@@ -56,14 +56,18 @@ class Segmenter:
         self,
         audio: Audio | AudioFile | Sequence[Audio | AudioFile],
         parallelize: bool = True,
-    ) -> Sequence | list[Sequence]:
+    ) -> Sequence | None | list[Sequence | None]:
         validate_audio(audio)
 
         # define nested function so vars are in scope and ``dask`` can call it
         def _to_sequence(audio_: Audio):
             if isinstance(audio_, AudioFile):
                 audio_ = Audio.read(audio_.path)
-            onsets, offsets = self.callback(audio_.data, audio_.samplerate, **self.segment_params)
+            out = self.callback(audio_.data, audio_.samplerate, **self.segment_params)
+            if out is None:
+                return out
+            else:
+                onsets, offsets = out
 
             units = []
             for onset, offset in zip(onsets, offsets):
