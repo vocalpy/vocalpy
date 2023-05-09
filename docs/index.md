@@ -169,6 +169,7 @@ tutorial
 howto
 api/index
 development/index
+reference/index
 ```
 
 # Support
