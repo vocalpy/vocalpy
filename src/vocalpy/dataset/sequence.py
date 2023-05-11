@@ -82,9 +82,9 @@ class SequenceDataset:
             dst = pathlib.Path(dst)
             if not dst.exists() or not dst.is_dir():
                 raise NotADirectoryError(f"`dst` not found or not recognized as a directory: {dst}")
-            url = dst / db_name
         else:
-            url = pathlib.Path(db_name)
+            dst = pathlib.Path(".")
+        url = dst / db_name
 
         if url.exists():
             if not replace:
@@ -108,11 +108,8 @@ class SequenceDataset:
             uniq_segment_params = self.segment_params
 
         for ind, segment_params_dict in enumerate(uniq_segment_params):
-            segment_params_fname = f"segment-params-{ind + 1}.json"
-            if dst:
-                segment_params_json_path = dst / segment_params_fname
-            else:
-                segment_params_json_path = pathlib.Path(segment_params_fname)
+            segment_params_fname = f"{db_name}-segment-params-{ind + 1}.json"
+            segment_params_json_path = dst / segment_params_fname
             with segment_params_json_path.open("w") as fp:
                 json.dump(segment_params_dict, fp)
             orm_segment_params.append(schema.sequence.SegmentParams(path=str(segment_params_json_path)))
@@ -169,9 +166,17 @@ class SequenceDataset:
             dst = pathlib.Path(dst)
             if not dst.exists() or not dst.is_dir():
                 raise NotADirectoryError(f"`dst` not found or not recognized as a directory: {dst}")
-            url = f"sqlite:///{dst}{db_name}"
         else:
-            url = f"sqlite:///{db_name}"
+            dst = pathlib.Path(".")
+        url = dst / db_name
+
+        if not url.exists():
+            raise FileNotFoundError(
+                f"`db_name` not found at `dst`: {url}. Please check values for both `db_name` and `dst`."
+                f"Note that `dst` defaults to the current working directory if not specified."
+            )
+
+        url = f"sqlite:///{url}"
 
         engine = create_engine(url, echo=echo)
 
