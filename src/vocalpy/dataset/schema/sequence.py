@@ -64,6 +64,7 @@ class Unit(SequenceDatasetBase):
     sequence_id = Column(Integer, ForeignKey('sequences.id'))
     onset = Column(Float)
     offset = Column(Float)
+    label = Column(String)
 
     sequence = relationship("Sequence", back_populates="units")
 
