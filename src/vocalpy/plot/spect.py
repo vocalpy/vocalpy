@@ -123,13 +123,7 @@ def annotated_spectrogram(
     spect_ax = fig.add_subplot(gs[:2, :])
     annot_ax = fig.add_subplot(gs[2, :])
 
-    spectrogram(
-        spect,
-        tlim,
-        flim,
-        ax=spect_ax,
-        imshow_kwargs=imshow_kwargs
-    )
+    spectrogram(spect, tlim, flim, ax=spect_ax, imshow_kwargs=imshow_kwargs)
 
     annotation(
         annot,

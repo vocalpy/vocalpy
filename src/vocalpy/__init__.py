@@ -14,7 +14,6 @@ from .annotation import Annotation
 from .annotation_file import AnnotationFile
 from .audio import Audio
 from .audio_file import AudioFile
-from .dataset import Dataset
 from .dataset_file import DatasetFile, DatasetFileType, DatasetFileTypeEnum
 from .feature_file import FeatureFile
 from .segmenter import Segmenter
@@ -41,7 +40,6 @@ __all__ = [
     "AudioFile",
     "constants",
     "dataset",
-    "Dataset",
     "DatasetFile",
     "DatasetFileType",
     "DatasetFileTypeEnum",
