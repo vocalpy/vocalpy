@@ -46,7 +46,8 @@ class Sequence(SequenceDatasetBase):
 
     def __repr__(self):
         return (
-            f"Sequence(id={self.id!r}, audio_id={self.audio_id!r}, onset={self.onset!r}, offset={self.offset!r}, method={self.method!r}, "
+            f"Sequence(id={self.id!r}, audio_id={self.audio_id!r}, onset={self.onset!r}, "
+            f"offset={self.offset!r}, method={self.method!r}, "
             f"segment_params_id={self.segment_params_id!r}, audio={self.audio!r})"
         )
 

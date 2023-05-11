@@ -110,7 +110,7 @@ class SequenceDataset:
         for ind, segment_params_dict in enumerate(uniq_segment_params):
             segment_params_fname = f"segment-params-{ind + 1}.json"
             if dst:
-                segment_params_json_path = dst / segment_params_fnane
+                segment_params_json_path = dst / segment_params_fname
             else:
                 segment_params_json_path = pathlib.Path(segment_params_fname)
             with segment_params_json_path.open("w") as fp:
