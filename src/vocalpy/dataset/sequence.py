@@ -34,17 +34,16 @@ class SequenceDataset:
     to_sqlite
     from_sqlite
     """
+
     sequences: list[Sequence] = attrs.field()
+
     @sequences.validator
     def is_list_of_seqs(self, attribute, value):
         if not isinstance(value, list):
-            raise TypeError(
-                f"`sequences` must be a list but type was: {type(value)}"
-            )
+            raise TypeError(f"`sequences` must be a list but type was: {type(value)}")
         if not all([isinstance(element, Sequence) for element in value]):
-            raise TypeError(
-                "All elements in `sequences` list must be of type `vocalpy.Sequence`."
-            )
+            raise TypeError("All elements in `sequences` list must be of type `vocalpy.Sequence`.")
+
     segment_params: dict | list[dict] = attrs.field(init=False)
 
     def __attrs_post_init__(self):
@@ -60,7 +59,7 @@ class SequenceDataset:
         else:  # if there's more than one set
             self.segment_params = uniq_segment_params
 
-    def to_sqlite(self, db_name=':memory:', dst=None, replace=False, echo=False):
+    def to_sqlite(self, db_name=":memory:", dst=None, replace=False, echo=False):
         """Save this :class:`vocalpy.dataset.SequenceDataset` to a SQLite database file.
 
         This method creates a new database file every time it is called.
@@ -82,9 +81,7 @@ class SequenceDataset:
         if dst:
             dst = pathlib.Path(dst)
             if not dst.exists() or not dst.is_dir():
-                raise NotADirectoryError(
-                    f"`dst` not found or not recognized as a directory: {dst}"
-                )
+                raise NotADirectoryError(f"`dst` not found or not recognized as a directory: {dst}")
             url = dst / db_name
         else:
             url = pathlib.Path(db_name)
@@ -98,7 +95,7 @@ class SequenceDataset:
                 )
             url.unlink()
 
-        engine = create_engine(f'sqlite:///{url}', echo=echo)
+        engine = create_engine(f"sqlite:///{url}", echo=echo)
 
         schema.sequence.SequenceDatasetBase.metadata.create_all(engine)
 
@@ -111,16 +108,14 @@ class SequenceDataset:
             uniq_segment_params = self.segment_params
 
         for ind, segment_params_dict in enumerate(uniq_segment_params):
-            segment_params_fname = f'segment-params-{ind + 1}.json'
+            segment_params_fname = f"segment-params-{ind + 1}.json"
             if dst:
                 segment_params_json_path = dst / segment_params_fnane
             else:
                 segment_params_json_path = pathlib.Path(segment_params_fname)
-            with segment_params_json_path.open('w') as fp:
+            with segment_params_json_path.open("w") as fp:
                 json.dump(segment_params_dict, fp)
-            orm_segment_params.append(
-                schema.sequence.SegmentParams(path=str(segment_params_json_path))
-            )
+            orm_segment_params.append(schema.sequence.SegmentParams(path=str(segment_params_json_path)))
 
         with Session(engine) as session, session.begin():
             for an_orm_segment_params in orm_segment_params:
@@ -146,10 +141,7 @@ class SequenceDataset:
                 # make and add units
                 for seq_unit in seq.units:
                     unit = schema.sequence.Unit(
-                        onset=seq_unit.onset,
-                        offset=seq_unit.offset,
-                        label=seq_unit.label,
-                        sequence=sequence
+                        onset=seq_unit.onset, offset=seq_unit.offset, label=seq_unit.label, sequence=sequence
                     )
                     session.add(unit)
             # ---- implicit session.commit() when we __exit__ context + begin() from above
@@ -176,46 +168,33 @@ class SequenceDataset:
         if dst:
             dst = pathlib.Path(dst)
             if not dst.exists() or not dst.is_dir():
-                raise NotADirectoryError(
-                    f"`dst` not found or not recognized as a directory: {dst}"
-                )
-            url = f'sqlite:///{dst}{db_name}'
+                raise NotADirectoryError(f"`dst` not found or not recognized as a directory: {dst}")
+            url = f"sqlite:///{dst}{db_name}"
         else:
-            url = f'sqlite:///{db_name}'
+            url = f"sqlite:///{db_name}"
 
         engine = create_engine(url, echo=echo)
 
         schema.sequence.SequenceDatasetBase.metadata.create_all(engine)
 
         with Session(engine) as session, session.begin():
-            seg_params_stmt = (
-                select(schema.sequence.SegmentParams)
-                .order_by(schema.sequence.SegmentParams.id)
-            )
+            seg_params_stmt = select(schema.sequence.SegmentParams).order_by(schema.sequence.SegmentParams.id)
             seg_params_result = session.scalars(seg_params_stmt).all()
 
             segment_params = []
             for model_segment_params in seg_params_result:
                 path = model_segment_params.path
-                with pathlib.Path(path).open('r') as fp:
+                with pathlib.Path(path).open("r") as fp:
                     this_seg_params = json.load(fp)
                 segment_params.append(this_seg_params)
 
             audios = []
-            audio_stmt = (
-                select(schema.sequence.Audio)
-                .order_by(schema.sequence.Audio.id)
-            )
+            audio_stmt = select(schema.sequence.Audio).order_by(schema.sequence.Audio.id)
             audio_result = session.scalars(audio_stmt).all()
             for model_audio in audio_result:
-                audios.append(
-                    Audio(path=model_audio.path)
-                )
+                audios.append(Audio(path=model_audio.path))
 
-            seqs_stmt = (
-                select(schema.sequence.Sequence)
-                    .order_by(schema.sequence.Sequence.id)
-            )
+            seqs_stmt = select(schema.sequence.Sequence).order_by(schema.sequence.Sequence.id)
             seqs_result = session.scalars(seqs_stmt).all()
 
             seqs = []
@@ -229,16 +208,14 @@ class SequenceDataset:
 
                 units = []
                 for model_unit in seq_units_result:
-                    unit = Unit(onset=model_unit.onset,
-                                offset=model_unit.offset,
-                                label=model_unit.label)
+                    unit = Unit(onset=model_unit.onset, offset=model_unit.offset, label=model_unit.label)
                     units.append(unit)
 
                 seq = Sequence(
                     units=units,
                     audio=audios[model_sequence.audio_id - 1],
                     method=model_sequence.method,
-                    segment_params=segment_params[model_sequence.segment_params_id - 1]
+                    segment_params=segment_params[model_sequence.segment_params_id - 1],
                 )
                 seqs.append(seq)
 

@@ -8,12 +8,14 @@ import numpy.typing as npt
 from ..annotation import Annotation
 
 
-def labels(labels: npt.ArrayLike,
-           t: npt.NDArray,
-           t_shift_label: float = 0.01,
-           y: float = 0.4,
-           ax: plt.Axes | None = None,
-           text_kwargs: dict | None = None):
+def labels(
+    labels: npt.ArrayLike,
+    t: npt.NDArray,
+    t_shift_label: float = 0.01,
+    y: float = 0.4,
+    ax: plt.Axes | None = None,
+    text_kwargs: dict | None = None,
+):
     """Plot labels of segments on an axis.
 
     Parameters
@@ -49,7 +51,7 @@ def labels(labels: npt.ArrayLike,
 
     for label, t_lbl in zip(labels, t):
         t_lbl -= t_shift_label
-        text = ax.text(t_lbl, y, label, **text_kwargs, label='label')
+        text = ax.text(t_lbl, y, label, **text_kwargs, label="label")
         text_list.append(text)
 
     return text_list
@@ -62,7 +64,7 @@ def segments(
     tlim: list | tuple | None = None,
     y_segments: float = 0.4,
     h_segments: float = 0.4,
-    y_labels = 0.3,
+    y_labels=0.3,
     ax: plt.Axes | None = None,
     label_color_map: dict | None = None,
     text_kwargs: dict | None = None,
@@ -109,7 +111,7 @@ def segments(
     if label_color_map is None:
         if lbl is not None:
             labelset = set(lbl)
-            cmap = plt.cm.get_cmap('tab20')
+            cmap = plt.cm.get_cmap("tab20")
             colors = [cmap(ind) for ind in range(len(labelset))]
             label_color_map = {label: color for label, color in zip(labelset, colors)}
 
@@ -132,20 +134,15 @@ def segments(
                 continue
 
         kwargs = {
-            'width': offset_s - onset_s,
-            'height': h_segments,
+            "width": offset_s - onset_s,
+            "height": h_segments,
         }
         if lbl is not None:
             labels_to_plot.append(label)
-            label_plot_times.append(
-                onset_s + ((offset_s - onset_s) / 2)
-            )
-            kwargs['facecolor'] = label_color_map[label]
+            label_plot_times.append(onset_s + ((offset_s - onset_s) / 2))
+            kwargs["facecolor"] = label_color_map[label]
 
-        rectangle = plt.Rectangle(
-            (onset_s, y_segments),
-            **kwargs
-        )
+        rectangle = plt.Rectangle((onset_s, y_segments), **kwargs)
         ax.add_patch(rectangle)
         rectangles.append(rectangle)
 
