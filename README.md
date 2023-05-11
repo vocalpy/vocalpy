@@ -47,7 +47,7 @@ The goals of VocalPy are to:
 
 ## Features
 
-###  Data types for acoustic communication data: audio, spectrograms, annotations
+###  Data types for acoustic communication data: audio, spectrogram, annotations, features
 
 #### The `vocalpy.Audio` data type
 
@@ -128,13 +128,59 @@ audio=vocalpy.Audio(data=None, samplerate=None, channels=None), path=tests/data-
 #### A `SpectrogramMaker` for computing spectrograms
 
 ```python
-import vocalpy as voc
+>>> import vocalpy as voc
+>>> wav_paths = voc.paths.from_dir('wav')
+>>> audios = [voc.Audio(wav_path) for wav_path in wav_paths]
+>>> spect_params = {'fft_size': 512, 'step_size': 64}
+>>> spect_maker = voc.SpectrogramMaker(spect_params=spect_params)
+>>> spects = spect_maker.make(audios, parallelize=True)
+```
 
-wav_paths = voc.paths.from_dir('wav')
-audios = [voc.Audio(wav_path) for wav_path in wav_paths]
-spect_params = {'fft_size': 512, 'step_size': 64}
-spect_maker = voc.SpectrogramMaker(spect_params=spect_params)
-spects = spect_maker.make(audios, parallelize=True)
+### `Dataset`s you flexibly build from pipelines and convert to databases
+
+- The `vocalpy.dataset` module contains classes that represent common types of datasets 
+- You make these classes with outputs of your pipelines, e.g. a `list` of `vocalpy.Sequence`s 
+  or `vocalpy.Spectrogram`s
+- Because of the design of `vocalpy`, these datasets capture key metadata from your pipeline: 
+  - parameters and data provenance details; 
+    e.g., what parameters did you use to segment? What audio file did this sequence come from?
+- Then you can save the dataset along with metadata to databases, or later load from databases
+  - `vocalpy` comes with built-in support for persisting to [SQLite](https://www.sqlite.org/index.html), 
+    a lightweight, efficient single-file database format.
+    It is the only database file format 
+    [recommended by the US Library of Congress for archival data](https://www.sqlite.org/locrsf.html),
+    and it's [built into Python](https://docs.python.org/3/library/sqlite3.html) 
+    -- no need to install separate database software like MySQL
+
+#### A `SequenceDataset` for common analyses of sequences of units
+
+```python
+>>> import evfuncs
+>>> import vocalpy as voc
+>>> data_dir = 'tests/data-for-tests/source/audio_cbin_annot_notmat/gy6or6/032312/'
+>>> cbin_paths = voc.paths.from_dir(data_dir, 'cbin')
+>>> audios = [voc.Audio.read(cbin_path) for cbin_path in cbin_paths]
+>>> segment_params = {
+    'threshold': 1500,
+    'min_syl_dur': 0.01,
+    'min_silent_dur': 0.006,
+}
+>>> segmenter = voc.Segmenter(
+    callback=evfuncs.segment_song, 
+    segment_params=segment_params
+)
+>>> seqs = segmenter.segment(audios)
+>>> seq_dataset = voc.dataset.SequenceDataset(sequences=seqs)
+>>> seq_dataset.to_sqlite(db_name='gy6or6-032312.db', replace=True)
+>>> print(seq_dataset)
+SequenceDataset(sequences=[Sequence(units=[Unit(onset=2.18934375, offset=2.21, label='-', audio=None, spectrogram=None),
+Unit(onset=2.346125, offset=2.373125, label='-', audio=None, spectrogram=None), Unit(onset=2.50471875, offset=2.51546875,
+label='-', audio=None, spectrogram=None), Unit(onset=2.81909375, offset=2.84740625, label='-', audio=None, spectrogram=None),
+...
+>>> # test that we can load the dataset
+>>> seq_dataset_loaded = voc.dataset.SequenceDataset.from_sqlite(db_name='gy6or6-032312.db')
+>>> seq_dataset_loaded == seq_dataset
+True
 ```
 
 ## Getting Started
