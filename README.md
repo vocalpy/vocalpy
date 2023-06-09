@@ -43,6 +43,10 @@ The goals of VocalPy are to:
     [research software engineers](https://www.nature.com/articles/d41586-022-01516-2) 
     developing libraries and applications
 
+A [paper introducing VocalPy and its design](./docs/fa2023/main.pdf) 
+has been accepted with revisions 
+in the [Forum Acusticum 2023](https://www.fa2023.org/) proceedings.
+
 [^1]: For a curated collection, see <https://github.com/rhine3/bioacoustics-software>.
 
 ## Features
