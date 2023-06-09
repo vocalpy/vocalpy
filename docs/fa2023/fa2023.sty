@@ -1,0 +1,401 @@
+% Latex Paper Template for FA2023
+%
+
+% !!! DO NOT MODIFY THIS FILE !!!! 
+
+%%%<<<<<<<<<<>>>>>>>>>>>%%%
+%%%TO BE CHANGED EVERY YEAR
+\newcommand{\conferenceyear}{2023}
+\newcommand{\conferenceedition}{10\textsuperscript{th}}
+%%%<<<<<<<<<<>>>>>>>>>>>%%%
+
+
+\newcommand{\correspondingauthor}[2]{
+\thanks{*\textit{\textbf{Corresponding author}: #1.\\ \textbf{Copyright}: \textcopyright\the\year{} #2 This is an open-access article distributed under the terms of the Creative Commons Attribution 3.0 Unported License, which permits unrestricted use, distribution, and reproduction in any medium, provided the original author and source are credited.}}
+}
+
+
+\providecommand{\keywords}[1]
+{
+  \small	
+  \textbf{Keywords:} #1
+}
+
+\RequirePackage{xcolor}
+\definecolor{blueAcoustics}{HTML}{3977aa}
+
+\def\Hline{\noalign{\hrule height 0.4mm}}
+\newcommand{\bm}[1]{\mbox{\boldmath{$#1$}}}
+\newcommand{\range}[2]{{#1,\cdots,#2\;}}
+\newcommand{\secref}[1]{\mbox{Sec.~\ref{#1}}}
+\newcommand{\tabref}[1]{\mbox{Tab.~\ref{#1}}}
+\newcommand{\figref}[1]{\mbox{Fig.~\ref{#1}}}
+\newcommand{\eqnref}[1]{\mbox{Eqn.~(\ref{#1})}}
+
+\renewcommand{\sfdefault}{phv}
+\renewcommand{\rmdefault}{ptm}
+\renewcommand{\ttdefault}{pcr}
+
+\RequirePackage[bottom=4cm, top=5cm, left=2cm, right=2cm,a4paper]{geometry}
+
+\setlength{\columnsep}{8mm}
+
+% \setlength{\paperheight}{297mm}
+% \setlength{\paperwidth}{210mm}
+% \setlength{\textheight}{252mm}
+% \setlength{\textwidth}{172mm}
+% \setlength{\columnsep}{8mm}
+% \setlength{\headheight}{0mm}
+% \setlength{\voffset}{-12mm}
+% \setlength{\hoffset}{0mm}
+% \setlength{\marginparwidth}{0mm}
+% \setlength{\parindent}{1pc}
+% \setlength{\topmargin}{-5mm}
+% \setlength{\oddsidemargin}{-6mm}
+% \setlength{\evensidemargin}{-6mm}
+
+\setlength\normallineskip{1\p@}
+\setlength\parskip{0\p@ \@plus \p@}
+%\def\baselinestretch{0.98}
+
+\RequirePackage{tikz}
+\RequirePackage{background}
+\RequirePackage{calc}
+\usetikzlibrary{calc}
+\backgroundsetup{
+scale=1,
+angle=0,
+opacity=1,
+contents=
+{
+\begin{tikzpicture}[remember picture, overlay]
+\node[anchor=north] (a) at (current page.north) {\includegraphics[scale=1]{header_onda.png}};
+\node[anchor=north] at ($(current page.north) - (0,1.25cm)$) {\includegraphics[scale=1]{header.png}};
+\node[anchor=south west] at ($(current page.south west) + (2cm,0.757cm)$) {\includegraphics[width=1.36cm]{footer_logo_eaa.jpg}};
+\node[anchor=south east] at ($(current page.south east) - (2cm,-0.757cm)$) {\includegraphics[width=1.36cm]{footer_logo_aia.png}};
+\node[anchor=north,align=center] at ($(current page.south) + (0,1.95cm)$) {\textcolor{blueAcoustics}{\fontsize{10}{10}\selectfont \textbf{\conferenceedition\ Convention of the European Acoustics Association}}\\
+\textcolor{blueAcoustics}{\fontsize{9}{9}\selectfont Turin, Italy • 11\textsuperscript{th} – 15\textsuperscript{th} September \conferenceyear\ • Politecnico di Torino}};
+\end{tikzpicture}
+}
+}
+
+% \def\normalsize{\@setsize\normalsize{12.2pt}\xpt\@xpt}
+% \def\small{\@setsize\small{10pt}\ixpt\@ixpt}
+% \def\footnotesize{\@setsize\footnotesize{9pt}\viiipt\@viiipt}
+% \def\scriptsize{\@setsize\scriptsize{8pt}\viipt\@viipt}
+% \def\tiny{\@setsize\tiny{7pt}\vipt\@vipt}
+% \def\large{\@setsize\large{14pt}\xiipt\@xiipt}
+% \def\Large{\@setsize\Large{16pt}\xivpt\@xivpt}
+% \def\LARGE{\@setsize\LARGE{20pt}\xviipt\@xviipt}
+% \def\huge{\@setsize\huge{23pt}\xxpt\@xxpt}
+% \def\Huge{\@setsize\Huge{28pt}\xxvpt\@xxvpt}
+
+\twocolumn
+\pagestyle{empty}
+
+\def\maketitle{\par
+  \begingroup
+  \def\thefootnote{}
+  \def\@makefnmark{
+    \hbox
+    {$^{\@thefnmark}$\hss}
+  }
+  \twocolumn[\@maketitle]
+%  \permission
+  \@thanks
+  \endgroup
+  \setcounter{footnote}{0}
+  \let\maketitle\relax
+  \let\@maketitle\relax
+  \gdef\thefootnote{
+  \arabic{footnote}
+  }
+  \gdef\@@savethanks{}
+  \gdef\@thanks{}
+  \gdef\@author{}
+  \gdef\@title{}
+  \let\thanks\relax
+}
+
+\def\@maketitle{
+  \newpage
+  \null
+  \begin{center} {
+    \Large \bf \uppercase \@title \par
+  }
+  \vskip 2.0em {
+    \large \lineskip .5em
+    \begin{tabular}[t]{c}
+    \@author \\
+    \end{tabular}
+    \par
+  }
+  \end{center}
+  \par
+  \vskip 2.0em
+}
+
+%%%From the setspace package
+\newcommand{\setstretch}[1]{%
+  \def\baselinestretch{#1}%
+  \@currsize
+}
+\newcommand{\restore@spacing}{%
+    \par
+    \vskip \parskip
+    \vskip \baselineskip
+  \endgroup
+  \vskip -\parskip
+  \vskip -\baselineskip
+}
+\newenvironment{spacing}[1]{%
+  \par
+  \begingroup
+    \setstretch {#1}%
+}{%
+  \restore@spacing
+}
+
+
+\def\multauthor#1#2{
+  \gdef\@author{
+  \begin{tabular}{@{}c@{}}
+    {\bf #1} \\
+    #2\relax
+   \end{tabular}%\hskip .3in
+  }
+%  \def\authorname{#1}
+}
+
+\def\oneauthor#1#2{
+  \gdef\@author{
+  \begin{tabular}{@{}c@{}}
+    {\bf #1} \\
+    #2\relax
+   \end{tabular}%\hskip .3in
+  }
+  \def\authorname{#1}
+}
+
+\def\twoauthors#1#2#3#4{
+%  \gdef\@author{
+%  \begin{tabular}{@{}c@{}}
+%    {\bf #1} \\
+%    #2
+%  \end{tabular}\hskip .3in
+%  \begin{tabular}{@{}c@{}}
+%    {\bf #3} \\
+%    #4\relax
+%  \end{tabular}
+%  }
+  \gdef\@author{
+    \makebox[\textwidth]{%
+      \hfill
+      \begin{tabular}{@{}c@{}}
+        {\bf #1} \\
+        #2
+      \end{tabular}
+      \hfill
+      \begin{tabular}{@{}c@{}}
+        {\bf #3} \\
+        #4\relax
+      \end{tabular}
+      \hfill
+    }
+  }
+  \def\authorname{#1, #3}
+}
+
+\def\threeauthors#1#2#3#4#5#6{
+  \gdef\@author{
+    \makebox[\textwidth]{%
+      \hfill
+      \begin{tabular}{@{}c@{}}
+        {\bf #1} \\
+        #2
+      \end{tabular}
+      \hfill
+      \begin{tabular}{@{}c@{}}
+        {\bf #3} \\
+        #4
+      \end{tabular}
+      \hfill
+      \begin{tabular}{@{}c@{}}
+        {\bf #5} \\
+        #6\relax
+      \end{tabular}
+      \hfill
+    }
+%  \begin{tabular}{@{}c@{}}
+%    {\bf #1} \\
+%    #2
+%  \end{tabular}\hskip .3in
+%  \begin{tabular}{@{}c@{}}
+%    {\bf #3} \\
+%    #4
+%  \end{tabular}\hskip .3in
+%  \begin{tabular}{@{}c@{}}
+%    {\bf #5} \\
+%    #6\relax
+%  \end{tabular}
+  }
+  \def\authorname{#1, #3, #5}
+}
+
+
+\def\fourauthors#1#2#3#4#5#6#7#8{
+  \gdef\@author{
+    \makebox[\textwidth]{%
+      \hfill
+      \begin{tabular}{@{}c@{}}
+        {\bf #1} \\
+        #2
+      \end{tabular}
+      \hfill
+      \begin{tabular}{@{}c@{}}
+        {\bf #3} \\
+        #4
+      \end{tabular}
+      \hfill
+      \begin{tabular}{@{}c@{}}
+        {\bf #5} \\
+        #6
+      \end{tabular}
+      \hfill
+      \begin{tabular}{@{}c@{}}
+        {\bf #7} \\
+        #8\relax
+      \end{tabular}
+      \hfill
+    }
+%  \begin{tabular}{@{}c@{}}
+%    {\bf #1} \\
+%    #2
+%  \end{tabular}\hskip .2cm
+%  \begin{tabular}{@{}c@{}}
+%    {\bf #3} \\
+%    #4
+%  \end{tabular}\hskip .2cm
+%  \begin{tabular}{@{}c@{}}
+%    {\bf #5} \\
+%    #6\relax
+%  \end{tabular}\hskip .2cm
+%  \begin{tabular}{@{}c@{}}
+%    {\bf #7} \\
+%    #8\relax
+%  \end{tabular}
+  }
+  \def\authorname{#1, #3, #5, #7}
+}
+
+\renewenvironment{abstract}{%
+  \small
+  \begin{center}%
+    {\bfseries ABSTRACT\vspace{-0.5em}\vspace{0pt}}%
+  \end{center}%
+  \list{}{%
+    \setlength{\leftmargin}{0mm}%
+    \setlength{\rightmargin}{\leftmargin}%
+  }%
+  \item\relax}
+ {\endlist}
+\def\title#1{\gdef\@title{{#1}}}
+
+\newif\if@saspsection
+
+\renewcommand\section{
+  \@saspsectiontrue
+  \@startsection
+  {section}
+  {1}
+  {\z@}
+  {-3.5ex \@plus -1ex \@minus -.2ex}
+  {6pt \@plus.2ex}
+  {\large\bf\centering}
+}
+
+\renewcommand\subsection{
+  \@saspsectionfalse
+  \@startsection
+  {subsection}
+  {2}
+  {\z@}
+  {-2.5ex \@plus -1ex \@minus -.2ex}
+  {6pt \@plus.2ex}
+  {\normalsize\bf\raggedright}
+}
+
+\renewcommand\subsubsection{
+  \@saspsectionfalse
+  \@startsection
+  {subsubsection}
+  {3}
+  {\z@}
+  {-1.5ex \@plus -1ex \@minus -.2ex}
+  {6pt \@plus.2ex}
+  {\normalsize\it\raggedright}
+}
+
+\def\@sect#1#2#3#4#5#6[#7]#8{
+  \refstepcounter{#1}
+  \if@saspsection
+    \edef\@svsec{\csname the#1\endcsname.\hskip 0.6em}
+  \else
+    \edef\@svsec{\csname the#1\endcsname\hskip 0.6em}
+  \fi
+  \begingroup
+    \ifnum #2=1
+      \bf\centering{\interlinepenalty \@M \@svsec\uppercase{#8}\par}
+    \else
+      \ifnum #2=2
+        \bf\raggedright
+        \noindent{\interlinepenalty \@M \@svsec #8\par}
+      \else
+        \it\raggedright
+        \noindent{\interlinepenalty \@M \@svsec #8\par}
+      \fi
+    \fi
+  \endgroup
+  \csname #1mark\endcsname{#7}\addcontentsline
+  {toc}{#1}{\protect\numberline
+  \if@saspsection
+    {\csname the#1\endcsname.}
+  \else
+    {\csname the#1\endcsname}
+  \fi
+  #7}
+  \@tempskipa #5\relax
+  \@xsect{\@tempskipa}
+}
+
+\bibliographystyle{ieeetr}
+
+\def\thebibliography#1{
+  \section{References}\list
+  {[\arabic{enumi}]}{
+  \settowidth\labelwidth{[#1]}\leftmargin 1em
+  \advance\leftmargin\labelsep
+  \usecounter{enumi}
+  }
+  \def\newblock{\hskip .01em plus .01em minus .01em}
+  \sloppy\clubpenalty4000\widowpenalty4000
+  \sfcode`\.=1000\relax
+}
+
+\let\endthebibliography=\endlist
+
+\long\def\@makecaption#1#2{
+  \vskip 10pt
+  \setbox\@tempboxa\hbox{#1. #2}
+  \ifdim
+    \wd\@tempboxa >\hsize #1. #2\par
+  \else
+    \hbox
+    to\hsize{\hfil\box\@tempboxa\hfil}
+  \fi
+}
+
+\def\fnum@figure{{\bf Figure\ \thefigure}}
+\def\fnum@table{{\bf Table \thetable}}
+
+\flushbottom

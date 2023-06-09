@@ -1,0 +1,257 @@
+% -----------------------------------------------
+% Template for FA2023 Proceedings
+
+% DO NOT MODIFY THE FOLLOWING SECTION!!
+%-------------------------------------
+\documentclass[11pt]{article}
+\usepackage{fa2023}
+\usepackage{amsmath}
+\usepackage{cite}
+\usepackage{url}
+\usepackage{graphicx}
+\usepackage{color}
+\usepackage{siunitx}
+\usepackage[utf8]{inputenc}
+%-------------------------------------
+
+% Title.
+% ------
+\title{Introducing VocalPy: a core Python package for researchers studying animal acoustic communication}
+
+% Note: Please do NOT use \thanks or a \footnote in any of the author markup
+
+% Single address
+% To use with only one author or several with the same address
+% ---------------
+
+% Two addresses
+% --------------
+%\twoauthors
+%  {First author} {School \\ Department}
+%  {Second author} {Company \\ Address}
+% ---------------
+
+% Three addresses
+% --------------
+%\threeauthors
+  %{First Author} {Affiliation1 \\ {\tt author1@institute.edu}}
+  %{Second Author} {Affiliation2 \\ {\tt author2@institute.edu}}
+  %{Third Author} {Affiliation3 \\ {\tt author3@institute.edu}}
+% ------------
+
+\multauthor
+{David Nicholson$^{1*}$ \hspace{1cm} Second author$^1$ \hspace{1cm} Third author$^2$} { \bfseries{Fourth author$^3$ \hspace{1cm} Fifth author$^2$ \hspace{1cm} Sixth author$^1$}\\
+  $^1$ Department of Computer Science, University, Country\\
+$^2$ International Laboratories, City, Country\\
+$^3$  Company, Address
+\correspondingauthor{first.author@email.ad}{First author et al.}
+}
+
+
+
+\sloppy % please retain sloppy command for improved formatting
+\begin{document}
+
+%
+\maketitle
+\begin{abstract}
+The study of animal acoustic communication requires true interdisciplinary collaboration, big team science, and cutting edge computational methods. To those ends, more and more groups have begun to share their code. However, this code is often written to answer specific research questions, and tailored to specific data formats. As a result, it is not always easy to read and reuse, and there is significant duplication of effort. Here I introduce a Python package, VocalPy, created to address these issues. VocalPy has two main goals: (1) make code more readable across research groups, and (2) facilitate collaboration between scientists-coders writing analysis code and research software engineers developing libraries and applications. To achieve these goals, VocalPy provides abstractions for acoustic communications research. These abstractions encapsulate common data types--audio, array, annotations--as well as typical steps or processes in workflows--segmenting audio, computing spectrograms, extracting features. I demonstrate with examples how these abstractions enable scientist-coders to write more readable, idiomatic analysis code that is more easily translated to a service provided by an application. In closing, I describe our plans to leverage VocalPy within other packages, and discuss how VocalPy can become the core of a software community for researchers studying animal acoustic communication.
+\end{abstract}
+\keywords{\textit{insert here from 3 to 5 keywords separated by a comma (no bold, no capitalized letters, italic). \textbf{Note that the keywords insertion is mandatory.}}}
+%
+
+\section{Introduction}\label{sec:introduction}
+
+The study of animal acoustic communication allows us to answer questions that are central to the question of what it means to be human. How did language evolve and how does it relate to the ability of vocal learning in other animals  \cite{hauserFacultyLanguageWhat2002, wirthlinModularApproachVocal2019,  vernesMultidimensionalNatureVocal2021petkovBirdsPrimatesSpoken2012, martinsVocalLearningContinuum2020}?
+Answering these questions requires collaboration across disciplines, big team science, and cutting edge computational methods.
+Many previous authors have called for collaboration across disciplines at scale to investigate language, vocal learning, and vocal behavior more generally 
+\cite{hauserFacultyLanguageWhat2002, wirthlinModularApproachVocal2019, berthetAnimalLinguisticsPrimer2022}.
+As the many research disciplines just mentioned have become ever more computational, as has science more generally, it has becoming clear that cutting edge computational methods will play a key role in studies of animal acoustic communication
+Nowhere is this more obvious than the widespread proliferation of so-called deep learning models, both from a neuroethological standpoint \cite{sainburgComputationalNeuroethologyVocal2021} and more generally in bioacoustics \cite{stowellComputationalBioacousticsDeep2022}.
+In sum, there is a movement towards collaboration across disciplines and research groups at scale using rapidly evolving computational methods.
+
+In concert with these movements, researchers studying animal acoustic communication have begun to adopt the habits of other computational sciences, such as openly sharing their code \cite{christinaBuffetApproachOpen2023}.
+Sharing code across disciplines and research groups produces a unique set of challenges, especially when that code uses rapidly evolving computational methods.
+The code is often written to answer very specific research questions,
+It is also tailored to very specific data formats, which vary widely across groups. 
+Because researchers are required to spend so much time writing low-level code that deals with different data formats and analyses, they do not have a "development budget" to spend on documenting what their code is doing
+As a result of all these factors working together, it is not always easy to read and reuse shared code. A reader must first grasp what low-level details are being dealt with, often reverse engineering the analysis from a single sparsely-documented script. Often one finds oneself attempting to hold these low-level details in mind while piecing together the methodological steps in the analysis, perhaps finally writing it down in outline form
+This process of reverse engineering an analysis script requires a significant time investment from a researcher in another group
+Furthermore, because each group writes code to deal with low-level details, there is massive duplication of effort. 
+
+In this paper I introduce VocalPy, designed to address these issues by serving as a core package for the community of researchers studying animal acoustic communication.
+VocalPy addresses the issues just described with an approach inspired by domain-driven design \cite{evansDomaindrivenDesignTackling2004, percivalArchitecturePatternsPython2020}.
+The key innovation that VocalPy provides is a domain model of research on animal acoustic communication.
+A schematized version of the design of VocalPy and the domain model it implements is shown in \figref{fig:schematic}.
+This domain model is meant to capture the essential entities, processes, and relationships that researchers work with when they write the sort of imperative analysis scripts described above.
+Entities are data like audio signals, spectrogram, annotations, and features extracted from all of those, as well as the varying file formats that all these data can be contained in.
+Processes can convert one form of acoustic communication data to another: a spectrogram is made from audio, features are extracted from a spectrogram or annotation file, and a set of files is persisted to a database to represent a dataset.
+A workflow that applies a set of processes to entities results in relationships between these entities. Typically a researcher will want to capture these relationships
+An entire dataset consisting of some combination of these data as specified by a researcher.
+
+VocalPy provides high-level abstractions of these entities, processes, and relationships that a scientist-coder can use to write scripts idiomatically, in a way meant to be readable across research groups
+In the language of domain driven design, these abstractions live in a domain layer
+At the same time, VocalPy is designed so that the domain layer facilitates collaboration between scientists-coders writing imperative analysis code and researchers writing robust engineered code for applications and libraries
+Lightweight domain layer objects can be passed to core processes that generate spectrograms, extract features, or save datasets that can choose from a "backend".
+We provide initial implementations of these backends as proof of concept.
+
+
+\begin{figure}[ht]
+ \centerline{\framebox{
+ \includegraphics[width=7.8cm]{voc-fig1-model.png}}}
+ \caption{ A diagram illustrating the design of VocalPy. The package implements a domain model of acoustic communication research, providing high-level abstractions of entities and processes. Entities are uniquely identifiable data we wish to track throughout their lifetime, like audio and spectrograms, and processes are applied to those data, such as generating spectrograms from audio or extracting acoustic features from spectrograms. The diagram is meant to show a common workflow for analyzing sequences of acoustic units that could be written as imperative code by a scientist-coder using the domain model built into VocalPy. The dataset generated by this workflow and the provenance of the different files in the dataset can then moved to persistent storage such as a database using an implementation provided by a research software engineer. For clarity of presentation, this diagram leaves out some relationships between entities and almost all of their attributes.}
+ \label{fig:schematic}
+\end{figure}
+
+
+\section{Page Size and template formatting}\label{sec:page_size}
+
+The proceedings will be formatted for
+A4-size paper (\SI{21.0}{\centi\meter} $\times$ \SI{29.7}{\centi\meter}), portrait layout.
+All material on each page should fit within a rectangle of \SI{17.0}{\centi\meter} x \SI{20.7}{\centi\meter},
+centered on the page, beginning \SI{5.0}{\centi\meter}
+from the top of the page and ending with \SI{4.0}{\centi\meter} from the bottom.
+The left and right margins should be \SI{2.0}{\centi\meter}.
+The text should be in two \SI{8.1}{\centi\meter} columns with a \SI{0.8}{\centi\meter} gutter.
+All text must be in a two-column format. Text must be fully justified.
+\textbf{All papers must be compliant with the formatting guidelines provided in this template for papers indexing purposes and timely reviews. Any paper that varies from this format will be returned to the author(s) for re-formatting using the presented guidance. Only papers conforming to the template guidelines will be included in the proceedings.}
+
+\section{Typeset Text}\label{sec:typeset_text}
+
+\subsection{Normal or body text}\label{subsec:body}
+
+Please use a 10pt (point) Times New Roman font with single line spacing and 0.2pt characters spacing (i.e., condensed spacing by 0.2pt).
+
+\subsection{Title and authors}
+
+The following is for making a camera-ready version.
+The title is 15pt Times New Roman, bold, caps, upper case, centered, with 16pt space before, 26pt space after it and with characters spacing of 0.2pt.
+Authors' names are centered.
+The lead author's name is to be listed first (left-most), and the co-authors' names after.
+If the addresses for all authors are the same, include the address only once.
+If the authors have different addresses, put the addresses as multiple affiliations.
+
+\subsection{First page copyright notice}
+Please include the copyright notice exactly as it appears here in the lower left-hand corner of the page.
+Make sure to update the first author’s name in the copyright notice, accordingly. It is set in 9pt Times New Roman. 
+
+\subsection{Page numbering, headers and footers}
+
+Do not modify headers, footers or page numbers in your submission. These will be added electronically at a later stage, when the publications are assembled.
+
+\subsubsection{First level headings}
+
+First level headings are in Times New Roman 10pt bold and capital, centered, with 16pt space before, 8pt space after it, and with characters spacing of 0.2pt. 
+
+\subsubsection{Second level headings}
+
+Second level headings are in Times New Roman 10pt bold, flush left, with 10pt space before, 6pt space after it, and with characters spacing of 0.2pt.
+
+\subsubsection{Third level headings}
+
+Third level headings are in Times New Roman 10pt italic, flush left, with 7pt space before, 8pt space after it, and with characters spacing of 0.2pt.\\
+Using more than three levels of headings is highly discouraged.
+
+
+\section{Footnotes and Figures}
+
+\subsection{Normal or body text}
+
+Indicate footnotes with a number in the text.\footnote{This is a footnote.}
+Use 9pt type for footnotes. Place the footnotes at the bottom of the page on which they appear.
+
+\subsection{Figures, tables and captions}
+
+All artworks must be centered, neat, clean, and legible.
+All lines should be very dark for purposes of reproduction and artworks should not be hand-drawn.
+Proceedings will only be supplied in electronic form, so color figures are acceptable. However, for sustainability reasons it is suggested to make artworks (figures and graphs) comprehensible and clear also for black and white print. In this case a best effort should be made to remove all references to colors in figures in the text.
+Please ensure sufficient resolution to avoid pixelation and compression effects. Captions for figures and tables appear below and above the object, respectively.
+Each figure or table is numbered consecutively and is introduced in the text before appearing on the page. Captions should be Times New Roman 11pt, with 10pt space before, 6pt space after it and with characters spacing of 0.2pt.
+Place tables/figures in text as close to the reference as possible.
+References to tables and figures should be capitalized, for example:
+see \figref{fig:example} and \tabref{tab:example}.
+Figures and tables may extend on a single column to a maximum width of \SI{8.1}{\centi\meter} and across both columns to a maximum width of \SI{17.0} {\centi\meter}.\\\\
+
+\begin{figure}[ht]
+ \centerline{\framebox{
+ \includegraphics[width=7.8cm]{example-image-a}}}
+ \caption{ Figure captions should be placed below the figure.}
+ \label{fig:example}
+\end{figure}
+
+\begin{table}[!h]
+ \caption{Table captions should be placed above the table.}
+ \begin{center}
+ \begin{tabular}{|l|l|}
+  \hline
+  String value & Numeric value \\
+  \hline
+  Value1  & \conferenceyear\ \\
+  \hline
+ \end{tabular}
+\end{center}
+ \label{tab:example}
+\end{table}
+\newpage
+
+
+\section{Equations}
+
+Equations should not appear in the main body of the text, should be placed on separate lines and should be numbered. 
+The number should be on the right side, in parentheses, as in \eqnref{relativity}.
+
+\begin{equation}\label{relativity}
+E=mc^{2}
+\end{equation}
+
+\section{Citations}
+
+% All bibliographical references should be listed at the end,
+% inside a section named ``REFERENCES,'' numbered and in order of appearance.
+% All references listed should be cited in the text.
+% When referring to a document, type the number in square brackets
+% \cite{Author:00}, or for a range \cite{Author:00,Someone:10,Someone:04}.\\
+% Standard abbreviations should be used in your bibliography. When the following words appear in the references, please abbreviate them: 
+% \begin{itemize}\setlength\itemsep{-0.25em}
+% \item Proceedings $\rightarrow$ Proc.\
+% \item Record $\rightarrow$ Rec.\
+% \item Symposium $\rightarrow$ Symp.\
+% \item Technical Digest $\rightarrow$ Tech.\ Dig.
+% \item Technical Paper $\rightarrow$ Tech.\ Paper
+% \item First $\rightarrow$ 1\textsuperscript{st}
+% \item Second $\rightarrow$ 2\textsuperscript{nd}
+% \item Third $\rightarrow$ 3\textsuperscript{rd}
+% \item Fourth/nth $\rightarrow$ 4\textsuperscript{th/nth}.
+% \end{itemize}
+
+% \section{INSPECTING THE PDF FILE}
+% Carefully inspect your PDF file before submission to be sure that the PDF conversion was done properly and that there are no error messages when you open the PDF file. Common problems are: missing or incorrectly converted symbols especially mathematical symbols, failure of figures to reproduce, and incomplete legends in figures. Identification and correction of these problems is the responsibility of the authors.
+
+\section{Acknowledgments}
+In this section, you can acknowledge any support given which is not covered by the author contribution or funding sections. This may include administrative and technical support, or donations in kind (e.g., materials used for experiments).
+
+
+% For bibtex users:
+\bibliography{forum-acusticum-2023}
+
+% For non bibtex users:
+%\begin{thebibliography}{citations}
+%\bibitem{Author:00}
+%E.~Author.
+%\newblock The title of the conference paper.
+%\newblock In {\em Proc.\ of the European Society on Vibration
+%  }, pages 000--111, Chania, Greece, 2018.
+%
+%\bibitem{Someone:10}
+%A.~Someone, B.~Someone, and C.~Someone.
+%\newblock The title of the journal paper.
+%\newblock {\em Acta Acust united Ac}, A(B):111--222, 2010.
+%
+%\bibitem{Someone:04}
+%X.~Someone and Y.~Someone.
+%\newblock {\em The Title of the Book}.
+%\newblock S. Hirzel, Stuttgart, Germany, 2012.
+%
+%\end{thebibliography}
+
+\end{document}
