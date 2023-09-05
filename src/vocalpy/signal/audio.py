@@ -37,9 +37,7 @@ def smooth(data: npt.NDArray, samplerate: int, smooth_win: int = 2) -> npt.NDArr
         The `vocalpy.Audio.data` after smoothing.
 
     Rectifies audio signal by squaring, then smooths by taking
-    the average within a window of size sm_win.
-    This is a very literal translation from the Matlab function SmoothData.m
-    by Evren Tumer. Uses the Thomas-Santana algorithm.
+    the average within a window of size ``sm_win``.
     """
     data = np.array(data)
     if issubclass(data.dtype.type, numbers.Integral):
