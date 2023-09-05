@@ -3,7 +3,6 @@ from __future__ import annotations
 import numpy as np
 import numpy.typing as npt
 
-from ...sequence import Sequence
 from ..audio import smooth
 
 
@@ -14,19 +13,21 @@ def audio_amplitude(
     threshold: int = 5000,
     min_dur: float = 0.02,
     min_silent_dur: float = 0.002,
-) -> Sequence | None:
-    """Segment audio into a sequence of units.
+) -> tuple[npt.NDArray, npt.NDArray]:
+    """Find segments in audio by thresholding on the amplitude.
 
-    Applies a threshold below which is considered silence,
-    and then finds all continuous periods above the threshold
-    that are bordered by silent gaps.
-    All such periods are considered a :class:`vocalpy.Unit`.
-    This function returns a :class:`vocalpy.Sequence`
-    of such units.
-
-    Note that before segmenting,
-    the audio is first smoothed with
+    This function first squares the audio to rectify it,
+    and then smooths with a window of size ``smooth_win``
+    milliseconds. This is done by calling
     :func:`vocalpy.signal.segment.smooth`.
+    Then the function looks for all continuous periods
+    above ``threshold`` to find candidate segments.
+    Candidates are removed that have a duration less than
+    ``minimum_dur``, and then any two segments with a silent
+    gap between them less than ``min_silent_dur`` are merged
+    into a single segment. The segments remaining after this
+    post-processing are returned as onset and offset times
+    in two numpy arrays.
 
     Parameters
     ----------
@@ -50,8 +51,10 @@ def audio_amplitude(
 
     Returns
     -------
-    sequence : vocalpy.Sequence
-        A :class:`vocalpy.Sequence` made up of `vocalpy.Unit` instances.
+    onsets_s : numpy.ndarray
+        Vector of onset times of segments, in seconds.
+    offsets_s : numpy.ndarray
+        Vector of offset times of segments, in seconds.
     """
     smoothed = smooth(data, samplerate, smooth_win)
     above_th = smoothed > threshold
