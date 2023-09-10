@@ -224,4 +224,7 @@ def annotation(
         text_kwargs=text_kwargs,
     )
 
+    # FIXME: if we plot bounding boxes then we actually want yticks
+    ax.set_yticks([])
+
     return rectangles, text_list
