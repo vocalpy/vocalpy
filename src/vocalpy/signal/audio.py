@@ -57,4 +57,4 @@ def smooth(data: npt.NDArray, samplerate: int, smooth_win: int = 2) -> npt.NDArr
     h = np.ones((len,)) / len
     smooth = np.convolve(squared, h)
     offset = round((smooth.shape[-1] - data.shape[-1]) / 2)
-    return smooth[offset : data.shape[-1] + offset]
+    return smooth[offset : data.shape[-1] + offset]  # noqa: E203

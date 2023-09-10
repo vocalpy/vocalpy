@@ -13,7 +13,7 @@ def spectrogram(
     tlim: tuple | list | None = None,
     flim: tuple | list | None = None,
     ax: plt.Axes | None = None,
-    imshow_kwargs: dict | None = None,
+    pcolormesh_kwargs: dict | None = None,
 ) -> None:
     """Plot a spectrogram.
 
@@ -32,22 +32,18 @@ def spectrogram(
         limits of frequency axis (min, max) (i.e., x-axis).
         Default is None, in which case entire range of f will be plotted.
     ax : matplotlib.axes.Axes
-        axes on which to plot spectrgraom
-    imshow_kwargs : dict
-        keyword arguments passed to matplotlib.axes.Axes.imshow method
-        used to plot spectrogram. Default is None.
+        axes on which to plot spectrogram
+    pcolormesh_kwargs : dict
+        keyword arguments passed to :meth:`matplotlib.axes.Axes.pcolormesh`
+        method used to plot spectrogram. Default is None.
     """
-    if imshow_kwargs is None:
-        imshow_kwargs = {}
-
     if ax is None:
         fig, ax = plt.subplots()
 
-    s, t, f = spect.data, spect.times, spect.frequencies
+    if pcolormesh_kwargs is None:
+        pcolormesh_kwargs = {}
 
-    extent = [t.min(), t.max(), f.min(), f.max()]
-
-    ax.imshow(s, aspect="auto", origin="lower", extent=extent, **imshow_kwargs)
+    ax.pcolormesh(spect.times, spect.frequencies, spect.data, **pcolormesh_kwargs)
 
     if tlim is not None:
         ax.set_xlim(tlim)
@@ -65,10 +61,9 @@ def annotated_spectrogram(
     h_segments: float = 0.4,
     y_labels: float = 0.3,
     label_color_map: dict | None = None,
-    fig: plt.Figure | None = None,
-    imshow_kwargs: dict | None = None,
+    pcolormesh_kwargs: dict | None = None,
     text_kwargs=None,
-) -> tuple[plt.Figure, plt.Axes, plt.Axes]:
+) -> tuple[plt.Figure, dict]:
     """Plot a :class:`vocalpy.Spectrogram` with a :class:`vocalpy.Annotation` below it.
 
     Convenience function that calls :func:`vocalpy.plot.spectrogram` and :func:`vocalpy.plot.annotation`.
@@ -76,11 +71,11 @@ def annotated_spectrogram(
     Parameters
     ----------
     spect : vocalpy.Spectrogram
-    annotation : vocalpy.Annotation
-        annotation that has segments to be plotted
+    annot : vocalpy.Annotation
+        Annotation that has segments to be plotted
         (the `annot.seq.segments` attribute)
     tlim : tuple, list
-        limits of time axis (min, max) (i.e., x-axis).
+        Limits of time axis (min, max) (i.e., x-axis).
         Default is None, in which case entire range of t will be plotted.
     flim : tuple, list
         limits of frequency axis (min, max) (i.e., x-axis).
@@ -97,33 +92,34 @@ def annotated_spectrogram(
     label_color_map : dict, optional
         A :class:`dict` that maps string labels to colors
         (that are valid `color` arguments for matplotlib).
-    fig : matplotlib.pyplot.Figure
-        A :class:`matplotlib.pyplot.Figure` instance on which
-        the spectrogram and annotation should be plotted.
-    imshow_kwargs : dict
-        keyword arguments that will get passed to `matplotlib.axes.Axes.imshow`
+    pcolormesh_kwargs : dict
+        Keyword arguments that will get passed to :meth:`matplotlib.axes.Axes.pcolormesh`
         when using that method to plot spectrogram.
     text_kwargs : dict
-        keyword arguments for `matplotlib.axes.Axes.text`.
-        Passed to the function `vocalpy.plot.annot.labels` that plots labels
+        keyword arguments for :meth:`matplotlib.axes.Axes.text`.
+        Passed to the function :func:`vocalpy.plot.annot.labels` that plots labels
         using Axes.text method.
-        Defaults are defined as `vocalpy.plot.annot.DEFAULT_TEXT_KWARGS`.
+        Defaults are defined as :data:`vocalpy.plot.annot.DEFAULT_TEXT_KWARGS`.
 
     Returns
     -------
-    fig, spect_ax, annot_ax :
-        Matplotlib Figure and Axes instances.
-        The spect_ax is the axes containing the spectrogram
-        and the annot_ax is the axes containing the
-        annotated segments.
+    fig, axes :
+        Matplotlib Figure and :class:`dict` of Axes instances.
+        The axes containing the spectrogram is ``axes['spect']``
+        and the axes containing the annotated segments
+        is ``axes['annot']``.
     """
-    if fig is None:
-        fig = plt.figure()
-    gs = fig.add_gridspec(3, 3)
-    spect_ax = fig.add_subplot(gs[:2, :])
-    annot_ax = fig.add_subplot(gs[2, :])
+    fig, axs = plt.subplot_mosaic(
+        [
+            ["spect"],
+            ["spect"],
+            ["annot"],
+        ],
+        layout="constrained",
+        sharex=True,
+    )
 
-    spectrogram(spect, tlim, flim, ax=spect_ax, imshow_kwargs=imshow_kwargs)
+    spectrogram(spect, tlim, flim, ax=axs["spect"], pcolormesh_kwargs=pcolormesh_kwargs)
 
     annotation(
         annot,
@@ -132,8 +128,8 @@ def annotated_spectrogram(
         h_segments=h_segments,
         y_labels=y_labels,
         text_kwargs=text_kwargs,
-        ax=annot_ax,
+        ax=axs["annot"],
         label_color_map=label_color_map,
     )
 
-    return fig, spect_ax, annot_ax
+    return fig, axs

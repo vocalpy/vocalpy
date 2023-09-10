@@ -173,11 +173,9 @@ def annotation(
     annot : crowsetta.Annotation
         Annotation that has segments to be plotted
         (the `Annotation.data.seq.segments` attribute).
-    t : numpy.ndarray
-        Vector of centers of time bins from spectrogram.
     tlim : tuple, list
         Limits of time axis (tmin, tmax) (i.e., x-axis).
-        Default is None, in which case entire range of `t` will be plotted.
+        Default is None, in which case entire range of ``t`` will be plotted.
     y_segments : float
         Height at which segments should be plotted.
         Default is 0.5 (assumes y-limits of 0 and 1).
@@ -208,6 +206,7 @@ def annotation(
             "Please see this issue and give it a 'thumbs up' if support for bounding boxes would help you:\n"
             "https://github.com/vocalpy/vocalpy/issues/34"
         )
+
     if ax is None:
         fig, ax = plt.subplots()
         ax.set_ylim(0, 1)
@@ -224,5 +223,8 @@ def annotation(
         label_color_map=label_color_map,
         text_kwargs=text_kwargs,
     )
+
+    # FIXME: if we plot bounding boxes then we actually want yticks
+    ax.set_yticks([])
 
     return rectangles, text_list
