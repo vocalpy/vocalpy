@@ -178,6 +178,10 @@ def segment(
     from the dataset associated with [1]_.
 
     Code is adapted from [2]_.
+    Default parameters are taking from example script here:
+    https://github.com/pearsonlab/autoencoded-vocal-analysis/blob/master/examples/mouse_sylls_mwe.py
+    Note that example script suggests tuning these parameters using functionality built into it,
+    that we do not replicate here.
 
     Versions of this algorithm were also used to segment 
     rodent vocalizations in [4]_ (see code in [5]_)
