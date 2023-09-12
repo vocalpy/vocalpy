@@ -66,7 +66,7 @@ myst_enable_extensions = [
 
 html_theme = 'sphinx_book_theme'
 
-html_logo = "_static/crowsetta-primary-logo.png"
+html_logo = "_static/vocalpy-primary-logo.png"
 
 html_theme_options = {
     "logo_only": True,
