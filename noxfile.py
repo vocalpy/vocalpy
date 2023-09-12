@@ -79,11 +79,11 @@ def docs(session: nox.Session) -> None:
     if session.posargs:
         if "autobuild" in session.posargs:
             print("Building docs at http://127.0.0.1:8000 with sphinx-autobuild -- use Ctrl-C to quit")
-            session.run("sphinx-autobuild", "doc", "doc/_build/html")
+            session.run("sphinx-autobuild", "docs", "docs/_build/html")
         else:
             print("Unsupported argument to docs")
     else:
-        session.run("sphinx-build", "-nW", "--keep-going", "-b", "html", "doc/", "doc/_build/html")
+        session.run("sphinx-build", "-nW", "--keep-going", "-b", "html", "docs/", "docs/_build/html")
 
 
 @nox.session
