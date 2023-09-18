@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Callable
 
+import librosa
 import numpy as np
 import numpy.typing as npt
 from scipy.ndimage import gaussian_filter
@@ -11,9 +12,21 @@ from scipy.signal import stft
 EPSILON = 1e-9
 
 
-def spectrogram(data: npt.NDArray, samplerate: int, nperseg: int = 1024, noverlap: int = 512,
-                    min_freq: int = 30e3, max_freq: int =  110e3,
-                    spect_min_val: float = 2.0, spect_max_val: float = 6.0
+def log_magnitude(spect: npt.NDArray) -> npt.NDArray:
+    """Helper function that transform a spectrogram
+    by converting the values of the magnitude to log"""
+    return np.log(spect + EPSILON)
+
+
+TRANSFORMS = {
+    'log_magnitude': log_magnitude,
+    'amplitude_to_db': librosa.amplitude_to_db,
+}
+
+
+def get_spectrogram(data: npt.NDArray, samplerate: int, nperseg: int = 1024, noverlap: int = 512,
+                    min_freq: int = 30e3, max_freq: int = 110e3, transform: str = 'amplitude_to_db',
+                    spect_min_val: float | None = None, spect_max_val: float | None = None
                     ) -> tuple[npt.NDArray, npt.NDArray, npt.NDArray]:
     """Compute a spectrogram the same way the ``ava`` package does.
 
@@ -41,20 +54,29 @@ def spectrogram(data: npt.NDArray, samplerate: int, nperseg: int = 1024, noverla
         Maximum frequency. Spectrogram is "cropped"
         above this frequency (instead of, e.g.,
         bandpass filtering). Default is 110e3.
-    spect_min_val : float
+    transform : str
+        One of ``{'log_magnitude', 'amplitude_to_db'}``.
+        If ``'log_amplitude'``, the computed spectrogram
+        is transformed by calling ``np.log(np.abs(spect) + EPSILON``.
+        If ``'amplitude-to-db'``, the spectrogram
+        is transformed with
+        :func:`librosa.amplitude_to_db`.
+    spect_min_val : float, optional
         Expected minimum value of spectrogram
         after transforming to the log of the
         magnitude. Used for a min-max scaling:
         :math:`(s - s_{min} / (s_{max} - s_{min})`
         where ``spect_min_val`` is :math:`s_{min}`.
-        Default is 2.0.
-    spect_max_val : float
+        Default is None, in which case
+        the minimum value of the spectrogram is used.
+    spect_max_val : float, optional
         Expected maximum value of spectrogram
         after transforming to the log of the
         magnitude. Used for a min-max scaling:
         :math:`(s - s_{min} / (s_{max} - s_{min})`
         where ``spect_min_val`` is :math:`s_{min}`.
-        Default is 6.0.
+        Default is None, in which case
+        the maximum value of the spectrogram is used.
 
     Returns
     -------
@@ -73,21 +95,45 @@ def spectrogram(data: npt.NDArray, samplerate: int, nperseg: int = 1024, noverla
     https://github.com/pearsonlab/autoencoded-vocal-analysis/blob/master/examples/mouse_sylls_mwe.py
     Note that example script suggests tuning these parameters using functionality built into it,
     that we do not replicate here.
+
+    The following modifications were made to the defaults:
+    - We use the minimum and maximum of the computed spectrogram by default
+      when min-max scaling so the
+    - We default to converting the spectrogram to decibel-scaled values,
+      using :func:`librosa.amplitude_to_db`.
     """
     if not len(data) >= nperseg:
         raise ValueError(
             f"length of `audio`` {(len(data))} must be greater than or equal to ``nperseg``: {nperseg}"
         )
 
+    if spect_min_val is not None or spect_max_val is not None:
+        if not (spect_min_val is not None and spect_max_val is not None):
+            raise ValueError(
+                "If a value is specified for either ``spect_min_val`` or ``spect_max_val``, "
+                "then both values must be specified: "
+                f"spect_min_val: {spect_min_val}, spect_max_val: {spect_max_val}"
+            )
+
+    if transform not in TRANSFORMS:
+        raise ValueError(
+            f"Invalid ``transform``: {transform}. "
+            f"Valid values are: {TRANSFORMS}."
+        )
+
     f, t, spect = stft(data, samplerate, nperseg=nperseg, noverlap=noverlap)
     min_freq_ind = np.searchsorted(f, min_freq)
     max_freq_ind = np.searchsorted(f, max_freq)
     f, spect = f[min_freq_ind:max_freq_ind], spect[min_freq_ind:max_freq_ind]
-    spect = np.log(np.abs(spect) + EPSILON)
-    # This is like min-max scaling between 0. and 1,
-    # but notice that we could end up with all values set to zero
-    # depending on range of spectrogram before transformation.
-    # An alternative would be to do ``spect = (spect - spect.min()) / (spect.max() - spect.min())``.
+
+    # next line, we apply transform using the dict that maps names to functions.
+    # note we take ``np.abs`` here to preserve original behavior and to avoid librosa warning
+    spect = TRANSFORMS[transform](np.abs(spect))
+
+    if spect_min_val is None and spect_max_val is None:
+        spect_min_val = spect.min()
+        spect_max_val = spect.max()
+
     spect = (spect - spect_min_val) / (spect_max_val - spect_min_val)
     spect = np.clip(spect, 0., 1.)
     return spect, f, t
@@ -215,7 +261,7 @@ def segment(
     .. [7] https://github.com/ralphpeterson/gerbil-vocal-dialects/blob/main/vocalization_segmenting.py
     """
     if spect_callback is None:
-        spect_callback = spectrogram_ava
+        spect_callback = get_spectrogram
     spect, f, t = spect_callback(data, samplerate)
 
     dt = t[1] - t[0]
