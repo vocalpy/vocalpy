@@ -8,7 +8,6 @@ import numpy.typing as npt
 from scipy.ndimage import gaussian_filter
 from scipy.signal import stft
 
-
 EPSILON = 1e-9
 
 
@@ -19,15 +18,22 @@ def log_magnitude(spect: npt.NDArray) -> npt.NDArray:
 
 
 TRANSFORMS = {
-    'log_magnitude': log_magnitude,
-    'amplitude_to_db': librosa.amplitude_to_db,
+    "log_magnitude": log_magnitude,
+    "amplitude_to_db": librosa.amplitude_to_db,
 }
 
 
-def get_spectrogram(data: npt.NDArray, samplerate: int, nperseg: int = 1024, noverlap: int = 512,
-                    min_freq: int = 30e3, max_freq: int = 110e3, transform: str = 'amplitude_to_db',
-                    spect_min_val: float | None = None, spect_max_val: float | None = None
-                    ) -> tuple[npt.NDArray, npt.NDArray, npt.NDArray]:
+def get_spectrogram(
+    data: npt.NDArray,
+    samplerate: int,
+    nperseg: int = 1024,
+    noverlap: int = 512,
+    min_freq: int = 30e3,
+    max_freq: int = 110e3,
+    transform: str = "amplitude_to_db",
+    spect_min_val: float | None = None,
+    spect_max_val: float | None = None,
+) -> tuple[npt.NDArray, npt.NDArray, npt.NDArray]:
     """Compute a spectrogram the same way the ``ava`` package does.
 
     This is the default function used to generate spectrograms by
@@ -103,9 +109,7 @@ def get_spectrogram(data: npt.NDArray, samplerate: int, nperseg: int = 1024, nov
       using :func:`librosa.amplitude_to_db`.
     """
     if not len(data) >= nperseg:
-        raise ValueError(
-            f"length of `audio`` {(len(data))} must be greater than or equal to ``nperseg``: {nperseg}"
-        )
+        raise ValueError(f"length of `audio`` {(len(data))} must be greater than or equal to ``nperseg``: {nperseg}")
 
     if spect_min_val is not None or spect_max_val is not None:
         if not (spect_min_val is not None and spect_max_val is not None):
@@ -116,10 +120,7 @@ def get_spectrogram(data: npt.NDArray, samplerate: int, nperseg: int = 1024, nov
             )
 
     if transform not in TRANSFORMS:
-        raise ValueError(
-            f"Invalid ``transform``: {transform}. "
-            f"Valid values are: {TRANSFORMS}."
-        )
+        raise ValueError(f"Invalid ``transform``: {transform}. " f"Valid values are: {TRANSFORMS}.")
 
     f, t, spect = stft(data, samplerate, nperseg=nperseg, noverlap=noverlap)
     min_freq_ind = np.searchsorted(f, min_freq)
@@ -135,7 +136,7 @@ def get_spectrogram(data: npt.NDArray, samplerate: int, nperseg: int = 1024, nov
         spect_max_val = spect.max()
 
     spect = (spect - spect_min_val) / (spect_max_val - spect_min_val)
-    spect = np.clip(spect, 0., 1.)
+    spect = np.clip(spect, 0.0, 1.0)
     return spect, f, t
 
 
@@ -147,11 +148,16 @@ def softmax(arr: npt.NDArray, t=0.5):
 
 
 def segment(
-    data: npt.NDArray, samplerate: int,
+    data: npt.NDArray,
+    samplerate: int,
     spect_callback: Callable | None = None,
-    thresh_lowest: float = 0.1, thresh_min: float = 0.2, thresh_max: float = 0.3,
-    min_dur: float = 0.03, max_dur: float = 0.2,
-    use_softmax_amp: bool = True, temperature: float = 0.5,
+    thresh_lowest: float = 0.1,
+    thresh_min: float = 0.2,
+    thresh_max: float = 0.3,
+    min_dur: float = 0.03,
+    max_dur: float = 0.2,
+    use_softmax_amp: bool = True,
+    temperature: float = 0.5,
     smoothing_timescale: float = 0.007,
 ):
     """Find segments in audio, using algorithm
@@ -229,7 +235,7 @@ def segment(
     Note that example script suggests tuning these parameters using functionality built into it,
     that we do not replicate here.
 
-    Versions of this algorithm were also used to segment 
+    Versions of this algorithm were also used to segment
     rodent vocalizations in [4]_ (see code in [5]_)
     and [6]_ (see code in [7]_).
 
@@ -245,7 +251,7 @@ def segment(
     Data from: Low-dimensional learned feature spaces quantify individual
     and group differences in vocal repertoires. Duke Research Data Repository.
     https://doi.org/10.7924/r4gq6zn8w
-    
+
     .. [4] Nicholas Jourjine, Maya L. Woolfolk, Juan I. Sanguinetti-Scheck, John E. Sabatini,
     Sade McFadden, Anna K. Lindholm, Hopi E. Hoekstra,
     Two pup vocalization types are genetically and functionally separable in deer mice,
@@ -277,8 +283,8 @@ def segment(
     # replace this with a convolution to find local maxima?
     # actually I think we want `find_peaks`
     # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html
-    for i in range(1, len(amps)-1,1):
-        if amps[i] > thresh_max and amps[i] == np.max(amps[i - 1:i + 2]):
+    for i in range(1, len(amps) - 1, 1):
+        if amps[i] > thresh_max and amps[i] == np.max(amps[i - 1 : i + 2]):  # noqa: E203
             local_maxima.append(i)
 
     # Then search to the left and right for onsets and offsets.
@@ -296,14 +302,14 @@ def segment(
             if amps[i] < thresh_lowest:
                 onsets.append(i)
                 break
-            elif amps[i] < thresh_min and amps[i] == np.min(amps[i-1:i+2]):
+            elif amps[i] < thresh_min and amps[i] == np.min(amps[i - 1 : i + 2]):  # noqa: E203
                 onsets.append(i)
                 break
             i -= 1
 
-        # if we found multiple o        nsets because of if/else, then only keep one
+        # if we found multiple onsets because of if/else, then only keep one
         if len(onsets) != len(offsets) + 1:
-            onsets = onsets[:len(offsets)]
+            onsets = onsets[: len(offsets)]
             continue
 
         # then find offset
@@ -314,7 +320,7 @@ def segment(
             if amps[i] < thresh_lowest:
                 offsets.append(i)
                 break
-            elif amps[i] < thresh_min and amps[i] == np.min(amps[i-1:i+2]):
+            elif amps[i] < thresh_min and amps[i] == np.min(amps[i - 1 : i + 2]):  # noqa: E203
                 offsets.append(i)
                 break
             i += 1
@@ -322,7 +328,7 @@ def segment(
         # if we found multiple offsets because of if/else, then only keep one
         # shouldn't this change offsets though?
         if len(onsets) != len(offsets):
-            onsets = onsets[:len(offsets)]
+            onsets = onsets[: len(offsets)]
             continue
 
     # Throw away syllables that are too long or too short.
