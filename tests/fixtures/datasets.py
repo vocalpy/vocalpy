@@ -32,7 +32,6 @@ def spect_mat_annot_yarden_root():
 
 
 wav_seg_tuples = list(zip(GOFFINET_ETAL_2021_WAV_LIST, GOFFINET_ETAL_2021_SEG_TXT_LIST))
-breakpoint()
 
 
 @pytest.fixture(params=wav_seg_tuples)
