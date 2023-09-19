@@ -162,4 +162,4 @@ def an_audio_path(request):
 
 
 GOFFINET_ETAL_2021_WAV_DIR = SOURCE_TEST_DATA_ROOT / 'goffinet-et-al-2021' / 'wav'
-GOFFINET_ET_AL_2021_WAV_LIST = sorted(GOFFINET_ETAL_2021_WAV_DIR.glob())
+GOFFINET_ET_AL_2021_WAV_LIST = sorted(GOFFINET_ETAL_2021_WAV_DIR.glob('*.wav'))
