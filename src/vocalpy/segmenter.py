@@ -29,10 +29,10 @@ class Segmenter:
 
             # TODO: fix this
             try:
-                callback = getattr(vocalpy.signal.segment, method)
+                callback = getattr(vocalpy.segment, method)
             except AttributeError:
                 raise AttributeError(
-                    f"Method was '{method}' but `vocalpy.signal.segment` has no function named `{method}`"
+                    f"Method was '{method}' but `vocalpy.segment` has no function named `{method}`"
                 )
 
         if callback is None:
