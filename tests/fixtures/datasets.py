@@ -1,7 +1,8 @@
 import pytest
 
 from .annot import ANNOT_PATHS_LIST_NOTMAT
-from .audio import AUDIO_LIST_CBIN
+from .audio import AUDIO_LIST_CBIN, GOFFINET_ETAL_2021_WAV_LIST
+from .segments import GOFFINET_ETAL_2021_SEG_TXT_LIST
 from .test_data import SOURCE_TEST_DATA_ROOT
 
 # note we convert iterator to a list so it's not consumed by one unit test then left empty
@@ -28,3 +29,12 @@ SPECT_MAT_ANNOT_YARDEN_ROOT = SOURCE_TEST_DATA_ROOT / 'spect_mat_annot_yarden' /
 @pytest.fixture
 def spect_mat_annot_yarden_root():
     return SPECT_MAT_ANNOT_YARDEN_ROOT
+
+
+wav_seg_tuples = list(zip(GOFFINET_ETAL_2021_WAV_LIST, GOFFINET_ETAL_2021_SEG_TXT_LIST))
+breakpoint()
+
+
+@pytest.fixture(params=wav_seg_tuples)
+def goffinet_etal_2021_wav_seg_tuple(request):
+    return request.param
