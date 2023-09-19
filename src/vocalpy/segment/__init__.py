@@ -10,7 +10,6 @@ to the start and stop times.
 from . import ava
 from .audio_amplitude import audio_amplitude
 
-
 __all__ = [
     "audio_amplitude",
     "ava",
