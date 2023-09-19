@@ -36,8 +36,7 @@ class Segmenter:
                 )
 
         if callback is None:
-            from vocalpy.signal.segment import audio_amplitude as default_segment_func
-
+            from vocalpy.segment import audio_amplitude as default_segment_func
             callback = default_segment_func
 
         if callback is not None and not callable(callback):
