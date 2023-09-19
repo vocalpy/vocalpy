@@ -1,0 +1,4 @@
+from .test_data import SOURCE_TEST_DATA_ROOT
+
+GOFFINET_ETAL_2021_SEGS_DIR = SOURCE_TEST_DATA_ROOT / 'goffinet-et-al-2021' / 'segs'
+GOFFINET_ETAL_2021_SEG_TXT_PATHS = sorted(GOFFINET_ETAL_2021_SEGS_DIR.glob('*.txt'))
