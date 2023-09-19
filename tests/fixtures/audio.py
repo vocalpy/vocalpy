@@ -150,6 +150,7 @@ ALL_AUDIO_PATHS = (
     AUDIO_LIST_CBIN
 )
 
+
 @pytest.fixture(params=ALL_AUDIO_PATHS)
 def an_audio_path(request):
     """Parametrized fixture that returns one audio path
@@ -158,3 +159,7 @@ def an_audio_path(request):
     Used for testing .e.g. :class:`vocalpy.dataset.AudioFile`.
     """
     return request.param
+
+
+GOFFINET_ETAL_2021_WAV_DIR = SOURCE_TEST_DATA_ROOT / 'goffinet-et-al-2021' / 'wav'
+GOFFINET_ET_AL_2021_WAV_LIST = sorted(GOFFINET_ETAL_2021_WAV_DIR.glob())
