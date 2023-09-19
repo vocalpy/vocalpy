@@ -1,4 +1,4 @@
-from . import constants, dataset, paths, plot, signal, validators
+from . import constants, dataset, paths, plot, segment, signal, validators
 from .__about__ import (
     __author__,
     __commit__,
@@ -48,6 +48,7 @@ __all__ = [
     "plot",
     "Segmenter",
     "Sequence",
+    "segment",
     "signal",
     "Spectrogram",
     "SpectrogramFile",

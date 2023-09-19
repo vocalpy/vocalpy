@@ -1,7 +1,7 @@
 import evfuncs
 import numpy as np
 
-import vocalpy.signal.segment
+import vocalpy.segment
 
 
 def test_audio_amplitude(a_cbin_path):
@@ -14,7 +14,7 @@ def test_audio_amplitude(a_cbin_path):
     min_silent_dur = nmd['min_int'] / 1000
     threshold = nmd['threshold']
 
-    onsets, offsets = vocalpy.signal.segment.audio_amplitude(smooth, fs, threshold, min_syl_dur, min_silent_dur)
+    onsets, offsets = vocalpy.segment.audio_amplitude(smooth, fs, threshold, min_syl_dur, min_silent_dur)
     assert isinstance(onsets, np.ndarray)
     assert isinstance(offsets, np.ndarray)
     assert len(onsets) == len(offsets)

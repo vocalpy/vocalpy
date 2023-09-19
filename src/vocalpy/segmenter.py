@@ -29,14 +29,12 @@ class Segmenter:
 
             # TODO: fix this
             try:
-                callback = getattr(vocalpy.signal.segment, method)
+                callback = getattr(vocalpy.segment, method)
             except AttributeError:
-                raise AttributeError(
-                    f"Method was '{method}' but `vocalpy.signal.segment` has no function named `{method}`"
-                )
+                raise AttributeError(f"Method was '{method}' but `vocalpy.segment` has no function named `{method}`")
 
         if callback is None:
-            from vocalpy.signal.segment import audio_amplitude as default_segment_func
+            from vocalpy.segment import audio_amplitude as default_segment_func
 
             callback = default_segment_func
 
