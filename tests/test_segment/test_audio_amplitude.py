@@ -1,7 +1,7 @@
 import evfuncs
 import numpy as np
 
-import vocalpy.signal.segment
+import vocalpy.segment
 
 
 def test_audio_amplitude(a_cbin_path):
