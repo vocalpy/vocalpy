@@ -38,3 +38,8 @@ def generated_test_data_root(test_data_root):
 
 
 DATA_ROOTS_WITH_SUBDIRS = GENERATED_TEST_DATA_ROOT / 'root_with_subdirs_to_test_paths'
+
+# for details on these paths,
+# see tests/data-for-tests/source/goffinet-et-al-2021/README.md
+GOFFINET_ETAL_2021_ROOT = SOURCE_TEST_DATA_ROOT / 'goffinet-et-al-2021'
+GOFFINET_ETAL_2021_BM003_ROOT = GOFFINET_ETAL_2021_ROOT / 'BM003'
