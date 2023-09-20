@@ -3,42 +3,116 @@ from __future__ import annotations
 
 import numpy as np
 import numpy.typing as npt
-import scipy.spatial.distance
-
-tol = 0.01
 
 
-def _compute_tp(boundaries_hyp: npt.NDArray, boundaries_ref: npt.NDArray, tol: float = 0.01) -> int:
+def compute_true_positives(hypothesis: npt.NDArray, reference: npt.NDArray,
+                           tolerance: float | int, decimals: int | bool = 3):
     """Helper function to compute number of true positives.
 
     Parameters
     ----------
-    boundaries_hyp : numpy.ndarray
+    hypothesis : numpy.ndarray
         Boundaries, e.g., onsets or offsets of segments,
         as computed by some method.
-    boundaries_ref : numpy.ndarray
+    reference : numpy.ndarray
         Ground truth boundaries that the hypothesized
-        boundaries ``boundaries_hyp`` are compared to.
-    tol : float
+        boundaries ``hypothesis`` are compared to.
+    tol : float or int
         Tolerance, in seconds. Default is ``0.01``.
+    decimals: int
+        The number of decimal places to round both
+        ``hypothesis`` and ``reference`` to, using
+        :func:`numpy.round`. This mitigates inflated
+        error rates due to floating point error.
+        Rounding is only applied
+        if both ``hypothesis`` and ``reference``
+        are floating point values. To avoid rounding,
+        e.g. to compute strict precision and recall,
+        pass in the value ``False``. Default is 3, which
+        assumes that the values are in seconds
+        and should be rounded to milliseconds.
 
     Returns
     -------
-    tp : int
+    n_tp : int
         The number of true positives.
-    """
-    if tol < 0.0:
-        raise ValueError(f"Tolerance value ``tol`` must be a non-negative float but was: {tol}")
+    hits : numpy.ndarray
+        The indices of the true positives.
 
-    tp = 0
-    for _, boundary_time_ref in enumerate(boundaries_ref):
-        # FIXME: do we ignore multiple hits here?
-        hits = (
-            np.abs(scipy.spatial.distance.cdist(np.array([[boundary_time_ref]]), boundaries_hyp[:, np.newaxis])) < tol
-        ).sum()
-        if hits > 0:
-            tp += 1
-    return tp
+    Notes
+    -----
+    Adapted from this post by https://github.com/droyed under CC BY-SA 4.0 license.
+    https://stackoverflow.com/a/51747164/4906855
+    """
+    # validators.is_valid_boundaries_array(hypothesis)  # 1-d, non-negative, strictly increasing
+    # validators.is_valid_boundaries_array(reference)
+    # validators.boundary_arrays_have_same_dtype(hypothesis, reference)
+
+    if tolerance < 0:
+        raise ValueError(
+            f"``tolerance`` must be a non-negative number but was: {tolerance}"
+        )
+
+    if decimals is not False and not isinstance(decimals, int):
+        raise ValueError(
+            f"``decimals`` must either be ``False`` or an integer but was: {decimals}"
+        )
+
+    if decimals < 0:
+        raise ValueError(
+            f"``decimals`` must be a non-negative number but was: {decimals}"
+        )
+
+    if issubclass(reference.dtype.type, float):
+        if not isinstance(tolerance, float):
+            raise TypeError(
+                "If ``hypothesis`` and ``reference`` are floating, tolerance must be a float also, "
+                f"but type was: {type(tolerance)}"
+            )
+        if decimals is not False:
+            # we assume float values are in units of seconds and round to ``decimals``,
+            # the default is 3 to indicate "milliseconds"
+            reference = np.round(reference, decimals=decimals)
+            hypothesis = np.round(hypothesis, decimals=decimals)
+
+    if issubclass(reference.dtype.type, int):
+        if not isinstance(tolerance, int):
+            raise TypeError(
+                "If ``hypothesis`` and ``reference`` are integers, tolerance must be an integer also, "
+                f"but type was: {type(tolerance)}"
+            )
+
+    # ---- "algorithm" ----
+    # To determine whether elements in ``hypothesis`` are in ``reference`` with some ``tolerance``
+    # (plus or minus some maximum difference),  we find where we would insert elements
+    # from ``hypothesis`` in ``reference`` to maintain ,
+    # and then find the minimum distance between the inserted elements from hypothesis
+    # and the nearest elements in reference
+    # ---------------------
+    # determine where to insert elements from ``hypothesis`` in sorted order with ``reference``
+    insert_indices = np.searchsorted(reference, hypothesis)
+
+    # we special case values in ``hypothesis`` that would be inserted *after* the last element of reference,
+    # so that below we can say ``reference[these_indices] - hypothesis`` without raising an IndexError
+    left_invalid_mask = idx == len(reference)
+    idx[left_invalid_mask] = len(reference) - 1
+    left_differences = reference[insert_indices] - hypothesis
+    # we need to multiply any special cased values so that they are positive instead of negative
+    # (they are negative because we put them on the "wrong" side using ``left_invalid_mask``
+    left_differences[left_invalid_mask] *= -1
+
+    # we do the same thing now for values from the right
+    right_invalid_mask = idx == 0
+    idx_minus_one = idx - 1
+    idx_minus_one[right_invalid_mask] = 0
+    right_differences = hypothesis - reference[idx_minus_one]
+    right_differences[right_invalid_mask] *= -1
+
+    is_within_tolerance = np.minimum(left_differences, right_differences) <= tolerance
+    hits = np.nonzero(is_within_tolerance)
+    n_tp = is_within_tolerance.sum()
+
+    return n_tp, hits
 
 
 def compute_tp(onsets_hyp, offsets_hyp, onsets_ref, offsets_ref, tol=0.01, method="combine"):
