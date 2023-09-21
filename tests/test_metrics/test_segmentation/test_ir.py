@@ -161,3 +161,54 @@ def test___recall(hypothesis, reference, tolerance, decimals, expected_recall, e
         assert math.isclose(recall, expected_recall)
         assert n_tp == expected_n_tp
         assert np.array_equal(hits, expected_hits)
+
+
+@pytest.mark.parametrize(
+    'hypothesis, reference, tolerance, decimals, expected_fscore, expected_n_tp, expected_hits',
+    [
+        (
+            np.array([0, 5, 10, 15]),
+            np.array([0, 5, 10, 15]),
+            'default',
+            'default',
+            1.0,
+            4,
+            np.array([0, 1, 2, 3]),
+        ),
+        (
+                np.array([0, 5, 10, 15]),
+                np.array([1, 6, 11, 16]),
+                1,
+                'default',
+                1.0,
+                4,
+                np.array([0, 1, 2, 3]),
+        ),
+        (
+                np.array([0., 5., 10., 15.]),
+                np.array([0., 5., 10., 15.]),
+                'default',
+                'default',
+                1.0,
+                4,
+                np.array([0, 1, 2, 3]),
+        ),
+        (
+                np.array([0., 5., 10., 15.]),
+                np.array([0.5, 5.5, 10.5, 15.5]),
+                0.5,
+                'default',
+                1.0,
+                4,
+                np.array([0, 1, 2, 3]),
+        ),
+    ]
+)
+def test___fscore(hypothesis, reference, tolerance, decimals, expected_fscore, expected_n_tp, expected_hits):
+    if tolerance == 'default' and decimals == 'default':
+        fscore, n_tp, hits = vocalpy.metrics.segmentation.ir._fscore(
+            hypothesis, reference
+        )
+        assert math.isclose(fscore, expected_fscore)
+        assert n_tp == expected_n_tp
+        assert np.array_equal(hits, expected_hits)
