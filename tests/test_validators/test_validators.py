@@ -91,6 +91,12 @@ def test_is_valid_boundaries_array_raises_type_error(y):
         # 3d
         np.array([[[1, 2, 3]]]),
         np.array([[[1.0, 2.0, 3.0]]]),
+        # has negative values
+        np.array([[[-1, 0, 2, 3]]]),
+        np.array([[[-1.0, 0.0, 1.0, 2.0, 3.0]]]),
+        # is not monotonically increasing
+        np.array([[[1, 2, 3]]])[::-1],
+        np.array([[[1.0, 2.0, 3.0]]])[::-1],
     ]
 )
 def test_is_valid_boundaries_array_raises_value_error(y):
