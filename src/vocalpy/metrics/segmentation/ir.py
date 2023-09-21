@@ -7,8 +7,13 @@ import numpy.typing as npt
 from ... import validators
 
 
+__all__ = [
+    'compute_true_positives'
+]
+
+
 def compute_true_positives(hypothesis: npt.NDArray, reference: npt.NDArray,
-                           tolerance: float | int, decimals: int | bool = 3):
+                           tolerance: float | int | None = None, decimals: int | bool = 3):
     """Helper function to compute number of true positives.
 
     Parameters
@@ -50,6 +55,12 @@ def compute_true_positives(hypothesis: npt.NDArray, reference: npt.NDArray,
     validators.is_valid_boundaries_array(reference)
     validators.have_same_dtype(hypothesis, reference)
 
+    if tolerance is None:
+        if issubclass(reference.dtype.type, np.floating):
+            tolerance = 0.
+        elif issubclass(reference.dtype.type, np.integer):
+            tolerance = 0
+
     if tolerance < 0:
         raise ValueError(
             f"``tolerance`` must be a non-negative number but was: {tolerance}"
@@ -65,7 +76,7 @@ def compute_true_positives(hypothesis: npt.NDArray, reference: npt.NDArray,
             f"``decimals`` must be a non-negative number but was: {decimals}"
         )
 
-    if issubclass(reference.dtype.type, float):
+    if issubclass(reference.dtype.type, np.floating):
         if not isinstance(tolerance, float):
             raise TypeError(
                 "If ``hypothesis`` and ``reference`` are floating, tolerance must be a float also, "
@@ -77,7 +88,7 @@ def compute_true_positives(hypothesis: npt.NDArray, reference: npt.NDArray,
             reference = np.round(reference, decimals=decimals)
             hypothesis = np.round(hypothesis, decimals=decimals)
 
-    if issubclass(reference.dtype.type, int):
+    if issubclass(reference.dtype.type, np.integer):
         if not isinstance(tolerance, int):
             raise TypeError(
                 "If ``hypothesis`` and ``reference`` are integers, tolerance must be an integer also, "
@@ -111,7 +122,7 @@ def compute_true_positives(hypothesis: npt.NDArray, reference: npt.NDArray,
     right_differences[right_invalid_mask] *= -1
 
     is_within_tolerance = np.minimum(left_differences, right_differences) <= tolerance
-    hits = np.nonzero(is_within_tolerance)
+    hits = np.nonzero(is_within_tolerance)[0]
     n_tp = is_within_tolerance.sum()
 
     return n_tp, hits
