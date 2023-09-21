@@ -73,8 +73,8 @@ class Spectrogram:
                 f"but number of dimensions was {value.ndim}."
             )
 
-    frequencies: npt.NDArray = attrs.field(validator=validators.is_1d_ndarray)
-    times: npt.NDArray = attrs.field(validator=validators.is_1d_ndarray)
+    frequencies: npt.NDArray = attrs.field(validator=validators.attrs.is_1d_ndarray)
+    times: npt.NDArray = attrs.field(validator=validators.attrs.is_1d_ndarray)
 
     path: pathlib.Path = attrs.field(
         converter=attrs.converters.optional(pathlib.Path),
