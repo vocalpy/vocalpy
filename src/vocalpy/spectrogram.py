@@ -1,3 +1,4 @@
+"""Class that represents a spectrogram."""
 from __future__ import annotations
 
 import pathlib
