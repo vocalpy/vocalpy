@@ -1,9 +1,4 @@
-"""Validation functions.
-
-Includes validators used by attrs classes,
-as well as more general validation functions
-that may be used e.g. as pre-conditions for a function.
-"""
+"""Validators used by attrs classes."""
 from . import validators
 
 
