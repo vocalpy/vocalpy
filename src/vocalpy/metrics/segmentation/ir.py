@@ -4,6 +4,8 @@ from __future__ import annotations
 import numpy as np
 import numpy.typing as npt
 
+from ... import validators
+
 
 def compute_true_positives(hypothesis: npt.NDArray, reference: npt.NDArray,
                            tolerance: float | int, decimals: int | bool = 3):
@@ -44,9 +46,9 @@ def compute_true_positives(hypothesis: npt.NDArray, reference: npt.NDArray,
     Adapted from this post by https://github.com/droyed under CC BY-SA 4.0 license.
     https://stackoverflow.com/a/51747164/4906855
     """
-    # validators.is_valid_boundaries_array(hypothesis)  # 1-d, non-negative, strictly increasing
-    # validators.is_valid_boundaries_array(reference)
-    # validators.boundary_arrays_have_same_dtype(hypothesis, reference)
+    validators.is_valid_boundaries_array(hypothesis)  # 1-d, non-negative, strictly increasing
+    validators.is_valid_boundaries_array(reference)
+    validators.have_same_dtype(hypothesis, reference)
 
     if tolerance < 0:
         raise ValueError(
@@ -94,18 +96,18 @@ def compute_true_positives(hypothesis: npt.NDArray, reference: npt.NDArray,
 
     # we special case values in ``hypothesis`` that would be inserted *after* the last element of reference,
     # so that below we can say ``reference[these_indices] - hypothesis`` without raising an IndexError
-    left_invalid_mask = idx == len(reference)
-    idx[left_invalid_mask] = len(reference) - 1
+    left_invalid_mask = insert_indices == len(reference)
+    insert_indices[left_invalid_mask] = len(reference) - 1
     left_differences = reference[insert_indices] - hypothesis
     # we need to multiply any special cased values so that they are positive instead of negative
     # (they are negative because we put them on the "wrong" side using ``left_invalid_mask``
     left_differences[left_invalid_mask] *= -1
 
     # we do the same thing now for values from the right
-    right_invalid_mask = idx == 0
-    idx_minus_one = idx - 1
-    idx_minus_one[right_invalid_mask] = 0
-    right_differences = hypothesis - reference[idx_minus_one]
+    right_invalid_mask = insert_indices == 0
+    insert_indices_minus_one = insert_indices - 1
+    insert_indices_minus_one[right_invalid_mask] = 0
+    right_differences = hypothesis - reference[insert_indices_minus_one]
     right_differences[right_invalid_mask] *= -1
 
     is_within_tolerance = np.minimum(left_differences, right_differences) <= tolerance
