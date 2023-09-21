@@ -128,29 +128,115 @@ def compute_true_positives(hypothesis: npt.NDArray, reference: npt.NDArray,
     return n_tp, hits
 
 
-def compute_tp(onsets_hyp, offsets_hyp, onsets_ref, offsets_ref, tol=0.01, method="combine"):
-    if method == "combine":
-        boundaries_hyp = np.concatenate((onsets_hyp, offsets_hyp))
-        boundaries_ref = np.concatenate((onsets_ref, offsets_ref))
-        tp, all_hits = _compute_tp(boundaries_hyp, boundaries_ref)
-    elif method == "separate":
-        tp = 0
-        all_hits = []
-        for boundaries_hyp, boundaries_ref in zip((onsets_hyp, offsets_hyp), (onsets_ref, offsets_ref)):
-            tp_, all_hits_ = _compute_tp(boundaries_hyp, boundaries_ref)
-            tp += tp_
-            all_hits.append(all_hits_)
-    return tp, all_hits
+def _precision(hypothesis: npt.NDArray, reference: npt.NDArray,
+               tolerance: float | int | None = None, decimals: int | bool = 3):
+    """Helper function to compute precision :math:`P`
+    given a hypothesized vector of boundaries ``hypothesis``
+    returned by a segmentation algorithm
+    and a reference vector of boundaries ``reference``,
+    e.g., boundaries cleaned by a human expert
+    or boundaries from a benchmark dataset.
+
+    Precision is defined as the number of true positives (:math:`T_p`)
+    over the number of true positives
+    plus the number of false positives (:math:`F_p`).
+
+    :math:`P = \\frac{T_p}{T_p+F_p}`.
+
+    The number of true positives ``n_tp`` is computed by calling
+    :func:`vocalpy.metrics.segmentation.ir.compute_true_positives`.
+    This function then computes the precision as
+    ``precision = n_tp / hypothesis.size``.
+
+    Parameters
+    ----------
+    hypothesis : numpy.ndarray
+        Boundaries, e.g., onsets or offsets of segments,
+        as computed by some method.
+    reference : numpy.ndarray
+        Ground truth boundaries that the hypothesized
+        boundaries ``hypothesis`` are compared to.
+    tol : float or int
+        Tolerance, in seconds. Default is ``0.01``.
+    decimals: int
+        The number of decimal places to round both
+        ``hypothesis`` and ``reference`` to, using
+        :func:`numpy.round`. This mitigates inflated
+        error rates due to floating point error.
+        Rounding is only applied
+        if both ``hypothesis`` and ``reference``
+        are floating point values. To avoid rounding,
+        e.g. to compute strict precision and recall,
+        pass in the value ``False``. Default is 3, which
+        assumes that the values are in seconds
+        and should be rounded to milliseconds.
+
+    Returns
+    -------
+    precision : float
+
+    n_tp : int
+        The number of true positives.
+    hits : numpy.ndarray
+        The indices of the true positives.
+    """
+    n_tp, hits = compute_true_positives(hypothesis, reference, tolerance, decimals)
+    precision_val = n_tp / hypothesis.size
+    return precision_val, n_tp, hits
 
 
-def _precision(tp, pp):
-    return tp / pp
+def _recall(hypothesis: npt.NDArray, reference: npt.NDArray,
+            tolerance: float | int | None = None, decimals: int | bool = 3):
+    """Helper function to compute recall :math:`R`
+    given a hypothesized vector of boundaries ``hypothesis``
+    returned by a segmentation algorithm
+    and a reference vector of boundaries ``reference``,
+    e.g., boundaries cleaned by a human expert
+    or boundaries from a benchmark dataset.
 
+    Recall (:math:`R`) is defined as the number of true positives (:math:`T_p`)
+    over the number of true positives plus the number of false negatives
+    (:math:`F_n`).
 
-# FIXME
-def precision():
-    pass
+    :math:`R = \\frac{T_p}{T_p + F_n}`
 
+    The number of true positives ``n_tp`` is computed by calling
+    :func:`vocalpy.metrics.segmentation.ir.compute_true_positives`.
+    This function then computes the recall as
+    ``recall = n_tp / reference.size``.
 
-def _recall(tp, p):
-    return tp / p
+    Parameters
+    ----------
+    hypothesis : numpy.ndarray
+        Boundaries, e.g., onsets or offsets of segments,
+        as computed by some method.
+    reference : numpy.ndarray
+        Ground truth boundaries that the hypothesized
+        boundaries ``hypothesis`` are compared to.
+    tol : float or int
+        Tolerance, in seconds. Default is ``0.01``.
+    decimals: int
+        The number of decimal places to round both
+        ``hypothesis`` and ``reference`` to, using
+        :func:`numpy.round`. This mitigates inflated
+        error rates due to floating point error.
+        Rounding is only applied
+        if both ``hypothesis`` and ``reference``
+        are floating point values. To avoid rounding,
+        e.g. to compute strict precision and recall,
+        pass in the value ``False``. Default is 3, which
+        assumes that the values are in seconds
+        and should be rounded to milliseconds.
+
+    Returns
+    -------
+    recall : float
+
+    n_tp : int
+        The number of true positives.
+    hits : numpy.ndarray
+        The indices of the true positives.
+    """
+    n_tp, hits = compute_true_positives(hypothesis, reference, tolerance, decimals)
+    recall_val = n_tp / reference.size
+    return recall_val, n_tp, hits
