@@ -14,7 +14,8 @@ __all__ = [
 
 def compute_true_positives(hypothesis: npt.NDArray, reference: npt.NDArray,
                            tolerance: float | int | None = None, decimals: int | bool = 3):
-    """Helper function to compute number of true positives.
+    r"""Helper function to compute number of true positives.
+    This is used by :func:`~vocalpymetrics.segmentation.ir.precision_recall_fscore`.
 
     Parameters
     ----------
@@ -25,10 +26,20 @@ def compute_true_positives(hypothesis: npt.NDArray, reference: npt.NDArray,
         Ground truth boundaries that the hypothesized
         boundaries ``hypothesis`` are compared to.
     tolerance : float or int
-        Tolerance, in seconds. Default is None,
+        Tolerance :math:`\Delta t` in seconds.
+        Elements in ``hypothesis`` are considered
+        a true positive if they are within a time interval
+        around any reference boundary :math:`t_0`
+        in ``reference`` plus or minus
+        the ``tolerance``, i.e.,
+        if a hypothesized boundary :math:`t_h`
+        is within the interval
+        :math:`t_0 - \Delta t < t < t_0 + \Delta t`.
+        Default is None,
         in which case it is set to ``0``
         (either float or int, depending on the
         dtype of ``hypothesis`` and ``reference``).
+        See notes for more detail.
     decimals: int
         The number of decimal places to round both
         ``hypothesis`` and ``reference`` to, using
@@ -53,6 +64,28 @@ def compute_true_positives(hypothesis: npt.NDArray, reference: npt.NDArray,
     -----
     Adapted from this post by https://github.com/droyed under CC BY-SA 4.0 license.
     https://stackoverflow.com/a/51747164/4906855
+
+    The addition of a tolerance parameter is based on [1]_.
+    This is also sometimes known as a "collar" [2]_ or "forgiveness collar" [3]_.
+    The value for the tolerance is usually determined by visual inspection
+    of the distribution; see for example [4]_.
+
+    References
+    ----------
+    .. [1] Kemp, T., Schmidt, M., Westphal, M., & Waibel, A. (2000, June).
+    Strategies for automatic segmentation of audio data.
+    In 2000 ieee international conference on acoustics, speech, and signal processing.
+    proceedings (cat. no. 00ch37100) (Vol. 3, pp. 1423-1426). IEEE.
+
+    .. [2] Jordán, P. G., & Giménez, A. O. (2023).
+    Advances in Binary and Multiclass Audio Segmentation with Deep Learning Techniques.
+
+    .. [3] NIST. (2009). The 2009 (RT-09) Rich Transcription Meeting Recognition Evaluation Plan.
+    https://web.archive.org/web/20100606041157if_/http://www.itl.nist.gov/iad/mig/tests/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf
+
+    .. [4] Du, P., & Troyer, T. W. (2006).
+    A segmentation algorithm for zebra finch song at the note level.
+    Neurocomputing, 69(10-12), 1375-1379.
     """
     validators.is_valid_boundaries_array(hypothesis)  # 1-d, non-negative, strictly increasing
     validators.is_valid_boundaries_array(reference)
@@ -133,19 +166,90 @@ def compute_true_positives(hypothesis: npt.NDArray, reference: npt.NDArray,
 
 def precision_recall_fscore(hypothesis: npt.NDArray, reference: npt.NDArray, metric: str,
                tolerance: float | int | None = None, decimals: int | bool = 3):
-    """
+    r"""Helper function that computes precision, recall, and the F-score.
+
+    Since all these metrics require computing the number of true positives,
+    and F-score is a combination of precision and recall,
+    we rely on this helper function to compute them.
+    You can compute each directly without needing the ``metric`` argument
+    that this function requires by calling the appropriate function:
+    :func:`~vocalpy.metrics.segmentation.ir.precision`,
+    :func:`~vocalpy.metrics.segmentation.ir.recall`, and
+    :func:`~vocalpy.metrics.segmentation.ir.fscore`.
+    See those functions for definitions of the metrics
+    in terms of segmentation algorithms.
 
     Parameters
     ----------
-    hypothesis
-    reference
-    metric
-    tolerance
-    decimals
+    hypothesis : numpy.ndarray
+        Boundaries, e.g., onsets or offsets of segments,
+        as computed by some method.
+    reference : numpy.ndarray
+        Ground truth boundaries that the hypothesized
+        boundaries ``hypothesis`` are compared to.
+    metric : str
+        The name of the metric to compute.
+        One of: ``{"precision", "recall", "fscore"}``.
+    tolerance : float or int
+        Tolerance, in seconds.
+        Elements in ``hypothesis`` are considered
+        a true positive if they are within a time interval
+        around any reference boundary :math:`t_0`
+        in ``reference`` plus or minus
+        the ``tolerance``, i.e.,
+        if a hypothesized boundary :math:`t_h`
+        is within the interval
+        :math:`t_0 - \Delta t < t < t_0 + \Delta t`.
+        Default is None,
+        in which case it is set to ``0``
+        (either float or int, depending on the
+        dtype of ``hypothesis`` and ``reference``).
+        See notes for more detail.
+    decimals: int
+        The number of decimal places to round both
+        ``hypothesis`` and ``reference`` to, using
+        :func:`numpy.round`. This mitigates inflated
+        error rates due to floating point error.
+        Rounding is only applied
+        if both ``hypothesis`` and ``reference``
+        are floating point values. To avoid rounding,
+        e.g. to compute strict precision and recall,
+        pass in the value ``False``. Default is 3, which
+        assumes that the values are in seconds
+        and should be rounded to milliseconds.
 
     Returns
     -------
+    metric_value : float
+        Value for ``metric``.
+    n_tp : int
+        The number of true positives.
+    hits : numpy.ndarray
+        The indices of the true positives.
 
+    Notes
+    -----
+    The addition of a tolerance parameter is based on [1]_.
+    This is also sometimes known as a "collar" [2]_ or "forgiveness collar" [3]_.
+    The value for the tolerance is usually determined by visual inspection
+    of the distribution; see for example [4]_.
+
+    References
+    ----------
+    .. [1] Kemp, T., Schmidt, M., Westphal, M., & Waibel, A. (2000, June).
+    Strategies for automatic segmentation of audio data.
+    In 2000 ieee international conference on acoustics, speech, and signal processing.
+    proceedings (cat. no. 00ch37100) (Vol. 3, pp. 1423-1426). IEEE.
+
+    .. [2] Jordán, P. G., & Giménez, A. O. (2023).
+    Advances in Binary and Multiclass Audio Segmentation with Deep Learning Techniques.
+
+    .. [3] NIST. (2009). The 2009 (RT-09) Rich Transcription Meeting Recognition Evaluation Plan.
+    https://web.archive.org/web/20100606041157if_/http://www.itl.nist.gov/iad/mig/tests/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf
+
+    .. [4] Du, P., & Troyer, T. W. (2006).
+    A segmentation algorithm for zebra finch song at the note level.
+    Neurocomputing, 69(10-12), 1375-1379.
     """
     if metric not in {"precision", "recall", "fscore"}:
         raise ValueError(
@@ -168,7 +272,7 @@ def precision_recall_fscore(hypothesis: npt.NDArray, reference: npt.NDArray, met
 
 def _precision(hypothesis: npt.NDArray, reference: npt.NDArray,
                tolerance: float | int | None = None, decimals: int | bool = 3):
-    """Helper function to compute precision :math:`P`
+    r"""Helper function to compute precision :math:`P`
     given a hypothesized vector of boundaries ``hypothesis``
     returned by a segmentation algorithm
     and a reference vector of boundaries ``reference``,
@@ -195,7 +299,16 @@ def _precision(hypothesis: npt.NDArray, reference: npt.NDArray,
         Ground truth boundaries that the hypothesized
         boundaries ``hypothesis`` are compared to.
     tolerance : float or int
-        Tolerance, in seconds. Default is None,
+        Tolerance, in seconds.
+        Elements in ``hypothesis`` are considered
+        a true positive if they are within a time interval
+        around any reference boundary :math:`t_0`
+        in ``reference`` plus or minus
+        the ``tolerance``, i.e.,
+        if a hypothesized boundary :math:`t_h`
+        is within the interval
+        :math:`t_0 - \Delta t < t < t_0 + \Delta t`.
+        Default is None,
         in which case it is set to ``0``
         (either float or int, depending on the
         dtype of ``hypothesis`` and ``reference``).
@@ -220,13 +333,37 @@ def _precision(hypothesis: npt.NDArray, reference: npt.NDArray,
         The number of true positives.
     hits : numpy.ndarray
         The indices of the true positives.
+
+    Notes
+    -----
+    The addition of a tolerance parameter is based on [1]_.
+    This is also sometimes known as a "collar" [2]_ or "forgiveness collar" [3]_.
+    The value for the tolerance is usually determined by visual inspection
+    of the distribution; see for example [4]_.
+
+    References
+    ----------
+    .. [1] Kemp, T., Schmidt, M., Westphal, M., & Waibel, A. (2000, June).
+    Strategies for automatic segmentation of audio data.
+    In 2000 ieee international conference on acoustics, speech, and signal processing.
+    proceedings (cat. no. 00ch37100) (Vol. 3, pp. 1423-1426). IEEE.
+
+    .. [2] Jordán, P. G., & Giménez, A. O. (2023).
+    Advances in Binary and Multiclass Audio Segmentation with Deep Learning Techniques.
+
+    .. [3] NIST. (2009). The 2009 (RT-09) Rich Transcription Meeting Recognition Evaluation Plan.
+    https://web.archive.org/web/20100606041157if_/http://www.itl.nist.gov/iad/mig/tests/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf
+
+    .. [4] Du, P., & Troyer, T. W. (2006).
+    A segmentation algorithm for zebra finch song at the note level.
+    Neurocomputing, 69(10-12), 1375-1379.
     """
     return precision_recall_fscore(hypothesis, reference, "precision", tolerance, decimals)
 
 
 def _recall(hypothesis: npt.NDArray, reference: npt.NDArray,
             tolerance: float | int | None = None, decimals: int | bool = 3):
-    """Helper function to compute recall :math:`R`
+    r"""Helper function to compute recall :math:`R`
     given a hypothesized vector of boundaries ``hypothesis``
     returned by a segmentation algorithm
     and a reference vector of boundaries ``reference``,
@@ -253,7 +390,16 @@ def _recall(hypothesis: npt.NDArray, reference: npt.NDArray,
         Ground truth boundaries that the hypothesized
         boundaries ``hypothesis`` are compared to.
     tolerance : float or int
-        Tolerance, in seconds. Default is None,
+        Tolerance, in seconds.
+        Elements in ``hypothesis`` are considered
+        a true positive if they are within a time interval
+        around any reference boundary :math:`t_0`
+        in ``reference`` plus or minus
+        the ``tolerance``, i.e.,
+        if a hypothesized boundary :math:`t_h`
+        is within the interval
+        :math:`t_0 - \Delta t < t < t_0 + \Delta t`.
+        Default is None,
         in which case it is set to ``0``
         (either float or int, depending on the
         dtype of ``hypothesis`` and ``reference``).
@@ -278,13 +424,37 @@ def _recall(hypothesis: npt.NDArray, reference: npt.NDArray,
         The number of true positives.
     hits : numpy.ndarray
         The indices of the true positives.
+
+    Notes
+    -----
+    The addition of a tolerance parameter is based on [1]_.
+    This is also sometimes known as a "collar" [2]_ or "forgiveness collar" [3]_.
+    The value for the tolerance is usually determined by visual inspection
+    of the distribution; see for example [4]_.
+
+    References
+    ----------
+    .. [1] Kemp, T., Schmidt, M., Westphal, M., & Waibel, A. (2000, June).
+    Strategies for automatic segmentation of audio data.
+    In 2000 ieee international conference on acoustics, speech, and signal processing.
+    proceedings (cat. no. 00ch37100) (Vol. 3, pp. 1423-1426). IEEE.
+
+    .. [2] Jordán, P. G., & Giménez, A. O. (2023).
+    Advances in Binary and Multiclass Audio Segmentation with Deep Learning Techniques.
+
+    .. [3] NIST. (2009). The 2009 (RT-09) Rich Transcription Meeting Recognition Evaluation Plan.
+    https://web.archive.org/web/20100606041157if_/http://www.itl.nist.gov/iad/mig/tests/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf
+
+    .. [4] Du, P., & Troyer, T. W. (2006).
+    A segmentation algorithm for zebra finch song at the note level.
+    Neurocomputing, 69(10-12), 1375-1379.
     """
     return precision_recall_fscore(hypothesis, reference, "recall", tolerance, decimals)
 
 
 def _fscore(hypothesis: npt.NDArray, reference: npt.NDArray,
              tolerance: float | int | None = None, decimals: int | bool = 3):
-    """Helper function to compute the F-score
+    r"""Helper function to compute the F-score
     given a hypothesized vector of boundaries ``hypothesis``
     returned by a segmentation algorithm
     and a reference vector of boundaries ``reference``,
@@ -307,7 +477,16 @@ def _fscore(hypothesis: npt.NDArray, reference: npt.NDArray,
         Ground truth boundaries that the hypothesized
         boundaries ``hypothesis`` are compared to.
     tolerance : float or int
-        Tolerance, in seconds. Default is None,
+        Tolerance, in seconds.
+        Elements in ``hypothesis`` are considered
+        a true positive if they are within a time interval
+        around any reference boundary :math:`t_0`
+        in ``reference`` plus or minus
+        the ``tolerance``, i.e.,
+        if a hypothesized boundary :math:`t_h`
+        is within the interval
+        :math:`t_0 - \Delta t < t < t_0 + \Delta t`.
+        Default is None,
         in which case it is set to ``0``
         (either float or int, depending on the
         dtype of ``hypothesis`` and ``reference``).
@@ -332,6 +511,30 @@ def _fscore(hypothesis: npt.NDArray, reference: npt.NDArray,
         The number of true positives.
     hits : numpy.ndarray
         The indices of the true positives.
+
+    Notes
+    -----
+    The addition of a tolerance parameter is based on [1]_.
+    This is also sometimes known as a "collar" [2]_ or "forgiveness collar" [3]_.
+    The value for the tolerance is usually determined by visual inspection
+    of the distribution; see for example [4]_.
+
+    References
+    ----------
+    .. [1] Kemp, T., Schmidt, M., Westphal, M., & Waibel, A. (2000, June).
+    Strategies for automatic segmentation of audio data.
+    In 2000 ieee international conference on acoustics, speech, and signal processing.
+    proceedings (cat. no. 00ch37100) (Vol. 3, pp. 1423-1426). IEEE.
+
+    .. [2] Jordán, P. G., & Giménez, A. O. (2023).
+    Advances in Binary and Multiclass Audio Segmentation with Deep Learning Techniques.
+
+    .. [3] NIST. (2009). The 2009 (RT-09) Rich Transcription Meeting Recognition Evaluation Plan.
+    https://web.archive.org/web/20100606041157if_/http://www.itl.nist.gov/iad/mig/tests/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf
+
+    .. [4] Du, P., & Troyer, T. W. (2006).
+    A segmentation algorithm for zebra finch song at the note level.
+    Neurocomputing, 69(10-12), 1375-1379.
     """
     return precision_recall_fscore(hypothesis, reference, "fscore", tolerance, decimals)
 
@@ -339,7 +542,7 @@ def _fscore(hypothesis: npt.NDArray, reference: npt.NDArray,
 def precision(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt.NDArray, offsets_ref: npt.NDArray,
               tolerance: float | int | None, decimals: int = 3, method: str = "combine"
               ) -> tuple[float, int, npt.NDArray] | tuple[float, float, int, int, npt.NDArray, npt.NDArray]:
-    """Compute precision :math:`P`
+    r"""Compute precision :math:`P`
     given a hypothesized segmentation with
     onsets and offsets ``onset_hyp`` and offsets_hyp``
     and a reference segmentation
@@ -375,7 +578,16 @@ def precision(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt
         Ground truth offsets of segments that the hypothesized
         ``offsets_hyp`` are compared to.
     tolerance : float or int
-        Tolerance, in seconds. Default is None,
+        Tolerance, in seconds.
+        Elements in ``hypothesis`` are considered
+        a true positive if they are within a time interval
+        around any reference boundary :math:`t_0`
+        in ``reference`` plus or minus
+        the ``tolerance``, i.e.,
+        if a hypothesized boundary :math:`t_h`
+        is within the interval
+        :math:`t_0 - \Delta t < t < t_0 + \Delta t`.
+        Default is None,
         in which case it is set to ``0``
         (either float or int, depending on the
         dtype of ``hypothesis`` and ``reference``).
@@ -402,10 +614,37 @@ def precision(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt
     -------
     precision : float
         Value for precision, computed as described above.
+        If ``method`` is ``"separate"`` then two values for
+        precision will be returned, one for onsets
+        and one for offsets.
     n_tp : int
         The number of true positives.
     hits : numpy.ndarray
         The indices of the true positives.
+
+    Notes
+    -----
+    The addition of a tolerance parameter is based on [1]_.
+    This is also sometimes known as a "collar" [2]_ or "forgiveness collar" [3]_.
+    The value for the tolerance is usually determined by visual inspection
+    of the distribution; see for example [4]_.
+
+    References
+    ----------
+    .. [1] Kemp, T., Schmidt, M., Westphal, M., & Waibel, A. (2000, June).
+    Strategies for automatic segmentation of audio data.
+    In 2000 ieee international conference on acoustics, speech, and signal processing.
+    proceedings (cat. no. 00ch37100) (Vol. 3, pp. 1423-1426). IEEE.
+
+    .. [2] Jordán, P. G., & Giménez, A. O. (2023).
+    Advances in Binary and Multiclass Audio Segmentation with Deep Learning Techniques.
+
+    .. [3] NIST. (2009). The 2009 (RT-09) Rich Transcription Meeting Recognition Evaluation Plan.
+    https://web.archive.org/web/20100606041157if_/http://www.itl.nist.gov/iad/mig/tests/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf
+
+    .. [4] Du, P., & Troyer, T. W. (2006).
+    A segmentation algorithm for zebra finch song at the note level.
+    Neurocomputing, 69(10-12), 1375-1379.
     """
     if method == "combine":
         boundaries_hyp = np.concatenate((onsets_hyp, offsets_hyp))
@@ -421,7 +660,7 @@ def precision(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt
 def recall(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt.NDArray, offsets_ref: npt.NDArray,
            tolerance: float | int | None, decimals: int = 3, method: str = "combine"
            ) -> tuple[float, int, npt.NDArray] | tuple[float, float, int, int, npt.NDArray, npt.NDArray]:
-    """Compute recall :math:`R`
+    r"""Compute recall :math:`R`
     given a hypothesized segmentation with
     onsets and offsets ``onset_hyp`` and offsets_hyp``
     and a reference segmentation
@@ -457,7 +696,16 @@ def recall(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt.ND
         Ground truth offsets of segments that the hypothesized
         ``offsets_hyp`` are compared to.
     tolerance : float or int
-        Tolerance, in seconds. Default is None,
+        Tolerance, in seconds.
+        Elements in ``hypothesis`` are considered
+        a true positive if they are within a time interval
+        around any reference boundary :math:`t_0`
+        in ``reference`` plus or minus
+        the ``tolerance``, i.e.,
+        if a hypothesized boundary :math:`t_h`
+        is within the interval
+        :math:`t_0 - \Delta t < t < t_0 + \Delta t`.
+        Default is None,
         in which case it is set to ``0``
         (either float or int, depending on the
         dtype of ``hypothesis`` and ``reference``).
@@ -488,6 +736,30 @@ def recall(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt.ND
         The number of true positives.
     hits : numpy.ndarray
         The indices of the true positives.
+
+    Notes
+    -----
+    The addition of a tolerance parameter is based on [1]_.
+    This is also sometimes known as a "collar" [2]_ or "forgiveness collar" [3]_.
+    The value for the tolerance is usually determined by visual inspection
+    of the distribution; see for example [4]_.
+
+    References
+    ----------
+    .. [1] Kemp, T., Schmidt, M., Westphal, M., & Waibel, A. (2000, June).
+    Strategies for automatic segmentation of audio data.
+    In 2000 ieee international conference on acoustics, speech, and signal processing.
+    proceedings (cat. no. 00ch37100) (Vol. 3, pp. 1423-1426). IEEE.
+
+    .. [2] Jordán, P. G., & Giménez, A. O. (2023).
+    Advances in Binary and Multiclass Audio Segmentation with Deep Learning Techniques.
+
+    .. [3] NIST. (2009). The 2009 (RT-09) Rich Transcription Meeting Recognition Evaluation Plan.
+    https://web.archive.org/web/20100606041157if_/http://www.itl.nist.gov/iad/mig/tests/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf
+
+    .. [4] Du, P., & Troyer, T. W. (2006).
+    A segmentation algorithm for zebra finch song at the note level.
+    Neurocomputing, 69(10-12), 1375-1379.
     """
     if method == "combine":
         boundaries_hyp = np.concatenate((onsets_hyp, offsets_hyp))
@@ -503,7 +775,7 @@ def recall(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt.ND
 def fscore(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt.NDArray, offsets_ref: npt.NDArray,
            tolerance: float | int | None, decimals: int = 3, method: str = "combine"
            ) -> tuple[float, int, npt.NDArray] | tuple[float, float, int, int, npt.NDArray, npt.NDArray]:
-    """Compute precision :math:`P`
+    r"""Compute precision :math:`P`
     given a hypothesized segmentation with
     onsets and offsets ``onset_hyp`` and offsets_hyp``
     and a reference segmentation
@@ -539,7 +811,16 @@ def fscore(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt.ND
         Ground truth offsets of segments that the hypothesized
         ``offsets_hyp`` are compared to.
     tolerance : float or int
-        Tolerance, in seconds. Default is None,
+        Tolerance, in seconds.
+        Elements in ``hypothesis`` are considered
+        a true positive if they are within a time interval
+        around any reference boundary :math:`t_0`
+        in ``reference`` plus or minus
+        the ``tolerance``, i.e.,
+        if a hypothesized boundary :math:`t_h`
+        is within the interval
+        :math:`t_0 - \Delta t < t < t_0 + \Delta t`.
+        Default is None,
         in which case it is set to ``0``
         (either float or int, depending on the
         dtype of ``hypothesis`` and ``reference``).
@@ -570,6 +851,30 @@ def fscore(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt.ND
         The number of true positives.
     hits : numpy.ndarray
         The indices of the true positives.
+
+    Notes
+    -----
+    The addition of a tolerance parameter is based on [1]_.
+    This is also sometimes known as a "collar" [2]_ or "forgiveness collar" [3]_.
+    The value for the tolerance is usually determined by visual inspection
+    of the distribution; see for example [4]_.
+
+    References
+    ----------
+    .. [1] Kemp, T., Schmidt, M., Westphal, M., & Waibel, A. (2000, June).
+    Strategies for automatic segmentation of audio data.
+    In 2000 ieee international conference on acoustics, speech, and signal processing.
+    proceedings (cat. no. 00ch37100) (Vol. 3, pp. 1423-1426). IEEE.
+
+    .. [2] Jordán, P. G., & Giménez, A. O. (2023).
+    Advances in Binary and Multiclass Audio Segmentation with Deep Learning Techniques.
+
+    .. [3] NIST. (2009). The 2009 (RT-09) Rich Transcription Meeting Recognition Evaluation Plan.
+    https://web.archive.org/web/20100606041157if_/http://www.itl.nist.gov/iad/mig/tests/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf
+
+    .. [4] Du, P., & Troyer, T. W. (2006).
+    A segmentation algorithm for zebra finch song at the note level.
+    Neurocomputing, 69(10-12), 1375-1379.
     """
     if method == "combine":
         boundaries_hyp = np.concatenate((onsets_hyp, offsets_hyp))
