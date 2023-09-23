@@ -13,7 +13,7 @@ __all__ = [
 
 
 def compute_true_positives(hypothesis: npt.NDArray, reference: npt.NDArray,
-                           tolerance: float | int | None = None, decimals: int | bool = 3):
+                           tolerance: float | int | None = None, decimals: int | bool | None = None):
     r"""Helper function to compute number of true positives.
     This is used by :func:`~vocalpymetrics.segmentation.ir.precision_recall_fscore`.
 
@@ -102,14 +102,9 @@ def compute_true_positives(hypothesis: npt.NDArray, reference: npt.NDArray,
             f"``tolerance`` must be a non-negative number but was: {tolerance}"
         )
 
-    if decimals is not False and not isinstance(decimals, int):
+    if decimals and (decimals is not False and not isinstance(decimals, int)):
         raise ValueError(
             f"``decimals`` must either be ``False`` or an integer but was: {decimals}"
-        )
-
-    if decimals < 0:
-        raise ValueError(
-            f"``decimals`` must be a non-negative number but was: {decimals}"
         )
 
     if issubclass(reference.dtype.type, np.floating):
@@ -118,6 +113,14 @@ def compute_true_positives(hypothesis: npt.NDArray, reference: npt.NDArray,
                 "If ``hypothesis`` and ``reference`` are floating, tolerance must be a float also, "
                 f"but type was: {type(tolerance)}"
             )
+        if decimals is None:
+            decimals = 3
+
+        if decimals < 0:
+            raise ValueError(
+                f"``decimals`` must be a non-negative number but was: {decimals}"
+            )
+
         if decimals is not False:
             # we assume float values are in units of seconds and round to ``decimals``,
             # the default is 3 to indicate "milliseconds"
@@ -129,6 +132,10 @@ def compute_true_positives(hypothesis: npt.NDArray, reference: npt.NDArray,
             raise TypeError(
                 "If ``hypothesis`` and ``reference`` are integers, tolerance must be an integer also, "
                 f"but type was: {type(tolerance)}"
+            )
+        if decimals is not None:
+            raise ValueError(
+                f"Cannot specify a ``decimals`` value when dtype of arrays is int"
             )
 
     # ---- "algorithm" ----
@@ -165,7 +172,7 @@ def compute_true_positives(hypothesis: npt.NDArray, reference: npt.NDArray,
 
 
 def precision_recall_fscore(hypothesis: npt.NDArray, reference: npt.NDArray, metric: str,
-               tolerance: float | int | None = None, decimals: int | bool = 3):
+               tolerance: float | int | None = None, decimals: int | bool | None = None):
     r"""Helper function that computes precision, recall, and the F-score.
 
     Since all these metrics require computing the number of true positives,
@@ -271,7 +278,7 @@ def precision_recall_fscore(hypothesis: npt.NDArray, reference: npt.NDArray, met
 
 
 def _precision(hypothesis: npt.NDArray, reference: npt.NDArray,
-               tolerance: float | int | None = None, decimals: int | bool = 3):
+               tolerance: float | int | None = None, decimals: int | bool | None = None):
     r"""Helper function to compute precision :math:`P`
     given a hypothesized vector of boundaries ``hypothesis``
     returned by a segmentation algorithm
@@ -362,7 +369,7 @@ def _precision(hypothesis: npt.NDArray, reference: npt.NDArray,
 
 
 def _recall(hypothesis: npt.NDArray, reference: npt.NDArray,
-            tolerance: float | int | None = None, decimals: int | bool = 3):
+            tolerance: float | int | None = None, decimals: int | bool | None = None):
     r"""Helper function to compute recall :math:`R`
     given a hypothesized vector of boundaries ``hypothesis``
     returned by a segmentation algorithm
@@ -453,7 +460,7 @@ def _recall(hypothesis: npt.NDArray, reference: npt.NDArray,
 
 
 def _fscore(hypothesis: npt.NDArray, reference: npt.NDArray,
-             tolerance: float | int | None = None, decimals: int | bool = 3):
+             tolerance: float | int | None = None, decimals: int | bool | None = None):
     r"""Helper function to compute the F-score
     given a hypothesized vector of boundaries ``hypothesis``
     returned by a segmentation algorithm
