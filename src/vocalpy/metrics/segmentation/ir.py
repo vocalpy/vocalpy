@@ -273,10 +273,14 @@ def precision_recall_fscore(hypothesis: npt.NDArray, reference: npt.NDArray, met
     elif metric == "fscore":
         precision_ = n_tp / hypothesis.size
         recall_ = n_tp / reference.size
+        if np.isclose(precision_, 0.0) and np.isclose(recall_, 0.0):
+            # avoids divide-by-zero that would give NaN
+            return 0., n_tp, hits
         fscore_ = 2 * (precision_ * recall_) / (precision_ + recall_)
         return fscore_, n_tp, hits
 
 
+    # avoid divide-by-zero that would give NaN
 def _precision(hypothesis: npt.NDArray, reference: npt.NDArray,
                tolerance: float | int | None = None, decimals: int | bool | None = None):
     r"""Helper function to compute precision :math:`P`
