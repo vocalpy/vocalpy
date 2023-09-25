@@ -551,7 +551,7 @@ def _fscore(hypothesis: npt.NDArray, reference: npt.NDArray,
 
 
 def precision(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt.NDArray, offsets_ref: npt.NDArray,
-              tolerance: float | int | None, decimals: int = 3, method: str = "combine"
+              tolerance: float | int | None = None, decimals: int | bool | None = None, method: str = "combine"
               ) -> tuple[float, int, npt.NDArray] | tuple[float, float, int, int, npt.NDArray, npt.NDArray]:
     r"""Compute precision :math:`P`
     given a hypothesized segmentation with
@@ -669,7 +669,7 @@ def precision(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt
 
 
 def recall(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt.NDArray, offsets_ref: npt.NDArray,
-           tolerance: float | int | None, decimals: int = 3, method: str = "combine"
+           tolerance: float | int | None = None, decimals: int | bool | None = None, method: str = "combine"
            ) -> tuple[float, int, npt.NDArray] | tuple[float, float, int, int, npt.NDArray, npt.NDArray]:
     r"""Compute recall :math:`R`
     given a hypothesized segmentation with
@@ -784,7 +784,7 @@ def recall(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt.ND
 
 
 def fscore(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt.NDArray, offsets_ref: npt.NDArray,
-           tolerance: float | int | None, decimals: int = 3, method: str = "combine"
+           tolerance: float | int | None = None, decimals: int | bool | None = None, method: str = "combine"
            ) -> tuple[float, int, npt.NDArray] | tuple[float, float, int, int, npt.NDArray, npt.NDArray]:
     r"""Compute precision :math:`P`
     given a hypothesized segmentation with
