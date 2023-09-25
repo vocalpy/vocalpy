@@ -658,8 +658,8 @@ def precision(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt
     Neurocomputing, 69(10-12), 1375-1379.
     """
     if method == "combine":
-        boundaries_hyp = np.concatenate((onsets_hyp, offsets_hyp))
-        boundaries_ref = np.concatenate((onsets_ref, offsets_ref))
+        boundaries_hyp = np.sort(np.concatenate((onsets_hyp, offsets_hyp)))
+        boundaries_ref = np.sort(np.concatenate((onsets_ref, offsets_ref)))
         precision_, n_tp, all_hits = _precision(boundaries_hyp, boundaries_ref, tolerance, decimals)
         return precision_, n_tp, all_hits
     elif method == "separate":
@@ -773,8 +773,8 @@ def recall(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt.ND
     Neurocomputing, 69(10-12), 1375-1379.
     """
     if method == "combine":
-        boundaries_hyp = np.concatenate((onsets_hyp, offsets_hyp))
-        boundaries_ref = np.concatenate((onsets_ref, offsets_ref))
+        boundaries_hyp = np.sort(np.concatenate((onsets_hyp, offsets_hyp)))
+        boundaries_ref = np.sort(np.concatenate((onsets_ref, offsets_ref)))
         recall_, n_tp, all_hits = _recall(boundaries_hyp, boundaries_ref, tolerance, decimals)
         return recall_, n_tp, all_hits
     elif method == "separate":
@@ -888,8 +888,8 @@ def fscore(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt.ND
     Neurocomputing, 69(10-12), 1375-1379.
     """
     if method == "combine":
-        boundaries_hyp = np.concatenate((onsets_hyp, offsets_hyp))
-        boundaries_ref = np.concatenate((onsets_ref, offsets_ref))
+        boundaries_hyp = np.sort(np.concatenate((onsets_hyp, offsets_hyp)))
+        boundaries_ref = np.sort(np.concatenate((onsets_ref, offsets_ref)))
         fscore_, n_tp, all_hits = _fscore(boundaries_hyp, boundaries_ref, tolerance, decimals)
         return fscore_, n_tp, all_hits
     elif method == "separate":
