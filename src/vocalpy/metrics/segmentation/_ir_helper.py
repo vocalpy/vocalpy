@@ -21,7 +21,7 @@ __all__ = [
 
 
 def fast_hit_windows(reference: npt.NDArray, hypothesis: npt.NDArray, tolerance: float) -> tuple[list, list]:
-    """Fast calculation of toleranceed hits for time events.
+    """Fast calculation of toleranced hits for time events.
 
     Given two lists of event times ``reference`` and ``hypothesis``, and a
     tolerance window, computes a list of pairings
@@ -49,7 +49,7 @@ def fast_hit_windows(reference: npt.NDArray, hypothesis: npt.NDArray, tolerance:
 
     Notes
     -----
-    This function is adapted from of ``mir_eval``, under MIT license:
+    This function is adapted from ``mir_eval``, under MIT license:
     https://github.com/craffel/mir_eval
     """
     reference = np.asarray(reference)
