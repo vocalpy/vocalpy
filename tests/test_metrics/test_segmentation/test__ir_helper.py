@@ -346,6 +346,14 @@ def test_bipartite_match(hit_ref, hit_hyp, expected_matches):
                 'default',
                 [(0, 0), (1, 3), (2, 6)],
         ),
+        (
+                np.array([0, 1, 2, 4, 5, 6, 7, 10, 11, 13]),
+                np.array([0, 5, 10]),
+                1,
+                'default',
+                [(0, 0), (1, 3), (2, 7)],
+        ),
+
         # ---- float values -----
         # float values, all hits, default tolerance and decimals
         (
