@@ -4,15 +4,14 @@ from __future__ import annotations
 import numpy as np
 import numpy.typing as npt
 
-
 __all__ = [
-    'have_same_dtype',
-    'is_1d_ndarray',
-    'is_valid_boundaries_array',
+    "have_same_dtype",
+    "is_1d_ndarray",
+    "is_valid_boundaries_array",
 ]
 
 
-def is_1d_ndarray(y: npt.NDArray, name:str | None = None) -> bool:
+def is_1d_ndarray(y: npt.NDArray, name: str | None = None) -> bool:
     """Validates that ``y`` is a
     1-dimensional :class:`numpy.ndarray`.
 
@@ -45,13 +44,12 @@ def is_1d_ndarray(y: npt.NDArray, name:str | None = None) -> bool:
 
     if not len(y.shape) == 1:
         raise ValueError(
-            f"Input {name}should be a 1-dimensional numpy array, "
-            f"but number of dimensions was: {y.ndim}"
+            f"Input {name}should be a 1-dimensional numpy array, " f"but number of dimensions was: {y.ndim}"
         )
     return True
 
 
-def is_valid_boundaries_array(y: npt.NDArray, name:str | None = None) -> bool:
+def is_valid_boundaries_array(y: npt.NDArray, name: str | None = None) -> bool:
     """Validates that ``y`` is a valid array of boundaries,
     i.e., onsets or offsets of segments such as those
     found with a segmentation algorithm.
@@ -83,22 +81,14 @@ def is_valid_boundaries_array(y: npt.NDArray, name:str | None = None) -> bool:
     else:
         name = ""
 
-    if not (
-        issubclass(y.dtype.type, np.floating) or issubclass(y.dtype.type, np.integer)
-    ):
-        raise TypeError(
-            f"Dtype of boundaries array {name}must be either float or int but was: {y.dtype}"
-    )
+    if not (issubclass(y.dtype.type, np.floating) or issubclass(y.dtype.type, np.integer)):
+        raise TypeError(f"Dtype of boundaries array {name}must be either float or int but was: {y.dtype}")
 
     if not np.all(y >= 0.0):
-        raise ValueError(
-            f"Values of boundaries array {name}must all be non-negative"
-        )
+        raise ValueError(f"Values of boundaries array {name}must all be non-negative")
 
     if not np.all(y[1:] > y[:-1]):
-        raise ValueError(
-            f"Values of boundaries array {name}must be strictly increasing"
-        )
+        raise ValueError(f"Values of boundaries array {name}must be strictly increasing")
 
     return True
 
@@ -130,8 +120,6 @@ def have_same_dtype(arr1: npt.NDArray, arr2: npt.NDArray, name1: str | None = No
         else:
             names = ""
 
-        raise ValueError(
-            f"Two arrays {names}must have the same dtype, but dtypes were: {arr1.dtype} and {arr2.dtype}"
-        )
+        raise ValueError(f"Two arrays {names}must have the same dtype, but dtypes were: {arr1.dtype} and {arr2.dtype}")
 
     return True
