@@ -11,7 +11,7 @@ from ... import validators
 def find_hits(
     hypothesis: npt.NDArray, reference: npt.NDArray, tolerance: float | int | None = None, decimals: int | None = None
 ) -> tuple[npt.NDArray, npt.NDArray]:
-    """Find hits in arrays of event times.
+    r"""Find hits in arrays of event times.
 
     This is a helper function used to compute information retrieval metrics.
     Specifically, this function is called by
