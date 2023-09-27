@@ -141,7 +141,7 @@ def find_hits(hypothesis: npt.NDArray, reference: npt.NDArray,
     have_duplicates_ref = counts_ref > 1
     if not np.any(have_duplicates_ref):
         # no duplicates, we can return
-        return hits_ref, hits_hyp
+        return hits_ref, hits_hyp, diffs_in_window
     else:
         # For each unique value in ref, we need to find the value in
         # hyp that has the smallest distance from it. This is the hit we keep.
