@@ -711,8 +711,64 @@ def fscore(
 
 def concat_starts_and_stops(starts: npt.NDArray, stops: npt.NDArray) -> npt.NDArray:
     """Concatenate arrays of start and stop times
-    into a single array of boundaries.
+    into a single array of boundary times.
 
+    Some segmenting algorithms return lists of segments
+    denoted by the start and stop times of each segment.
+    (You may also see these times called "onsets" and "offsets".)
+    Typically, such segmenting algorithms work by setting a
+    threshold on some acoustic feature, e.g. the Root-Mean-Square
+    of the spectral power.
+    This means the segments will be separated by brief
+    "silent gaps" (periods below threshold).
+
+    To compute metrics for segmentation like precision
+    and recall, you may want to combine the start and stop
+    times into a single array of boundary times.
+    Such an approach is valid if we think of a "silent gaps"
+    as a segment whose start time is the stop time/offset of the
+    preceding segment.
+
+    If you have arrays of start and stop times,
+    you can concatenate into a single array of
+    boundary times with this function.
+    Both ``starts`` and ``stops`` must be 1-dimensional
+    arrays of non-negative, strictly increasing values,
+    with the same ``dtype``.
+    The two arrays ``starts`` and ``stops``
+    must be the same length, and all start times
+    must be less than the corresponding stop times,
+    i.e., ``np.all(starts < stops)`` should evaluate
+    to ``True``.
+
+    Parameters
+    ----------
+    starts : numpy.ndarray
+        Array of start times of segments.
+    stops : numpy.ndarray
+        Array of stop times of segments.
+
+    Returns
+    -------
+    boundaries : numpy.ndarray
+        The array of boundary times,
+        concatenated and then sorted,
+        so that
+        ``np.all(boundaries[1:] > boundaries[:-1]``
+        evaluates to ``True``.
+
+    Examples
+    --------
+
+    >>> starts = np.array([0, 8, 16, 24])
+    >>> stops = np.array([4, 12, 20, 28])
+    >>> concat_starts_and_stops(starts, stops)
+    np.array([0, 4, 8, 12, 16, 20, 24, 28])
+
+    >>> starts = np.array([0.000, 8.000, 16.000, 24.000])
+    >>> stops = np.array([4.000, 12.000, 20.000, 28.000])
+    >>> concat_starts_and_stops(starts, stops)
+    np.array([0.000, 4.000, 8.000, 12.000, 16.000, 20.000, 24.000, 28.000])
     """
     validators.is_valid_boundaries_array(starts)  # 1-d, non-negative, strictly increasing
     validators.is_valid_boundaries_array(stops)
