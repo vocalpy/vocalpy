@@ -730,4 +730,4 @@ def concat_starts_and_stops(starts: npt.NDArray, stops: npt.NDArray) -> npt.NDAr
             f"but some values in ``starts`` were greater: values at indices {gt}"
         )
 
-    np.sort(np.concatenate((starts, stops)))
+    return np.sort(np.concatenate((starts, stops)))
