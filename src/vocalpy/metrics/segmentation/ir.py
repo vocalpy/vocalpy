@@ -529,7 +529,7 @@ def _fscore(hypothesis: npt.NDArray, reference: npt.NDArray,
     or boundaries from a benchmark dataset.
 
     The F-score can be interpreted as a harmonic mean of the precision and
-    recall, where an F-score reaches its bhyp value at 1 and worst score at 0.
+    recall, where an F-score reaches its best value at 1 and worst score at 0.
     The relative contribution of precision and recall to the F-score are
     equal. The formula for the F-score is:
 
@@ -866,11 +866,11 @@ def recall(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt.ND
 def fscore(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt.NDArray, offsets_ref: npt.NDArray,
            tolerance: float | int | None = None, decimals: int | bool | None = None, method: str = "combine"
            ) -> tuple[float, int, IRMetricData] | tuple[float, float, int, int, IRMetricData, IRMetricData]:
-    r"""Compute precision :math:`P`
+    r"""Compute the F-score
     given a hypothesized segmentation with
     onsets and offsets ``onset_hyp`` and offsets_hyp``
     and a reference segmentation
-    with onsets and offsets ``onsets_ref`` and ``offsets_ref``
+    with onsets and offsets ``onsets_ref`` and ``offsets_ref``.
 
     For example: a hypothesized segmentation would be one
     with boundaries returned by a segmentation algorithm,
@@ -878,16 +878,12 @@ def fscore(onsets_hyp: npt.NDArray, offsets_hyp: npt.NDArray, onsets_ref: npt.ND
     boundaries cleaned by a human expert,
     or from a benchmark dataset.
 
-    Recall (:math:`R`) is defined as the number of true positives (:math:`T_p`)
-    over the number of true positives plus the number of false negatives
-    (:math:`F_n`).
+    The F-score can be interpreted as a harmonic mean of the precision and
+    recall, where an F-score reaches its best value at 1 and worst score at 0.
+    The relative contribution of precision and recall to the F-score are
+    equal. The formula for the F-score is:
 
-    :math:`R = \\frac{T_p}{T_p + F_n}`
-
-    The number of true positives ``n_tp`` is computed by calling
-    :func:`vocalpy.metrics.segmentation.ir.compute_true_positives`.
-    This function then computes the recall as
-    ``recall = n_tp / reference.size``.
+    ``f_score = 2 * (precision * recall) / (precision + recall)``
 
     Parameters
     ----------
