@@ -7,6 +7,232 @@ import vocalpy.metrics.segmentation.ir
 
 
 @pytest.mark.parametrize(
+    'hypothesis, reference, tolerance, decimals, expected_hit_ref, expected_hit_hyp, expected_diff',
+    [
+        # ---- int values -----
+        # all hits
+        (
+                np.array([0, 5, 10, 15]),
+                np.array([0, 5, 10, 15]),
+                'default',
+                'default',
+                np.array([0, 1, 2, 3]),
+                np.array([0, 1, 2, 3]),
+                np.array([0, 0, 0, 0]),
+        ),
+        # no hits
+        (
+                np.array([1, 6, 11, 16]),
+                np.array([0, 5, 10, 15]),
+                'default',
+                'default',
+                np.array([]),
+                np.array([]),
+                np.array([]),
+        ),
+        # no > hits > all
+        (
+                np.array([1, 6, 10, 16]),
+                np.array([0, 5, 10, 15]),
+                'default',
+                'default',
+                np.array([2]),
+                np.array([2]),
+                np.array([0])
+        ),
+        (
+                np.array([0, 5, 10]),
+                np.array([0, 5, 10, 15]),
+                'default',
+                'default',
+                np.array([0, 1, 2]),
+                np.array([0, 1, 2]),
+                np.array([0, 0, 0]),
+        ),
+        (
+                np.array([0, 5, 10, 15]),
+                np.array([0, 5, 10]),
+                'default',
+                'default',
+                np.array([0, 1, 2]),
+                np.array([0, 1, 2]),
+                np.array([0, 0, 0]),
+        ),
+        # ---- int values -----
+        # ---- tolerance of 1
+        # all hits
+        (
+                np.array([1, 6, 11, 16]),
+                np.array([0, 5, 10, 15]),
+                1,
+                'default',
+                np.array([0, 1, 2, 3]),
+                np.array([0, 1, 2, 3]),
+                np.array([1, 1, 1, 1]),
+        ),
+        # no hits, tolerance of one
+        (
+                np.array([2, 7, 12, 17]),
+                np.array([0, 5, 10, 15]),
+                1,
+                'default',
+                np.array([]),
+                np.array([]),
+                np.array([]),
+        ),
+        # no > hits > all, tolerance of one
+        (
+                np.array([2, 7, 11, 17]),
+                np.array([0, 5, 10, 15]),
+                1,
+                [2],
+                [2],
+        ),
+        (
+                np.array([1, 6, 11]),
+                np.array([0, 5, 10, 15]),
+                1,
+                [0, 1, 2],
+                [0, 1, 2],
+        ),
+        (
+                np.array([1, 6, 11, 16]),
+                np.array([0, 5, 10]),
+                1,
+                [0, 1, 2],
+                [0, 1, 2],
+        ),
+        (
+                np.array([0, 1, 6, 11]),
+                np.array([0, 5, 10]),
+                1,
+                [0, 0, 1, 2],
+                [0, 1, 2, 3],
+        ),
+        (
+                np.array([0, 1, 2, 5, 6, 7, 10, 11, 13]),
+                np.array([0, 5, 10]),
+                1,
+                [0, 0, 1, 1, 2, 2],
+                [0, 1, 3, 4, 6, 7],
+        ),
+        # ---- float values -----
+        # float values, tolerance=0, all hits
+        (
+                np.array([0.000, 5.000, 10.000, 15.000]),
+                np.array([0.000, 5.000, 10.000, 15.000]),
+                0,
+                [0, 1, 2, 3],
+                [0, 1, 2, 3],
+        ),
+        # float values, tolerance=0, no hits
+        (
+                np.array([1.000, 6.000, 11.000, 16.000]),
+                np.array([0.000, 5.000, 10.000, 15.000]),
+                0,
+                [],
+                [],
+        ),
+        # float values, tolerance=0, none < hits < all
+        (
+                np.array([1.000, 6.000, 10.000, 16.000]),
+                np.array([0.000, 5.000, 10.000, 15.000]),
+                0,
+                [2],
+                [2],
+        ),
+        (
+                np.array([0.000, 5.000, 10.000]),
+                np.array([0.000, 5.000, 10.000, 15.000]),
+                0,
+                [0, 1, 2],
+                [0, 1, 2],
+        ),
+        (
+                np.array([0.000, 5.000, 10.000, 15.000]),
+                np.array([0.000, 5.000, 10.000]),
+                0,
+                [0, 1, 2],
+                [0, 1, 2],
+        ),
+        # float values, all hits, tolerance of 0.5
+        (
+                np.array([0.500, 5.500, 10.500, 15.500]),
+                np.array([0.000, 5.000, 10.000, 15.000]),
+                0.5,
+                [0, 1, 2, 3],
+                [0, 1, 2, 3],
+        ),
+        # float values, no hits, tolerance of 0.5
+        (
+                np.array([1.500, 6.500, 11.500, 16.500]),
+                np.array([0.000, 5.000, 10.000, 15.000]),
+                0.5,
+                [],
+                [],
+        ),
+        # float values, none < hits < all, tolerance of 0.5
+        (
+                np.array([1.500, 6.500, 10.500, 16.500]),
+                np.array([0.000, 5.000, 10.000, 15.000]),
+                0.5,
+                [2],
+                [2],
+        ),
+        (
+                np.array([0.500, 5.500, 10.500]),
+                np.array([0.000, 5.000, 10.000, 15.000]),
+                0.5,
+                [0, 1, 2],
+                [0, 1, 2],
+        ),
+        (
+                np.array([0.500, 5.500, 10.500, 15.500]),
+                np.array([0.000, 5.000, 10.000]),
+                0.5,
+                [0, 1, 2],
+                [0, 1, 2],
+        ),
+        (
+                np.array([0.500, 1.500, 5.500, 10.500]),
+                np.array([0.000, 5.000, 10.000]),
+                0.5,
+                [0, 1, 2],
+                [0, 2, 3]
+        ),
+        (
+                np.array([0.250, 0.500, 2.500, 5.000, 5.500, 7.500, 10.500, 11.500, 13.500]),
+                np.array([0.000, 5.000, 10.000]),
+                0.5,
+                [0, 0, 1, 1, 2],
+                [0, 1, 3, 4, 6],
+        ),
+    ]
+)
+def test_find_hits(hypothesis, reference, tolerance, decimals, expected_hit_ref, expected_hit_hyp, expected_diff)
+    if tolerance == 'default' and decimals == 'default':
+        metric_value, n_tp, hits = vocalpy.metrics.segmentation.ir.find_hits(
+            hypothesis, reference, metric
+        )
+    elif tolerance != 'default' and decimals == 'default':
+        metric_value, n_tp, hits = vocalpy.metrics.segmentation.ir.find_hits(
+            hypothesis, reference, metric, tolerance=tolerance,
+        )
+    elif tolerance == 'default' and decimals != 'default':
+        metric_value, n_tp, hits = vocalpy.metrics.segmentation.ir.find_hits(
+            hypothesis, reference, metric, decimals=decimals
+        )
+    elif tolerance != 'default' and decimals != 'default':
+        metric_value, n_tp, hits = vocalpy.metrics.segmentation.ir.find_hits(
+            hypothesis, reference, metric, tolerance=tolerance, decimals=decimals
+        )
+
+    assert math.isclose(metric_value, expected_metric_value)
+    assert n_tp == expected_n_tp
+    assert np.array_equal(hits, expected_hits)
+
+
+@pytest.mark.parametrize(
     'hypothesis, reference, metric, tolerance, decimals, expected_metric_value, expected_n_tp, expected_hits',
     [
         # ---- int values -----
