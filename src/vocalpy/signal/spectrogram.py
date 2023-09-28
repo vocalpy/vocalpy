@@ -1,8 +1,13 @@
-"""functions for making spectrograms
+"""Functions for making spectrograms.
 
-filters adapted from SciPy cookbook
+.. autosummary::
+   :toctree: generated/
+
+Notes
+-----
+Filters adapted from SciPy cookbook:
 https://scipy-cookbook.readthedocs.io/items/ButterworthBandpass.html
-spectrogram adapted from code by Kyle Kastner and Tim Sainburg
+Spectrogram adapted from code by Kyle Kastner and Tim Sainburg:
 https://github.com/timsainb/python_spectrograms_and_inversion
 """
 from __future__ import annotations
