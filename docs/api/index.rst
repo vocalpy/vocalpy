@@ -67,7 +67,6 @@ Other
 
    constants
    validators
-   converters
    paths
 
 
