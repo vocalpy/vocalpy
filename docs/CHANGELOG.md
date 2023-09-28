@@ -16,3 +16,23 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   from information retrieval: precision, recall, F-score
   [#57](https://github.com/vocalpy/vocalpy/pull/57).
   Fixes [#54](https://github.com/vocalpy/vocalpy/issues/54)
+
+## 0.3.0
+### Added
+- Add initial plot module
+  [#35](https://github.com/vocalpy/vocalpy/pull/35).
+- Add MVP of SequenceDataset saving to / loading from SQLite
+  [#36](https://github.com/vocalpy/vocalpy/pull/36).
+
+## 0.2.0
+### Added
+- Develop based on domain model 
+  [#29](https://github.com/vocalpy/vocalpy/pull/29).
+
+### Changed
+- Rework core classes
+  [#31](https://github.com/vocalpy/vocalpy/pull/31).
+
+### Fixed
+- Fixup audio class
+  [#21](https://github.com/vocalpy/vocalpy/pull/21).
