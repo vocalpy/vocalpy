@@ -19,7 +19,7 @@ def audio_amplitude(
     This function first squares the audio to rectify it,
     and then smooths with a window of size ``smooth_win``
     milliseconds. This is done by calling
-    :func:`vocalpy.signal.segment.smooth`.
+    :func:`vocalpy.signal.audio.smooth`.
     Then the function looks for all continuous periods
     above ``threshold`` to find candidate segments.
     Candidates are removed that have a duration less than
