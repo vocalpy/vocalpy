@@ -31,8 +31,7 @@ def generate_npz_spect_files():
     """
     for wav_path in AUDIO_LIST_WAV:
         audio = voc.Audio.read(wav_path)
-        spect, freqs, times = voc.signal.spectrogram(audio.data, audio.samplerate)
-        spect = voc.Spectrogram(data=spect, frequencies=freqs, times=times)
+        spect = voc.signal.spectrogram.spectrogram(audio)
         dst_path = SPECT_NPZ_DIR / f'{wav_path.name}.npz'
         spect.write(path=dst_path)
 
