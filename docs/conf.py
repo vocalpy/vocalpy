@@ -3,6 +3,11 @@
 # For the full list of built-in configuration values, see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
 
+
+import os
+import pathlib
+import sys
+
 # -- Project information -----------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
@@ -10,6 +15,11 @@ project = 'VocalPy'
 copyright = '2023, David Nicholson'
 author = 'David Nicholson'
 release = ''
+
+# This song and dance enables builds from outside the docs directory
+# https://github.com/librosa/librosa/blob/96da0eb228f591740ecbaa369cbc03fc92ea8185/docs/conf.py#L29
+srcpath = os.path.abspath(pathlib.Path(os.path.dirname(__file__)) / "..")
+sys.path.insert(0, srcpath)
 
 # -- General configuration ---------------------------------------------------
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
