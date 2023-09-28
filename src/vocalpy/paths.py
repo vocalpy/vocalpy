@@ -2,6 +2,8 @@
 
 .. autosummary::
    :toctree: generated
+
+   from_dir
 """
 from __future__ import annotations
 
