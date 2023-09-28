@@ -1,4 +1,4 @@
-"""Class representing step in a pipeline that makes spectrograms from audio."""
+"""Class that represents the step in a pipeline that makes spectrograms from audio."""
 from __future__ import annotations
 
 import pathlib
@@ -72,7 +72,7 @@ DEFAULT_SPECT_PARAMS = {"fft_size": 512, "step_size": 64}
 
 
 class SpectrogramMaker:
-    """Class representing step in a pipeline that makes spectrograms from audio.
+    """Class that represents the step in a pipeline that makes spectrograms from audio.
 
     Attributes
     ----------
