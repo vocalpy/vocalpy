@@ -8,29 +8,66 @@ API Reference
 
 This section documents the vocalpy `API <https://en.wikipedia.org/wiki/API>`_.
 
+Data types
+----------
+
+Data types for acoustic communication data.
+
 .. autosummary::
    :toctree: generated
-   :template: module.rst
 
-   dataset
-   plot
+   Audio
+   Spectrogram
+   Annotation
+
+
+Classes for Pipelines
+---------------------
+
+Classes for common steps in your pipelines and workflows
+
+.. autosummary::
+   :toctree: generated
+
+   Segmenter
+   SpectrogramMaker
+   SpectrogramParameters
+
+Signal processing
+-----------------
+
+.. autosummary::
+   :toctree: generated
+
    signal
-   annotation
-   annotation_file
-   annotator
-   audio
-   audio_file
+   segment
+
+Datasets
+--------
+
+.. autosummary::
+   :toctree: generated
+
+   dataset.SequenceDataset
+   Sequence
+   Unit
+
+Visualization
+-------------
+.. autosummary::
+   :toctree: generated
+
+   plot
+
+Other
+-------
+
+.. autosummary::
+   :toctree: generated
+
    constants
-   converters
-   dataset_file
-   feature_extractor
-   feature_file
-   paths
-   segmenter
-   sequence
-   spectrogram
-   spectrogram_file
-   spectrogram_maker
-   spectrogram_parameters
-   unit
    validators
+   converters
+   paths
+
+
