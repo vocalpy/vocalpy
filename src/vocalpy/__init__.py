@@ -1,3 +1,4 @@
+"""A core package for acoustic communication research in Python."""
 from . import constants, dataset, metrics, paths, plot, segment, signal, validators
 from .__about__ import (
     __author__,
