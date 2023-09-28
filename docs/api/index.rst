@@ -64,6 +64,7 @@ Other
 
 .. autosummary::
    :toctree: generated
+   :recursive:
 
    constants
    validators
