@@ -1,4 +1,8 @@
-"""Validation functions."""
+"""Validation functions.
+
+.. autosummary::
+   :toctree: generated
+"""
 from __future__ import annotations
 
 import numpy as np

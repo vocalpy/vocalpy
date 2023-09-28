@@ -1,8 +1,17 @@
-"""functions for making spectrograms
+"""Functions for making spectrograms.
 
-filters adapted from SciPy cookbook
+.. autosummary::
+   :toctree: generated/
+
+   butter_bandpass
+   butter_bandpass_filter
+   spectrogram
+
+Notes
+-----
+Filters adapted from SciPy cookbook:
 https://scipy-cookbook.readthedocs.io/items/ButterworthBandpass.html
-spectrogram adapted from code by Kyle Kastner and Tim Sainburg
+Spectrogram adapted from code by Kyle Kastner and Tim Sainburg:
 https://github.com/timsainb/python_spectrograms_and_inversion
 """
 from __future__ import annotations
@@ -33,7 +42,7 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
 def spectrogram(
     audio: Audio, fft_size: int = 512, step_size: int = 64, thresh=None, transform_type=None, freq_cutoffs=None
 ) -> Spectrogram:
-    """creates a spectrogram
+    """Creates a spectrogram.
 
     Parameters
     ----------

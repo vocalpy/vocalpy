@@ -1,4 +1,8 @@
-"""Validators used by attrs classes."""
+"""Validators used by attrs classes.
+
+.. autosummary::
+   :toctree: generated
+"""
 from . import validators
 
 

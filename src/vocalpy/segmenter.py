@@ -1,4 +1,4 @@
-"""Class that segments audio into sequences of units"""
+"""Class that represents the segmenting step in a pipeline."""
 from __future__ import annotations
 
 from typing import Callable
@@ -20,7 +20,37 @@ DEFAULT_SEGMENT_PARAMS = {
 
 
 class Segmenter:
+    """Class that represents the segmenting step in a pipeline.
+
+    Attributes
+    ----------
+    callback : callable, optional
+        The function or :class:`Callable` class instance
+        that is used to segment.
+        If not specified, defaults to
+        :func:`vocalpy.segment.audio_amplitude.audio_amplitude`.
+    method : str, optional.
+        The name of the function to use to segment.
+    segment_params : dict, optional.
+        If not specified, defaults to
+        :const:`vocalpy.segmenter.DEFAULT_SEGMENT_PARAMS`.
+    """
     def __init__(self, callback: Callable | None = None, method: str | None = None, segment_params: dict | None = None):
+        """Initialize a new :class:`vocalpy.Segmenter` instance.
+
+        Parameters
+        ----------
+        callback : callable, optional
+            The function or :class:`Callable` class instance
+            that is used to segment.
+            If not specified, defaults to
+            :func:`vocalpy.segment.audio_amplitude.audio_amplitude`.
+        method : str, optional.
+            The name of the function to use to segment.
+        segment_params : dict, optional.
+            If not specified, defaults to
+            :data:`vocalpy.segmenter.DEFAULT_SEGMENT_PARAMS`.
+        """
         if callback and method:
             raise ValueError("Cannot specify both `callback` and `method`, only one or the other.")
 
@@ -55,6 +85,25 @@ class Segmenter:
         audio: Audio | AudioFile | list[Audio | AudioFile],
         parallelize: bool = True,
     ) -> Sequence | None | list[Sequence | None]:
+        """Segment audio into sequences.
+
+        Parameters
+        ----------
+        audio : vocalpy.Audio or list of Audio
+            A `class`:vocalpy.Audio` instance
+            or list of :class:`vocalpy.Audio` instances
+            to segment.
+        parallelize : bool
+            If True, parallelize segmentation using :mod:`dask`.
+
+        Returns
+        -------
+        seq : vocalpy.Sequence, None, or list of vocalpy.Sequence or None
+            If a single :class:`~vocalpy.Audio` instance is passed in,
+            a single :class:`~vocalpy.Sequence` instance will be returned.
+            If a list of :class:`~vocalpy.Audio` instances is passed in,
+            a list of :class:`~vocalpy.Sequence` instances will be returned.
+        """
         validate_audio(audio)
 
         # define nested function so vars are in scope and ``dask`` can call it
