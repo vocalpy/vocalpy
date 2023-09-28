@@ -127,7 +127,7 @@ def find_hits(
                 f"but type was: {type(tolerance)}"
             )
         if decimals is not None:
-            raise ValueError(f"Cannot specify a ``decimals`` value when dtype of arrays is int")
+            raise ValueError("Cannot specify a ``decimals`` value when dtype of arrays is int")
 
     diffs = np.abs(np.subtract.outer(reference, hypothesis))
     in_window = diffs <= tolerance
