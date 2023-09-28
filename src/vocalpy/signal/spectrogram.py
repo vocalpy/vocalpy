@@ -3,6 +3,10 @@
 .. autosummary::
    :toctree: generated/
 
+   butter_bandpass
+   butter_bandpass_filter
+   spectrogram
+
 Notes
 -----
 Filters adapted from SciPy cookbook:
@@ -38,7 +42,7 @@ def butter_bandpass_filter(data, lowcut, highcut, fs, order=5):
 def spectrogram(
     audio: Audio, fft_size: int = 512, step_size: int = 64, thresh=None, transform_type=None, freq_cutoffs=None
 ) -> Spectrogram:
-    """creates a spectrogram
+    """Creates a spectrogram.
 
     Parameters
     ----------
