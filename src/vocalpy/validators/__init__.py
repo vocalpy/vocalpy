@@ -5,5 +5,5 @@ e.g. as pre-conditions,
 and functions used by :mod:`attrs` classes
 as validators for those classes' attributes.
 """
-from . import attrs
-from .validators import *
+from . import attrs  # noqa: F401
+from .validators import *  # noqa: F401, F403
