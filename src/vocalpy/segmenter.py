@@ -28,7 +28,7 @@ class Segmenter:
         The function or :class:`Callable` class instance
         that is used to segment.
         If not specified, defaults to
-        :func:`vocalpy.segment.audio_amplitude.audio_amplitude`.
+        :func:`vocalpy.segment.energy`.
     method : str, optional.
         The name of the function to use to segment.
     segment_params : dict, optional.
@@ -44,7 +44,7 @@ class Segmenter:
             The function or :class:`Callable` class instance
             that is used to segment.
             If not specified, defaults to
-            :func:`vocalpy.segment.audio_amplitude.audio_amplitude`.
+            :func:`vocalpy.segment.energy`.
         method : str, optional.
             The name of the function to use to segment.
         segment_params : dict, optional.

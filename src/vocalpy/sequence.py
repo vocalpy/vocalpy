@@ -18,7 +18,7 @@ class Sequence:
     units : list
         A :class:`list` of `vocalpy.Unit` instances.
         Produced by segmenting audio, e.g. with
-        :func:`vocalpy.signal.segment.segment_audio_amplitude`.
+        :func:`vocalpy.segment.energy`.
     segment_method : str
         The method used to segment audio.
         Either a string name of a method

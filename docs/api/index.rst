@@ -4,9 +4,10 @@ API Reference
 =============
 
 .. automodule:: vocalpy
-.. currentmodule:: vocalpy
 
 This section documents the vocalpy `API <https://en.wikipedia.org/wiki/API>`_.
+
+.. currentmodule:: vocalpy
 
 Data types
 ----------
@@ -40,6 +41,7 @@ Signal processing
 
 .. autosummary::
    :toctree: generated
+   :recursive:
    :template: module.rst
 
    signal
@@ -51,6 +53,7 @@ Metrics
 .. autosummary::
    :toctree: generated
    :template: module.rst
+   :recursive:
 
    metrics
    metrics.segmentation
@@ -72,6 +75,7 @@ Visualization
 .. autosummary::
    :toctree: generated
    :template: module.rst
+   :recursive:
 
    plot
 
@@ -81,9 +85,8 @@ Other
 .. autosummary::
    :toctree: generated
    :template: module.rst
+   :recursive:
 
    constants
    validators
    paths
-
-
