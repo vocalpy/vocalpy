@@ -110,7 +110,7 @@ class Segmenter:
         def _to_sequence(audio_: Audio):
             if isinstance(audio_, AudioFile):
                 audio_ = Audio.read(audio_.path)
-            out = self.callback(audio, **self.segment_params)
+            out = self.callback(audio_, **self.segment_params)
             if out is None:
                 return out
             else:
