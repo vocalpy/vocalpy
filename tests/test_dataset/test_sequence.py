@@ -11,12 +11,12 @@ class TestSequenceDataset:
 
         segment_params = {
             'threshold': 1500,
-            'min_syl_dur': 0.01,
+            'min_dur': 0.01,
             'min_silent_dur': 0.006,
         }
         segmenter = voc.Segmenter(
-            callback=evfuncs.segment_song,
-            segment_params=segment_params
+            callback=voc.segment.energy,
+            segment_params=segment_params,
         )
 
         seqs = segmenter.segment(audios)

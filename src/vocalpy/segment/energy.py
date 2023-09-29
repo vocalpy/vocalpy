@@ -1,27 +1,29 @@
 from __future__ import annotations
+from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
 
-from ..signal.audio import smooth
+from .. import signal
+if TYPE_CHECKING:
+    from .. import Audio
 
-
-def audio_amplitude(
-    data: npt.NDArray,
-    samplerate: int,
+def energy(
+    audio: Audio,
     smooth_win: int = 2,
     threshold: int = 5000,
     min_dur: float = 0.02,
     min_silent_dur: float = 0.002,
-) -> tuple[npt.NDArray, npt.NDArray]:
-    """Find segments in audio by thresholding on the amplitude.
+) -> tuple[npt.NDArray, npt.NDArray] | None:
+    """Find segments in audio by thresholding the smoothed energy.
 
-    This function first squares the audio to rectify it,
-    and then smooths with a window of size ``smooth_win``
-    milliseconds. This is done by calling
-    :func:`vocalpy.signal.audio.smooth`.
-    Then the function looks for all continuous periods
-    above ``threshold`` to find candidate segments.
+    Converts audio to smoothed energy
+    using :func:`vocalpy.signal.audio.smoothed_energy`,
+    that computes a running average of the squared signal
+    by convolving with a window of size ``smooth_win``
+    milliseconds.
+    Then finds all continuous periods
+    above ``threshold``, that are considered candidate segments.
     Candidates are removed that have a duration less than
     ``minimum_dur``, and then any two segments with a silent
     gap between them less than ``min_silent_dur`` are merged
@@ -31,16 +33,12 @@ def audio_amplitude(
 
     Parameters
     ----------
-    data : numpy.ndarray
-        An audio signal as a :class:`numpy.ndarray`.
-        Typically, the `data` attribute from a :class:`vocalpy.Audio` instance.
-    samplerate : int
-        The sampling rate.
-        Typically, the `samplerate` attribute from a :class:`vocalpy.Audio` instance.
+    audio: vocalpy.Audio
+        An audio signal.
     smooth_win : integer
         Size of smoothing window in milliseconds. Default is 2.
     threshold : int
-        Value above which amplitude is considered part of a segment.
+        Value above which smoothed energy is considered part of a segment.
         Default is 5000.
     min_dur : float
         Minimum duration of a segment, in seconds.
@@ -56,8 +54,8 @@ def audio_amplitude(
     offsets_s : numpy.ndarray
         Vector of offset times of segments, in seconds.
     """
-    smoothed = smooth(data, samplerate, smooth_win)
-    above_th = smoothed > threshold
+    energy_smoothed = signal.audio.smoothed_energy(audio, smooth_win)
+    above_th = energy_smoothed > threshold
     h = [1, -1]
     # convolving with h causes:
     # +1 whenever above_th changes from 0 to 1
@@ -67,8 +65,8 @@ def audio_amplitude(
     # always get in units of sample first, then convert to s
     onsets_sample = np.where(above_th_convoluted > 0)[0]
     offsets_sample = np.where(above_th_convoluted < 0)[0]
-    onsets_s = onsets_sample / samplerate
-    offsets_s = offsets_sample / samplerate
+    onsets_s = onsets_sample / audio.samplerate
+    offsets_s = offsets_sample / audio.samplerate
 
     if onsets_s.shape[0] < 1 or offsets_s.shape[0] < 1:
         return None  # because no onsets or offsets in this file
