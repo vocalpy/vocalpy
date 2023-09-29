@@ -35,6 +35,7 @@ class Segmenter:
         If not specified, defaults to
         :const:`vocalpy.segmenter.DEFAULT_SEGMENT_PARAMS`.
     """
+
     def __init__(self, callback: Callable | None = None, method: str | None = None, segment_params: dict | None = None):
         """Initialize a new :class:`vocalpy.Segmenter` instance.
 

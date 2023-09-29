@@ -6,7 +6,6 @@ import warnings
 
 import numpy as np
 import numpy.typing as npt
-import scipy.signal
 
 from ..audio import Audio
 

@@ -1,12 +1,15 @@
 from __future__ import annotations
+
 from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
 
 from .. import signal
+
 if TYPE_CHECKING:
     from .. import Audio
+
 
 def energy(
     audio: Audio,
