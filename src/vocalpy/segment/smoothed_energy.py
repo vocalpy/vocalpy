@@ -3,10 +3,10 @@ from __future__ import annotations
 import numpy as np
 import numpy.typing as npt
 
-from ..signal.audio import smooth
+from ..signal.audio import smoothed_energy
 
 
-def audio_amplitude(
+def smoothed_energy(
     data: npt.NDArray,
     samplerate: int,
     smooth_win: int = 2,
@@ -14,8 +14,10 @@ def audio_amplitude(
     min_dur: float = 0.02,
     min_silent_dur: float = 0.002,
 ) -> tuple[npt.NDArray, npt.NDArray]:
-    """Find segments in audio by thresholding on the amplitude.
+    """Find segments in audio by thresholding the smoothed energy.
 
+    Converts audio to smoothed energy
+    using :func:`vocalpy.signal.audio.smoothed_energy`
     This function first squares the audio to rectify it,
     and then smooths with a window of size ``smooth_win``
     milliseconds. This is done by calling
