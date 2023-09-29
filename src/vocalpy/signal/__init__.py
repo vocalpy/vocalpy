@@ -1,15 +1,6 @@
-"""Functions for signal processing.
-
-.. autosummary::
-   :toctree: generated
-
-   audio
-   preprocess
-   spectrogram
-"""
+"""Functions for signal processing."""
 from . import preprocess, spectrogram
 
 __all__ = [
-    "preprocess",
     "spectrogram",
 ]
