@@ -5,6 +5,12 @@ The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
 ## Unreleased
+### Changed
+- Rename `vocalpy.segment.audio_amplitude` to `vocalpy.segment.energy`
+  [#63](https://github.com/vocalpy/vocalpy/pull/63).
+  Fixes [#62](https://github.com/vocalpy/vocalpy/issues/62).
+
+## 0.4.0
 ### Added
 - Add `vocalpy.segment` module with algorithms for segmenting, 
   and add the algorithm from the `ava` package to that module,
