@@ -1,7 +1,4 @@
 """Functions for working with paths.
-
-.. autosummary::
-   :toctree: generated
 """
 from __future__ import annotations
 
