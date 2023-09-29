@@ -64,7 +64,7 @@ class Segmenter:
                 raise AttributeError(f"Method was '{method}' but `vocalpy.segment` has no function named `{method}`")
 
         if callback is None:
-            from vocalpy.segment import audio_amplitude as default_segment_func
+            from vocalpy.segment import smoothed_energy as default_segment_func
 
             callback = default_segment_func
 
