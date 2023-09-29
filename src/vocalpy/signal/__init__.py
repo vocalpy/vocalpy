@@ -1,6 +1,7 @@
 """Functions for signal processing."""
-from . import preprocess, spectrogram
+from . import audio, spectrogram
 
 __all__ = [
+    "audio",
     "spectrogram",
 ]
