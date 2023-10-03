@@ -23,7 +23,7 @@ __title__ = "vocalpy"
 __summary__ = "A core package for acoustic communication research in Python"
 __uri__ = "https://github.com/vocalpy/vocalpy"
 
-__version__ = "0.5.0"
+__version__ = "0.6.0"
 
 if base_dir is not None and os.path.exists(os.path.join(base_dir, ".commit")):
     with open(os.path.join(base_dir, ".commit")) as fp:
