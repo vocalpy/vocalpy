@@ -64,9 +64,31 @@ def bandpass_filtfilt(audio: Audio, freq_cutoffs=(500, 10000)) -> Audio:
     filtered = scipy.signal.filtfilt(b, a, audio.data, padlen=padlen)
     return Audio(data=filtered, samplerate=audio.samplerate)
 
+
+def meansquared(audio: Audio, freq_cutoffs=(500, 10000), smooth_win: int = 2) -> npt.NDArray:
+    """Convert audio to a Root-Mean-Square-like trace
+
+    First applied a band-pass filter
     Rectifies audio signal by squaring, then smooths by taking
-    the average within a window of size ``sm_win``.
+    the average within a window of size ``smooth_win``.
+
+    Parameters
+    ----------
+    audio: vocalpy.Audio
+        An audio signal.
+    freq_cutoffs : Iterable
+        Cutoff frequencies for bandpass filter.
+        List or tuple with two elements, default is ``(500, 10000)``.
+    smooth_win : integer
+        Size of smoothing window, in milliseconds. Default is ``2``.
+
+    Returns
+    -------
+    meansquared : numpy.ndarray
+        The ``vocalpy.Audio.data`` after squaring and smoothing.
     """
+    audio = bandpass_filtfilt(audio, freq_cutoffs)
+
     data = np.array(audio.data)
     if issubclass(data.dtype.type, numbers.Integral):
         while np.any(np.abs(data) > np.sqrt(np.iinfo(data.dtype).max)):
