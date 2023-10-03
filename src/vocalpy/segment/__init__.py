@@ -8,9 +8,9 @@ with high and low frequencies in addition
 to the start and stop times.
 """
 from . import ava
-from .energy import energy
+from .meansquared import meansquared
 
 __all__ = [
-    "energy",
+    "meansquared",
     "ava",
 ]

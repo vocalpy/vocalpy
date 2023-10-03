@@ -28,7 +28,7 @@ class Segmenter:
         The function or :class:`Callable` class instance
         that is used to segment.
         If not specified, defaults to
-        :func:`vocalpy.segment.energy`.
+        :func:`vocalpy.segment.meansquared`.
     method : str, optional.
         The name of the function to use to segment.
     segment_params : dict, optional.
@@ -45,7 +45,7 @@ class Segmenter:
             The function or :class:`Callable` class instance
             that is used to segment.
             If not specified, defaults to
-            :func:`vocalpy.segment.energy`.
+            :func:`vocalpy.segment.meansquared`.
         method : str, optional.
             The name of the function to use to segment.
         segment_params : dict, optional.
@@ -65,7 +65,7 @@ class Segmenter:
                 raise AttributeError(f"Method was '{method}' but `vocalpy.segment` has no function named `{method}`")
 
         if callback is None:
-            from vocalpy.segment import energy as default_segment_func
+            from vocalpy.segment import meansquared as default_segment_func
 
             callback = default_segment_func
 

@@ -1,6 +1,6 @@
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
+from typing import TYPE_CHECKING, Iterable
 
 import numpy as np
 import numpy.typing as npt
@@ -11,37 +11,42 @@ if TYPE_CHECKING:
     from .. import Audio
 
 
-def energy(
+def meansquared(
     audio: Audio,
-    smooth_win: int = 2,
     threshold: int = 5000,
     min_dur: float = 0.02,
     min_silent_dur: float = 0.002,
+    freq_cutoffs: Iterable = (500, 10000),
+    smooth_win: int = 2,
 ) -> tuple[npt.NDArray, npt.NDArray] | None:
-    """Find segments in audio by thresholding the smoothed energy.
+    """Segment audio by thresholding the mean squared signal.
 
-    Converts audio to smoothed energy
-    using :func:`vocalpy.signal.audio.smoothed_energy`,
-    that computes a running average of the squared signal
-    by convolving with a window of size ``smooth_win``
-    milliseconds.
+    Converts audio to the mean squared of the signal
+    (using :func:`vocalpy.signal.audio.meansquared`).
     Then finds all continuous periods
-    above ``threshold``, that are considered candidate segments.
+    in the mean squared signal above ``threshold``.
+    These periods are considered candidate segments.
     Candidates are removed that have a duration less than
-    ``minimum_dur``, and then any two segments with a silent
+    ``minimum_dur``; then, any two segments with a silent
     gap between them less than ``min_silent_dur`` are merged
     into a single segment. The segments remaining after this
     post-processing are returned as onset and offset times
-    in two numpy arrays.
+    in two NumPy arrays.
+
+    Note that :func:`vocalpy.signal.audio.meansquared`
+    first filters the audio, with
+    :func:`vocalpy.signal.audio.bandpass_filtfilt`,
+    using ``freq_cutoffs``, and then computes
+    a running average of the squared signal
+    by convolving with a window of size ``smooth_win``
+    milliseconds.
 
     Parameters
     ----------
     audio: vocalpy.Audio
         An audio signal.
-    smooth_win : integer
-        Size of smoothing window in milliseconds. Default is 2.
     threshold : int
-        Value above which smoothed energy is considered part of a segment.
+        Value above which mean squared signal is considered part of a segment.
         Default is 5000.
     min_dur : float
         Minimum duration of a segment, in seconds.
@@ -49,6 +54,11 @@ def energy(
     min_silent_dur : float
         Minimum duration of silent gap between segments, in seconds.
         Default is 0.002, i.e. 2 ms.
+    freq_cutoffs : Iterable
+        Cutoff frequencies for bandpass filter.
+        List or tuple with two elements, default is ``(500, 10000)``.
+    smooth_win : int
+        Size of smoothing window in milliseconds. Default is 2.
 
     Returns
     -------
@@ -57,8 +67,8 @@ def energy(
     offsets_s : numpy.ndarray
         Vector of offset times of segments, in seconds.
     """
-    energy_smoothed = signal.audio.smoothed_energy(audio, smooth_win)
-    above_th = energy_smoothed > threshold
+    meansquared_ = signal.audio.meansquared(audio, freq_cutoffs, smooth_win)
+    above_th = meansquared_ > threshold
     h = [1, -1]
     # convolving with h causes:
     # +1 whenever above_th changes from 0 to 1

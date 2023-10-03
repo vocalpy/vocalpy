@@ -15,7 +15,7 @@ class TestSequenceDataset:
             'min_silent_dur': 0.006,
         }
         segmenter = voc.Segmenter(
-            callback=voc.segment.energy,
+            callback=voc.segment.meansquared,
             segment_params=segment_params,
         )
 
