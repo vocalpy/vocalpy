@@ -13,11 +13,11 @@ if TYPE_CHECKING:
 
 def meansquared(
     audio: Audio,
-    freq_cutoffs: Iterable = (500, 10000),
-    smooth_win: int = 2,
     threshold: int = 5000,
     min_dur: float = 0.02,
     min_silent_dur: float = 0.002,
+    freq_cutoffs: Iterable = (500, 10000),
+    smooth_win: int = 2,
 ) -> tuple[npt.NDArray, npt.NDArray] | None:
     """Segment audio by thresholding the mean squared signal.
 
@@ -45,11 +45,6 @@ def meansquared(
     ----------
     audio: vocalpy.Audio
         An audio signal.
-    freq_cutoffs : Iterable
-        Cutoff frequencies for bandpass filter.
-        List or tuple with two elements, default is ``(500, 10000)``.
-    smooth_win : int
-        Size of smoothing window in milliseconds. Default is 2.
     threshold : int
         Value above which mean squared signal is considered part of a segment.
         Default is 5000.
@@ -59,6 +54,11 @@ def meansquared(
     min_silent_dur : float
         Minimum duration of silent gap between segments, in seconds.
         Default is 0.002, i.e. 2 ms.
+    freq_cutoffs : Iterable
+        Cutoff frequencies for bandpass filter.
+        List or tuple with two elements, default is ``(500, 10000)``.
+    smooth_win : int
+        Size of smoothing window in milliseconds. Default is 2.
 
     Returns
     -------
