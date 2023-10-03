@@ -4,6 +4,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+### Changed
+- Rename `vocalpy.segment.energy` to `vocalpy.segment.meansquared`,
+  and rename `vocalpy.signal.audio.energy` to `vocalpy.signal.audio.meansquared`
+  [#76](https://github.com/vocalpy/vocalpy/pull/76).
+  Fixes [#75](https://github.com/vocalpy/vocalpy/issues/75).
+
+### Fixed
+- Add back `vocalpy.signal.audio.bandpass_filtfilt`; 
+  have `vocalpy.signal.audio.meansquared` use this function
+  (and by extension `vocalpy.segment.meansquared`)
+  [#76](https://github.com/vocalpy/vocalpy/pull/76).
+  Fixes [#74](https://github.com/vocalpy/vocalpy/issues/74).
+
 ## 0.5.0
 ### Changed
 - Rename `vocalpy.segment.audio_amplitude` to `vocalpy.segment.energy`
