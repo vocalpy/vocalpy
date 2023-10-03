@@ -4,7 +4,7 @@ import numpy as np
 import vocalpy.segment
 
 
-def test_audio_amplitude(a_cbin_path):
+def test_meansquared(a_cbin_path):
     audio = vocalpy.Audio.read(a_cbin_path)
 
     notmat = str(a_cbin_path) + '.not.mat'
@@ -13,7 +13,7 @@ def test_audio_amplitude(a_cbin_path):
     min_silent_dur = nmd['min_int'] / 1000
     threshold = nmd['threshold']
 
-    onsets, offsets = vocalpy.segment.energy(audio, threshold, min_syl_dur, min_silent_dur)
+    onsets, offsets = vocalpy.segment.meansquared(audio, threshold, min_syl_dur, min_silent_dur)
     assert isinstance(onsets, np.ndarray)
     assert isinstance(offsets, np.ndarray)
     assert len(onsets) == len(offsets)
