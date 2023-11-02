@@ -312,7 +312,7 @@ def precision_recall_fscore(
 
     # If we have no boundaries, we get no score.
     if len(reference) == 0 or len(hypothesis) == 0:
-        return 0.0, 0, IRMetricData()
+        return 0.0, 0, IRMetricData(hits_ref=np.array([]), hits_hyp=np.array([]), diffs=np.array([]))
 
     hits_ref, hits_hyp, diffs = find_hits(hypothesis, reference, tolerance, decimals)
     metric_data = IRMetricData(hits_ref, hits_hyp, diffs)
