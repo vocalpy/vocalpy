@@ -53,6 +53,15 @@ def test_is_1d_ndarray_raises_value_error(y):
     [
         np.array([1, 2, 3]),
         np.array([1.0, 2.0, 3.0]),
+        # ---- edge cases
+        # empty arrays are valid boundary arrays,
+        # e.g. when we segment but don't find any boundaries
+        np.array([], dtype=np.float32),
+        np.array([], dtype=np.int16),
+        # a single boundary is still a valid boundary array
+        # e.g for segmenting algorithms that threshold a distance measure
+        np.array([1]),
+        np.array([1.0]),
     ]
 )
 def test_is_valid_boundaries_array(y):
