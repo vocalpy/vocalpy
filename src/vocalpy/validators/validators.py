@@ -54,9 +54,9 @@ def is_1d_ndarray(y: npt.NDArray, name: str | None = None) -> bool:
 
 
 def is_valid_boundaries_array(y: npt.NDArray, name: str | None = None) -> bool:
-    """Validates that ``y`` is a valid array of boundaries,
-    i.e., onsets or offsets of segments such as those
-    found with a segmentation algorithm.
+    """Validates that ``y`` is a valid array of boundaries
+    found with a segmentation algorithm,
+    e.g., onsets or offsets of segments returned by :func:`vocalpy.segment.meansquared`.
 
     To be a valid array of boundaries, ``y`` must meet the following conditions:
     - Be a one dimensional numpy array, as validated with
@@ -64,6 +64,9 @@ def is_valid_boundaries_array(y: npt.NDArray, name: str | None = None) -> bool:
     - Have a dtype that is a float or int, e.g. ``np.float64`` or ``np.int32``.
     - Have values that are all non-negative, i.e. ``np.all(y >= 0.0)``
     - Have values that are strictly increasing, i.e. ``np.all(y[1:] > y[:-1])``
+
+    An empty array or an array with a single value are also considered valid,
+    as long as the dtype is correct and any value is non-negative.
 
     Parameters
     ----------
@@ -77,6 +80,17 @@ def is_valid_boundaries_array(y: npt.NDArray, name: str | None = None) -> bool:
     -------
     is_valid_boundaries_array: bool
         True if ``y`` is valid.
+
+    Examples
+    --------
+    >>> vocalpy.validators.is_valid_boundaries_array(np.array([1, 2, 3], dtype=np.int16))
+    True
+    >>> vocalpy.validators.is_valid_boundaries_array(np.array([1.0, 2.0, 3.0], dtype=np.float32))
+    True
+    >>> vocalpy.validators.is_valid_boundaries_array(np.array([], dtype=np.float32))
+    True
+    >>> vocalpy.validators.is_valid_boundaries_array(np.array([1.0], dtype=np.float32))
+    True
     """
     is_1d_ndarray(y, name)
 
@@ -90,6 +104,11 @@ def is_valid_boundaries_array(y: npt.NDArray, name: str | None = None) -> bool:
 
     if not np.all(y >= 0.0):
         raise ValueError(f"Values of boundaries array {name}must all be non-negative")
+
+    if y.size <= 1:
+        # It's a valid boundary array but there's no boundaries or just one boundary,
+        # so we don't check that values are strictly increasing
+        return True
 
     if not np.all(y[1:] > y[:-1]):
         raise ValueError(f"Values of boundaries array {name}must be strictly increasing")
