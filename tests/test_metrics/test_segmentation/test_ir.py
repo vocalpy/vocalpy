@@ -498,6 +498,59 @@ IR_METRICS_SINGLE_BOUNDARY_ARRAY_PARAMS_VALS = [
         expected_recall=1.0,
         expected_fscore=0.5454545454545454,
     ),
+    # # edge cases
+    # no boundaries in either
+    IRMetricSingleBoundaryArrayTestCase(
+        reference=np.array([]),
+        hypothesis=np.array([]),
+        tolerance=0.5,
+        decimals=3,
+        expected_hits_ref=np.array([]),
+        expected_hits_hyp=np.array([]),
+        expected_diffs=np.array([]),
+        expected_precision=0.0,
+        expected_recall=0.0,
+        expected_fscore=0.0,
+    ),
+    # no boundaries in reference
+    IRMetricSingleBoundaryArrayTestCase(
+        reference=np.array([]),
+        hypothesis=np.array([1.0, 2.0, 3.0]),
+        tolerance=0.5,
+        decimals=3,
+        expected_hits_ref=np.array([]),
+        expected_hits_hyp=np.array([]),
+        expected_diffs=np.array([]),
+        expected_precision=0.0,
+        expected_recall=0.0,
+        expected_fscore=0.0,
+    ),
+    # no boundaries in hypothesis
+    IRMetricSingleBoundaryArrayTestCase(
+        reference=np.array([1.0, 2.0, 3.0]),
+        hypothesis=np.array([]),
+        tolerance=0.5,
+        decimals=3,
+        expected_hits_ref=np.array([]),
+        expected_hits_hyp=np.array([]),
+        expected_diffs=np.array([]),
+        expected_precision=0.0,
+        expected_recall=0.0,
+        expected_fscore=0.0,
+    ),
+    # only one boundary in ref/hyp
+    IRMetricSingleBoundaryArrayTestCase(
+        reference=np.array([1.0]),
+        hypothesis=np.array([1.0]),
+        tolerance=0.5,
+        decimals=3,
+        expected_hits_ref=np.array([0]),
+        expected_hits_hyp=np.array([0]),
+        expected_diffs=np.array([0]),
+        expected_precision=1.0,
+        expected_recall=1.0,
+        expected_fscore=1.0,
+    ),
 ]
 
 
