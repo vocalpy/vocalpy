@@ -92,7 +92,7 @@ def entropy(power_spectrogram: Spectrogram, min_freq: float=380., max_freq: floa
     return sum_log / (P.shape[0] - 1) - log_sum
 
 
-def amplitude(power_spectrogram: npt.NDArray, min_freq: float=380., max_freq: float=11025., baseline: int = 70) -> npt.NDArray:
+def amplitude(power_spectrogram: Spectrogram, min_freq: float=380., max_freq: float=11025., baseline: int = 70) -> npt.NDArray:
     """Calculates the amplitude of each window in a song interval.
 
     Amplitude is the volume of a sound in decibels, considering only frequencies above min_frequency.
