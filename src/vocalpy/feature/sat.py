@@ -23,7 +23,7 @@ def goodness_of_pitch(cepstrogram: npt.NDArray, quefrencies: npt.NDArray, max_F0
     return np.max(cepstrogram[min_quef_idx : max_quef_idx, :], axis=0)
 
 
-def mean_frequency(power_spectrogram: voc.Spectrogram, min_freq: float=380., max_freq: float=11025.) -> npt.NDArray:
+def mean_frequency(power_spectrogram: Spectrogram, min_freq: float=380., max_freq: float=11025.) -> npt.NDArray:
     """Calculates the mean frequency of each window in a song interval.
 
     This is one way to estimate the pitch of a signal.
