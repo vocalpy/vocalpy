@@ -43,7 +43,7 @@ def mean_frequency(power_spectrogram: Spectrogram, min_freq: float=380., max_fre
 EPS = np.finfo(np.double).eps
 
 
-def frequency_modulation(dSdf: npt.NDArray, dSdt: npt.NDArray) -> npt.NDArray:
+def frequency_modulation(dSdt: npt.NDArray, dSdf: npt.NDArray) -> npt.NDArray:
     """Calculates the frequency modulation of each window in a song interval.
 
     Frequency Modulation can be thought of as the slope of frequency traces in a spectrogram. A high
@@ -54,7 +54,7 @@ def frequency_modulation(dSdf: npt.NDArray, dSdt: npt.NDArray) -> npt.NDArray:
     Returns:
         np.array: array containing the frequency modulation of each frame in the song interval.
     """
-    return np.arctan(np.max(dSdt, axis=0) / (np.max(dSdt, axis=0) + EPS))
+    return np.arctan(np.max(dSdt, axis=0) / (np.max(dSdf, axis=0) + EPS))
 
 
 def amplitude_modulation(dSdt: npt.NDArray) -> npt.NDArray:
