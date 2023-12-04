@@ -69,7 +69,7 @@ def amplitude_modulation(dSdt: npt.NDArray) -> npt.NDArray:
     return np.sum(dSdt, axis=0)
 
 
-def entropy(power_spectra: npt.NDArray, min_freq: float=380., max_freq: float=11025.) -> npt.NDArray:
+def entropy(power_spectrogram: Spectrogram, min_freq: float=380., max_freq: float=11025.) -> npt.NDArray:
     """Calculates the Wiener entropy of each window in a song interval.
 
     Wiener entropy is a measure of the uniformity of power spread across frequency bands in a frame of audio.
