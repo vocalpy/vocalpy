@@ -24,11 +24,12 @@ def sat(audio: Audio, n_fft=400, hop_length=40, freq_range=0.5):
     spectra1 = np.fft.fft(windows1, n=n_fft)
     spectra2 = np.fft.fft(windows2, n=n_fft)
     power_spectrogram = (np.abs(spectra1) + np.abs(spectra2)) ** 2
-    power_spectrogram = power_spectrogram.T[:f.shape[-1], :]
+    power_spectrogram = power_spectrogram.T[: f.shape[-1], :]
 
     # make power spectrum into Spectrogram
     t = librosa.frames_to_time(np.arange(windows.shape[0]), sr=audio.samplerate, hop_length=hop_length, n_fft=n_fft)
     from .. import Spectrogram
+
     power_spectrogram = Spectrogram(data=power_spectrogram, frequencies=f, times=t)
 
     log_spectra = np.log(spectra1, where=spectra1 > 0)

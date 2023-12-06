@@ -13,7 +13,7 @@ if TYPE_CHECKING:
 
 from .. import spectral
 
-#get small number to avoid potential divide by zero errors
+# get small number to avoid potential divide by zero errors
 EPS = np.finfo(np.double).eps
 
 
@@ -31,10 +31,10 @@ def goodness_of_pitch(cepstrogram: npt.NDArray, quefrencies: npt.NDArray, max_F0
     quefrency_cutoff = 1 / max_F0
     min_quef_idx = np.min(np.argwhere(quefrencies > quefrency_cutoff)) - 1
     max_quef_idx = int(np.floor(len(cepstrogram) / 2))
-    return np.max(cepstrogram[min_quef_idx : max_quef_idx, :], axis=0)
+    return np.max(cepstrogram[min_quef_idx:max_quef_idx, :], axis=0)
 
 
-def mean_frequency(power_spectrogram: Spectrogram, min_freq: float=380., max_freq: float=11025.) -> npt.NDArray:
+def mean_frequency(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_freq: float = 11025.0) -> npt.NDArray:
     """Calculates the mean frequency of each window in a song interval.
 
     This is one way to estimate the pitch of a signal.
@@ -76,7 +76,7 @@ def amplitude_modulation(dSdt: npt.NDArray) -> npt.NDArray:
     return np.sum(dSdt, axis=0)
 
 
-def entropy(power_spectrogram: Spectrogram, min_freq: float=380., max_freq: float=11025.) -> npt.NDArray:
+def entropy(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_freq: float = 11025.0) -> npt.NDArray:
     """Calculates the Wiener entropy of each window in a song interval.
 
     Wiener entropy is a measure of the uniformity of power spread across frequency bands in a frame of audio.
@@ -90,16 +90,15 @@ def entropy(power_spectrogram: Spectrogram, min_freq: float=380., max_freq: floa
     """
     freq_inds = (power_spectrogram.frequencies > min_freq) & (power_spectrogram.frequencies < max_freq)
     P = power_spectrogram.data[freq_inds, :]
-    #calculate entropy for current frame
+    # calculate entropy for current frame
     sum_log = np.sum(np.log(P), axis=0)
-    log_sum = np.log(
-        np.sum(P, axis=0) / (
-            P.shape[0] - 1
-        ))
+    log_sum = np.log(np.sum(P, axis=0) / (P.shape[0] - 1))
     return sum_log / (P.shape[0] - 1) - log_sum
 
 
-def amplitude(power_spectrogram: Spectrogram, min_freq: float=380., max_freq: float=11025., baseline: int = 70) -> npt.NDArray:
+def amplitude(
+    power_spectrogram: Spectrogram, min_freq: float = 380.0, max_freq: float = 11025.0, baseline: int = 70
+) -> npt.NDArray:
     """Calculates the amplitude of each window in a song interval.
 
     Amplitude is the volume of a sound in decibels, considering only frequencies above min_frequency.
@@ -112,7 +111,9 @@ def amplitude(power_spectrogram: Spectrogram, min_freq: float=380., max_freq: fl
     return 10 * np.log10(np.sum(P, axis=0)) + baseline
 
 
-def pitch(audio: Audio, min_frequency: float = 380., fmax_yin: float = 8000., frame_length: int = 400, hop_length: int = 40):
+def pitch(
+    audio: Audio, min_frequency: float = 380.0, fmax_yin: float = 8000.0, frame_length: int = 400, hop_length: int = 40
+):
     """Estimates the fundamental frequency (or pitch) of each window in a song interval using the yin algorithm.
 
     For more information on the YIN algorithm for fundamental frequency estimation, please refer to the documentation
@@ -121,17 +122,29 @@ def pitch(audio: Audio, min_frequency: float = 380., fmax_yin: float = 8000., fr
     Returns:
         np.array: array containing the YIN estimated fundamental frequency of each frame in the song interval in Hertz.
     """
-    return librosa.yin(audio.data, fmin=min_frequency, fmax=fmax_yin, sr=audio.samplerate, frame_length=frame_length, hop_length=hop_length)
+    return librosa.yin(
+        audio.data,
+        fmin=min_frequency,
+        fmax=fmax_yin,
+        sr=audio.samplerate,
+        frame_length=frame_length,
+        hop_length=hop_length,
+    )
 
 
 def similarity_features(
-        audio: Audio, n_fft=400, hop_length=40,
-        freq_range=0.5, min_freq: float=380., amp_baseline: int = 70,
-        max_F0: int = 1830, fmax_yin: float = 8000.,
+    audio: Audio,
+    n_fft=400,
+    hop_length=40,
+    freq_range=0.5,
+    min_freq: float = 380.0,
+    amp_baseline: int = 70,
+    max_F0: int = 1830,
+    fmax_yin: float = 8000.0,
 ) -> xr.DataSet:
     # pitch, goodness, AM, FM, entropy
     power_spectrogram, cepstrogram, quefrencies, max_freq, dSdt, dSdf = spectral.sat(
-        audio,  n_fft, hop_length, freq_range
+        audio, n_fft, hop_length, freq_range
     )
     amp_ = amplitude(power_spectrogram, min_freq, max_freq, amp_baseline)
     pitch_ = pitch(audio, min_freq, fmax_yin, frame_length=n_fft, hop_length=hop_length)
@@ -141,14 +154,12 @@ def similarity_features(
     entropy_ = entropy(power_spectrogram, min_freq, max_freq)
     return xr.Dataset(
         {
-            "amplitude":  (["time"], amp_),
+            "amplitude": (["time"], amp_),
             "pitch": (["time"], pitch_),
             "goodness_of_pitch": (["time"], goodness_),
             "frequency_modulation": (["time"], FM),
             "amplitude_modulation": (["time"], AM),
             "entropy": (["time"], entropy_),
         },
-        coords={
-            "time": power_spectrogram.times
-        }
+        coords={"time": power_spectrogram.times},
     )
