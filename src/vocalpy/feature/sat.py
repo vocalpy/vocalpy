@@ -1,9 +1,20 @@
+"""Feature extraction for Sound Analysis Toolbox (SAT)."""
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import librosa
 import numpy as np
 import numpy.typing as npt
 import xarray as xr
 
-from .. import Audio, Spectrogram, spectral
+if TYPE_CHECKING:
+    from .. import Audio, Spectrogram
+
+from .. import spectral
+
+#get small number to avoid potential divide by zero errors
+EPS = np.finfo(np.double).eps
 
 
 def goodness_of_pitch(cepstrogram: npt.NDArray, quefrencies: npt.NDArray, max_F0: int = 1830) -> npt.NDArray:
@@ -37,10 +48,6 @@ def mean_frequency(power_spectrogram: Spectrogram, min_freq: float=380., max_fre
     P = power_spectrogram.data[freq_inds, :]
     frequencies = power_spectrogram.frequencies[freq_inds]
     return np.sum(P * frequencies[:, np.newaxis], axis=0) / np.sum(P, axis=0)
-
-
-#get small number to avoid potential divide by zero errors
-EPS = np.finfo(np.double).eps
 
 
 def frequency_modulation(dSdt: npt.NDArray, dSdf: npt.NDArray) -> npt.NDArray:
