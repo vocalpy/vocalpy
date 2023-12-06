@@ -112,17 +112,43 @@ def amplitude(power_spectrogram: Spectrogram, min_freq: float=380., max_freq: fl
     return 10 * np.log10(np.sum(P, axis=0)) + baseline
 
 
-def pitch(y: npt.NDArray, sample_rate: int, min_frequency, fmax_yin: int, hop_length: int = 40) -> npt.NDArray:
+def pitch(audio: Audio, min_frequency: float = 380., fmax_yin: float = 8000., frame_length: int = 400, hop_length: int = 40):
     """Estimates the fundamental frequency (or pitch) of each window in a song interval using the yin algorithm.
 
     For more information on the YIN algorithm for fundamental frequency estimation, please refer to the documentation
-    for `librosa.yin()`.
+    for :func:`librosa.yin()`.
 
     Returns:
         np.array: array containing the YIN estimated fundamental frequency of each frame in the song interval in Hertz.
     """
-    return librosa.yin(audio.data, fmin=min_frequency, fmax=fmax_yin, sr=audio.samplerate, hop_length=hop_length)
+    return librosa.yin(audio.data, fmin=min_frequency, fmax=fmax_yin, sr=audio.samplerate, frame_length=frame_length, hop_length=hop_length)
 
 
-def for_similarity():
-    pass
+def for_similarity(
+        audio: Audio, n_fft=400, hop_length=40,
+        freq_range=0.5, min_freq: float=380., amp_baseline: int = 70,
+        max_F0: int = 1830, fmax_yin: float = 8000.,
+) -> xr.DataSet:
+    # pitch, goodness, AM, FM, entropy
+    power_spectrogram, cepstrogram, quefrencies, max_freq, dSdt, dSdf = spectral.sat(
+        audio,  n_fft, hop_length, freq_range
+    )
+    amp_ = amplitude(power_spectrogram, min_freq, max_freq, amp_baseline)
+    pitch_ = pitch(audio, min_freq, fmax_yin, frame_length=n_fft, hop_length=hop_length)
+    goodness_ = goodness_of_pitch(cepstrogram, quefrencies, max_F0)
+    FM = frequency_modulation(dSdt, dSdf)
+    AM = amplitude_modulation(dSdt)
+    entropy_ = entropy(power_spectrogram, min_freq, max_freq)
+    return xr.Dataset(
+        {
+            "amplitude":  (["time"], amp_),
+            "pitch": (["time"], pitch_),
+            "goodness_of_pitch": (["time"], goodness_),
+            "frequency_modulation": (["time"], FM),
+            "amplitude_modulation": (["time"], AM),
+            "entropy": (["time"], entropy_),
+        },
+        coords={
+            "time": power_spectrogram.times
+        }
+    )
