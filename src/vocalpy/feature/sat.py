@@ -124,7 +124,7 @@ def pitch(audio: Audio, min_frequency: float = 380., fmax_yin: float = 8000., fr
     return librosa.yin(audio.data, fmin=min_frequency, fmax=fmax_yin, sr=audio.samplerate, frame_length=frame_length, hop_length=hop_length)
 
 
-def for_similarity(
+def similarity_features(
         audio: Audio, n_fft=400, hop_length=40,
         freq_range=0.5, min_freq: float=380., amp_baseline: int = 70,
         max_F0: int = 1830, fmax_yin: float = 8000.,
