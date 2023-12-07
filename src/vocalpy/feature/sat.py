@@ -1,4 +1,11 @@
-"""Feature extraction for Sound Analysis Toolbox (SAT)."""
+"""Feature extraction for Sound Analysis Toolbox (SAT).
+
+Code adapted from [1]_, [2]_, and [3]_.
+
+.. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
+.. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
+.. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch, specifically the acoustics module
+"""
 from __future__ import annotations
 
 from typing import TYPE_CHECKING
@@ -17,32 +24,104 @@ from .. import spectral
 EPS = np.finfo(np.double).eps
 
 
-def goodness_of_pitch(cepstrogram: npt.NDArray, quefrencies: npt.NDArray, max_F0: int = 1830) -> npt.NDArray:
-    """Calculates the goodness of pitch of each window in a song interval.
+def goodness_of_pitch(cepstrogram: npt.NDArray, quefrencies: npt.NDArray, max_F0: float = 1830.0) -> npt.NDArray:
+    """Calculate goodness of pitch
 
-    Goodness of pitch is an estimate of the harmonic periodicity of a signal.
+    Finds the max in each column of ``cepstrogram``
+    between ``quefrencies`` greater than ``1 / max_F0``
+    and less than ``int(np.floor(len(cepstrogram) / 2))``.
+
+    Parameters
+    ----------
+    cepstrogram : numpy.ndarray
+        Cepstrogram returned by :func:`vocalpy.spectral.sat`,
+        matrix with dimensions (quefrencies, time bins).
+    quefrencies : numpy.ndarray
+        The quefrencies for the cepstrogram.
+    max_F0 : float
+        Maximum frequency to consider,
+        that becomes the lowest ``quefrency``
+        used when computing goodness of pitch.
+
+    Returns
+    -------
+    values : numpy.ndarray
+        The goodness of pitch values for each column in ``cepstrogram``.
+
+    Notes
+    -----
+    Goodness of pitch is an estimate of harmonic periodicity of a signal.
     Higher values indicate a more periodic sound (like a harmonic stack), whereas
     lower values indicate less periodic sounds (like noise). Formally, it is the
     peak of the cepstrum of the signal for fundamental frequencies below `max_F0`.
 
-    Returns:
-        np.array: array containing the goodness of pitch for each frame in the song interval.
+    Code adapted from [1]_, [2]_, and [3]_.
+    Docs adapted from [1]_ and [3]_.
+
+    References
+    ----------
+    .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
+    .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
+    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch, specifically the acoustics module
     """
+    if max_F0 <= 0:
+        raise ValueError(
+            f"`max_F0` must be greater than zero but was: {max_F0}"
+        )
     quefrency_cutoff = 1 / max_F0
+    if quefrency_cutoff > quefrencies.max():
+        raise ValueError(
+            f"`max_F0` of {max_F0} gives a quefrency cut-off of {quefrency_cutoff}, "
+            f"but this is greater than the max value in `quefrencies`: {quefrencies.max()}"
+        )
     min_quef_idx = np.min(np.argwhere(quefrencies > quefrency_cutoff)) - 1
     max_quef_idx = int(np.floor(len(cepstrogram) / 2))
     return np.max(cepstrogram[min_quef_idx:max_quef_idx, :], axis=0)
 
 
 def mean_frequency(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_freq: float = 11025.0) -> npt.NDArray:
-    """Calculates the mean frequency of each window in a song interval.
+    """Calculate mean frequency.
 
+    Finds the mean for each column in ``power_spectrogram``,
+    between the frequencies specified by ``min_freq`` and ``max_freq``.
+    To find the mean, the frequencies are weighted by their power
+    in ``power_spectrogram`` and then divided by the sum of that power.
+
+    Parameters
+    ----------
+    power_spectrogram : vocalpy.Spectrogram
+        Spectrogram, returned by
+        :func:`vocalpy.spectral.sat`.
+    min_freq : float
+        The minimum frequency to consider in ``power_spectrogram``.
+    max_freq : float
+        The maximum frequency to consider in ``power_spectrogram``.
+        Returned by :func`:vocalpy.spectral.sat`, computing using the
+        ``freq_range`` argument to that function.
+
+    Returns
+    -------
+    values : numpy.ndarray
+        The mean frequency of each column in ``power_spectrogram``.
+
+    Notes
+    -----
     This is one way to estimate the pitch of a signal.
     It is the center of the distribution of power across frequencies in the signal.
-    For another estimate of pitch, see `SongInterval.calc_pitch()`
+    For another estimate of pitch, see :func:`vocalpy.features.sat.pitch`.
 
-    Returns:
-        np.array: array containing the mean frequency of each frame in the song interval in Hz.
+    Code adapted from [1]_, [2]_, and [3]_.
+    Docs adapted from [1]_ and [3]_.
+
+    References
+    ----------
+    .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
+    .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
+    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch, specifically the acoustics module
+
+    See Also
+    --------
+    pitch
     """
     freq_inds = (power_spectrogram.frequencies > min_freq) & (power_spectrogram.frequencies < max_freq)
     P = power_spectrogram.data[freq_inds, :]
@@ -51,42 +130,114 @@ def mean_frequency(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_
 
 
 def frequency_modulation(dSdt: npt.NDArray, dSdf: npt.NDArray) -> npt.NDArray:
-    """Calculates the frequency modulation of each window in a song interval.
+    """Calculate frequency modulation.
 
-    Frequency Modulation can be thought of as the slope of frequency traces in a spectrogram. A high
-    frequency modulation score is indicative of a sound who's pitch is changing rapidly, or which is
+    Parameters
+    ----------
+    dSdt : numpy.ndarray
+        Derivative of spectrogram with respect to time, returned by
+        :func:`vocalpy.spectral.sat`.
+    dSdf : numpy.ndarray
+        Derivative of spectrogram with respect to frequency, returned by
+        :func:`vocalpy.spectral.sat`.
+
+    Returns
+    -------
+    values : numpy.ndarray
+        The frequency modulation for each column in ``dSdt`` and ``dSdf``.
+
+    Notes
+    -----
+    Frequency modulation can be thought of as the slope of frequency traces in a spectrogram. A high
+    frequency modulation score is indicative of a sound whose pitch is changing rapidly, or which is
     noisy and has an unstable pitch. A low frequency modulation score indicates that the pitch of a
-    sound is stable (like in a flat harmonic stack). This implementation is based on SAP.
+    sound is stable (like in a flat harmonic stack).
 
-    Returns:
-        np.array: array containing the frequency modulation of each frame in the song interval.
+    Code adapted from [1]_, [2]_, and [3]_.
+    Docs adapted from [1]_ and [3]_.
+
+    References
+    ----------
+    .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
+    .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
+    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch, specifically the acoustics module
     """
     return np.arctan(np.max(dSdt, axis=0) / (np.max(dSdf, axis=0) + EPS))
 
 
 def amplitude_modulation(dSdt: npt.NDArray) -> npt.NDArray:
-    """Calculates the amplitude modulation of each window in a song interval.
+    """Calculates the amplitude modulation.
 
+    Parameters
+    ----------
+    dSdt : numpy.ndarray
+        Derivative of spectrogram with respect to time, returned by
+        :func:`vocalpy.spectral.sat`.
+
+    Returns
+    -------
+    values : numpy.ndarray
+        The amplitude modulation for each column in ``dSdt``.
+
+    Notes
+    -----
     Amplitude modulation is a measure of the rate of change of the amplitude of a signal.
-    It will be positive at the beginning of a song syllable and negative at the end.
+    In birdsong, it will be positive at the beginning of a song syllable and negative at the end.
 
-    Returns:
-        np.array: array containing the amplitude modulation of each frame in the song interval.
+    Code adapted from [1]_, [2]_, and [3]_.
+    Docs adapted from [1]_ and [3]_.
+
+    References
+    ----------
+    .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
+    .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
+    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch, specifically the acoustics module
     """
     return np.sum(dSdt, axis=0)
 
 
 def entropy(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_freq: float = 11025.0) -> npt.NDArray:
-    """Calculates the Wiener entropy of each window in a song interval.
+    """Calculate Wiener entropy
 
-    Wiener entropy is a measure of the uniformity of power spread across frequency bands in a frame of audio.
-    The output of this function is log-scaled Weiner entropy, which can range in value from 0 to negative
-    infinity. A score close to 0 indicates broadly spread power across frequency bands, ie a less structured
-    sound like white noise. A large negative score indicates low uniformity across frequency bands, ie a more
-    structured sound like a harmonic stack or pure tone.
+    Computes the Wiener entropy for each column in ``power_spectrogram``,
+    between the frequencies specified by ``min_freq`` and ``max_freq``.
 
     Returns:
-        np.array: array containing the log-scaled Weiner entropy of each frame in the song interval.
+        np.array: array containing the  of each frame in the song interval.
+
+    Parameters
+    ----------
+    power_spectrogram : vocalpy.Spectrogram
+        Spectrogram, returned by
+        :func:`vocalpy.spectral.sat`.
+    min_freq : float
+        The minimum frequency to consider in ``power_spectrogram``.
+    max_freq : float
+        The maximum frequency to consider in ``power_spectrogram``.
+        Returned by :func`:vocalpy.spectral.sat`, computing using the
+        ``freq_range`` argument to that function.
+
+    Returns
+    -------
+    values : numpy.ndarray
+        The log-scaled Weiner entropy for every column in ``power_spectrogram``.
+
+    Notes
+    ------
+    Wiener entropy is a measure of the uniformity of power spread across frequency bands in a frame of audio.
+    The output of this function is log-scaled Wiener entropy, which can range in value from 0 to negative
+    infinity. A score close to 0 indicates broadly spread power across frequency bands, i.e. a less structured
+    sound like white noise. A large negative score indicates low uniformity across frequency bands, i.e. a more
+    structured sound like a harmonic stack or pure tone.
+
+    Code adapted from [1]_, [2]_, and [3]_.
+    Docs adapted from [1]_ and [3]_.
+
+    References
+    ----------
+    .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
+    .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
+    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch, specifically the acoustics module
     """
     freq_inds = (power_spectrogram.frequencies > min_freq) & (power_spectrogram.frequencies < max_freq)
     P = power_spectrogram.data[freq_inds, :]
@@ -97,14 +248,46 @@ def entropy(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_freq: f
 
 
 def amplitude(
-    power_spectrogram: Spectrogram, min_freq: float = 380.0, max_freq: float = 11025.0, baseline: int = 70
+    power_spectrogram: Spectrogram, min_freq: float = 380.0, max_freq: float = 11025.0, baseline: float = 70.0
 ) -> npt.NDArray:
-    """Calculates the amplitude of each window in a song interval.
+    """Calculate amplitude.
 
-    Amplitude is the volume of a sound in decibels, considering only frequencies above min_frequency.
+    Sums each column in ``power_spectrogram.data``
+    for frequencies between ``min_freq`` and ``max_freq``.
+    This gives the energy, that is then converted
+    to decibels with ``10 * np.log10``. The ``baseline``
+    is added to these values.
 
-    Returns:
-        np.array: array containing the amplitude of each frame in the song interval in decibels
+    Parameters
+    ----------
+    power_spectrogram : vocalpy.Spectrogram
+        Spectrogram, returned by
+        :func:`vocalpy.spectral.sat`.
+    min_freq : float
+        The minimum frequency to consider in ``power_spectrogram``.
+    max_freq : float
+        The maximum frequency to consider in ``power_spectrogram``.
+        Returned by :func`:vocalpy.spectral.sat`, computing using the
+        ``freq_range`` argument to that function.
+    baseline : float
+        The baseline value added, in decibels.
+        The default is 70.0 dB, the value used by SAT
+        and SAP.
+
+    Returns
+    -------
+    values : numpy.ndarray
+
+    Notes
+    -----
+    Code adapted from [1]_, [2]_, and [3]_.
+    Docs adapted from [1]_ and [3]_.
+
+    References
+    ----------
+    .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
+    .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
+    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch, specifically the acoustics module
     """
     freq_inds = (power_spectrogram.frequencies > min_freq) & (power_spectrogram.frequencies < max_freq)
     P = power_spectrogram.data[freq_inds, :]
@@ -112,19 +295,51 @@ def amplitude(
 
 
 def pitch(
-    audio: Audio, min_frequency: float = 380.0, fmax_yin: float = 8000.0, frame_length: int = 400, hop_length: int = 40
+    audio: Audio, fmin: float = 380.0, fmax_yin: float = 8000.0, frame_length: int = 400, hop_length: int = 40
 ):
-    """Estimates the fundamental frequency (or pitch) of each window in a song interval using the yin algorithm.
-
-    For more information on the YIN algorithm for fundamental frequency estimation, please refer to the documentation
-    for :func:`librosa.yin()`.
+    """Estimates the fundamental frequency (or pitch) using the YIN algorithm.
 
     Returns:
         np.array: array containing the YIN estimated fundamental frequency of each frame in the song interval in Hertz.
+
+    Parameters
+    ----------
+    audio : vocalpy.Audio
+    fmin : float
+        Minimum frequency in Hertz.
+        The recommended minimum is ``librosa.note_to_hz('C2')`` (~65 Hz)
+        though lower values may be feasible.
+    fmax_yin : float
+        Maximum frequency in Hertz.
+        Default is 8000.
+    frame_length : int
+        length of the frames in samples.
+        Default is 400.
+    hop_length : int
+        number of audio samples between adjacent YIN predictions.
+        If ``None``, defaults to ``frame_length // 4``.
+        Default is 40.
+
+    Returns
+    -------
+
+    Notes
+    -----
+    For more information on the YIN algorithm for fundamental frequency estimation,
+    please refer to the documentation for :func:`librosa.yin`.
+
+    Code adapted from [1]_, [2]_, and [3]_.
+    Docs adapted from [1]_ and [3]_.
+
+    References
+    ----------
+    .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
+    .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
+    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch, specifically the acoustics module
     """
     return librosa.yin(
         audio.data,
-        fmin=min_frequency,
+        fmin=fmin,
         fmax=fmax_yin,
         sr=audio.samplerate,
         frame_length=frame_length,
@@ -138,10 +353,51 @@ def similarity_features(
     hop_length=40,
     freq_range=0.5,
     min_freq: float = 380.0,
-    amp_baseline: int = 70,
-    max_F0: int = 1830,
+    amp_baseline: float = 70.0,
+    max_F0: int = 1830.0,
     fmax_yin: float = 8000.0,
 ) -> xr.DataSet:
+    """Extract all features used to compute simlarity with SAT.
+
+    Calls :func:`vocalpy.spectral.sat` to get spectral representations
+    of `vocalpy.Audio` that are used to extract features,
+    and then extracts all features.
+
+    Parameters
+    ----------
+    audio : vocalpy.Audio
+        Audio loaded from a file.
+    n_fft : int
+        FFT window size.
+    hop_length : int
+        Number of audio samples between adjacent STFT columns.
+    freq_range : float
+        Range of frequencies to use, given as a value
+        between zero and one.
+        Default is 0.5, which means
+        "Use the first half of the frequencies,
+        from zero to :math:`f_s/4`
+        (half the Nyquist frequency)".
+    min_freq : float
+        Minimum frequency to consider when extracting features.
+    amp_baseline : float
+        The baseline value added, in decibels, to the amplitude feature.
+        The default is 70.0 dB, the value used by SAT
+        and SAP.
+    max_F0 : float
+        Maximum frequency to consider,
+        that becomes the lowest ``quefrency``
+        used when computing goodness of pitch.
+    fmax_yin : float
+        Maximum frequency in Hertz when computing pitch with YIN algorithm.
+        Default is 8000.
+
+    Returns
+    -------
+    features : xarray.Dataset
+        An xarray.Dataset where the data variables are the features,
+        and the coordinate is the time for each time bin.
+    """
     # pitch, goodness, AM, FM, entropy
     power_spectrogram, cepstrogram, quefrencies, max_freq, dSdt, dSdf = spectral.sat(
         audio, n_fft, hop_length, freq_range
