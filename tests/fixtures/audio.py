@@ -163,3 +163,16 @@ def an_audio_path(request):
 
 GOFFINET_ETAL_2021_WAV_DIR = GOFFINET_ETAL_2021_BM003_ROOT / 'wavs'
 GOFFINET_ETAL_2021_WAV_LIST = sorted(GOFFINET_ETAL_2021_WAV_DIR.glob('*.wav'))
+
+
+ZEBRA_FINCH_WAV_DIR = SOURCE_TEST_DATA_ROOT / 'zebra-finch-wav'
+ALL_ZEBRA_FINCH_WAVS = sorted(ZEBRA_FINCH_WAV_DIR.glob('*.wav'))
+
+
+@pytest.fixture(params=ALL_ZEBRA_FINCH_WAVS)
+def a_zebra_finch_wav(request):
+    """Parametrized fixture that returns
+
+    Used for testing :func:`vocalpy.spectral.sat`
+    and :func:`vocalpy.feature.sat`"""
+    return request.param

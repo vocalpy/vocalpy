@@ -164,7 +164,7 @@ SOURCE_TEST_DATA_TAR = SOURCE_TEST_DATA_DIR / "source-test-data.tar.gz"
 @nox.session(name='test-data-tar-source')
 def test_data_tar_source(session) -> None:
     """
-    Make a .tar.gz file of just the 'generated' test data used to run tests on CI.
+    Make a .tar.gz file of just the 'source' test data used to run tests.
     """
     session.log(f"Making tarfile with source data: {SOURCE_TEST_DATA_TAR}")
     make_tarfile(SOURCE_TEST_DATA_TAR, SOURCE_TEST_DATA_DIRS)
@@ -194,7 +194,7 @@ TEST_DATA_GENERATE_SCRIPT = './tests/scripts/generate_data_for_tests.py'
 @nox.session(name='test-data-generate', python="3.10")
 def test_data_generate(session) -> None:
     """
-    Produced 'generated' test data, by running TEST_DATA_GENERATE_SCRIPT on 'source' test data.
+    Produce 'generated' test data, by running TEST_DATA_GENERATE_SCRIPT on 'source' test data.
     """
     session.install(".[test]")
     session.run("python", TEST_DATA_GENERATE_SCRIPT)
