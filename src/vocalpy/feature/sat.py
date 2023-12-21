@@ -125,6 +125,7 @@ def mean_frequency(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_
     """
     freq_inds = (power_spectrogram.frequencies > min_freq) & (power_spectrogram.frequencies < max_freq)
     P = power_spectrogram.data[freq_inds, :]
+    P[P == 0.] = EPS
     frequencies = power_spectrogram.frequencies[freq_inds]
     return np.sum(P * frequencies[:, np.newaxis], axis=0) / np.sum(P, axis=0)
 
@@ -241,6 +242,7 @@ def entropy(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_freq: f
     """
     freq_inds = (power_spectrogram.frequencies > min_freq) & (power_spectrogram.frequencies < max_freq)
     P = power_spectrogram.data[freq_inds, :]
+    P[P == 0.] = EPS
     # calculate entropy for current frame
     sum_log = np.sum(np.log(P), axis=0)
     log_sum = np.log(np.sum(P, axis=0) / (P.shape[0] - 1))
@@ -291,6 +293,7 @@ def amplitude(
     """
     freq_inds = (power_spectrogram.frequencies > min_freq) & (power_spectrogram.frequencies < max_freq)
     P = power_spectrogram.data[freq_inds, :]
+    P[P == 0.] = EPS
     return 10 * np.log10(np.sum(P, axis=0)) + baseline
 
 
