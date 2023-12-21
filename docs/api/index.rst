@@ -16,7 +16,6 @@ Data types for acoustic communication data.
 
 .. autosummary::
    :toctree: generated
-   :template: module.rst
 
    Audio
    Spectrogram
@@ -30,7 +29,6 @@ Classes for common steps in your pipelines and workflows
 
 .. autosummary::
    :toctree: generated
-   :template: module.rst
 
    Segmenter
    SpectrogramMaker
@@ -42,17 +40,26 @@ Signal processing
 .. autosummary::
    :toctree: generated
    :recursive:
-   :template: module.rst
 
    signal
    segment
+   spectral
+
+Feature Extraction
+------------------
+
+.. autosummary::
+   :toctree: generated
+   :recursive:
+
+   feature
+
 
 Metrics
 -------
 
 .. autosummary::
    :toctree: generated
-   :template: module.rst
    :recursive:
 
    metrics
@@ -64,7 +71,6 @@ Datasets
 
 .. autosummary::
    :toctree: generated
-   :template: module.rst
 
    dataset.SequenceDataset
    Sequence
@@ -74,7 +80,6 @@ Visualization
 -------------
 .. autosummary::
    :toctree: generated
-   :template: module.rst
    :recursive:
 
    plot
@@ -84,7 +89,6 @@ Other
 
 .. autosummary::
    :toctree: generated
-   :template: module.rst
    :recursive:
 
    constants
