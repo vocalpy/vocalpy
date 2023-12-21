@@ -33,20 +33,7 @@ A core package for acoustic communication research in Python.
 
 ::::
 
-There are many great software tools for researchers studying acoustic communication in animals[^1].
-But our research groups work with a wide range of different data formats: for audio, for array data, for annotations. 
-This means we write a lot of low-level code to deal with those formats, 
-and then our code for analyses is *tightly coupled* to those formats.
-In turn, this makes it hard for other groups to read our code, 
-and it takes a real investment to understand our analyses, workflows and pipelines.
-It also means that it requires significant work to translate an 
-analysis worked out by a scientist-coder in a Jupyter notebook 
-into a generalized, robust service provided by an application 
-developed by a research software engineer.
-
-In particular, acoustic communication researchers working with the Python programming language face these problems. 
-How can our scripts and libraries talk to each other?
-Luckily, Python is a great glue language! Let's use it to solve these problems.
+VocalPy is a core package for acoustic communication research in Python.
 
 The goals of VocalPy are to:
 - make it easy to work with a wide array of data formats: audio, array (spectrograms, features), annotation
@@ -62,8 +49,6 @@ The goals of VocalPy are to:
   - facilitate collaboration between scientist-coders writing imperative analysis scripts and 
     [research software engineers](https://www.nature.com/articles/d41586-022-01516-2) 
     developing libraries and applications
-
-[^1]: For a curated collection, see <https://github.com/rhine3/bioacoustics-software>.
 
 ## Features
 
