@@ -1,4 +1,10 @@
-"""Similarity as computed by SAT"""
+"""Similarity as computed by SAT
+
+Code adapted from [1]_ and [2]_.
+
+.. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
+.. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
+"""
 import numpy as np
 import numpy.typing as npt
 import scipy.spatial.distance
