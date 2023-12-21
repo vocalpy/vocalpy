@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+### Added
+- Add `feature` module with functions to extract 
+  [Sound Analysis Toolbox](http://soundanalysispro.com/matlab-sat) 
+  features [#85](https://github.com/vocalpy/vocalpy/pull/85).
+  Fixes [#3](https://github.com/vocalpy/vocalpy/issues/3).
+  Also adds a `spectral` module with a `sat` function that computes 
+  the spectral representations used by the functions in 
+  `vocalpy.features.sat`.
+
 ## 0.6.1
 ### Fixed
 - Fix return values for `vocalpy.metrics.segmentation.ir.precision_recall_fscore`
