@@ -149,10 +149,8 @@ def frequency_modulation(dSdt: npt.NDArray, dSdf: npt.NDArray) -> npt.NDArray:
 
     Notes
     -----
-    Frequency modulation can be thought of as the slope of frequency traces in a spectrogram. A high
-    frequency modulation score is indicative of a sound whose pitch is changing rapidly, or which is
-    noisy and has an unstable pitch. A low frequency modulation score indicates that the pitch of a
-    sound is stable (like in a flat harmonic stack).
+    Frequency modulation is a measure of the variance of the frequency composition over time
+    of a signal [4]_.
 
     Code adapted from [1]_, [2]_, and [3]_.
     Docs adapted from [1]_ and [3]_.
@@ -162,6 +160,7 @@ def frequency_modulation(dSdt: npt.NDArray, dSdf: npt.NDArray) -> npt.NDArray:
     .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
     .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
     .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch, specifically the acoustics module
+    .. [4] Bradbury, Jack W., and Sandra Lee Vehrencamp. Principles of animal communication. Vol. 132. Sunderland, MA: Sinauer Associates, 1998.
     """
     return np.arctan(np.max(dSdt, axis=0) / (np.max(dSdf, axis=0) + EPS))
 
@@ -182,8 +181,8 @@ def amplitude_modulation(dSdt: npt.NDArray) -> npt.NDArray:
 
     Notes
     -----
-    Amplitude modulation is a measure of the rate of change of the amplitude of a signal.
-    In birdsong, it will be positive at the beginning of a song syllable and negative at the end.
+    Amplitude modulation is a measure of the variance in amplitude
+    over time of a signal [4]_.
 
     Code adapted from [1]_, [2]_, and [3]_.
     Docs adapted from [1]_ and [3]_.
@@ -193,6 +192,7 @@ def amplitude_modulation(dSdt: npt.NDArray) -> npt.NDArray:
     .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
     .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
     .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch, specifically the acoustics module
+    .. [4] Bradbury, Jack W., and Sandra Lee Vehrencamp. Principles of animal communication. Vol. 132. Sunderland, MA: Sinauer Associates, 1998.
     """
     return np.sum(dSdt, axis=0)
 
