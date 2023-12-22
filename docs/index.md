@@ -50,6 +50,8 @@ The goals of VocalPy are to:
     [research software engineers](https://www.nature.com/articles/d41586-022-01516-2) 
     developing libraries and applications
 
+For more on acoustic communication research in genearl, please see the {ref}`about` page.
+
 ## Features
 
 ###  Data types for acoustic communication data: audio, spectrograms, annotations
