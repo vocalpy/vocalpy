@@ -57,7 +57,7 @@ def test(session) -> None:
     Run the unit and regular tests.
     """
     session.install(".[test]")
-    session.run("pytest", "-n", "auto", *session.posargs)
+    session.run("pytest", *session.posargs)
 
 
 @nox.session
@@ -90,7 +90,7 @@ def docs(session: nox.Session) -> None:
 def coverage(session: nox.Session) -> None:
     """Run tests and measure coverage"""
     session.run(
-        "pytest", "-n", "auto", "--cov=./", "--cov-report=xml", *session.posargs
+        "pytest", "--cov=./", "--cov-report=xml", *session.posargs
     )
 
 
