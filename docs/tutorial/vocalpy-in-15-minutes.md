@@ -28,7 +28,7 @@ This tutorial will introduce you to VocalPy, a core Python package for acoustic 
 First we download some example data, from the [Bengalese Finch song repository](https://nickledave.github.io/bfsongrepo/).
 
 ```{code-cell} ipython3
-:tag: [hide-output]
+:tags: [hide-output]
 !curl -sSL https://raw.githubusercontent.com/vocalpy/vak/main/src/scripts/download_autoannotate_data.py | python3 -
 ```
 
