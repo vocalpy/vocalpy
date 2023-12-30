@@ -8,9 +8,9 @@ import attrs
 import numpy as np
 import numpy.typing as npt
 
-from . import validators
-from .audio_file import AudioFile
-from .spectrogram_file import SpectrogramFile
+from .. import validators
+from ..audio_file import AudioFile
+from ..spectrogram_file import SpectrogramFile
 
 VALID_SPECT_FILE_EXTENSION = ".npz"
 
