@@ -43,10 +43,6 @@ def spectrogram(audio: Audio, n_fft: int = 512, hop_length: int = 64, method='li
     spect : vocalpy.Spectrogram
         A :class:`vocalpy.Spectrogram` instance
         computed according to `method`
-
-    Examples
-    --------
-
     """
     if not isinstance(audio, Audio):
         raise TypeError(
