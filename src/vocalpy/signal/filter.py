@@ -16,11 +16,8 @@ https://github.com/timsainb/python_spectrograms_and_inversion
 """
 from __future__ import annotations
 
-import numpy as np
 import scipy.signal
 
-from ..audio import Audio
-from .._spectrogram.data_type import Spectrogram
 
 __all__ = ["butter_bandpass", "butter_bandpass_filter"]
 
