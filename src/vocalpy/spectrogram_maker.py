@@ -11,7 +11,7 @@ import vocalpy.constants
 
 from .audio import Audio
 from .audio_file import AudioFile
-from .spectrogram import Spectrogram
+from ._spectrogram.data_type import Spectrogram
 from .spectrogram_file import SpectrogramFile
 
 

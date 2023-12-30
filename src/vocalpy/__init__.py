@@ -19,7 +19,7 @@ from .dataset_file import DatasetFile, DatasetFileType, DatasetFileTypeEnum
 from .feature_file import FeatureFile
 from .segmenter import Segmenter
 from .sequence import Sequence
-from .spectrogram import Spectrogram
+from ._spectrogram.data_type import Spectrogram
 from .spectrogram_file import SpectrogramFile
 from .spectrogram_maker import SpectrogramMaker
 from .spectrogram_parameters import SpectrogramParameters

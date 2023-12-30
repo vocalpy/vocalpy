@@ -4,7 +4,7 @@ from __future__ import annotations
 import matplotlib.pyplot as plt
 
 from ..annotation import Annotation
-from ..spectrogram import Spectrogram
+from .._spectrogram.data_type import Spectrogram
 from .annot import annotation
 
 

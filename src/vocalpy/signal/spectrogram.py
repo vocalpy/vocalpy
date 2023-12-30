@@ -20,7 +20,7 @@ import numpy as np
 import scipy.signal
 
 from ..audio import Audio
-from ..spectrogram import Spectrogram
+from .._spectrogram.data_type import Spectrogram
 
 __all__ = ["butter_bandpass", "butter_bandpass_filter", "spectrogram"]
 
