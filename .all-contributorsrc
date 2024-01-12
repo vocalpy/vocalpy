@@ -1,0 +1,27 @@
+{
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": false,
+  "commitType": "docs",
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "ralphpeterson",
+      "name": "Ralph Emilio Peterson",
+      "avatar_url": "https://avatars.githubusercontent.com/u/4031329?v=4",
+      "profile": "https://github.com/ralphpeterson",
+      "contributions": [
+        "ideas",
+        "userTesting"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7,
+  "skipCi": true,
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "projectName": "vocalpy",
+  "projectOwner": "vocalpy"
+}
