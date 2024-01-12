@@ -1,4 +1,7 @@
 <br>
+<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
+[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+<!-- ALL-CONTRIBUTORS-BADGE:END -->
 <div align="center">
 <img src="https://github.com/vocalpy/vocalpy/blob/main/docs/_static/vocalpy-primary.png?raw=True" width="400">
 </div>
@@ -247,3 +250,25 @@ The project is licensed under the [BSD license](./LICENSE).
 ### Citation
 If you use vocalpy, please cite the DOI:  
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7905426.svg)](https://doi.org/10.5281/zenodo.7905426)
+
+## Contributors ✨
+
+Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
+
+<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
+<!-- prettier-ignore-start -->
+<!-- markdownlint-disable -->
+<table>
+  <tbody>
+    <tr>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ralphpeterson"><img src="https://avatars.githubusercontent.com/u/4031329?v=4?s=100" width="100px;" alt="Ralph Emilio Peterson"/><br /><sub><b>Ralph Emilio Peterson</b></sub></a><br /><a href="#ideas-ralphpeterson" title="Ideas, Planning, & Feedback">🤔</a> <a href="#userTesting-ralphpeterson" title="User Testing">📓</a></td>
+    </tr>
+  </tbody>
+</table>
+
+<!-- markdownlint-restore -->
+<!-- prettier-ignore-end -->
+
+<!-- ALL-CONTRIBUTORS-LIST:END -->
+
+This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
