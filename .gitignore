@@ -24,6 +24,7 @@ coverage.xml
 # Sphinx
 docs/_build/
 docs/api/generated
+docs/getting_started/data
 
 # test data
 tests/data-for-tests/source/

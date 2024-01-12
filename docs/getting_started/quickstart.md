@@ -11,9 +11,9 @@ kernelspec:
   name: python3
 ---
 
-(tutorial)=
+(quickstart)=
 ![VocalPy logo](./images/vocalpy-primary.png)
-# VocalPy 🐍 💬 in 15 minutes ⏲️
+# Quickstart: VocalPy 🐍 💬 in 15 minutes ⏲️
 
 +++
 
