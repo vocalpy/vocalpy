@@ -9,14 +9,15 @@ To install VocalPy, copy and paste one of the commands below in the terminal.
 
 .. tabs::
 
-   .. code-tab:: shell with ``pip``
+   .. code-tab:: pure Python environment
 
-         pip install vocalpy
+         @NickleDave to add python virtual env instructions
 
-   .. code-tab:: shell with ``conda``
+   .. code-tab:: conda environment
 
+         conda create --n vocalpy python=3.10
+         conda activate vocalpy
          conda install vocalpy -c conda-forge
-
 ```
 
 If you are starting a new project, we recommend creating a new virtual environment, 
