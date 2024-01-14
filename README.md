@@ -191,19 +191,21 @@ label='-', audio=None, spectrogram=None), Unit(onset=2.81909375, offset=2.847406
 True
 ```
 
-## Getting Started
-### Installation
-#### with `pip`
 
-```console
+## Installation
+#### With `pip`
+```
+$ conda create -n vocalpy python=3.10
+$ conda activate vocalpy
 $ pip install vocalpy
 ```
-
-#### with `conda`
-
-```console
+#### With `conda`
+```
+$ conda create -n vocalpy python=3.10
+$ conda activate vocalpy    
 $ conda install vocalpy -c conda-forge
 ```
+For more detail see [Getting Started - Installation](https://vocalpy.readthedocs.io/en/latest/getting_started/installation.html)
 
 ### Support
 
