@@ -1,5 +1,4 @@
-(about)=
-## About VocalPy
+(background)=
 
 ### Background
 

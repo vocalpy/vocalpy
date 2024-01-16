@@ -1,35 +1,13 @@
-<br>
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
-<div align="center">
-<img src="https://github.com/vocalpy/vocalpy/blob/main/docs/_static/vocalpy-primary.png?raw=True" width="400">
-</div>
-<hr>
+(what-is-vocalpy)=
+# What is VocalPy?
 
-## A core package for acoustic communication research in Python
+You read on the landing page of the docuemntation 
+that VocalPy is the core package of the [VocalPy community](http://www.vocalpy.org/).
+You also learned that it is a Python library,
+meant for researchers studying how animals communicate with sound.
+This page explains the goals and features of VocalPy in more detail.
 
-[![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
-[![Build Status](https://github.com/vocalpy/vocalpy/actions/workflows/ci.yml/badge.svg)](https://github.com/vocalpy/vocalpy/actions)
-[![Documentation Status](https://readthedocs.org/projects/vocalpy/badge/?version=latest)](https://vocalpy.readthedocs.io/en/latest/?badge=latest)
-[![DOI](https://zenodo.org/badge/159904494.svg)](https://zenodo.org/badge/latestdoi/159904494)
-[![PyPI version](https://badge.fury.io/py/vocalpy.svg)](https://badge.fury.io/py/vocalpy)
-[![PyPI Python versions](https://img.shields.io/pypi/pyversions/vocalpy)](https://img.shields.io/pypi/pyversions/vocalpy)
-[![codecov](https://codecov.io/gh/vocalpy/vocalpy/branch/main/graph/badge.svg?token=TXtNTxXKmb)](https://codecov.io/gh/vocalpy/vocalpy)
-
-There are many great software tools for researchers studying acoustic communication in animals[^1].
-But our research groups work with a wide range of different data formats: for audio, for array data, for annotations. 
-This means we write a lot of low-level code to deal with those formats, 
-and then our code for analyses is *tightly coupled* to those formats.
-In turn, this makes it hard for other groups to read our code, 
-and it takes a real investment to understand our analyses, workflows and pipelines.
-It also means that it requires significant work to translate from a 
-pipeline or analysis worked out by a scientist-coder in a Jupyter notebook 
-into a generalized, robust service provided by an application.
-
-In particular, acoustic communication researchers working with the Python programming language face these problems. 
-How can our scripts and libraries talk to each other?
-Luckily, Python is a great glue language! Let's use it to solve these problems.
+## Goals
 
 The goals of VocalPy are to:
 - make it easy to work with a wide array of data formats: audio, array (spectrograms, features), annotation
@@ -46,16 +24,11 @@ The goals of VocalPy are to:
     [research software engineers](https://www.nature.com/articles/d41586-022-01516-2) 
     developing libraries and applications
 
-A [paper introducing VocalPy and its design](docs/fa2023/Introducing_VocalPy__a_core_Python_package_for_researchers_studying_animal_acoustic_communication.pdf) 
-has been accepted at [Forum Acusticum 2023](https://www.fa2023.org/) 
-as part of the session "Open-source software and cutting-edge applications in bio-acoustics",
-and will be published in the proceedings.
-
-[^1]: For a curated collection, see <https://github.com/rhine3/bioacoustics-software>.
+For more on acoustic communication research in general, please see the {ref}`background` page.
 
 ## Features
 
-###  Data types for acoustic communication data: audio, spectrogram, annotations, features
+###  Data types for acoustic communication data: audio, spectrograms, annotations
 
 #### The `vocalpy.Audio` data type
 
@@ -132,7 +105,7 @@ Unit(onset=6.83525, offset=6.8643125, label='-', audio=None, spectrogram=None)],
 segment_params={'threshold': 1500, 'min_syl_dur': 0.01, 'min_silent_dur': 0.006}, 
 audio=vocalpy.Audio(data=None, samplerate=None, channels=None), path=tests/data-for-tests/source/audio_cbin_annot_notmat/gy6or6/032312/gy6or6_baseline_230312_0809.141.cbin), spectrogram=None)
 ```
- 
+  
 #### A `SpectrogramMaker` for computing spectrograms
 
 ```python
@@ -190,87 +163,3 @@ label='-', audio=None, spectrogram=None), Unit(onset=2.81909375, offset=2.847406
 >>> seq_dataset_loaded == seq_dataset
 True
 ```
-
-
-## Installation
-#### With `pip`
-```
-$ conda create -n vocalpy python=3.10
-$ conda activate vocalpy
-$ pip install vocalpy
-```
-#### With `conda`
-```
-$ conda create -n vocalpy python=3.10
-$ conda activate vocalpy    
-$ conda install vocalpy -c conda-forge
-```
-For more detail see [Getting Started - Installation](https://vocalpy.readthedocs.io/en/latest/getting_started/installation.html)
-
-### Support
-
-To report a bug or request a feature (such as a new annotation format), 
-please use the issue tracker on GitHub:  
-<https://github.com/vocalpy/vocalpy/issues>
-
-To ask a question about vocalpy, discuss its development, 
-or share how you are using it, 
-please start a new topic on the VocalPy forum 
-with the vocalpy tag:  
-<https://forum.vocalpy.org/>
-
-### Contribute
-
-#### Code of conduct
-
-Please note that this project is released with a [Contributor Code of Conduct](./CODE_OF_CONDUCT.md).
-By participating in this project you agree to abide by its terms.
-
-#### Contributing Guidelines
-
-Below we provide some quick links, 
-but you can learn more about how you can help and give feedback  
-by reading our [Contributing Guide](./CONTRIBUTING.md).
-
-To ask a question about vocalpy, discuss its development, 
-or share how you are using it, 
-please start a new "Q&A" topic on the VocalPy forum 
-with the vocalpy tag:  
-<https://forum.vocalpy.org/>
-
-To report a bug, or to request a feature, 
-please use the issue tracker on GitHub:  
-<https://github.com/vocalpy/vocalpy/issues>
-
-### CHANGELOG
-You can see project history and work in progress in the [CHANGELOG](./docs/CHANGELOG.md)
-
-### License
-
-The project is licensed under the [BSD license](./LICENSE).
-
-### Citation
-If you use vocalpy, please cite the DOI:  
-[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.7905426.svg)](https://doi.org/10.5281/zenodo.7905426)
-
-## Contributors ✨
-
-Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
-
-<!-- ALL-CONTRIBUTORS-LIST:START - Do not remove or modify this section -->
-<!-- prettier-ignore-start -->
-<!-- markdownlint-disable -->
-<table>
-  <tbody>
-    <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ralphpeterson"><img src="https://avatars.githubusercontent.com/u/4031329?v=4?s=100" width="100px;" alt="Ralph Emilio Peterson"/><br /><sub><b>Ralph Emilio Peterson</b></sub></a><br /><a href="#ideas-ralphpeterson" title="Ideas, Planning, & Feedback">🤔</a> <a href="#userTesting-ralphpeterson" title="User Testing">📓</a> <a href="https://github.com/vocalpy/vocalpy/commits?author=ralphpeterson" title="Documentation">📖</a></td>
-    </tr>
-  </tbody>
-</table>
-
-<!-- markdownlint-restore -->
-<!-- prettier-ignore-end -->
-
-<!-- ALL-CONTRIBUTORS-LIST:END -->
-
-This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
