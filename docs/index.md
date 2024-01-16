@@ -198,7 +198,7 @@ If you are new to the library, start with {ref}`tutorial`.
 :hidden: true
 :maxdepth: 2
 
-tutorial/index
+getting_started/index
 howto/index
 api/index
 development/index
