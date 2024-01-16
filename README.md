@@ -261,7 +261,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 <table>
   <tbody>
     <tr>
-      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ralphpeterson"><img src="https://avatars.githubusercontent.com/u/4031329?v=4?s=100" width="100px;" alt="Ralph Emilio Peterson"/><br /><sub><b>Ralph Emilio Peterson</b></sub></a><br /><a href="#ideas-ralphpeterson" title="Ideas, Planning, & Feedback">🤔</a> <a href="#userTesting-ralphpeterson" title="User Testing">📓</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/ralphpeterson"><img src="https://avatars.githubusercontent.com/u/4031329?v=4?s=100" width="100px;" alt="Ralph Emilio Peterson"/><br /><sub><b>Ralph Emilio Peterson</b></sub></a><br /><a href="#ideas-ralphpeterson" title="Ideas, Planning, & Feedback">🤔</a> <a href="#userTesting-ralphpeterson" title="User Testing">📓</a> <a href="https://github.com/vocalpy/vocalpy/commits?author=ralphpeterson" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>
