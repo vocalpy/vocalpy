@@ -15,7 +15,8 @@
       "contributions": [
         "ideas",
         "userTesting",
-        "doc"
+        "doc",
+        "bug"
       ]
     }
   ],
