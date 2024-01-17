@@ -65,7 +65,7 @@ class TestAudio:
         ],
     )
     def test_init_raises(self, data, samplerate, expected_exception):
-        """Test that :class:`vocalpy.Spectrogram` raises expected errors"""
+        """Test that :class:`vocalpy.Audio` raises expected errors"""
         with pytest.raises(expected_exception):
             vocalpy.Audio(data=data, samplerate=samplerate)
 
@@ -121,7 +121,7 @@ class TestAudio:
         assert audio != other
 
     def test_read(self, a_wav_path, tmp_path):
-        """Test that :meth:`vocalpy.Spectrogram.read` works as expected.
+        """Test that :meth:`vocalpy.Audio.read` works as expected.
 
         To do this we make an audio file "by hand".
         """
@@ -180,7 +180,7 @@ class TestAudio:
                 assert getattr(audio_loaded, attr_name) == attr_val
 
     def test_lazy(self, a_wav_path):
-        """Test that :meth:`vocalpy.Spectrogram.read` works as expected.
+        """Test that :meth:`vocalpy.Audio.read` works as expected.
 
         To do this we make an audio file "by hand".
         """

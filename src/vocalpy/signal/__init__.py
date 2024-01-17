@@ -1,7 +1,7 @@
 """Functions for signal processing."""
-from . import audio, spectrogram
+from . import audio, filter
 
 __all__ = [
     "audio",
-    "spectrogram",
+    "filter",
 ]

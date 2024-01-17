@@ -4,7 +4,8 @@ Code adapted from [1]_, [2]_, and [3]_.
 
 .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
 .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
-.. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch, specifically the acoustics module
+.. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_
+   by Therese Koch, specifically the acoustics module
 """
 from __future__ import annotations
 
@@ -62,12 +63,11 @@ def goodness_of_pitch(cepstrogram: npt.NDArray, quefrencies: npt.NDArray, max_F0
     ----------
     .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
     .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
-    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch, specifically the acoustics module
+    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_
+       by Therese Koch, specifically the acoustics module
     """
     if max_F0 <= 0:
-        raise ValueError(
-            f"`max_F0` must be greater than zero but was: {max_F0}"
-        )
+        raise ValueError(f"`max_F0` must be greater than zero but was: {max_F0}")
     quefrency_cutoff = 1 / max_F0
     if quefrency_cutoff > quefrencies.max():
         raise ValueError(
@@ -117,7 +117,8 @@ def mean_frequency(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_
     ----------
     .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
     .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
-    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch, specifically the acoustics module
+    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_
+       by Therese Koch, specifically the acoustics module
 
     See Also
     --------
@@ -125,7 +126,7 @@ def mean_frequency(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_
     """
     freq_inds = (power_spectrogram.frequencies > min_freq) & (power_spectrogram.frequencies < max_freq)
     P = power_spectrogram.data[freq_inds, :]
-    P[P == 0.] = EPS
+    P[P == 0.0] = EPS
     frequencies = power_spectrogram.frequencies[freq_inds]
     return np.sum(P * frequencies[:, np.newaxis], axis=0) / np.sum(P, axis=0)
 
@@ -159,8 +160,10 @@ def frequency_modulation(dSdt: npt.NDArray, dSdf: npt.NDArray) -> npt.NDArray:
     ----------
     .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
     .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
-    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch, specifically the acoustics module
-    .. [4] Bradbury, Jack W., and Sandra Lee Vehrencamp. Principles of animal communication. Vol. 132. Sunderland, MA: Sinauer Associates, 1998.
+    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_
+       by Therese Koch, specifically the acoustics module
+    .. [4] Bradbury, Jack W., and Sandra Lee Vehrencamp. Principles of animal communication. Vol. 132.
+       Sunderland, MA: Sinauer Associates, 1998.
     """
     return np.arctan(np.max(dSdt, axis=0) / (np.max(dSdf, axis=0) + EPS))
 
@@ -191,8 +194,10 @@ def amplitude_modulation(dSdt: npt.NDArray) -> npt.NDArray:
     ----------
     .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
     .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
-    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch, specifically the acoustics module
-    .. [4] Bradbury, Jack W., and Sandra Lee Vehrencamp. Principles of animal communication. Vol. 132. Sunderland, MA: Sinauer Associates, 1998.
+    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_
+       by Therese Koch, specifically the acoustics module
+    .. [4] Bradbury, Jack W., and Sandra Lee Vehrencamp. Principles of animal communication. Vol. 132.
+       Sunderland, MA: Sinauer Associates, 1998.
     """
     return np.sum(dSdt, axis=0)
 
@@ -238,11 +243,12 @@ def entropy(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_freq: f
     ----------
     .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
     .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
-    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch, specifically the acoustics module
+    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_
+       by Therese Koch, specifically the acoustics module
     """
     freq_inds = (power_spectrogram.frequencies > min_freq) & (power_spectrogram.frequencies < max_freq)
     P = power_spectrogram.data[freq_inds, :]
-    P[P == 0.] = EPS
+    P[P == 0.0] = EPS
     # calculate entropy for current frame
     sum_log = np.sum(np.log(P), axis=0)
     log_sum = np.log(np.sum(P, axis=0) / (P.shape[0] - 1))
@@ -289,17 +295,16 @@ def amplitude(
     ----------
     .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
     .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
-    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch, specifically the acoustics module
+    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_
+       by Therese Koch, specifically the acoustics module
     """
     freq_inds = (power_spectrogram.frequencies > min_freq) & (power_spectrogram.frequencies < max_freq)
     P = power_spectrogram.data[freq_inds, :]
-    P[P == 0.] = EPS
+    P[P == 0.0] = EPS
     return 10 * np.log10(np.sum(P, axis=0)) + baseline
 
 
-def pitch(
-    audio: Audio, fmin: float = 380.0, fmax_yin: float = 8000.0, frame_length: int = 400, hop_length: int = 40
-):
+def pitch(audio: Audio, fmin: float = 380.0, fmax_yin: float = 8000.0, frame_length: int = 400, hop_length: int = 40):
     """Estimates the fundamental frequency (or pitch) using the YIN algorithm.
 
     Returns:
@@ -338,7 +343,8 @@ def pitch(
     ----------
     .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
     .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
-    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch, specifically the acoustics module
+    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_
+       by Therese Koch, specifically the acoustics module
     """
     return librosa.yin(
         audio.data,

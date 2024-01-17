@@ -10,18 +10,18 @@ class SpectrogramParameters:
 
     Attributes
     ----------
-    fft_size : int
+    n_fft : int
         Size of window used for Fast Fourier Transform (FFT),
         in number of samples.
-    step_size : int
+    hop_length : int
         Size of step taken with window for FFT,
-        in number of samples. Also known as "hop size".
+        in number of samples.
     sandbox : dict
         A "sandbox" of any additional parameters.
     """
 
-    fft_size: int
-    step_size: int
+    n_fft: int
+    hop_length: int
     sandbox: dict | None = attrs.field(
         validator=attrs.validators.optional(attrs.validators.instance_of(dict)), default=None
     )

@@ -9,9 +9,9 @@ import dask.diagnostics
 
 import vocalpy.constants
 
+from ._spectrogram.data_type import Spectrogram
 from .audio import Audio
 from .audio_file import AudioFile
-from .spectrogram import Spectrogram
 from .spectrogram_file import SpectrogramFile
 
 
@@ -86,9 +86,8 @@ class SpectrogramMaker:
 
     def __init__(self, callback: Callable | None = None, spect_params: dict | None = None):
         if callback is None:
-            from vocalpy.signal.spectrogram import spectrogram as default_spect_func
-
-            callback = default_spect_func
+            import vocalpy.spectrogram
+            callback = vocalpy.spectrogram
         if not callable(callback):
             raise ValueError(f"`callback` should be callable, but `callable({callback})` returns False")
         self.callback = callback
