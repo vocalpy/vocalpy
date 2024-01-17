@@ -1,7 +1,7 @@
 import attrs
 
-from .audio import Audio
 from ._spectrogram.data_type import Spectrogram
+from .audio import Audio
 
 DEFAULT_LABEL = "-"
 

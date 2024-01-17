@@ -9,9 +9,9 @@ import dask.diagnostics
 
 import vocalpy.constants
 
+from ._spectrogram.data_type import Spectrogram
 from .audio import Audio
 from .audio_file import AudioFile
-from ._spectrogram.data_type import Spectrogram
 from .spectrogram_file import SpectrogramFile
 
 

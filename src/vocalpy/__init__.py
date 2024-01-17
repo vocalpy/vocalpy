@@ -11,6 +11,7 @@ from .__about__ import (
     __uri__,
     __version__,
 )
+from ._spectrogram.data_type import Spectrogram
 from .annotation import Annotation
 from .annotation_file import AnnotationFile
 from .audio import Audio
@@ -20,7 +21,6 @@ from .feature_file import FeatureFile
 from .segmenter import Segmenter
 from .sequence import Sequence
 from .spectrogram import spectrogram
-from ._spectrogram.data_type import Spectrogram
 from .spectrogram_file import SpectrogramFile
 from .spectrogram_maker import SpectrogramMaker
 from .spectrogram_parameters import SpectrogramParameters

@@ -20,7 +20,7 @@ if TYPE_CHECKING:
 
 
 def sat(
-        audio: Audio, n_fft=400, hop_length=40, freq_range=0.5
+    audio: Audio, n_fft=400, hop_length=40, freq_range=0.5
 ) -> tuple[Spectrogram, npt.NDArray, npt.NDArray, float, npt.NDArray, npt.NDArray]:
     """Compute spectral representations needed to extract predefined acoustic features
     with :func:`vocalpy.features.sat.similarity_features`
@@ -83,7 +83,7 @@ def sat(
     .. [6] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch,
            specifically the ``acoustics`` module.
     """
-    if not 0. < freq_range <= 1.0:
+    if not 0.0 < freq_range <= 1.0:
         raise ValueError(
             f"`freq_range` must be a float greater than zero and less than or equal to 1.0, but was: {freq_range}. "
             f"Please specify a value between zero and one inclusive specifying the percentage of the frequencies "

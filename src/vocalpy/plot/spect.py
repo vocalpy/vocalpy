@@ -3,8 +3,8 @@ from __future__ import annotations
 
 import matplotlib.pyplot as plt
 
-from ..annotation import Annotation
 from .._spectrogram.data_type import Spectrogram
+from ..annotation import Annotation
 from .annot import annotation
 
 

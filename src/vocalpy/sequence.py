@@ -3,8 +3,8 @@ from __future__ import annotations
 import attrs
 import numpy as np
 
-from .audio import Audio
 from ._spectrogram.data_type import Spectrogram
+from .audio import Audio
 from .unit import Unit
 
 

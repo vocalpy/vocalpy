@@ -4,12 +4,12 @@ from __future__ import annotations
 import librosa
 import numpy as np
 
-from .audio import Audio
 from ._spectrogram.data_type import Spectrogram
+from .audio import Audio
 
 
 # TODO: add 'SAT' method and 'biosound' method
-def spectrogram(audio: Audio, n_fft: int = 512, hop_length: int = 64, method='librosa-db', **kwargs) -> Spectrogram:
+def spectrogram(audio: Audio, n_fft: int = 512, hop_length: int = 64, method="librosa-db", **kwargs) -> Spectrogram:
     """Get a spectrogram from audio.
 
     This is a convenience function that takes an instance of :class:`vocalpy.Audio`
@@ -45,10 +45,8 @@ def spectrogram(audio: Audio, n_fft: int = 512, hop_length: int = 64, method='li
         computed according to `method`
     """
     if not isinstance(audio, Audio):
-        raise TypeError(
-            f"audio must be an instance of `vocalpy.Audio` but was: {type(audio)}"
-        )
-    if method == 'librosa-db':
+        raise TypeError(f"audio must be an instance of `vocalpy.Audio` but was: {type(audio)}")
+    if method == "librosa-db":
         S = librosa.stft(audio.data, n_fft=n_fft, hop_length=hop_length)
         S = librosa.amplitude_to_db(np.abs(S))
         t = librosa.frames_to_time(frames=np.arange(S.shape[-1]), sr=audio.samplerate, hop_length=hop_length)
@@ -59,6 +57,4 @@ def spectrogram(audio: Audio, n_fft: int = 512, hop_length: int = 64, method='li
             times=t,
         )
     else:
-        raise ValueError(
-            f"Unknown method: {method}"
-        )
+        raise ValueError(f"Unknown method: {method}")

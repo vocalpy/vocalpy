@@ -18,7 +18,6 @@ from __future__ import annotations
 
 import scipy.signal
 
-
 __all__ = ["butter_bandpass", "butter_bandpass_filter"]
 
 

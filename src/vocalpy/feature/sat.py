@@ -65,9 +65,7 @@ def goodness_of_pitch(cepstrogram: npt.NDArray, quefrencies: npt.NDArray, max_F0
     .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch, specifically the acoustics module
     """
     if max_F0 <= 0:
-        raise ValueError(
-            f"`max_F0` must be greater than zero but was: {max_F0}"
-        )
+        raise ValueError(f"`max_F0` must be greater than zero but was: {max_F0}")
     quefrency_cutoff = 1 / max_F0
     if quefrency_cutoff > quefrencies.max():
         raise ValueError(
@@ -125,7 +123,7 @@ def mean_frequency(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_
     """
     freq_inds = (power_spectrogram.frequencies > min_freq) & (power_spectrogram.frequencies < max_freq)
     P = power_spectrogram.data[freq_inds, :]
-    P[P == 0.] = EPS
+    P[P == 0.0] = EPS
     frequencies = power_spectrogram.frequencies[freq_inds]
     return np.sum(P * frequencies[:, np.newaxis], axis=0) / np.sum(P, axis=0)
 
@@ -242,7 +240,7 @@ def entropy(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_freq: f
     """
     freq_inds = (power_spectrogram.frequencies > min_freq) & (power_spectrogram.frequencies < max_freq)
     P = power_spectrogram.data[freq_inds, :]
-    P[P == 0.] = EPS
+    P[P == 0.0] = EPS
     # calculate entropy for current frame
     sum_log = np.sum(np.log(P), axis=0)
     log_sum = np.log(np.sum(P, axis=0) / (P.shape[0] - 1))
@@ -293,13 +291,11 @@ def amplitude(
     """
     freq_inds = (power_spectrogram.frequencies > min_freq) & (power_spectrogram.frequencies < max_freq)
     P = power_spectrogram.data[freq_inds, :]
-    P[P == 0.] = EPS
+    P[P == 0.0] = EPS
     return 10 * np.log10(np.sum(P, axis=0)) + baseline
 
 
-def pitch(
-    audio: Audio, fmin: float = 380.0, fmax_yin: float = 8000.0, frame_length: int = 400, hop_length: int = 40
-):
+def pitch(audio: Audio, fmin: float = 380.0, fmax_yin: float = 8000.0, frame_length: int = 400, hop_length: int = 40):
     """Estimates the fundamental frequency (or pitch) using the YIN algorithm.
 
     Returns:
