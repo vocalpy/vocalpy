@@ -182,6 +182,6 @@ def specific_spect_list(spect_list_mat,
 
 @pytest.fixture
 def default_spect_params():
-    spect_sig = inspect.signature(vocalpy.signal.spectrogram.spectrogram)
-    default_fft_size, default_step_size = spect_sig.parameters['fft_size'], spect_sig.parameters['step_size']
-    return vocalpy.SpectrogramParameters(fft_size=default_fft_size, step_size=default_step_size)
+    spect_sig = inspect.signature(vocalpy.spectrogram)
+    default_n_fft, default_hop_length = spect_sig.parameters['n_fft'], spect_sig.parameters['hop_length']
+    return vocalpy.SpectrogramParameters(n_fft=default_n_fft, hop_length=default_hop_length)
