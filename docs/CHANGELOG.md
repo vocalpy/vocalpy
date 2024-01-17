@@ -4,6 +4,13 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+### Added
+- Add convenience function `vocalpy.spectrogram`, that computes a spectrogram from 
+  a `vocalpy.Audio` using a specified `method`, and then returns it as a `vocalpy.Spectrogram`
+  [#109](https://github.com/vocalpy/vocalpy/pull/109).
+  Fixes [#88](https://github.com/vocalpy/vocalpy/issues/88).
+
 ## 0.7.0
 ### Added
 - Add `feature` module with functions to extract 
