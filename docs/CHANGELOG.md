@@ -11,6 +11,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [#109](https://github.com/vocalpy/vocalpy/pull/109).
   Fixes [#88](https://github.com/vocalpy/vocalpy/issues/88).
 
+### Fixed
+- Fix hard-coded value in `vocalpy.spectral.sat` that should have been `n_fft` parameter
+  [#111](https://github.com/vocalpy/vocalpy/pull/111).
+  Fixes [#100](https://github.com/vocalpy/vocalpy/issues/100).
+
 ## 0.7.0
 ### Added
 - Add `feature` module with functions to extract 
