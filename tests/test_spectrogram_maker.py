@@ -64,7 +64,7 @@ class TestSpectrogramMaker:
         spect_maker = vocalpy.SpectrogramMaker(callback=callback, spect_params=spect_params)
         assert isinstance(spect_maker, vocalpy.SpectrogramMaker)
         if callback is None and spect_params is None:
-            assert spect_maker.callback is vocalpy.signal.spectrogram.spectrogram
+            assert spect_maker.callback is vocalpy.spectrogram
             assert spect_maker.spect_params == vocalpy.spectrogram_maker.DEFAULT_SPECT_PARAMS
         else:
             assert spect_maker.callback is callback
