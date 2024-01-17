@@ -55,6 +55,7 @@ def spectrogram(audio: Audio, n_fft: int = 512, hop_length: int = 64, method="li
             data=S,
             frequencies=f,
             times=t,
+            audio_path=audio.path,
         )
     else:
         raise ValueError(f"Unknown method: {method}")
