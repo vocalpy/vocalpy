@@ -4,7 +4,8 @@ Code adapted from [1]_, [2]_, and [3]_.
 
 .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
 .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
-.. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_ by Therese Koch, specifically the acoustics module
+.. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_
+   by Therese Koch, specifically the acoustics module
 """
 from __future__ import annotations
 
