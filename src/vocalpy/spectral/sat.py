@@ -95,7 +95,7 @@ def sat(
     # ---- make power spec
     audio_pad = np.pad(audio.data, pad_width=n_fft // 2)
     windows = librosa.util.frame(audio_pad, frame_length=n_fft, hop_length=hop_length, axis=0)
-    tapers = scipy.signal.windows.dpss(400, 1.5, Kmax=2)
+    tapers = scipy.signal.windows.dpss(n_fft, 1.5, Kmax=2)
     windows1 = windows * tapers[0, :]
     windows2 = windows * tapers[1, :]
 
