@@ -150,6 +150,11 @@ class Spectrogram:
         path : str, pathlib.Path
             The path to the file containing the spectrogram ``s``
             and associated arrays ``f`` and ``t``.
+    audio_path : str or pathlib.Path, optional
+        Path to audio file from which spectrogram was generated.
+        Optional, default None. Note this argument is not validated
+        (to guarantee that the spectrogram was actually generated
+        from the specified audio path.)
 
         Returns
         -------
