@@ -73,3 +73,8 @@ filterwarnings = [
     'ignore:Deprecated call to `pkg_resources.declare_namespace',
     'ignore:pkg_resources is deprecated as an API',
 ]
+
+[tool.flit.sdist]
+exclude = [
+    "tests/data-for-tests"
+]
