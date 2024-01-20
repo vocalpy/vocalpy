@@ -20,22 +20,32 @@ class Example:
 EXAMPLES = [
     Example(
         name='bells.wav',
-        metadata='Zebra finch song from Sound Analysis Pro: http://soundanalysispro.com/',
+        metadata='Zebra finch song from Sound Analysis Pro website: http://soundanalysispro.com/',
         type='audio'
     ),
     Example(
         name='flashcam.wav',
-        metadata='Zebra finch song from Sound Analysis Pro: http://soundanalysispro.com/',
+        metadata='Zebra finch song from Sound Analysis Pro website: http://soundanalysispro.com/',
         type='audio'
     ),
     Example(
         name='samba.wav',
-        metadata='Zebra finch song from Sound Analysis Pro: http://soundanalysispro.com/',
+        metadata='Zebra finch song from Sound Analysis Pro website: http://soundanalysispro.com/',
         type='audio'
     ),
     Example(
         name='simple.wav',
-        metadata='Zebra finch song from Sound Analysis Pro: http://soundanalysispro.com/',
+        metadata='Zebra finch song from Sound Analysis Pro website: http://soundanalysispro.com/',
+        type='audio'
+    ),
+    Example(
+        name='BM003.wav',
+        metadata="""Mouse ultrasonic vocalization from:
+Goffinet, J., Brudner, S., Mooney, R., & Pearson, J. (2021). 
+Data from: Low-dimensional learned feature spaces quantify individual and group differences 
+in vocal repertoires. Duke Research Data Repository. https://doi.org/10.7924/r4gq6zn8w.
+Adapted under Creative Commons License 1.0: https://creativecommons.org/publicdomain/zero/1.0/.
+File name in dataset: BM003_day9_air_20s_sparse_chunk007_0297.wav""",
         type='audio'
     ),
 ]
