@@ -86,7 +86,7 @@ html_theme_options = {
 html_static_path = ['_static']
 
 # -- Extension configuration -------------------------------------------------
-autosummary_generate = True
+autosummary_ignore_module_all = False
 
 # -- Options for intersphinx extension ---------------------------------------
 
