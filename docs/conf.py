@@ -91,7 +91,8 @@ autosummary_ignore_module_all = False
 # -- Options for intersphinx extension ---------------------------------------
 
 # Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = intersphinx_mapping = {
+intersphinx_mapping = {
+    "librosa": ("https://librosa.org/doc/0.10.0", None),
     "python": ("https://docs.python.org/3/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
