@@ -381,6 +381,7 @@ def similarity_features(
     amp_baseline: float = 70.0,
     max_F0: int = 1830.0,
     fmax_yin: float = 8000.0,
+    trough_threshold: float = 0.1,
 ) -> xr.DataSet:
     """Extract all features used to compute simlarity with SAT.
 
@@ -407,8 +408,7 @@ def similarity_features(
         Minimum frequency to consider when extracting features.
     amp_baseline : float
         The baseline value added, in decibels, to the amplitude feature.
-        The default is 70.0 dB, the value used by SAT
-        and SAP.
+        The default is 70.0 dB, the value used by SAT and SAP.
     max_F0 : float
         Maximum frequency to consider,
         that becomes the lowest ``quefrency``
@@ -416,6 +416,10 @@ def similarity_features(
     fmax_yin : float
         Maximum frequency in Hertz when computing pitch with YIN algorithm.
         Default is 8000.
+    trough_threshold: float
+        Absolute threshold for peak estimation.
+        A float greater than 0.
+        Used by :func:`pitch`.
 
     Returns
     -------
@@ -428,7 +432,8 @@ def similarity_features(
         audio, n_fft, hop_length, freq_range
     )
     amp_ = amplitude(power_spectrogram, min_freq, max_freq, amp_baseline)
-    pitch_ = pitch(audio, min_freq, fmax_yin, frame_length=n_fft, hop_length=hop_length)
+    pitch_ = pitch(audio, min_freq, fmax_yin,
+                   frame_length=n_fft, hop_length=hop_length, trough_threshold=trough_threshold)
     goodness_ = goodness_of_pitch(cepstrogram, quefrencies, max_F0)
     FM = frequency_modulation(dSdt, dSdf)
     AM = amplitude_modulation(dSdt)
