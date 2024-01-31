@@ -432,8 +432,9 @@ def similarity_features(
         audio, n_fft, hop_length, freq_range
     )
     amp_ = amplitude(power_spectrogram, min_freq, max_freq, amp_baseline)
-    pitch_ = pitch(audio, min_freq, fmax_yin,
-                   frame_length=n_fft, hop_length=hop_length, trough_threshold=trough_threshold)
+    pitch_ = pitch(
+        audio, min_freq, fmax_yin, frame_length=n_fft, hop_length=hop_length, trough_threshold=trough_threshold
+    )
     goodness_ = goodness_of_pitch(cepstrogram, quefrencies, max_F0)
     FM = frequency_modulation(dSdt, dSdf)
     AM = amplitude_modulation(dSdt)
