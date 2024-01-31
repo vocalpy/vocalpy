@@ -383,11 +383,11 @@ def similarity_features(
     fmax_yin: float = 8000.0,
     trough_threshold: float = 0.1,
 ) -> xr.DataSet:
-    """Extract all features used to compute simlarity with SAT.
+    """Extract all features used to compute similarity with SAT.
 
     Calls :func:`vocalpy.spectral.sat` to get spectral representations
-    of `vocalpy.Audio` that are used to extract features,
-    and then extracts all features.
+    of the :class:`vocalpy.Audio`, then extracts all features
+    from those spectral representations.
 
     Parameters
     ----------
