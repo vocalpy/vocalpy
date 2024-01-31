@@ -27,7 +27,6 @@ from .spectrogram_maker import SpectrogramMaker
 from .spectrogram_parameters import SpectrogramParameters
 from .unit import Unit
 
-
 __all__ = [
     "__author__",
     "__commit__",

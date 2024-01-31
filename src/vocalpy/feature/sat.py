@@ -304,7 +304,14 @@ def amplitude(
     return 10 * np.log10(np.sum(P, axis=0)) + baseline
 
 
-def pitch(audio: Audio, fmin: float = 380.0, fmax_yin: float = 8000.0, frame_length: int = 400, hop_length: int = 40, trough_threshold: float = 0.1 ):
+def pitch(
+    audio: Audio,
+    fmin: float = 380.0,
+    fmax_yin: float = 8000.0,
+    frame_length: int = 400,
+    hop_length: int = 40,
+    trough_threshold: float = 0.1,
+):
     """Estimates the fundamental frequency (or pitch) using the YIN algorithm.
 
     Returns:
@@ -355,7 +362,7 @@ def pitch(audio: Audio, fmin: float = 380.0, fmax_yin: float = 8000.0, frame_len
         sr=audio.samplerate,
         frame_length=frame_length,
         hop_length=hop_length,
-       trough_threshold=trough_threshold
+        trough_threshold=trough_threshold,
     )
 
 
