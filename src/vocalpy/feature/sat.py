@@ -312,14 +312,14 @@ def pitch(
     hop_length: int = 40,
     trough_threshold: float = 0.1,
 ):
-    """Estimates the fundamental frequency (or pitch) using the YIN algorithm.
+    """Estimates the fundamental frequency (or pitch) using the YIN algorithm [1]_.
 
-    Returns:
-        np.array: array containing the YIN estimated fundamental frequency of each frame in the song interval in Hertz.
+    The pitch is computed using :func:`librosa.yin`.
 
     Parameters
     ----------
     audio : vocalpy.Audio
+        A :class:`vocalpy.Audio` instance.
     fmin : float
         Minimum frequency in Hertz.
         The recommended minimum is ``librosa.note_to_hz('C2')`` (~65 Hz)
@@ -334,26 +334,32 @@ def pitch(
         number of audio samples between adjacent YIN predictions.
         If ``None``, defaults to ``frame_length // 4``.
         Default is 40.
-    trough_threshold: float > 0
-        absolute threshold for peak estimation.
+    trough_threshold: float
+        Absolute threshold for peak estimation.
+        A float greater than 0.
 
     Returns
     -------
+    pitch: np.array
+        Time series of fundamental frequency in Hertz.
 
     Notes
     -----
     For more information on the YIN algorithm for fundamental frequency estimation,
     please refer to the documentation for :func:`librosa.yin`.
 
-    Code adapted from [1]_, [2]_, and [3]_.
-    Docs adapted from [1]_ and [3]_.
+    Code adapted from [2]_, [3]_, and [4]_.
+    Docs adapted from [2]_ and [4]_.
 
     References
     ----------
-    .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
-    .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
-    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_
-       by Therese Koch, specifically the acoustics module
+    .. [1] De Cheveigné, Alain, and Hideki Kawahara.
+           “YIN, a fundamental frequency estimator for speech and music.”
+           The Journal of the Acoustical Society of America 111.4 (2002): 1917-1930.
+    .. [2] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
+    .. [3] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
+    .. [4] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_
+           by Therese Koch, specifically the acoustics module
     """
     return librosa.yin(
         audio.data,
