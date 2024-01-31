@@ -304,15 +304,22 @@ def amplitude(
     return 10 * np.log10(np.sum(P, axis=0)) + baseline
 
 
-def pitch(audio: Audio, fmin: float = 380.0, fmax_yin: float = 8000.0, frame_length: int = 400, hop_length: int = 40):
-    """Estimates the fundamental frequency (or pitch) using the YIN algorithm.
+def pitch(
+    audio: Audio,
+    fmin: float = 380.0,
+    fmax_yin: float = 8000.0,
+    frame_length: int = 400,
+    hop_length: int = 40,
+    trough_threshold: float = 0.1,
+):
+    """Estimates the fundamental frequency (or pitch) using the YIN algorithm [1]_.
 
-    Returns:
-        np.array: array containing the YIN estimated fundamental frequency of each frame in the song interval in Hertz.
+    The pitch is computed using :func:`librosa.yin`.
 
     Parameters
     ----------
     audio : vocalpy.Audio
+        A :class:`vocalpy.Audio` instance.
     fmin : float
         Minimum frequency in Hertz.
         The recommended minimum is ``librosa.note_to_hz('C2')`` (~65 Hz)
@@ -327,24 +334,32 @@ def pitch(audio: Audio, fmin: float = 380.0, fmax_yin: float = 8000.0, frame_len
         number of audio samples between adjacent YIN predictions.
         If ``None``, defaults to ``frame_length // 4``.
         Default is 40.
+    trough_threshold: float
+        Absolute threshold for peak estimation.
+        A float greater than 0.
 
     Returns
     -------
+    pitch: np.array
+        Time series of fundamental frequency in Hertz.
 
     Notes
     -----
     For more information on the YIN algorithm for fundamental frequency estimation,
     please refer to the documentation for :func:`librosa.yin`.
 
-    Code adapted from [1]_, [2]_, and [3]_.
-    Docs adapted from [1]_ and [3]_.
+    Code adapted from [2]_, [3]_, and [4]_.
+    Docs adapted from [2]_ and [4]_.
 
     References
     ----------
-    .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
-    .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
-    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_
-       by Therese Koch, specifically the acoustics module
+    .. [1] De Cheveigné, Alain, and Hideki Kawahara.
+           “YIN, a fundamental frequency estimator for speech and music.”
+           The Journal of the Acoustical Society of America 111.4 (2002): 1917-1930.
+    .. [2] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
+    .. [3] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
+    .. [4] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_
+           by Therese Koch, specifically the acoustics module
     """
     return librosa.yin(
         audio.data,
@@ -353,6 +368,7 @@ def pitch(audio: Audio, fmin: float = 380.0, fmax_yin: float = 8000.0, frame_len
         sr=audio.samplerate,
         frame_length=frame_length,
         hop_length=hop_length,
+        trough_threshold=trough_threshold,
     )
 
 
@@ -365,12 +381,13 @@ def similarity_features(
     amp_baseline: float = 70.0,
     max_F0: int = 1830.0,
     fmax_yin: float = 8000.0,
+    trough_threshold: float = 0.1,
 ) -> xr.DataSet:
-    """Extract all features used to compute simlarity with SAT.
+    """Extract all features used to compute similarity with SAT.
 
     Calls :func:`vocalpy.spectral.sat` to get spectral representations
-    of `vocalpy.Audio` that are used to extract features,
-    and then extracts all features.
+    of the :class:`vocalpy.Audio`, then extracts all features
+    from those spectral representations.
 
     Parameters
     ----------
@@ -391,8 +408,7 @@ def similarity_features(
         Minimum frequency to consider when extracting features.
     amp_baseline : float
         The baseline value added, in decibels, to the amplitude feature.
-        The default is 70.0 dB, the value used by SAT
-        and SAP.
+        The default is 70.0 dB, the value used by SAT and SAP.
     max_F0 : float
         Maximum frequency to consider,
         that becomes the lowest ``quefrency``
@@ -400,6 +416,10 @@ def similarity_features(
     fmax_yin : float
         Maximum frequency in Hertz when computing pitch with YIN algorithm.
         Default is 8000.
+    trough_threshold: float
+        Absolute threshold for peak estimation.
+        A float greater than 0.
+        Used by :func:`pitch`.
 
     Returns
     -------
@@ -412,7 +432,9 @@ def similarity_features(
         audio, n_fft, hop_length, freq_range
     )
     amp_ = amplitude(power_spectrogram, min_freq, max_freq, amp_baseline)
-    pitch_ = pitch(audio, min_freq, fmax_yin, frame_length=n_fft, hop_length=hop_length)
+    pitch_ = pitch(
+        audio, min_freq, fmax_yin, frame_length=n_fft, hop_length=hop_length, trough_threshold=trough_threshold
+    )
     goodness_ = goodness_of_pitch(cepstrogram, quefrencies, max_F0)
     FM = frequency_modulation(dSdt, dSdf)
     AM = amplitude_modulation(dSdt)

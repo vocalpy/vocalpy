@@ -87,6 +87,7 @@ class SpectrogramMaker:
     def __init__(self, callback: Callable | None = None, spect_params: dict | None = None):
         if callback is None:
             import vocalpy.spectrogram
+
             callback = vocalpy.spectrogram
         if not callable(callback):
             raise ValueError(f"`callback` should be callable, but `callable({callback})` returns False")

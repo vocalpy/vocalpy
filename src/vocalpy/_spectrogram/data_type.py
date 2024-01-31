@@ -143,24 +143,24 @@ class Spectrogram:
     @classmethod
     def read(cls, path: str | pathlib.Path, audio_path: str | pathlib.Path | None = None):
         """Read spectrogram and associated arrays from a Numpy npz file
-        at the given ``path``.
+            at the given ``path``.
 
-        Parameters
-        ----------
-        path : str, pathlib.Path
-            The path to the file containing the spectrogram ``s``
-            and associated arrays ``f`` and ``t``.
-    audio_path : str or pathlib.Path, optional
-        Path to audio file from which spectrogram was generated.
-        Optional, default None. Note this argument is not validated
-        (to guarantee that the spectrogram was actually generated
-        from the specified audio path.)
+            Parameters
+            ----------
+            path : str, pathlib.Path
+                The path to the file containing the spectrogram ``s``
+                and associated arrays ``f`` and ``t``.
+        audio_path : str or pathlib.Path, optional
+            Path to audio file from which spectrogram was generated.
+            Optional, default None. Note this argument is not validated
+            (to guarantee that the spectrogram was actually generated
+            from the specified audio path.)
 
-        Returns
-        -------
-        spect : vocalpy.Spectrogram
-            An instance of :class:`vocalpy.Spectrogram`
-            containing the arrays loaded from ``path``.
+            Returns
+            -------
+            spect : vocalpy.Spectrogram
+                An instance of :class:`vocalpy.Spectrogram`
+                containing the arrays loaded from ``path``.
         """
         path = pathlib.Path(path)
         if not path.exists():

@@ -2,9 +2,8 @@
 from __future__ import annotations
 
 import importlib.resources
-from typing import TYPE_CHECKING
-
 from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
 if TYPE_CHECKING:
     import vocalpy
@@ -19,42 +18,39 @@ class Example:
 
 EXAMPLES = [
     Example(
-        name='bells.wav',
-        metadata='Zebra finch song from Sound Analysis Pro website: http://soundanalysispro.com/',
-        type='audio'
+        name="bells.wav",
+        metadata="Zebra finch song from Sound Analysis Pro website: http://soundanalysispro.com/",
+        type="audio",
     ),
     Example(
-        name='flashcam.wav',
-        metadata='Zebra finch song from Sound Analysis Pro website: http://soundanalysispro.com/',
-        type='audio'
+        name="flashcam.wav",
+        metadata="Zebra finch song from Sound Analysis Pro website: http://soundanalysispro.com/",
+        type="audio",
     ),
     Example(
-        name='samba.wav',
-        metadata='Zebra finch song from Sound Analysis Pro website: http://soundanalysispro.com/',
-        type='audio'
+        name="samba.wav",
+        metadata="Zebra finch song from Sound Analysis Pro website: http://soundanalysispro.com/",
+        type="audio",
     ),
     Example(
-        name='simple.wav',
-        metadata='Zebra finch song from Sound Analysis Pro website: http://soundanalysispro.com/',
-        type='audio'
+        name="simple.wav",
+        metadata="Zebra finch song from Sound Analysis Pro website: http://soundanalysispro.com/",
+        type="audio",
     ),
     Example(
-        name='BM003.wav',
+        name="BM003.wav",
         metadata="""Mouse ultrasonic vocalization from:
-Goffinet, J., Brudner, S., Mooney, R., & Pearson, J. (2021). 
-Data from: Low-dimensional learned feature spaces quantify individual and group differences 
+Goffinet, J., Brudner, S., Mooney, R., & Pearson, J. (2021).
+Data from: Low-dimensional learned feature spaces quantify individual and group differences
 in vocal repertoires. Duke Research Data Repository. https://doi.org/10.7924/r4gq6zn8w.
 Adapted under Creative Commons License 1.0: https://creativecommons.org/publicdomain/zero/1.0/.
 File name in dataset: BM003_day9_air_20s_sparse_chunk007_0297.wav""",
-        type='audio'
+        type="audio",
     ),
 ]
 
 
-REGISTRY = {
-    example.name: example
-    for example in EXAMPLES
-}
+REGISTRY = {example.name: example for example in EXAMPLES}
 
 
 def example(name: str) -> vocalpy.Audio:
@@ -90,19 +86,15 @@ def example(name: str) -> vocalpy.Audio:
     >>> voc.plot.spect(spect)
     """
     if name not in REGISTRY:
-        raise ValueError(
-            f"No example found with name: {name}. "
-            f"For a list of examples, call "
-        )
+        raise ValueError(f"No example found with name: {name}. " f"For a list of examples, call ")
     example_ = REGISTRY[name]
     path = importlib.resources.files("vocalpy.examples").joinpath(name)
-    if example_.type == 'audio':
+    if example_.type == "audio":
         import vocalpy
+
         return vocalpy.Audio.read(path)
     else:
-        raise ValueError(
-            f"The ``type`` for the example was invalid: {example_.type}"
-        )
+        raise ValueError(f"The ``type`` for the example was invalid: {example_.type}")
 
 
 def list():
@@ -127,8 +119,4 @@ def list():
     print("Examples built into VocalPy")
     print("=" * 72)
     for example in EXAMPLES:
-        print(
-            f"name: {example.name}\n"
-            "metadata:\n"
-            f"{example.metadata}\n"
-        )
+        print(f"name: {example.name}\n" "metadata:\n" f"{example.metadata}\n")
