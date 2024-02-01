@@ -551,6 +551,20 @@ IR_METRICS_SINGLE_BOUNDARY_ARRAY_PARAMS_VALS = [
         expected_recall=1.0,
         expected_fscore=1.0,
     ),
+    # this is a regression test
+    # see https://github.com/vocalpy/vocalpy/issues/119
+    IRMetricSingleBoundaryArrayTestCase(
+        reference=np.array([2.244, 2.262]),
+        hypothesis=np.array([2.254]),
+        tolerance=0.01,
+        decimals=3,
+        expected_hits_ref=np.array([1]),
+        expected_hits_hyp=np.array([0]),
+        expected_diffs=np.array([0.008]),
+        expected_precision=1.0,
+        expected_recall=0.5,
+        expected_fscore=(2 * 1.0 * 0.5) / (1 + 0.5),  # 0.6666666666666666 (repeating)
+    ),
 ]
 
 
@@ -583,7 +597,7 @@ def test_find_hits(ir_metric_test_case):
 
     assert np.array_equal(hits_ref, expected_hits_ref)
     assert np.array_equal(hits_hyp, expected_hits_hyp)
-    assert np.array_equal(diffs, expected_diffs)
+    assert np.allclose(diffs, expected_diffs)
 
 
 # TODO: define ``metric`` fixture we use to parametrize the test for `precision_recall_fscore`
@@ -642,7 +656,7 @@ def test_precision_recall_fscore(ir_metric_test_case, ir_metric_name):
     assert n_tp == expected_n_tp
     assert np.array_equal(ir_metric_data.hits_ref, expected_hits_ref)
     assert np.array_equal(ir_metric_data.hits_hyp, expected_hits_hyp)
-    assert np.array_equal(ir_metric_data.diffs, expected_diffs)
+    assert np.allclose(ir_metric_data.diffs, expected_diffs)
 
 
 @pytest.mark.parametrize(
@@ -676,7 +690,7 @@ def test_precision(ir_metric_test_case):
     assert n_tp == expected_n_tp
     assert np.array_equal(ir_metric_data.hits_ref, expected_hits_ref)
     assert np.array_equal(ir_metric_data.hits_hyp, expected_hits_hyp)
-    assert np.array_equal(ir_metric_data.diffs, expected_diffs)
+    assert np.allclose(ir_metric_data.diffs, expected_diffs)
 
 
 @pytest.mark.parametrize(
@@ -710,7 +724,7 @@ def test_recall(ir_metric_test_case):
     assert n_tp == expected_n_tp
     assert np.array_equal(ir_metric_data.hits_ref, expected_hits_ref)
     assert np.array_equal(ir_metric_data.hits_hyp, expected_hits_hyp)
-    assert np.array_equal(ir_metric_data.diffs, expected_diffs)
+    assert np.allclose(ir_metric_data.diffs, expected_diffs)
 
 
 @pytest.mark.parametrize(
@@ -744,7 +758,7 @@ def test_fscore(ir_metric_test_case):
     assert n_tp == expected_n_tp
     assert np.array_equal(ir_metric_data.hits_ref, expected_hits_ref)
     assert np.array_equal(ir_metric_data.hits_hyp, expected_hits_hyp)
-    assert np.array_equal(ir_metric_data.diffs, expected_diffs)
+    assert np.allclose(ir_metric_data.diffs, expected_diffs)
 
 
 @pytest.mark.parametrize(

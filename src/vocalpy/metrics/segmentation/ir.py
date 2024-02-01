@@ -10,7 +10,7 @@ from ... import validators
 
 def find_hits(
     hypothesis: npt.NDArray, reference: npt.NDArray, tolerance: float | int | None = None, decimals: int | None = None
-) -> tuple[npt.NDArray, npt.NDArray]:
+) -> tuple[npt.NDArray, npt.NDArray, npt.NDArray]:
     r"""Find hits in arrays of event times.
 
     This is a helper function used to compute information retrieval metrics.
@@ -136,27 +136,21 @@ def find_hits(
     # now force there to be only one hit in hyp for each hit in ref;
     # we do this by choosing the hit that has the smallest absolute difference
     diffs_in_window = diffs[hits_ref, hits_hyp]
-    hits_ref_uniq, uniq_idx_ref, counts_ref = np.unique(hits_ref, return_index=True, return_counts=True)
-    have_duplicates_ref = counts_ref > 1
-    if not np.any(have_duplicates_ref):
-        # no duplicates, we can return
-        return hits_ref, hits_hyp, diffs_in_window
-    else:
-        # For each unique value in ref, we need to find the value in
-        # hyp that has the smallest distance from it. This is the hit we keep.
-        hits_hyp_out = []
-        diffs_out = []
-        for uniq_ind, ref_uniq in enumerate(hits_ref_uniq):
-            if not have_duplicates_ref[uniq_ind]:
-                ind_in_hits = uniq_idx_ref[uniq_ind]
-                hits_hyp_out.append(hits_hyp[ind_in_hits])
-                diffs_out.append(diffs_in_window[ind_in_hits])
-            else:
-                dupe_inds = np.where(hits_ref == ref_uniq)[0]
-                min_diff_ind = np.argmin(diffs_in_window[dupe_inds])
-                hits_hyp_out.append(hits_hyp[dupe_inds][min_diff_ind])
-                diffs_out.append(diffs_in_window[dupe_inds][min_diff_ind])
-        return hits_ref_uniq, np.array(hits_hyp_out), np.array(diffs_out)
+    hits_diffs = sorted(zip(hits_ref, hits_hyp, diffs_in_window), key=lambda x: x[2])
+    hits_ref_out = []
+    hits_hyp_out = []
+    diffs_out = []
+    for hit_ref, hit_hyp, diff in hits_diffs:
+        if hit_ref not in hits_ref_out and hit_hyp not in hits_hyp_out:
+            hits_ref_out.append(hit_ref)
+            hits_hyp_out.append(hit_hyp)
+            diffs_out.append(diff)
+    hits_ref_out = np.array(hits_ref_out)
+    sort_inds = np.argsort(hits_ref_out)
+    hits_ref_out = hits_ref_out[sort_inds]
+    hits_hyp_out = np.array(hits_hyp_out)[sort_inds]
+    diffs_out = np.array(diffs_out)[sort_inds]
+    return hits_ref_out, hits_hyp_out, diffs_out
 
 
 @attr.define
