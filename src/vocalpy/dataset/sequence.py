@@ -194,7 +194,7 @@ class SequenceDataset:
                 segment_params.append(this_seg_params)
 
             audios = []
-            audio_stmt = select(schema.sequence.Audio).order_by(schema.sequence.Audio.id)
+            audio_stmt = select(schema.sequence.Sound).order_by(schema.sequence.Sound.id)
             audio_result = session.scalars(audio_stmt).all()
             for model_audio in audio_result:
                 audios.append(Sound(path=model_audio.path))
