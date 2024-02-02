@@ -3,6 +3,7 @@ from __future__ import annotations
 import contextlib
 import pathlib
 import reprlib
+import warnings
 
 import numpy as np
 import numpy.typing as npt
@@ -28,6 +29,10 @@ class Sound:
     samples : int
         The number of samples in the audio signal.
         Determined from the last dimension of ``data``.
+    duration : float
+        Duration of the sound in seconds.
+        Determined from the last dimension of ``data``
+        and the ``samplerate``.
     path : pathlib.Path
         The path to the audio file that this
         :class:`vocalpy.Sound` was read from.
@@ -72,6 +77,13 @@ class Sound:
                 )
             if data.ndim == 1:
                 data = data[np.newaxis, :]
+
+        if data.shape[0] > data.shape[1]:
+            warnings.warn(
+                "The ``data`` passed in has more channels than samples: the number of channels (data.shape[0]) "
+                f"is {data.shape[0]} and the number of samples (data.shape[1]) is {data.shape[1]}. "
+                "You may need to verify you have passed in the data correctly."
+            )
 
         self._data = data
 
