@@ -12,68 +12,22 @@ from ._vendor import evfuncs
 from .audio_file import AudioFile
 
 
-def get_channels_from_data(data: npt.NDArray) -> int:
-    """Determine the number of audio channels
-    from audio data in a Numpy array.
-
-    Parameters
-    ----------
-    data : numpy.ndarray
-        An audio signal as a :class:`numpy.ndarray`.
-        Either one-dimensional for data with one audio channel,
-        or two-dimensional for data with one or more channels,
-        where the dimensions are (samples, channels).
-
-    Returns
-    -------
-    channels : int
-        Number of channels in ``data``.
-        Determined as described in the definition of ``data``.
-    """
-    if data.ndim == 1:
-        # handles both soundfile and evfuncs
-        channels = 1
-    elif data.ndim == 2:
-        # multi-channel sound loaded by soundfile will have channels as second dimension
-        channels = data.shape[1]
-    else:
-        raise ValueError(
-            "Sound `data` had invalid number of dimensions, unable to determine number of channels. "
-            f"Number of dimensions of `data` was: {data.ndim}"
-            "The `data` array should have either one dimension (1 channel) or two dimensions."
-            "(number of channels will be equal to size of the first dimension, i.e., ``data.shape[0]``)"
-        )
-    return channels
-
-
-def is_1d_or_2d_ndarray(data: npt.NDArray) -> None:
-    if not isinstance(data, np.ndarray):
-        raise TypeError(f"Sound array `data` should be a numpy array, " f"but type was {type(data)}.")
-
-    if not (data.ndim == 1 or data.ndim == 2):
-        raise ValueError(
-            f"Sound array `data` should have either 1 or 2 dimensions, " f"but number of dimensions was {data.ndim}."
-        )
-
-
 class Sound:
-    """Class that represents an audio signal.
+    """Class that represents a sound.
 
     Attributes
     ----------
     data : numpy.ndarray
-        The audio signal as a :class:`numpy.ndarray`.
-        Either one-dimensional for data with one audio channel,
-        or two-dimensional for data with one or more channels,
-        where the dimensions are (samples, channels).
+        The audio signal as a :class:`numpy.ndarray`,
+        where the dimensions are (channels, samples).
     samplerate : int
         The sampling rate the audio signal was acquired at, in Hertz.
-    channels : int, optional
+    channels : int
         The number of channels in the audio signal.
-        If not specified, this will be determined from ``data``
-        as specified above. If specified, the value
-        must match what is determined from ``data``
-        or a ValueError will be raised.
+        Determined from the first dimension of ``data``.
+    samples : int
+        The number of samples in the audio signal.
+        Determined from the last dimension of ``data``.
     path : pathlib.Path
         The path to the audio file that this
         :class:`vocalpy.Sound` was read from.
@@ -95,6 +49,11 @@ class Sound:
         samplerate: int | None = None,
         path: str | pathlib.Path | None = None,
     ):
+        if all([arg is None for arg in (data, samplerate, path)]):
+            raise ValueError(
+                "Must specify either audio path, or data and samplerate."
+            )
+
         if path:
             path = pathlib.Path(path)
         self.path = path
@@ -102,32 +61,47 @@ class Sound:
         if any((data is not None, samplerate is not None)):
             if not all((data is not None, samplerate is not None)):
                 raise ValueError("Must provide both `data` and `samplerate`.")
+
         if data is not None:
-            is_1d_or_2d_ndarray(data)
+            if not isinstance(data, np.ndarray):
+                raise TypeError(f"Sound array `data` should be a numpy array, " f"but type was {type(data)}.")
+            if not (data.ndim == 1 or data.ndim == 2):
+                raise ValueError(
+                    f"Sound array `data` should have either 1 or 2 dimensions, " 
+                    f"but number of dimensions was {data.ndim}."
+                )
+            if data.ndim == 1:
+                data = data[np.newaxis, :]
+
         self._data = data
 
         if samplerate is not None:
-            if not isinstance(samplerate, int) or samplerate < 1:
-                raise ValueError("`samplerate` must be a positive integer")
+            if not isinstance(samplerate, int):
+                raise TypeError(f"Type of ``samplerate`` must be int but was: {type(samplerate)}")
+            if not samplerate > 0:
+                raise ValueError(
+                    f"Value of ``samplerate`` must be a positive integer."
+                )
         self._samplerate = samplerate
 
-        if data is not None:
-            channels_from_data = get_channels_from_data(self.data)
-            self._channels = channels_from_data
-        else:
-            self._channels = None
-
-    def _read(self, **kwargs):
+    def _read(self):
+        if self._data is not None:
+            raise ValueError(
+                "This Sound instance already has data loaded into it. "
+                "Make a new Sound instance by calling ``Sound.read()`` or "
+                "by instantiating directly: ``sound = Sound(path=path)``."
+            )
         if self.path.name.endswith("cbin"):
             data, samplerate = evfuncs.load_cbin(self.path)
+            # evfuncs always gives us 1-dim
+            data = data[np.newaxis, :]
         else:
-            data, samplerate = soundfile.read(self.path, **kwargs)
-
-        channels = get_channels_from_data(data)
+            data, samplerate = soundfile.read(self.path)
+            if data.ndim == 1:
+                data = data[np.newaxis, :]
 
         self._data = data
         self._samplerate = samplerate
-        self._channels = channels
 
     @property
     def data(self):
@@ -143,16 +117,27 @@ class Sound:
 
     @property
     def channels(self):
-        if self._channels is None:
+        if self._data is None:
             self._read()
-        return self._channels
+        return self._data.shape[0]
+
+    @property
+    def samples(self):
+        if self._data is None:
+            self._read()
+        return self._data.shape[1]
+
+    @property
+    def duration(self):
+        if self._data is None:
+            self._read()
+        return self._data.shape[1] / self._samplerate
 
     def __repr__(self):
         return (
             f"vocalpy.{self.__class__.__name__}("
             f"data={reprlib.repr(self._data)}, "
             f"samplerate={reprlib.repr(self._samplerate)}, "
-            f"channels={self._channels}), "
             f"path={self.path})"
         )
 
@@ -163,13 +148,12 @@ class Sound:
         Returns
         -------
         audio_dict : dict
-            A :class:`dict` with keys {'data', 'samplerate', 'channels', 'path'} that map
+            A :class:`dict` with keys {'data', 'samplerate', 'path'} that map
             to the corresponding attributes of this :class:`vocalpy.Sound`.
         """
         return {
             "data": self._data,
             "samplerate": self._samplerate,
-            "channels": self._channels,
             "path": self.path,
         }
 
@@ -180,7 +164,6 @@ class Sound:
             [
                 np.array_equal(self.data, other.data),
                 self.samplerate == other.samplerate,
-                self.channels == other.channels,
                 self.path == other.path,
             ]
         )
@@ -191,7 +174,7 @@ class Sound:
         return not self.__eq__(other)
 
     @classmethod
-    def read(cls, path: str | pathlib.Path, **kwargs) -> "vocalpy.Sound":  # noqa: F821
+    def read(cls, path: str | pathlib.Path, **kwargs) -> 'Self':  # noqa: F821
         """Read audio from ``path``.
 
         Parameters
