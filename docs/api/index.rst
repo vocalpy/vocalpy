@@ -18,7 +18,7 @@ Data types for acoustic communication data.
    :toctree: generated
    :template: class.rst
 
-   Audio
+   Sound
    Spectrogram
    Annotation
 

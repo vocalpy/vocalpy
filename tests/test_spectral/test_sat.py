@@ -5,7 +5,7 @@ import vocalpy
 
 def test_sat(a_zebra_finch_wav):
     """Smoke test that tests :func:`vocalpy.spectral.sat` returns expected outputs"""
-    audio = vocalpy.Audio.read(a_zebra_finch_wav)
+    audio = vocalpy.Sound.read(a_zebra_finch_wav)
     out = vocalpy.spectral.sat(audio)
     assert len(out) == 6
     power_spectrogram, cepstrogram, quefrencies, max_freq, dSdt, dSdf = out

@@ -13,7 +13,7 @@ TIMES = np.arange(N_T) / FS
 
 class TestSpectrogram:
     def test_init(self):
-        """Test that we can initialize a :class:`vocalpy.Audio` instance."""
+        """Test that we can initialize a :class:`vocalpy.Sound` instance."""
         spect = vocalpy.Spectrogram(data=DATA, frequencies=FREQS, times=TIMES)
         assert isinstance(spect, vocalpy.Spectrogram)
 

@@ -6,7 +6,7 @@ class SequenceDatasetBase(DeclarativeBase):
     pass
 
 
-class Audio(SequenceDatasetBase):
+class Sound(SequenceDatasetBase):
     __tablename__ = "audios"
 
     id = Column(Integer, primary_key=True)
@@ -15,7 +15,7 @@ class Audio(SequenceDatasetBase):
     sequences = relationship("Sequence", back_populates="audio")
 
     def __repr__(self):
-        return f"Audio(id={self.id!r}, path={self.path!r})"
+        return f"Sound(id={self.id!r}, path={self.path!r})"
 
 
 class SegmentParams(SequenceDatasetBase):
@@ -39,7 +39,7 @@ class Sequence(SequenceDatasetBase):
     method = Column(String)  # should this be a table?
     segment_params_id = Column(Integer, ForeignKey("segment_params.id"))
 
-    audio = relationship("Audio", back_populates="sequences")
+    audio = relationship("Sound", back_populates="sequences")
     segment_params = relationship("SegmentParams", back_populates="sequences")
 
     units = relationship("Unit", back_populates="sequence")

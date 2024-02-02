@@ -25,9 +25,9 @@ def test_default_spect_fname_func(specific_audio_dir, audio_format):
 @pytest.mark.parametrize(
     "audio",
     [
-        vocalpy.Audio.read(AUDIO_LIST_WAV[0]),
+        vocalpy.Sound.read(AUDIO_LIST_WAV[0]),
         vocalpy.AudioFile(path=AUDIO_LIST_WAV[0]),
-        [vocalpy.Audio.read(path) for path in AUDIO_LIST_WAV[:3]],
+        [vocalpy.Sound.read(path) for path in AUDIO_LIST_WAV[:3]],
         [vocalpy.AudioFile(path=path) for path in AUDIO_LIST_WAV[:3]],
     ],
 )
@@ -42,7 +42,7 @@ def test_validate_audio(audio):
         (dict(), TypeError),
         ([vocalpy.Spectrogram.read(path) for path in SPECT_LIST_NPZ[:3]], TypeError),
         (
-            [vocalpy.Audio.read(path) for path in AUDIO_LIST_WAV[:3]]
+            [vocalpy.Sound.read(path) for path in AUDIO_LIST_WAV[:3]]
             + [vocalpy.AudioFile(path=path) for path in AUDIO_LIST_WAV[:3]],
             TypeError,
         ),
@@ -73,16 +73,16 @@ class TestSpectrogramMaker:
     @pytest.mark.parametrize(
         "audio",
         [
-            vocalpy.Audio.read(AUDIO_LIST_WAV[0]),
+            vocalpy.Sound.read(AUDIO_LIST_WAV[0]),
             vocalpy.AudioFile(path=AUDIO_LIST_WAV[0]),
-            [vocalpy.Audio.read(path) for path in AUDIO_LIST_WAV[:3]],
+            [vocalpy.Sound.read(path) for path in AUDIO_LIST_WAV[:3]],
             [vocalpy.AudioFile(path=path) for path in AUDIO_LIST_WAV[:3]],
         ],
     )
     def test_make(self, audio):
         spect_maker = vocalpy.SpectrogramMaker()
         out = spect_maker.make(audio)
-        if isinstance(audio, (vocalpy.Audio, vocalpy.AudioFile)):
+        if isinstance(audio, (vocalpy.Sound, vocalpy.AudioFile)):
             assert isinstance(out, vocalpy.Spectrogram)
         elif isinstance(audio, list):
             assert all([isinstance(spect, vocalpy.Spectrogram) for spect in out])
@@ -90,9 +90,9 @@ class TestSpectrogramMaker:
     @pytest.mark.parametrize(
         "audio",
         [
-            vocalpy.Audio.read(AUDIO_LIST_WAV[0]),
+            vocalpy.Sound.read(AUDIO_LIST_WAV[0]),
             vocalpy.AudioFile(path=AUDIO_LIST_WAV[0]),
-            [vocalpy.Audio.read(path) for path in AUDIO_LIST_WAV[:3]],
+            [vocalpy.Sound.read(path) for path in AUDIO_LIST_WAV[:3]],
             [vocalpy.AudioFile(path=path) for path in AUDIO_LIST_WAV[:3]],
         ],
     )
@@ -101,11 +101,11 @@ class TestSpectrogramMaker:
 
         out = spect_maker.write(audio, dir_path=tmp_path)
 
-        if isinstance(audio, (vocalpy.Audio, vocalpy.AudioFile)):
+        if isinstance(audio, (vocalpy.Sound, vocalpy.AudioFile)):
             assert isinstance(out, vocalpy.SpectrogramFile)
             path = out.path
             assert path.exists()
-            if isinstance(audio, vocalpy.Audio):
+            if isinstance(audio, vocalpy.Sound):
                 assert out.source_audio_file.path == audio.path
             elif isinstance(audio, vocalpy.AudioFile):
                 assert out.source_audio_file.path == audio.path
@@ -116,7 +116,7 @@ class TestSpectrogramMaker:
             for spect_file in out:
                 path = spect_file.path
                 assert path.exists()
-                if isinstance(audio, vocalpy.Audio):
+                if isinstance(audio, vocalpy.Sound):
                     assert spect_file.source_audio_file.path == audio.path
                 elif isinstance(audio, vocalpy.AudioFile):
                     assert spect_file.source_audio_file.path == audio.path

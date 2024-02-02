@@ -6,7 +6,7 @@ class TestSequenceDataset:
         """Test that we can "round trip" a SequenceDataset:
          save it, then load it, and have them be equal"""
         cbin_paths = voc.paths.from_dir(audio_dir_cbin, 'cbin')
-        audios = [voc.Audio.read(cbin_path) for cbin_path in cbin_paths]
+        audios = [voc.Sound.read(cbin_path) for cbin_path in cbin_paths]
 
         segment_params = {
             'threshold': 1500,

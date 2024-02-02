@@ -7,7 +7,7 @@ import vocalpy
 
 @pytest.fixture()
 def spectral_sat_result(a_zebra_finch_wav):
-    audio = vocalpy.Audio.read(a_zebra_finch_wav)
+    audio = vocalpy.Sound.read(a_zebra_finch_wav)
     out = vocalpy.spectral.sat(audio)
     return out
 
@@ -91,7 +91,7 @@ def test_amplitude(spectral_sat_result):
 )
 def test_pitch(frame_length, hop_length, a_zebra_finch_wav):
     """Smoke test that tests :func:`vocalpy.feature.sat.pitch` returns expected outputs"""
-    audio = vocalpy.Audio.read(a_zebra_finch_wav)
+    audio = vocalpy.Sound.read(a_zebra_finch_wav)
     out = vocalpy.feature.sat.pitch(
         audio
     )
@@ -106,7 +106,7 @@ def test_pitch(frame_length, hop_length, a_zebra_finch_wav):
 
 def test_similarity_features(a_zebra_finch_wav):
     """Smoke test that tests :func:`vocalpy.feature.sat.similarity_features` returns expected outputs"""
-    audio = vocalpy.Audio.read(a_zebra_finch_wav)
+    audio = vocalpy.Sound.read(a_zebra_finch_wav)
     out = vocalpy.feature.sat.similarity_features(audio)
     assert isinstance(out, xr.Dataset)
     assert len(out.data_vars) == 6

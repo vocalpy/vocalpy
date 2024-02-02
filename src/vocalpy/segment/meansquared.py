@@ -8,11 +8,11 @@ import numpy.typing as npt
 from .. import signal
 
 if TYPE_CHECKING:
-    from .. import Audio
+    from .. import Sound
 
 
 def meansquared(
-    audio: Audio,
+    audio: Sound,
     threshold: int = 5000,
     min_dur: float = 0.02,
     min_silent_dur: float = 0.002,
@@ -43,7 +43,7 @@ def meansquared(
 
     Parameters
     ----------
-    audio: vocalpy.Audio
+    audio: vocalpy.Sound
         An audio signal.
     threshold : int
         Value above which mean squared signal is considered part of a segment.

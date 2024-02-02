@@ -10,7 +10,7 @@ import dask.diagnostics
 import vocalpy.constants
 
 from ._spectrogram.data_type import Spectrogram
-from .audio import Audio
+from .audio import Sound
 from .audio_file import AudioFile
 from .spectrogram_file import SpectrogramFile
 
@@ -27,7 +27,7 @@ def default_spect_fname_func(audio_path: Union[str, pathlib.Path]):
     Returns
     -------
     spect_fname : pathlib.Path
-        Audio filename with extension added.
+        Sound filename with extension added.
         Default extension is :data:`vocalpy.constants.SPECT_FILE_EXT`.
 
     Notes
@@ -44,10 +44,10 @@ def default_spect_fname_func(audio_path: Union[str, pathlib.Path]):
     return audio_path.name + vocalpy.constants.SPECT_FILE_EXT
 
 
-def validate_audio(audio: Audio | AudioFile | Sequence[Audio | AudioFile]) -> None:
-    if not isinstance(audio, (Audio, AudioFile, list, tuple)):
+def validate_audio(audio: Sound | AudioFile | Sequence[Sound | AudioFile]) -> None:
+    if not isinstance(audio, (Sound, AudioFile, list, tuple)):
         raise TypeError(
-            "`audio` must be a `vocalpy.Audio` instance, "
+            "`audio` must be a `vocalpy.Sound` instance, "
             "a `vocalpy.AudioFile` instance, "
             "or a list/tuple of such instances, "
             f"but type was : {type(audio)}"
@@ -55,16 +55,16 @@ def validate_audio(audio: Audio | AudioFile | Sequence[Audio | AudioFile]) -> No
 
     if isinstance(audio, list) or isinstance(audio, tuple):
         if not (
-            all([isinstance(item, Audio) for item in audio]) or all([isinstance(item, AudioFile) for item in audio])
+                all([isinstance(item, Sound) for item in audio]) or all([isinstance(item, AudioFile) for item in audio])
         ):
             types_in_audio = set([type(audio) for audio in audio])
             raise TypeError(
                 "If `audio` is a list or tuple, "
                 "then items in `audio` must either "
-                "all be instances of `vocalpy.Audio`"
+                "all be instances of `vocalpy.Sound`"
                 "or all be instances of `vocalpy.AudioFile`."
                 f"Instead found the following types: {types_in_audio}."
-                f"Please make sure only `vocalpy.Audio instances are in the list/tuple."
+                f"Please make sure only `vocalpy.Sound instances are in the list/tuple."
             )
 
 
@@ -101,7 +101,7 @@ class SpectrogramMaker:
 
     def make(
         self,
-        audio: Audio | AudioFile | Sequence[Audio | AudioFile],
+        audio: Sound | AudioFile | Sequence[Sound | AudioFile],
         parallelize: bool = True,
     ) -> Spectrogram | List[Spectrogram]:
         """Make spectrogram(s) from audio.
@@ -109,16 +109,16 @@ class SpectrogramMaker:
         Makes the spectrograms with `self.callback`
         using the parameters `self.params`.
 
-        Takes as input :class:`vocalpy.Audio` or :class:`vocalpy.AudioFile`,
+        Takes as input :class:`vocalpy.Sound` or :class:`vocalpy.AudioFile`,
         a sequence of either, or a :class:`vocalpy.Dataset` with an
         ``audio_files`` attribute,
         and returns either a :class:`vocalpy.Spectrogram`
-        (given a single :class:`vocalpy.Audio` or :class:`vocalpy.AudioFile` instance)
+        (given a single :class:`vocalpy.Sound` or :class:`vocalpy.AudioFile` instance)
         or a list of :class:`vocalpy.Spectrogram` instances (given a sequence).
 
         Parameters
         ----------
-        audio: vocalpy.Audio, vocalpy.AudioFile, or a sequence of either
+        audio: vocalpy.Sound, vocalpy.AudioFile, or a sequence of either
             Source of audio used to make spectrograms.
 
         Returns
@@ -129,15 +129,15 @@ class SpectrogramMaker:
 
         # define nested function so vars are in scope and ``dask`` can call it
         def _to_spect(audio_):
-            """Make a ``Spectrogram`` from an ``Audio`` instance,
+            """Make a ``Spectrogram`` from an ``Sound`` instance,
             using self.callback"""
             if isinstance(audio_, AudioFile):
-                audio_ = Audio.read(audio_.path)
+                audio_ = Sound.read(audio_.path)
             spect = self.callback(audio_, **self.spect_params)
             spect.audio_path = audio_.path
             return spect
 
-        if isinstance(audio, (Audio, AudioFile)):
+        if isinstance(audio, (Sound, AudioFile)):
             return _to_spect(audio)
 
         spects = []
@@ -156,7 +156,7 @@ class SpectrogramMaker:
 
     def write(
         self,
-        audio: Audio | AudioFile | Sequence[Audio | AudioFile],
+        audio: Sound | AudioFile | Sequence[Sound | AudioFile],
         dir_path: str | pathlib.Path,
         parallelize: bool = True,
         namer: Callable = default_spect_fname_func,
@@ -169,16 +169,16 @@ class SpectrogramMaker:
         Makes the spectrograms with `self.callback`
         using the parameters `self.params`.
 
-        Takes as input :class:`vocalpy.Audio` or :class:`vocalpy.AudioFile`,
+        Takes as input :class:`vocalpy.Sound` or :class:`vocalpy.AudioFile`,
         a sequence of either, or a :class:`vocalpy.Dataset` with an
         ``audio_files`` attribute,
         and returns either a :class:`vocalpy.SpectrogramFile`
-        (given a single :class:`vocalpy.Audio` or :class:`vocalpy.AudioFile` instance)
+        (given a single :class:`vocalpy.Sound` or :class:`vocalpy.AudioFile` instance)
         or a list of :class:`vocalpy.Spectrogram` instances (given a sequence).
 
         Parameters
         ----------
-        audio: vocalpy.Audio, vocalpy.AudioFile, a sequence of either, or a Dataset
+        audio: vocalpy.Sound, vocalpy.AudioFile, a sequence of either, or a Dataset
             Source of audio used to make spectrograms.
         dir_path : string, pathlib.Path
             The directory where the spectrogram files should be saved.
@@ -199,17 +199,17 @@ class SpectrogramMaker:
 
         # define nested function so vars are in scope and ``dask`` can call it
         def _to_spect_file(audio_):
-            """Compute a `Spectrogram` from an `Audio` instance,
+            """Compute a `Spectrogram` from an `Sound` instance,
             using self.callback"""
             if isinstance(audio_, AudioFile):
-                audio_ = Audio.read(audio_.path)
+                audio_ = Sound.read(audio_.path)
             spect = self.callback(audio_, **self.spect_params)
             spect_fname = namer(audio_.path)
             spect_path = dir_path / spect_fname
             spect_file = spect.write(spect_path)
             return spect_file
 
-        if isinstance(audio, (Audio, AudioFile)):
+        if isinstance(audio, (Sound, AudioFile)):
             return _to_spect_file(audio)
 
         spect_files = []

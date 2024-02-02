@@ -38,7 +38,7 @@ def get_channels_from_data(data: npt.NDArray) -> int:
         channels = data.shape[1]
     else:
         raise ValueError(
-            "Audio `data` had invalid number of dimensions, unable to determine number of channels. "
+            "Sound `data` had invalid number of dimensions, unable to determine number of channels. "
             f"Number of dimensions of `data` was: {data.ndim}"
             "The `data` array should have either one dimension (1 channel) or two dimensions."
             "(number of channels will be equal to size of the first dimension, i.e., ``data.shape[0]``)"
@@ -48,15 +48,15 @@ def get_channels_from_data(data: npt.NDArray) -> int:
 
 def is_1d_or_2d_ndarray(data: npt.NDArray) -> None:
     if not isinstance(data, np.ndarray):
-        raise TypeError(f"Audio array `data` should be a numpy array, " f"but type was {type(data)}.")
+        raise TypeError(f"Sound array `data` should be a numpy array, " f"but type was {type(data)}.")
 
     if not (data.ndim == 1 or data.ndim == 2):
         raise ValueError(
-            f"Audio array `data` should have either 1 or 2 dimensions, " f"but number of dimensions was {data.ndim}."
+            f"Sound array `data` should have either 1 or 2 dimensions, " f"but number of dimensions was {data.ndim}."
         )
 
 
-class Audio:
+class Sound:
     """Class that represents an audio signal.
 
     Attributes
@@ -84,7 +84,7 @@ class Audio:
     Reading audio from a file
 
     >>> import vocalpy as voc
-    >>> audio = voc.Audio.read("1291.WAV")
+    >>> audio = voc.Sound.read("1291.WAV")
     >>> audio
     Audio(data=array([ 0.   ... -0.00115967]), samplerate=44100, channels=1)
     """
@@ -157,14 +157,14 @@ class Audio:
         )
 
     def asdict(self):
-        """Convert this :class:`vocalpy.Audio`
+        """Convert this :class:`vocalpy.Sound`
         to a :class:`dict`.
 
         Returns
         -------
         audio_dict : dict
             A :class:`dict` with keys {'data', 'samplerate', 'channels', 'path'} that map
-            to the corresponding attributes of this :class:`vocalpy.Audio`.
+            to the corresponding attributes of this :class:`vocalpy.Sound`.
         """
         return {
             "data": self._data,
@@ -191,7 +191,7 @@ class Audio:
         return not self.__eq__(other)
 
     @classmethod
-    def read(cls, path: str | pathlib.Path, **kwargs) -> "vocalpy.Audio":  # noqa: F821
+    def read(cls, path: str | pathlib.Path, **kwargs) -> "vocalpy.Sound":  # noqa: F821
         """Read audio from ``path``.
 
         Parameters
@@ -204,13 +204,13 @@ class Audio:
 
         Returns
         -------
-        audio : vocalpy.Audio
+        audio : vocalpy.Sound
             A :class:`vocalpy.Audio` instance with ``data``
             read from ``path``.
         """
         path = pathlib.Path(path)
         if not path.exists():
-            raise FileNotFoundError(f"Audio file not found at path: {path}")
+            raise FileNotFoundError(f"Sound file not found at path: {path}")
 
         if path.name.endswith("cbin"):
             data, samplerate = evfuncs.load_cbin(path)

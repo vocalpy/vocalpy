@@ -5,7 +5,7 @@ import vocalpy.segment
 
 
 def test_meansquared(a_cbin_path):
-    audio = vocalpy.Audio.read(a_cbin_path)
+    audio = vocalpy.Sound.read(a_cbin_path)
 
     notmat = str(a_cbin_path) + '.not.mat'
     nmd = crowsetta.formats.seq.notmat.load_notmat(notmat)

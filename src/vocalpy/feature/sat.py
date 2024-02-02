@@ -17,7 +17,7 @@ import numpy.typing as npt
 import xarray as xr
 
 if TYPE_CHECKING:
-    from .. import Audio, Spectrogram
+    from .. import Sound, Spectrogram
 
 from .. import spectral
 
@@ -305,7 +305,7 @@ def amplitude(
 
 
 def pitch(
-    audio: Audio,
+    audio: Sound,
     fmin: float = 380.0,
     fmax_yin: float = 8000.0,
     frame_length: int = 400,
@@ -318,7 +318,7 @@ def pitch(
 
     Parameters
     ----------
-    audio : vocalpy.Audio
+    audio : vocalpy.Sound
         A :class:`vocalpy.Audio` instance.
     fmin : float
         Minimum frequency in Hertz.
@@ -373,7 +373,7 @@ def pitch(
 
 
 def similarity_features(
-    audio: Audio,
+    audio: Sound,
     n_fft=400,
     hop_length=40,
     freq_range=0.5,
@@ -391,7 +391,7 @@ def similarity_features(
 
     Parameters
     ----------
-    audio : vocalpy.Audio
+    audio : vocalpy.Sound
         Audio loaded from a file.
     n_fft : int
         FFT window size.

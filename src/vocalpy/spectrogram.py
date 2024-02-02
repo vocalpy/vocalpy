@@ -5,11 +5,11 @@ import librosa
 import numpy as np
 
 from ._spectrogram.data_type import Spectrogram
-from .audio import Audio
+from .audio import Sound
 
 
 # TODO: add 'SAT' method and 'biosound' method
-def spectrogram(audio: Audio, n_fft: int = 512, hop_length: int = 64, method="librosa-db", **kwargs) -> Spectrogram:
+def spectrogram(audio: Sound, n_fft: int = 512, hop_length: int = 64, method="librosa-db", **kwargs) -> Spectrogram:
     """Get a spectrogram from audio.
 
     This is a convenience function that takes an instance of :class:`vocalpy.Audio`
@@ -24,7 +24,7 @@ def spectrogram(audio: Audio, n_fft: int = 512, hop_length: int = 64, method="li
 
     Parameters
     ----------
-    audio : vocalpy.Audio
+    audio : vocalpy.Sound
         Audio used to compute spectrogram.
     n_fft : int
         Length of the frame used for the Fast Fourier Transform,
@@ -44,8 +44,8 @@ def spectrogram(audio: Audio, n_fft: int = 512, hop_length: int = 64, method="li
         A :class:`vocalpy.Spectrogram` instance
         computed according to `method`
     """
-    if not isinstance(audio, Audio):
-        raise TypeError(f"audio must be an instance of `vocalpy.Audio` but was: {type(audio)}")
+    if not isinstance(audio, Sound):
+        raise TypeError(f"audio must be an instance of `vocalpy.Sound` but was: {type(audio)}")
     if method == "librosa-db":
         S = librosa.stft(audio.data, n_fft=n_fft, hop_length=hop_length)
         S = librosa.amplitude_to_db(np.abs(S))

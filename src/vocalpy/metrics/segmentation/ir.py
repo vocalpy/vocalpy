@@ -292,7 +292,7 @@ def precision_recall_fscore(
     proceedings (cat. no. 00ch37100) (Vol. 3, pp. 1423-1426). IEEE.
 
     .. [2] Jordán, P. G., & Giménez, A. O. (2023).
-    Advances in Binary and Multiclass Audio Segmentation with Deep Learning Techniques.
+    Advances in Binary and Multiclass Sound Segmentation with Deep Learning Techniques.
 
     .. [3] NIST. (2009). The 2009 (RT-09) Rich Transcription Meeting Recognition Evaluation Plan.
     https://web.archive.org/web/20100606041157if_/http://www.itl.nist.gov/iad/mig/thyps/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf
@@ -442,7 +442,7 @@ def precision(
     proceedings (cat. no. 00ch37100) (Vol. 3, pp. 1423-1426). IEEE.
 
     .. [2] Jordán, P. G., & Giménez, A. O. (2023).
-    Advances in Binary and Multiclass Audio Segmentation with Deep Learning Techniques.
+    Advances in Binary and Multiclass Sound Segmentation with Deep Learning Techniques.
 
     .. [3] NIST. (2009). The 2009 (RT-09) Rich Transcription Meeting Recognition Evaluation Plan.
     https://web.archive.org/web/20100606041157if_/http://www.itl.nist.gov/iad/mig/thyps/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf
@@ -568,7 +568,7 @@ def recall(
     proceedings (cat. no. 00ch37100) (Vol. 3, pp. 1423-1426). IEEE.
 
     .. [2] Jordán, P. G., & Giménez, A. O. (2023).
-    Advances in Binary and Multiclass Audio Segmentation with Deep Learning Techniques.
+    Advances in Binary and Multiclass Sound Segmentation with Deep Learning Techniques.
 
     .. [3] NIST. (2009). The 2009 (RT-09) Rich Transcription Meeting Recognition Evaluation Plan.
     https://web.archive.org/web/20100606041157if_/http://www.itl.nist.gov/iad/mig/thyps/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf
@@ -691,7 +691,7 @@ def fscore(
     proceedings (cat. no. 00ch37100) (Vol. 3, pp. 1423-1426). IEEE.
 
     .. [2] Jordán, P. G., & Giménez, A. O. (2023).
-    Advances in Binary and Multiclass Audio Segmentation with Deep Learning Techniques.
+    Advances in Binary and Multiclass Sound Segmentation with Deep Learning Techniques.
 
     .. [3] NIST. (2009). The 2009 (RT-09) Rich Transcription Meeting Recognition Evaluation Plan.
     https://web.archive.org/web/20100606041157if_/http://www.itl.nist.gov/iad/mig/thyps/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf

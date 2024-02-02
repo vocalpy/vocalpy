@@ -68,19 +68,19 @@ data_dir = ('data/bfsongrepo/gy6or6/032312/')
 wav_paths = voc.paths.from_dir(data_dir, 'wav')
 ```
 
-### Data type for audio: `vocalpy.Audio`
+### Data type for audio: `vocalpy.Sound`
 
 +++
 
-Next we load all the wav files into the data type that VocalPy provides for audio, `vocalpy.Audio`, using the method `vocalpy.Audio.read`:
+Next we load all the wav files into the data type that VocalPy provides for audio, `vocalpy.Sound`, using the method `vocalpy.Sound.read`:
 
 ```{code-cell} ipython3
 audios = [
-    voc.Audio.read(wav_path) for wav_path in wav_paths
+    voc.Sound.read(wav_path) for wav_path in wav_paths
 ]
 ```
 
-Let's inspect one of the `vocalpy.Audio` instances
+Let's inspect one of the `vocalpy.Sound` instances
 
 ```{code-cell} ipython3
 an_audio = audios[0]
@@ -201,7 +201,7 @@ Now that we know what we're working with, let's actually inspect the attributes 
 
 There are five attributes we care about here.
 
-1. `data`: this is the spectrogram itself -- as with the other data types,like `vocalpy.Audio`, the attribute name `data` indiciates this main data we care about
+1. `data`: this is the spectrogram itself -- as with the other data types,like `vocalpy.Sound`, the attribute name `data` indiciates this main data we care about
 
 ```{code-cell} ipython3
 print(a_spect.data)
@@ -239,7 +239,7 @@ print(a_spect.times[:10])
 print(a_spect.times.shape)
 ```
 
-Just like with the `Audio` class, VocalPy gives us the ability to conveniently read and write spectrograms from files. This saves us from generating spectrograms over and over. Computing spectrograms can be computionally expensive, if your audio has a high sampling rate or you are using methods like multi-taper spectrograms. Saving spectrograms from files also makes it easier for you to share your data in the exact form you used it, so that it's easier to replicate your analyses.
+Just like with the `Sound` class, VocalPy gives us the ability to conveniently read and write spectrograms from files. This saves us from generating spectrograms over and over. Computing spectrograms can be computionally expensive, if your audio has a high sampling rate or you are using methods like multi-taper spectrograms. Saving spectrograms from files also makes it easier for you to share your data in the exact form you used it, so that it's easier to replicate your analyses.
 
 +++
 

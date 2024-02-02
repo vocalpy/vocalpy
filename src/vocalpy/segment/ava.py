@@ -42,7 +42,7 @@ def get_spectrogram(
     Parameters
     ----------
     data : numpy.ndarray
-        Audio data.
+        Sound data.
     samplerate : int
         Sampling rate for audio.
     nperseg : int

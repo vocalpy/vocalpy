@@ -53,7 +53,7 @@ File name in dataset: BM003_day9_air_20s_sparse_chunk007_0297.wav""",
 REGISTRY = {example.name: example for example in EXAMPLES}
 
 
-def example(name: str) -> vocalpy.Audio:
+def example(name: str) -> vocalpy.Sound:
     """Get an example from :mod:`vocalpy.examples`.
 
     Returns a single example, e.g., a :class:`vocalpy.Audio`.
@@ -67,7 +67,7 @@ def example(name: str) -> vocalpy.Audio:
 
     Returns
     -------
-    example : vocalpy.Audio
+    example : vocalpy.Sound
         A :class:`vocalpy.Audio` instance with the example data
         read into it.
 
@@ -92,7 +92,7 @@ def example(name: str) -> vocalpy.Audio:
     if example_.type == "audio":
         import vocalpy
 
-        return vocalpy.Audio.read(path)
+        return vocalpy.Sound.read(path)
     else:
         raise ValueError(f"The ``type`` for the example was invalid: {example_.type}")
 

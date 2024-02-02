@@ -34,9 +34,9 @@ class TestSegmenter:
     @pytest.mark.parametrize(
         "audio",
         [
-            vocalpy.Audio.read(AUDIO_LIST_WAV[0]),
+            vocalpy.Sound.read(AUDIO_LIST_WAV[0]),
             vocalpy.AudioFile(path=AUDIO_LIST_WAV[0]),
-            [vocalpy.Audio.read(path) for path in AUDIO_LIST_WAV[:3]],
+            [vocalpy.Sound.read(path) for path in AUDIO_LIST_WAV[:3]],
             [vocalpy.AudioFile(path=path) for path in AUDIO_LIST_WAV[:3]],
         ],
     )
@@ -49,7 +49,7 @@ class TestSegmenter:
         }
         segmenter = vocalpy.Segmenter(segment_params=segment_params)
         out = segmenter.segment(audio)
-        if isinstance(audio, (vocalpy.Audio, vocalpy.AudioFile)):
+        if isinstance(audio, (vocalpy.Sound, vocalpy.AudioFile)):
             assert_is_expected_sequence(
                 sequence=out, audio=audio, segment_params=segment_params, method=segmenter.callback.__name__
             )

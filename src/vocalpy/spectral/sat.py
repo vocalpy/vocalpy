@@ -17,18 +17,18 @@ import numpy.typing as npt
 import scipy.signal.windows
 
 if TYPE_CHECKING:
-    from .. import Audio, Spectrogram
+    from .. import Sound, Spectrogram
 
 
 def sat(
-    audio: Audio, n_fft=400, hop_length=40, freq_range=0.5
+    audio: Sound, n_fft=400, hop_length=40, freq_range=0.5
 ) -> tuple[Spectrogram, npt.NDArray, npt.NDArray, float, npt.NDArray, npt.NDArray]:
     """Compute spectral representations needed to extract predefined acoustic features
     with :func:`vocalpy.features.sat.similarity_features`
 
     Parameters
     ----------
-    audio : vocalpy.Audio
+    audio : vocalpy.Sound
         Audio loaded from a file.
     n_fft : int
         FFT window size.

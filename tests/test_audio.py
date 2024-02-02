@@ -39,10 +39,10 @@ class TestAudio:
         ],
     )
     def test_init(self, data, samplerate, channels):
-        """Test that we can initialize a :class:`vocalpy.Audio` instance."""
-        audio = vocalpy.Audio(data=data, samplerate=samplerate)
+        """Test that we can initialize a :class:`vocalpy.Sound` instance."""
+        audio = vocalpy.Sound(data=data, samplerate=samplerate)
 
-        assert isinstance(audio, vocalpy.Audio)
+        assert isinstance(audio, vocalpy.Sound)
 
         for attr_name, attr_val in zip(("data", "samplerate", "channels"), (data, samplerate, channels)):
             assert hasattr(audio, attr_name)
@@ -65,9 +65,9 @@ class TestAudio:
         ],
     )
     def test_init_raises(self, data, samplerate, expected_exception):
-        """Test that :class:`vocalpy.Audio` raises expected errors"""
+        """Test that :class:`vocalpy.Sound` raises expected errors"""
         with pytest.raises(expected_exception):
-            vocalpy.Audio(data=data, samplerate=samplerate)
+            vocalpy.Sound(data=data, samplerate=samplerate)
 
     @pytest.mark.parametrize(
         "data, samplerate, channels",
@@ -80,8 +80,8 @@ class TestAudio:
         ],
     )
     def test_asdict(self, data, samplerate, channels):
-        audio = vocalpy.Audio(data=data, samplerate=samplerate)
-        assert isinstance(audio, vocalpy.Audio)
+        audio = vocalpy.Sound(data=data, samplerate=samplerate)
+        assert isinstance(audio, vocalpy.Sound)
 
         asdict = audio.asdict()
         assert isinstance(asdict, dict)
@@ -101,8 +101,8 @@ class TestAudio:
         ],
     )
     def test___eq__(self, data, samplerate):
-        audio = vocalpy.Audio(data=data, samplerate=samplerate)
-        other = vocalpy.Audio(data=data.copy(), samplerate=samplerate)
+        audio = vocalpy.Sound(data=data, samplerate=samplerate)
+        other = vocalpy.Sound(data=data.copy(), samplerate=samplerate)
         assert audio == other
 
     @pytest.mark.parametrize(
@@ -116,12 +116,12 @@ class TestAudio:
         ],
     )
     def test___ne__(self, data, samplerate):
-        audio = vocalpy.Audio(data=data, samplerate=samplerate)
-        other = vocalpy.Audio(data=data.copy() + 0.001, samplerate=samplerate)
+        audio = vocalpy.Sound(data=data, samplerate=samplerate)
+        other = vocalpy.Sound(data=data.copy() + 0.001, samplerate=samplerate)
         assert audio != other
 
     def test_read(self, a_wav_path, tmp_path):
-        """Test that :meth:`vocalpy.Audio.read` works as expected.
+        """Test that :meth:`vocalpy.Sound.read` works as expected.
 
         To do this we make an audio file "by hand".
         """
@@ -133,13 +133,13 @@ class TestAudio:
 
         # to make sure round-tripping works as we'd expect,
         # we first write what we read with soundfile to a temporary file
-        # then use `vocalpy.Audio` to read that temporary file
+        # then use `vocalpy.Sound` to read that temporary file
         # and test that it matches what we read directly from the original file
         tmp_wav_path = tmp_path / a_wav_path.name
         soundfile.write(tmp_wav_path, data, samplerate)
 
-        audio = vocalpy.Audio.read(tmp_wav_path)
-        assert isinstance(audio, vocalpy.Audio)
+        audio = vocalpy.Sound.read(tmp_wav_path)
+        assert isinstance(audio, vocalpy.Sound)
         for attr_name, attr_val in zip(("data", "samplerate", "channels"), (data, samplerate, channels)):
             assert hasattr(audio, attr_name)
             if isinstance(attr_val, np.ndarray):
@@ -148,7 +148,7 @@ class TestAudio:
                 assert getattr(audio, attr_name) == attr_val
 
     def test_write(self, a_wav_path, tmp_path):
-        """Test that :meth:`vocalpy.Audio.write` works as expected.
+        """Test that :meth:`vocalpy.Sound.write` works as expected.
 
         To do this we make a spectrogram file "by hand".
         """
@@ -160,9 +160,9 @@ class TestAudio:
 
         # to make sure round-tripping works as we'd expect,
         # we first write what we read with soundfile to a temporary file
-        # then use `vocalpy.Audio` to read that temporary file
+        # then use `vocalpy.Sound` to read that temporary file
         # and test that it matches what we read directly from the original file
-        audio = vocalpy.Audio(data=data, samplerate=samplerate)
+        audio = vocalpy.Sound(data=data, samplerate=samplerate)
         tmp_wav_path = tmp_path / a_wav_path.name
         assert not tmp_wav_path.exists()
 
@@ -170,8 +170,8 @@ class TestAudio:
 
         assert tmp_wav_path.exists()
 
-        audio_loaded = vocalpy.Audio.read(tmp_wav_path)
-        assert isinstance(audio_loaded, vocalpy.Audio)
+        audio_loaded = vocalpy.Sound.read(tmp_wav_path)
+        assert isinstance(audio_loaded, vocalpy.Sound)
         for attr_name, attr_val in zip(("data", "samplerate", "channels"), (data, samplerate, channels)):
             assert hasattr(audio_loaded, attr_name)
             if isinstance(attr_val, np.ndarray):
@@ -180,7 +180,7 @@ class TestAudio:
                 assert getattr(audio_loaded, attr_name) == attr_val
 
     def test_lazy(self, a_wav_path):
-        """Test that :meth:`vocalpy.Audio.read` works as expected.
+        """Test that :meth:`vocalpy.Sound.read` works as expected.
 
         To do this we make an audio file "by hand".
         """
@@ -190,7 +190,7 @@ class TestAudio:
         else:
             channels = data.shape[1]
 
-        audio = vocalpy.Audio(path=a_wav_path)
+        audio = vocalpy.Sound(path=a_wav_path)
         assert audio._data is None
         assert audio._samplerate is None
         assert audio._channels is None
@@ -207,7 +207,7 @@ class TestAudio:
         else:
             channels = data.shape[1]
 
-        audio = vocalpy.Audio(path=a_wav_path)
+        audio = vocalpy.Sound(path=a_wav_path)
         assert audio._data is None
         assert audio._samplerate is None
         assert audio._channels is None

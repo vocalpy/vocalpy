@@ -6,7 +6,7 @@ from typing import Callable
 import dask
 import dask.diagnostics
 
-from .audio import Audio
+from .audio import Sound
 from .audio_file import AudioFile
 from .sequence import Sequence
 from .spectrogram_maker import validate_audio
@@ -83,14 +83,14 @@ class Segmenter:
 
     def segment(
         self,
-        audio: Audio | AudioFile | list[Audio | AudioFile],
+        audio: Sound | AudioFile | list[Sound | AudioFile],
         parallelize: bool = True,
     ) -> Sequence | None | list[Sequence | None]:
         """Segment audio into sequences.
 
         Parameters
         ----------
-        audio : vocalpy.Audio or list of Audio
+        audio : vocalpy.Audio or list of Sound
             A `class`:vocalpy.Audio` instance
             or list of :class:`vocalpy.Audio` instances
             to segment.
@@ -108,9 +108,9 @@ class Segmenter:
         validate_audio(audio)
 
         # define nested function so vars are in scope and ``dask`` can call it
-        def _to_sequence(audio_: Audio):
+        def _to_sequence(audio_: Sound):
             if isinstance(audio_, AudioFile):
-                audio_ = Audio.read(audio_.path)
+                audio_ = Sound.read(audio_.path)
             out = self.callback(audio_, **self.segment_params)
             if out is None:
                 return out
@@ -124,12 +124,12 @@ class Segmenter:
             return Sequence(
                 units=units,
                 # note we make a new audio instance **without** data loaded
-                audio=Audio(path=audio_.path),
+                audio=Sound(path=audio_.path),
                 method=self.callback.__name__,
                 segment_params=self.segment_params,
             )
 
-        if isinstance(audio, (Audio, AudioFile)):
+        if isinstance(audio, (Sound, AudioFile)):
             return _to_sequence(audio)
 
         seqs = []

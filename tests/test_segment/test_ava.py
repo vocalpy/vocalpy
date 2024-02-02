@@ -36,7 +36,7 @@ def test_ava(goffinet_etal_2021_wav_seg_tuple):
     segs = segs.reshape(-1,2)
     onsets_txt, offsets_txt = segs[:,0], segs[:,1]
 
-    audio = voc.Audio.read(wav_path)
+    audio = voc.Sound.read(wav_path)
     onsets, offsets = voc.segment.ava.segment(audio.data, audio.samplerate,
                                           spect_callback=spect_callable,
                                           **SEGMENT_PARAMS)

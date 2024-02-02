@@ -7,7 +7,7 @@ import attrs
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
-from ..audio import Audio
+from ..audio import Sound
 from ..sequence import Sequence
 from ..unit import Unit
 from . import schema
@@ -197,7 +197,7 @@ class SequenceDataset:
             audio_stmt = select(schema.sequence.Audio).order_by(schema.sequence.Audio.id)
             audio_result = session.scalars(audio_stmt).all()
             for model_audio in audio_result:
-                audios.append(Audio(path=model_audio.path))
+                audios.append(Sound(path=model_audio.path))
 
             seqs_stmt = select(schema.sequence.Sequence).order_by(schema.sequence.Sequence.id)
             seqs_result = session.scalars(seqs_stmt).all()

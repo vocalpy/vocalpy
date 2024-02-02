@@ -27,7 +27,7 @@ from .__about__ import (
 from ._spectrogram.data_type import Spectrogram
 from .annotation import Annotation
 from .annotation_file import AnnotationFile
-from .audio import Audio
+from .audio import Sound
 from .audio_file import AudioFile
 from .dataset_file import DatasetFile, DatasetFileType, DatasetFileTypeEnum
 from .examples import example
@@ -52,7 +52,7 @@ __all__ = [
     "__version__",
     "Annotation",
     "AnnotationFile",
-    "Audio",
+    "Sound",
     "AudioFile",
     "constants",
     "dataset",
