@@ -24,7 +24,7 @@ readme = "README.md"
 license = {file = "LICENSE"}
 dependencies = [
     "attrs >=23.1.0",
-    "crowsetta >=5.0.0",
+    "crowsetta >=5.0.2",
     "dask >=2.10.1",
     "librosa >= 0.10.0.post2",
     "matplotlib >=3.7.1",
