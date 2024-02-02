@@ -4,12 +4,12 @@ import contextlib
 import pathlib
 import reprlib
 
-import evfuncs
 import numpy as np
 import numpy.typing as npt
 import soundfile
 
 from .audio_file import AudioFile
+from ._vendor import evfuncs
 
 
 def get_channels_from_data(data: npt.NDArray) -> int:
