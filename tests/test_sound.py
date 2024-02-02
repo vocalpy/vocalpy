@@ -23,7 +23,7 @@ RNG = np.random.default_rng()
     ],
 )
 def test_get_channels_from_data(data, expected_channels):
-    channels = vocalpy.audio.get_channels_from_data(data)
+    channels = vocalpy.sound.get_channels_from_data(data)
     assert channels == expected_channels
 
 
