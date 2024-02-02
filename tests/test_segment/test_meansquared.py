@@ -1,4 +1,3 @@
-import evfuncs
 import numpy as np
 
 import vocalpy.segment
@@ -8,7 +7,7 @@ def test_meansquared(a_cbin_path):
     audio = vocalpy.Audio.read(a_cbin_path)
 
     notmat = str(a_cbin_path) + '.not.mat'
-    nmd = evfuncs.load_notmat(notmat)
+    nmd = vocalpy._vendor.evfuncs.load_notmat(notmat)
     min_syl_dur = nmd['min_dur'] / 1000
     min_silent_dur = nmd['min_int'] / 1000
     threshold = nmd['threshold']
