@@ -88,7 +88,6 @@ def a_rec_path(request):
 AUDIO_DIR_WAV =  SOURCE_TEST_DATA_ROOT / 'audio_wav_annot_birdsongrec' / 'Bird0' / 'Wave'
 
 
-# TODO: add .WAV from TIMIT
 @pytest.fixture
 def audio_dir_wav(source_test_data_root):
     return AUDIO_DIR_WAV
