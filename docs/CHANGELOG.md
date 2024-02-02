@@ -14,6 +14,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [#120](https://github.com/vocalpy/vocalpy/pull/120).
   Fixes [#119](https://github.com/vocalpy/vocalpy/issues/119).
 
+### Changed
+- Vendor code from evfuncs, reduce number of dependencies
+  [#121](https://github.com/vocalpy/vocalpy/pull/121).
+  Fixes [#118](https://github.com/vocalpy/vocalpy/issues/118).
+- Bump minimum required version of crowsetta to 5.0.2 (that also vendors code)
+  [#121](https://github.com/vocalpy/vocalpy/pull/121).
+
 ## 0.8.0
 ### Added
 - Add convenience function `vocalpy.spectrogram`, that computes a spectrogram from 
