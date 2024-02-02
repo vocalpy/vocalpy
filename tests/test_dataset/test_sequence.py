@@ -1,4 +1,3 @@
-import evfuncs
 import vocalpy as voc
 
 
