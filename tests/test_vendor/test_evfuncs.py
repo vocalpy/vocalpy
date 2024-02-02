@@ -7,7 +7,7 @@ import vocalpy._vendor.evfuncs
 
 
 def test_readrecf(a_rec_path):
-    rec_dict = vocalpy.vendor.evfuncs.readrecf(a_rec_path)
+    rec_dict = vocalpy._vendor.evfuncs.readrecf(a_rec_path)
     assert 'header' in rec_dict
     assert isinstance(rec_dict['header'], list)
     assert 'sample_freq' in rec_dict
@@ -32,7 +32,7 @@ def test_readrecf(a_rec_path):
 
 
 def test_load_cbin(a_cbin_path):
-    dat, fs = vocalpy.vendor.evfuncs.load_cbin(a_cbin_path)
+    dat, fs = vocalpy._vendor.evfuncs.load_cbin(a_cbin_path)
     assert isinstance(dat, np.ndarray)
     assert dat.dtype == '>i2'  # should be big-endian 16 bit
     assert isinstance(fs, int)
