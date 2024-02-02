@@ -4,11 +4,11 @@ import contextlib
 import pathlib
 import reprlib
 
-import evfuncs
 import numpy as np
 import numpy.typing as npt
 import soundfile
 
+from ._vendor import evfuncs
 from .audio_file import AudioFile
 
 

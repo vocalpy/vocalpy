@@ -1,5 +1,18 @@
 """A core package for acoustic communication research in Python."""
-from . import constants, dataset, examples, feature, metrics, paths, plot, segment, signal, spectral, validators
+from . import (
+    _vendor,
+    constants,
+    dataset,
+    examples,
+    feature,
+    metrics,
+    paths,
+    plot,
+    segment,
+    signal,
+    spectral,
+    validators,
+)
 from .__about__ import (
     __author__,
     __commit__,
@@ -65,4 +78,5 @@ __all__ = [
     "SpectrogramParameters",
     "Unit",
     "validators",
+    "_vendor",
 ]

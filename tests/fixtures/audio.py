@@ -74,6 +74,17 @@ def audio_list_cbin_labels_not_in_labelset(audio_list_cbin,
     return audio_list_labels_in_labelset
 
 
+# rec files are not audio, but
+# they have the sampling rate for cbin files
+# so I'm putting the fixture here
+RECFILE_LIST = sorted(AUDIO_DIR_CBIN.glob('*.rec'))
+
+
+@pytest.fixture(params=RECFILE_LIST)
+def a_rec_path(request):
+    return request.param
+
+
 AUDIO_DIR_WAV =  SOURCE_TEST_DATA_ROOT / 'audio_wav_annot_birdsongrec' / 'Bird0' / 'Wave'
 
 
