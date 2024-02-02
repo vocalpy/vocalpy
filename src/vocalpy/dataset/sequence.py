@@ -119,7 +119,7 @@ class SequenceDataset:
                 session.add(an_orm_segment_params)
 
             for seq in self.sequences:
-                audio = schema.sequence.Audio(path=str(seq.audio.path))
+                audio = schema.sequence.Sound(path=str(seq.audio.path))
                 session.add(audio)
 
                 # make and add sequence, referring to audio and segment params
