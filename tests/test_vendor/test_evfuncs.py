@@ -3,7 +3,7 @@ test evfuncs module
 """
 import numpy as np
 
-import vocalpy.vendor.evfuncs
+import vocalpy._vendor.evfuncs
 
 
 def test_readrecf(a_rec_path):
