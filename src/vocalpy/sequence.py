@@ -4,7 +4,7 @@ import attrs
 import numpy as np
 
 from ._spectrogram.data_type import Spectrogram
-from .audio import Sound
+from .sound import Sound
 from .unit import Unit
 
 

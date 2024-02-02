@@ -6,7 +6,7 @@ from typing import Callable
 import dask
 import dask.diagnostics
 
-from .audio import Sound
+from .sound import Sound
 from .audio_file import AudioFile
 from .sequence import Sequence
 from .spectrogram_maker import validate_audio

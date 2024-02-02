@@ -8,7 +8,7 @@ import numpy as np
 import numpy.typing as npt
 import scipy.signal
 
-from ..audio import Sound
+from ..sound import Sound
 
 
 def bandpass_filtfilt(audio: Sound, freq_cutoffs=(500, 10000)) -> Sound:

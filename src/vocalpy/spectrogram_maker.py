@@ -10,7 +10,7 @@ import dask.diagnostics
 import vocalpy.constants
 
 from ._spectrogram.data_type import Spectrogram
-from .audio import Sound
+from .sound import Sound
 from .audio_file import AudioFile
 from .spectrogram_file import SpectrogramFile
 
