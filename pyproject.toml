@@ -26,7 +26,6 @@ dependencies = [
     "attrs >=23.1.0",
     "crowsetta >=5.0.0",
     "dask >=2.10.1",
-    "evfuncs >= 0.3.3",
     "librosa >= 0.10.0.post2",
     "matplotlib >=3.7.1",
     "numpy >=1.21.0",
