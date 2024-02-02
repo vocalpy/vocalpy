@@ -27,7 +27,7 @@ def test_get_channels_from_data(data, expected_channels):
     assert channels == expected_channels
 
 
-class TestAudio:
+class TestSound:
     @pytest.mark.parametrize(
         "data, samplerate, channels",
         [
