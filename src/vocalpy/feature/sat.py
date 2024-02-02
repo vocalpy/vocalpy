@@ -319,7 +319,7 @@ def pitch(
     Parameters
     ----------
     audio : vocalpy.Sound
-        A :class:`vocalpy.Audio` instance.
+        A :class:`vocalpy.Sound` instance.
     fmin : float
         Minimum frequency in Hertz.
         The recommended minimum is ``librosa.note_to_hz('C2')`` (~65 Hz)
@@ -386,7 +386,7 @@ def similarity_features(
     """Extract all features used to compute similarity with SAT.
 
     Calls :func:`vocalpy.spectral.sat` to get spectral representations
-    of the :class:`vocalpy.Audio`, then extracts all features
+    of the :class:`vocalpy.Sound`, then extracts all features
     from those spectral representations.
 
     Parameters

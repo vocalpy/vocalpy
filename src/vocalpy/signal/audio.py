@@ -17,7 +17,7 @@ def bandpass_filtfilt(audio: Sound, freq_cutoffs=(500, 10000)) -> Sound:
 
     Parameters
     ----------
-    audio: vocalpy.Audio
+    audio: vocalpy.Sound
         An audio signal.
     freq_cutoffs : Iterable
         Cutoff frequencies for bandpass filter.
@@ -81,7 +81,7 @@ def meansquared(audio: Sound, freq_cutoffs=(500, 10000), smooth_win: int = 2) ->
     Returns
     -------
     meansquared : numpy.ndarray
-        The ``vocalpy.Audio.data`` after squaring and smoothing.
+        The ``vocalpy.Sound.data`` after squaring and smoothing.
     """
     audio = bandpass_filtfilt(audio, freq_cutoffs)
 

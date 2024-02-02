@@ -90,9 +90,9 @@ class Segmenter:
 
         Parameters
         ----------
-        audio : vocalpy.Audio or list of Sound
-            A `class`:vocalpy.Audio` instance
-            or list of :class:`vocalpy.Audio` instances
+        audio : vocalpy.Sound or list of Sound
+            A `class`:vocalpy.Sound` instance
+            or list of :class:`vocalpy.Sound` instances
             to segment.
         parallelize : bool
             If True, parallelize segmentation using :mod:`dask`.
@@ -100,9 +100,9 @@ class Segmenter:
         Returns
         -------
         seq : vocalpy.Sequence, None, or list of vocalpy.Sequence or None
-            If a single :class:`~vocalpy.Audio` instance is passed in,
+            If a single :class:`~vocalpy.Sound` instance is passed in,
             a single :class:`~vocalpy.Sequence` instance will be returned.
-            If a list of :class:`~vocalpy.Audio` instances is passed in,
+            If a list of :class:`~vocalpy.Sound` instances is passed in,
             a list of :class:`~vocalpy.Sequence` instances will be returned.
         """
         validate_audio(audio)

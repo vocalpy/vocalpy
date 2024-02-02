@@ -56,7 +56,7 @@ REGISTRY = {example.name: example for example in EXAMPLES}
 def example(name: str) -> vocalpy.Sound:
     """Get an example from :mod:`vocalpy.examples`.
 
-    Returns a single example, e.g., a :class:`vocalpy.Audio`.
+    Returns a single example, e.g., a :class:`vocalpy.Sound`.
 
     Parameters
     ----------
@@ -68,7 +68,7 @@ def example(name: str) -> vocalpy.Sound:
     Returns
     -------
     example : vocalpy.Sound
-        A :class:`vocalpy.Audio` instance with the example data
+        A :class:`vocalpy.Sound` instance with the example data
         read into it.
 
     See Also

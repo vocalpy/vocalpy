@@ -76,7 +76,7 @@ class Sound:
         or a ValueError will be raised.
     path : pathlib.Path
         The path to the audio file that this
-        :class:`vocalpy.Audio` was read from.
+        :class:`vocalpy.Sound` was read from.
 
     Examples
     --------
@@ -205,7 +205,7 @@ class Sound:
         Returns
         -------
         audio : vocalpy.Sound
-            A :class:`vocalpy.Audio` instance with ``data``
+            A :class:`vocalpy.Sound` instance with ``data``
             read from ``path``.
         """
         path = pathlib.Path(path)

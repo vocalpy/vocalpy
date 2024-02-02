@@ -12,7 +12,7 @@ from .sound import Sound
 def spectrogram(audio: Sound, n_fft: int = 512, hop_length: int = 64, method="librosa-db", **kwargs) -> Spectrogram:
     """Get a spectrogram from audio.
 
-    This is a convenience function that takes an instance of :class:`vocalpy.Audio`
+    This is a convenience function that takes an instance of :class:`vocalpy.Sound`
     and returns an instance of :class:`vocalpy.Spectrogram`. The
     :attr:`vocalpy.Spectrogram.data` will be a spectral representation
     computed according to the specified `method`.
