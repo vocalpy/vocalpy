@@ -20,18 +20,18 @@ class TestSound:
     )
     def test_init(self, data, samplerate, channels):
         """Test that we can initialize a :class:`vocalpy.Sound` instance."""
-        audio = vocalpy.Sound(data=data, samplerate=samplerate)
+        sound = vocalpy.Sound(data=data, samplerate=samplerate)
 
-        assert isinstance(audio, vocalpy.Sound)
+        assert isinstance(sound, vocalpy.Sound)
 
         for attr_name, attr_val in zip(("data", "samplerate", "channels"), (data, samplerate, channels)):
-            assert hasattr(audio, attr_name)
+            assert hasattr(sound, attr_name)
             if attr_name == "data" and attr_val.ndim == 1:
                 assert np.array_equal(
-                    getattr(audio, attr_name), attr_val[np.newaxis, :]
+                    getattr(sound, attr_name), attr_val[np.newaxis, :]
                 )
             else:
-                assert getattr(audio, attr_name) is attr_val
+                assert getattr(sound, attr_name) is attr_val
 
     @pytest.mark.parametrize(
         "data, samplerate, expected_exception",
@@ -69,20 +69,20 @@ class TestSound:
         ],
     )
     def test_asdict(self, data, samplerate, channels):
-        audio = vocalpy.Sound(data=data, samplerate=samplerate)
-        assert isinstance(audio, vocalpy.Sound)
+        sound = vocalpy.Sound(data=data, samplerate=samplerate)
+        assert isinstance(sound, vocalpy.Sound)
 
-        asdict = audio.asdict()
+        asdict = sound.asdict()
         assert isinstance(asdict, dict)
 
         for attr_name, attr_val in zip(("data", "samplerate"), (data, samplerate)):
             assert attr_name in asdict
             if attr_name == "data" and attr_val.ndim == 1:
                 assert np.array_equal(
-                    getattr(audio, attr_name), attr_val[np.newaxis, :]
+                    getattr(sound, attr_name), attr_val[np.newaxis, :]
                 )
             else:
-                assert getattr(audio, attr_name) is attr_val
+                assert getattr(sound, attr_name) is attr_val
 
         assert asdict["data"].shape[0] == channels
 
@@ -97,9 +97,9 @@ class TestSound:
         ],
     )
     def test___eq__(self, data, samplerate):
-        audio = vocalpy.Sound(data=data, samplerate=samplerate)
+        sound = vocalpy.Sound(data=data, samplerate=samplerate)
         other = vocalpy.Sound(data=data.copy(), samplerate=samplerate)
-        assert audio == other
+        assert sound == other
 
     @pytest.mark.parametrize(
         "data, samplerate",
@@ -112,9 +112,9 @@ class TestSound:
         ],
     )
     def test___ne__(self, data, samplerate):
-        audio = vocalpy.Sound(data=data, samplerate=samplerate)
+        sound = vocalpy.Sound(data=data, samplerate=samplerate)
         other = vocalpy.Sound(data=data.copy() + 0.001, samplerate=samplerate)
-        assert audio != other
+        assert sound != other
 
     def test_read(self, a_wav_path, tmp_path):
         """Test that :meth:`vocalpy.Sound.read` works as expected.
@@ -134,14 +134,17 @@ class TestSound:
         tmp_wav_path = tmp_path / a_wav_path.name
         soundfile.write(tmp_wav_path, data, samplerate)
 
-        audio = vocalpy.Sound.read(tmp_wav_path)
-        assert isinstance(audio, vocalpy.Sound)
+        sound = vocalpy.Sound.read(tmp_wav_path)
+        assert isinstance(sound, vocalpy.Sound)
         for attr_name, attr_val in zip(("data", "samplerate", "channels"), (data, samplerate, channels)):
-            assert hasattr(audio, attr_name)
-            if isinstance(attr_val, np.ndarray):
-                np.testing.assert_allclose(getattr(audio, attr_name), attr_val)
+            assert hasattr(sound, attr_name)
+            if attr_name == "data" and attr_val.ndim == 1:
+                assert np.array_equal(
+                    getattr(sound, attr_name), attr_val[np.newaxis, :]
+                )
             else:
-                assert getattr(audio, attr_name) == attr_val
+                assert getattr(sound, attr_name) == attr_val
+
 
     def test_write(self, a_wav_path, tmp_path):
         """Test that :meth:`vocalpy.Sound.write` works as expected.
@@ -158,22 +161,22 @@ class TestSound:
         # we first write what we read with soundfile to a temporary file
         # then use `vocalpy.Sound` to read that temporary file
         # and test that it matches what we read directly from the original file
-        audio = vocalpy.Sound(data=data, samplerate=samplerate)
+        sound = vocalpy.Sound(data=data, samplerate=samplerate)
         tmp_wav_path = tmp_path / a_wav_path.name
         assert not tmp_wav_path.exists()
 
-        audio.write(tmp_wav_path)
+        sound.write(tmp_wav_path)
 
         assert tmp_wav_path.exists()
 
-        audio_loaded = vocalpy.Sound.read(tmp_wav_path)
-        assert isinstance(audio_loaded, vocalpy.Sound)
+        sound_loaded = vocalpy.Sound.read(tmp_wav_path)
+        assert isinstance(sound_loaded, vocalpy.Sound)
         for attr_name, attr_val in zip(("data", "samplerate", "channels"), (data, samplerate, channels)):
-            assert hasattr(audio_loaded, attr_name)
+            assert hasattr(sound_loaded, attr_name)
             if isinstance(attr_val, np.ndarray):
-                np.testing.assert_allclose(getattr(audio_loaded, attr_name), attr_val)
+                assert np.array_equal(getattr(sound_loaded, attr_name), attr_val[np.newaxis, :])
             else:
-                assert getattr(audio_loaded, attr_name) == attr_val
+                assert getattr(sound_loaded, attr_name) == attr_val
 
     def test_lazy(self, a_wav_path):
         """Test that :meth:`vocalpy.Sound.read` works as expected.
@@ -186,15 +189,18 @@ class TestSound:
         else:
             channels = data.shape[1]
 
-        audio = vocalpy.Sound(path=a_wav_path)
-        assert audio._data is None
-        assert audio._samplerate is None
-        assert audio._channels is None
+        sound = vocalpy.Sound(path=a_wav_path)
+        assert sound._data is None
+        assert sound._samplerate is None
 
-        _ = audio.data  # triggers lazy-load
-        assert np.array_equal(audio._data, data)
-        assert audio._samplerate == samplerate
-        assert audio._channels == channels
+        _ = sound.data  # triggers lazy-load
+        if channels == 1:
+            assert np.array_equal(sound._data, data[np.newaxis, :])
+        else:
+            assert np.array_equal(sound._data, data)
+
+        assert sound._samplerate == samplerate
+        assert sound.channels == channels
 
     def test_open(self, a_wav_path):
         data, samplerate = soundfile.read(a_wav_path)
@@ -203,17 +209,19 @@ class TestSound:
         else:
             channels = data.shape[1]
 
-        audio = vocalpy.Sound(path=a_wav_path)
-        assert audio._data is None
-        assert audio._samplerate is None
-        assert audio._channels is None
+        sound = vocalpy.Sound(path=a_wav_path)
+        assert sound._data is None
+        assert sound._samplerate is None
 
-        with audio.open():
-            assert np.array_equal(audio._data, data)
-            assert audio._samplerate == samplerate
-            assert audio._channels == channels
+        with sound.open():
+            if channels == 1:
+                assert np.array_equal(sound._data, data[np.newaxis, :])
+            else:
+                assert np.array_equal(sound._data, data)
+            assert sound._samplerate == samplerate
+            assert sound.channels == channels
 
         # check that attributes go back to none after we __exit__ the context
-        assert audio._data is None
-        assert audio._samplerate is None
-        assert audio._channels is None
+        assert sound._data is None
+        assert sound._samplerate is None
+
