@@ -80,7 +80,8 @@ class Sound:
                 warnings.warn(
                     "The ``data`` passed in has more channels than samples: the number of channels (data.shape[0]) "
                     f"is {data.shape[0]} and the number of samples (data.shape[1]) is {data.shape[1]}. "
-                    "You may need to verify you have passed in the data correctly."
+                    "You may need to verify you have passed in the data correctly.",
+                    stacklevel=2,
                 )
 
         self._data = data
@@ -89,7 +90,7 @@ class Sound:
             if not isinstance(samplerate, int):
                 raise TypeError(f"Type of ``samplerate`` must be int but was: {type(samplerate)}")
             if not samplerate > 0:
-                raise ValueError(f"Value of ``samplerate`` must be a positive integer.")
+                raise ValueError(f"Value of ``samplerate`` must be a positive integer, but was {samplerate}.")
         self._samplerate = samplerate
 
     def _read(self):
