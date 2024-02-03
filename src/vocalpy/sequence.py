@@ -49,7 +49,7 @@ class Sequence:
     method: str = attrs.field(converter=str, validator=attrs.validators.instance_of(str))
     segment_params: dict = attrs.field(converter=dict, validator=attrs.validators.instance_of(dict))
 
-    audio: Sound = attrs.field(validator=attrs.validators.optional(attrs.validators.instance_of(Sound)), default=None)
+    sound: Sound = attrs.field(validator=attrs.validators.optional(attrs.validators.instance_of(Sound)), default=None)
     spectrogram: Spectrogram = attrs.field(
         validator=attrs.validators.optional(attrs.validators.instance_of(Spectrogram)), default=None
     )

@@ -83,7 +83,7 @@ class Segmenter:
 
     def segment(
         self,
-        audio: Sound | AudioFile | list[Sound | AudioFile],
+        sound: Sound | AudioFile | list[Sound | AudioFile],
         parallelize: bool = True,
     ) -> Sequence | None | list[Sequence | None]:
         """Segment audio into sequences.
@@ -133,7 +133,7 @@ class Segmenter:
             return _to_sequence(audio)
 
         seqs = []
-        for audio_ in audio:
+        for sound_ in sound:
             if parallelize:
                 seqs.append(dask.delayed(_to_sequence(audio_)))
             else:

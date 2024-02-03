@@ -305,7 +305,7 @@ def amplitude(
 
 
 def pitch(
-    audio: Sound,
+    sound: Sound,
     fmin: float = 380.0,
     fmax_yin: float = 8000.0,
     frame_length: int = 400,
@@ -373,7 +373,7 @@ def pitch(
 
 
 def similarity_features(
-    audio: Sound,
+    sound: Sound,
     n_fft=400,
     hop_length=40,
     freq_range=0.5,

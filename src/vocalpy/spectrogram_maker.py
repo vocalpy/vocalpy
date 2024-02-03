@@ -44,7 +44,7 @@ def default_spect_fname_func(audio_path: Union[str, pathlib.Path]):
     return audio_path.name + vocalpy.constants.SPECT_FILE_EXT
 
 
-def validate_audio(audio: Sound | AudioFile | Sequence[Sound | AudioFile]) -> None:
+def validate_audio(sound: Sound | AudioFile | Sequence[Sound | AudioFile]) -> None:
     if not isinstance(audio, (Sound, AudioFile, list, tuple)):
         raise TypeError(
             "`audio` must be a `vocalpy.Sound` instance, "
@@ -101,7 +101,7 @@ class SpectrogramMaker:
 
     def make(
         self,
-        audio: Sound | AudioFile | Sequence[Sound | AudioFile],
+        sound: Sound | AudioFile | Sequence[Sound | AudioFile],
         parallelize: bool = True,
     ) -> Spectrogram | List[Spectrogram]:
         """Make spectrogram(s) from audio.
@@ -118,7 +118,7 @@ class SpectrogramMaker:
 
         Parameters
         ----------
-        audio: vocalpy.Sound, vocalpy.AudioFile, or a sequence of either
+        sound: vocalpy.Sound, vocalpy.AudioFile, or a sequence of either
             Source of audio used to make spectrograms.
 
         Returns
@@ -141,7 +141,7 @@ class SpectrogramMaker:
             return _to_spect(audio)
 
         spects = []
-        for audio_ in audio:
+        for sound_ in sound:
             if parallelize:
                 spects.append(dask.delayed(_to_spect(audio_)))
             else:
@@ -156,7 +156,7 @@ class SpectrogramMaker:
 
     def write(
         self,
-        audio: Sound | AudioFile | Sequence[Sound | AudioFile],
+        sound: Sound | AudioFile | Sequence[Sound | AudioFile],
         dir_path: str | pathlib.Path,
         parallelize: bool = True,
         namer: Callable = default_spect_fname_func,
@@ -178,7 +178,7 @@ class SpectrogramMaker:
 
         Parameters
         ----------
-        audio: vocalpy.Sound, vocalpy.AudioFile, a sequence of either, or a Dataset
+        sound: vocalpy.Sound, vocalpy.AudioFile, a sequence of either, or a Dataset
             Source of audio used to make spectrograms.
         dir_path : string, pathlib.Path
             The directory where the spectrogram files should be saved.
@@ -213,7 +213,7 @@ class SpectrogramMaker:
             return _to_spect_file(audio)
 
         spect_files = []
-        for audio_ in audio:
+        for sound_ in sound:
             if parallelize:
                 spect_files.append(dask.delayed(_to_spect_file(audio_)))
             else:

@@ -21,7 +21,7 @@ if TYPE_CHECKING:
 
 
 def sat(
-    audio: Sound, n_fft=400, hop_length=40, freq_range=0.5
+    sound: Sound, n_fft=400, hop_length=40, freq_range=0.5
 ) -> tuple[Spectrogram, npt.NDArray, npt.NDArray, float, npt.NDArray, npt.NDArray]:
     """Compute spectral representations needed to extract predefined acoustic features
     with :func:`vocalpy.features.sat.similarity_features`

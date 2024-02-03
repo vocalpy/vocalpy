@@ -34,7 +34,7 @@ class Unit:
     label: str = attrs.field(
         validator=attrs.validators.optional(attrs.validators.instance_of(str)), default=DEFAULT_LABEL
     )
-    audio: Sound = attrs.field(validator=attrs.validators.optional(attrs.validators.instance_of(Sound)), default=None)
+    sound: Sound = attrs.field(validator=attrs.validators.optional(attrs.validators.instance_of(Sound)), default=None)
     spectrogram: Spectrogram = attrs.field(
         validator=attrs.validators.optional(attrs.validators.instance_of(Spectrogram)), default=None
     )

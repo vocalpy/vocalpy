@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 
 
 def meansquared(
-    audio: Sound,
+    sound: Sound,
     threshold: int = 5000,
     min_dur: float = 0.02,
     min_silent_dur: float = 0.002,
@@ -43,7 +43,7 @@ def meansquared(
 
     Parameters
     ----------
-    audio: vocalpy.Sound
+    sound: vocalpy.Sound
         An audio signal.
     threshold : int
         Value above which mean squared signal is considered part of a segment.

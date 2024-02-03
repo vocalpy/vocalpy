@@ -11,13 +11,13 @@ import scipy.signal
 from ..sound import Sound
 
 
-def bandpass_filtfilt(audio: Sound, freq_cutoffs=(500, 10000)) -> Sound:
+def bandpass_filtfilt(sound: Sound, freq_cutoffs=(500, 10000)) -> Sound:
     """Filter audio with band-pass filter, then perform zero-phase
     filtering with :func:`scipy.signal.filtfilt`.
 
     Parameters
     ----------
-    audio: vocalpy.Sound
+    sound: vocalpy.Sound
         An audio signal.
     freq_cutoffs : Iterable
         Cutoff frequencies for bandpass filter.
@@ -61,7 +61,7 @@ def bandpass_filtfilt(audio: Sound, freq_cutoffs=(500, 10000)) -> Sound:
     return Sound(data=filtered, samplerate=audio.samplerate)
 
 
-def meansquared(audio: Sound, freq_cutoffs=(500, 10000), smooth_win: int = 2) -> npt.NDArray:
+def meansquared(sound: Sound, freq_cutoffs=(500, 10000), smooth_win: int = 2) -> npt.NDArray:
     """Convert audio to a Root-Mean-Square-like trace
 
     First applied a band-pass filter
@@ -70,7 +70,7 @@ def meansquared(audio: Sound, freq_cutoffs=(500, 10000), smooth_win: int = 2) ->
 
     Parameters
     ----------
-    audio: vocalpy.Sound
+    sound: vocalpy.Sound
         An audio signal.
     freq_cutoffs : Iterable
         Cutoff frequencies for bandpass filter.

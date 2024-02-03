@@ -9,7 +9,7 @@ from .sound import Sound
 
 
 # TODO: add 'SAT' method and 'biosound' method
-def spectrogram(audio: Sound, n_fft: int = 512, hop_length: int = 64, method="librosa-db", **kwargs) -> Spectrogram:
+def spectrogram(sound: Sound, n_fft: int = 512, hop_length: int = 64, method="librosa-db", **kwargs) -> Spectrogram:
     """Get a spectrogram from audio.
 
     This is a convenience function that takes an instance of :class:`vocalpy.Sound`
