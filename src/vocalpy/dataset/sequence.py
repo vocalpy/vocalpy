@@ -119,7 +119,7 @@ class SequenceDataset:
                 session.add(an_orm_segment_params)
 
             for seq in self.sequences:
-                audio = schema.sequence.Sound(path=str(seq.audio.path))
+                sound = schema.sequence.Sound(path=str(seq.audio.path))
                 session.add(audio)
 
                 # make and add sequence, referring to audio and segment params
@@ -127,7 +127,7 @@ class SequenceDataset:
                 an_orm_segment_params = orm_segment_params[ind]
 
                 sequence = schema.sequence.Sequence(
-                    audio=audio,
+                    audio=sound,
                     segment_params=an_orm_segment_params,
                     onset=seq.onset,
                     offset=seq.offset,

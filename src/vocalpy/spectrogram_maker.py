@@ -45,25 +45,25 @@ def default_spect_fname_func(audio_path: Union[str, pathlib.Path]):
 
 
 def validate_audio(sound: Sound | AudioFile | Sequence[Sound | AudioFile]) -> None:
-    if not isinstance(audio, (Sound, AudioFile, list, tuple)):
+    if not isinstance(sound, (Sound, AudioFile, list, tuple)):
         raise TypeError(
-            "`audio` must be a `vocalpy.Sound` instance, "
+            "`sound` must be a `vocalpy.Sound` instance, "
             "a `vocalpy.AudioFile` instance, "
             "or a list/tuple of such instances, "
-            f"but type was : {type(audio)}"
+            f"but type was : {type(sound)}"
         )
 
-    if isinstance(audio, list) or isinstance(audio, tuple):
+    if isinstance(sound, list) or isinstance(sound, tuple):
         if not (
-            all([isinstance(item, Sound) for item in audio]) or all([isinstance(item, AudioFile) for item in audio])
+            all([isinstance(item, (Sound, AudioFile)) for item in sound])
         ):
-            types_in_audio = set([type(audio) for audio in audio])
+            types_in_sound = set([type(sound) for sound in sound])
             raise TypeError(
-                "If `audio` is a list or tuple, "
-                "then items in `audio` must either "
+                "If `sound` is a list or tuple, "
+                "then items in `sound` must either "
                 "all be instances of `vocalpy.Sound`"
                 "or all be instances of `vocalpy.AudioFile`."
-                f"Instead found the following types: {types_in_audio}."
+                f"Instead found the following types: {types_in_sound}."
                 f"Please make sure only `vocalpy.Sound instances are in the list/tuple."
             )
 
@@ -137,7 +137,7 @@ class SpectrogramMaker:
             spect.audio_path = audio_.path
             return spect
 
-        if isinstance(audio, (Sound, AudioFile)):
+        if isinstance(sound, (Sound, AudioFile)):
             return _to_spect(audio)
 
         spects = []
@@ -209,7 +209,7 @@ class SpectrogramMaker:
             spect_file = spect.write(spect_path)
             return spect_file
 
-        if isinstance(audio, (Sound, AudioFile)):
+        if isinstance(sound, (Sound, AudioFile)):
             return _to_spect_file(audio)
 
         spect_files = []

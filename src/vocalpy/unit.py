@@ -20,7 +20,7 @@ class Unit:
     label : str
         A string label applied by an annotator to the unit.
         Default is determined by :data:`vocalpy.unit.DEFAULT_LABEL`.
-    audio : vocalpy.Sound, optional
+    sound : vocalpy.Sound, optional
         The audio for this unit.
         Optional, default is None.
     spectrogram : vocalpy.Spectrogram, optional

@@ -28,7 +28,7 @@ def sat(
 
     Parameters
     ----------
-    audio : vocalpy.Sound
+    sound : vocalpy.Sound
         Audio loaded from a file.
     n_fft : int
         FFT window size.
@@ -90,9 +90,8 @@ def sat(
             f"Please specify a value between zero and one inclusive specifying the percentage of the frequencies "
             f"to use when extracting features with a frequency range"
         )
-
     # ---- make power spec
-    audio_pad = np.pad(audio.data, pad_width=n_fft // 2)
+    audio_pad = np.pad(sound.data, pad_width=n_fft // 2)
     windows = librosa.util.frame(audio_pad, frame_length=n_fft, hop_length=hop_length, axis=0)
     tapers = scipy.signal.windows.dpss(n_fft, 1.5, Kmax=2)
     windows1 = windows * tapers[0, :]
@@ -105,7 +104,7 @@ def sat(
     power_spectrogram = power_spectrogram.T[: f.shape[-1], :]
 
     # make power spectrum into Spectrogram
-    t = librosa.frames_to_time(np.arange(windows.shape[0]), sr=audio.samplerate, hop_length=hop_length, n_fft=n_fft)
+    t = librosa.frames_to_time(np.arange(windows.shape[0]), sr=sound.samplerate, hop_length=hop_length, n_fft=n_fft)
     from .. import Spectrogram
 
     power_spectrogram = Spectrogram(data=power_spectrogram, frequencies=f, times=t)
@@ -119,7 +118,7 @@ def sat(
         np.log(np.abs(spectra1_for_cepstrum)), n=n_fft
     ).real
     cepstrogram = cepstrogram.T
-    quefrencies = np.array(np.arange(n_fft)) / audio.samplerate
+    quefrencies = np.array(np.arange(n_fft)) / sound.samplerate
 
     # freq_range means "use first `freq_range` percent of frequencies"
     max_freq_idx = int(np.floor(f.shape[0] * freq_range))

@@ -31,7 +31,7 @@ class Sequence:
         This attribute is added by a
         :class:`vocalpy.Segmenter` when it
         creates a :class:`vocalpy.Sequence`.
-    audio : vocalpy.Sound, optional
+    sound : vocalpy.Sound, optional
         The audio from which this sequence was segmented.
         Optional, default is None.
     spectrogram : vocalpy.Spectrogram, optional

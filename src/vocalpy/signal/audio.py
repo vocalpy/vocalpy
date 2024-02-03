@@ -25,23 +25,23 @@ def bandpass_filtfilt(sound: Sound, freq_cutoffs=(500, 10000)) -> Sound:
 
     Returns
     -------
-    audio : vocalpy.Sound
+    sound : vocalpy.Sound
         New audio instance
     """
     if freq_cutoffs[0] <= 0:
         raise ValueError("Low frequency cutoff {} is invalid, " "must be greater than zero.".format(freq_cutoffs[0]))
 
-    nyquist_rate = audio.samplerate / 2
+    nyquist_rate = sound.samplerate / 2
     if freq_cutoffs[1] >= nyquist_rate:
         raise ValueError(
             f"High frequency cutoff ({freq_cutoffs[1]}) is invalid, " f"must be less than Nyquist rate: {nyquist_rate}."
         )
 
-    if audio.data.shape[-1] < 387:
+    if sound.data.shape[-1] < 387:
         numtaps = 64
-    elif audio.data.shape[-1] < 771:
+    elif sound.data.shape[-1] < 771:
         numtaps = 128
-    elif audio.data.shape[-1] < 1539:
+    elif sound.data.shape[-1] < 1539:
         numtaps = 256
     else:
         numtaps = 512
@@ -57,8 +57,8 @@ def bandpass_filtfilt(sound: Sound, freq_cutoffs=(500, 10000)) -> Sound:
     a = np.zeros((numtaps + 1,))
     a[0] = 1  # make an "all-zero filter"
     padlen = np.max((b.shape[-1] - 1, a.shape[-1] - 1))
-    filtered = scipy.signal.filtfilt(b, a, audio.data, padlen=padlen)
-    return Sound(data=filtered, samplerate=audio.samplerate)
+    filtered = scipy.signal.filtfilt(b, a, sound.data, padlen=padlen)
+    return Sound(data=filtered, samplerate=sound.samplerate)
 
 
 def meansquared(sound: Sound, freq_cutoffs=(500, 10000), smooth_win: int = 2) -> npt.NDArray:
@@ -83,9 +83,9 @@ def meansquared(sound: Sound, freq_cutoffs=(500, 10000), smooth_win: int = 2) ->
     meansquared : numpy.ndarray
         The ``vocalpy.Sound.data`` after squaring and smoothing.
     """
-    audio = bandpass_filtfilt(audio, freq_cutoffs)
+    audio = bandpass_filtfilt(sound, freq_cutoffs)
 
-    data = np.array(audio.data)
+    data = np.array(sound.data)
     if issubclass(data.dtype.type, numbers.Integral):
         while np.any(np.abs(data) > np.sqrt(np.iinfo(data.dtype).max)):
             warnings.warn(
@@ -97,7 +97,7 @@ def meansquared(sound: Sound, freq_cutoffs=(500, 10000), smooth_win: int = 2) ->
             new_dtype_str = str(data.dtype)[:-1] + str(int(str(data.dtype)[-1]) ** 2)
             data = data.astype(np.dtype(new_dtype_str))
     squared = np.power(data, 2)
-    len = np.round(audio.samplerate * smooth_win / 1000).astype(int)
+    len = np.round(sound.samplerate * smooth_win / 1000).astype(int)
     h = np.ones((len,)) / len
     smooth = np.convolve(squared, h)
     offset = round((smooth.shape[-1] - data.shape[-1]) / 2)

@@ -362,10 +362,10 @@ def pitch(
            by Therese Koch, specifically the acoustics module
     """
     return librosa.yin(
-        audio.data,
+        sound.data,
         fmin=fmin,
         fmax=fmax_yin,
-        sr=audio.samplerate,
+        sr=sound.samplerate,
         frame_length=frame_length,
         hop_length=hop_length,
         trough_threshold=trough_threshold,
@@ -429,11 +429,11 @@ def similarity_features(
     """
     # pitch, goodness, AM, FM, entropy
     power_spectrogram, cepstrogram, quefrencies, max_freq, dSdt, dSdf = spectral.sat(
-        audio, n_fft, hop_length, freq_range
+        sound, n_fft, hop_length, freq_range
     )
     amp_ = amplitude(power_spectrogram, min_freq, max_freq, amp_baseline)
     pitch_ = pitch(
-        audio, min_freq, fmax_yin, frame_length=n_fft, hop_length=hop_length, trough_threshold=trough_threshold
+        sound, min_freq, fmax_yin, frame_length=n_fft, hop_length=hop_length, trough_threshold=trough_threshold
     )
     goodness_ = goodness_of_pitch(cepstrogram, quefrencies, max_F0)
     FM = frequency_modulation(dSdt, dSdf)

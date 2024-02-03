@@ -105,13 +105,13 @@ class Segmenter:
             If a list of :class:`~vocalpy.Sound` instances is passed in,
             a list of :class:`~vocalpy.Sequence` instances will be returned.
         """
-        validate_audio(audio)
+        validate_audio(sound)
 
         # define nested function so vars are in scope and ``dask`` can call it
-        def _to_sequence(audio_: Sound):
-            if isinstance(audio_, AudioFile):
-                audio_ = Sound.read(audio_.path)
-            out = self.callback(audio_, **self.segment_params)
+        def _to_sequence(sound_: Sound):
+            if isinstance(sound_, AudioFile):
+                sound_ = Sound.read(sound_.path)
+            out = self.callback(sound_, **self.segment_params)
             if out is None:
                 return out
             else:
@@ -124,20 +124,20 @@ class Segmenter:
             return Sequence(
                 units=units,
                 # note we make a new audio instance **without** data loaded
-                audio=Sound(path=audio_.path),
+                audio=Sound(path=sound_.path),
                 method=self.callback.__name__,
                 segment_params=self.segment_params,
             )
 
-        if isinstance(audio, (Sound, AudioFile)):
+        if isinstance(sound, (Sound, AudioFile)):
             return _to_sequence(audio)
 
         seqs = []
         for sound_ in sound:
             if parallelize:
-                seqs.append(dask.delayed(_to_sequence(audio_)))
+                seqs.append(dask.delayed(_to_sequence(sound_)))
             else:
-                seqs.append(_to_sequence(audio_))
+                seqs.append(_to_sequence(sound_))
 
         if parallelize:
             graph = dask.delayed()(seqs)

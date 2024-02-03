@@ -67,7 +67,7 @@ def meansquared(
     offsets_s : numpy.ndarray
         Vector of offset times of segments, in seconds.
     """
-    meansquared_ = signal.audio.meansquared(audio, freq_cutoffs, smooth_win)
+    meansquared_ = signal.audio.meansquared(sound, freq_cutoffs, smooth_win)
     above_th = meansquared_ > threshold
     h = [1, -1]
     # convolving with h causes:
@@ -78,8 +78,8 @@ def meansquared(
     # always get in units of sample first, then convert to s
     onsets_sample = np.where(above_th_convoluted > 0)[0]
     offsets_sample = np.where(above_th_convoluted < 0)[0]
-    onsets_s = onsets_sample / audio.samplerate
-    offsets_s = offsets_sample / audio.samplerate
+    onsets_s = onsets_sample / sound.samplerate
+    offsets_s = offsets_sample / sound.samplerate
 
     if onsets_s.shape[0] < 1 or offsets_s.shape[0] < 1:
         return None  # because no onsets or offsets in this file

@@ -109,7 +109,7 @@ def get_spectrogram(
       using :func:`librosa.amplitude_to_db`.
     """
     if not len(data) >= nperseg:
-        raise ValueError(f"length of `audio`` {(len(data))} must be greater than or equal to ``nperseg``: {nperseg}")
+        raise ValueError(f"length of `sound`` {(len(data))} must be greater than or equal to ``nperseg``: {nperseg}")
 
     if spect_min_val is not None or spect_max_val is not None:
         if not (spect_min_val is not None and spect_max_val is not None):
