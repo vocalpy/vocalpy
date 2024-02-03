@@ -55,9 +55,7 @@ class Sound:
         path: str | pathlib.Path | None = None,
     ):
         if all([arg is None for arg in (data, samplerate, path)]):
-            raise ValueError(
-                "Must specify either audio path, or data and samplerate."
-            )
+            raise ValueError("Must specify either audio path, or data and samplerate.")
 
         if path:
             path = pathlib.Path(path)
@@ -72,7 +70,7 @@ class Sound:
                 raise TypeError(f"Sound array `data` should be a numpy array, " f"but type was {type(data)}.")
             if not (data.ndim == 1 or data.ndim == 2):
                 raise ValueError(
-                    f"Sound array `data` should have either 1 or 2 dimensions, " 
+                    f"Sound array `data` should have either 1 or 2 dimensions, "
                     f"but number of dimensions was {data.ndim}."
                 )
             if data.ndim == 1:
@@ -91,9 +89,7 @@ class Sound:
             if not isinstance(samplerate, int):
                 raise TypeError(f"Type of ``samplerate`` must be int but was: {type(samplerate)}")
             if not samplerate > 0:
-                raise ValueError(
-                    f"Value of ``samplerate`` must be a positive integer."
-                )
+                raise ValueError(f"Value of ``samplerate`` must be a positive integer.")
         self._samplerate = samplerate
 
     def _read(self):
@@ -185,7 +181,7 @@ class Sound:
         return not self.__eq__(other)
 
     @classmethod
-    def read(cls, path: str | pathlib.Path, **kwargs) -> 'Self':  # noqa: F821
+    def read(cls, path: str | pathlib.Path, **kwargs) -> "Self":  # noqa: F821
         """Read audio from ``path``.
 
         Parameters

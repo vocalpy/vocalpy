@@ -10,8 +10,8 @@ import dask.diagnostics
 import vocalpy.constants
 
 from ._spectrogram.data_type import Spectrogram
-from .sound import Sound
 from .audio_file import AudioFile
+from .sound import Sound
 from .spectrogram_file import SpectrogramFile
 
 
@@ -55,7 +55,7 @@ def validate_audio(audio: Sound | AudioFile | Sequence[Sound | AudioFile]) -> No
 
     if isinstance(audio, list) or isinstance(audio, tuple):
         if not (
-                all([isinstance(item, Sound) for item in audio]) or all([isinstance(item, AudioFile) for item in audio])
+            all([isinstance(item, Sound) for item in audio]) or all([isinstance(item, AudioFile) for item in audio])
         ):
             types_in_audio = set([type(audio) for audio in audio])
             raise TypeError(

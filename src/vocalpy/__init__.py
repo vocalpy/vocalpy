@@ -27,13 +27,13 @@ from .__about__ import (
 from ._spectrogram.data_type import Spectrogram
 from .annotation import Annotation
 from .annotation_file import AnnotationFile
-from .sound import Sound
 from .audio_file import AudioFile
 from .dataset_file import DatasetFile, DatasetFileType, DatasetFileTypeEnum
 from .examples import example
 from .feature_file import FeatureFile
 from .segmenter import Segmenter
 from .sequence import Sequence
+from .sound import Sound
 from .spectrogram import spectrogram
 from .spectrogram_file import SpectrogramFile
 from .spectrogram_maker import SpectrogramMaker

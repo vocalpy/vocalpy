@@ -7,8 +7,8 @@ import attrs
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
-from ..sound import Sound
 from ..sequence import Sequence
+from ..sound import Sound
 from ..unit import Unit
 from . import schema
 
