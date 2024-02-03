@@ -78,12 +78,12 @@ class Sound:
             if data.ndim == 1:
                 data = data[np.newaxis, :]
 
-        if data.shape[0] > data.shape[1]:
-            warnings.warn(
-                "The ``data`` passed in has more channels than samples: the number of channels (data.shape[0]) "
-                f"is {data.shape[0]} and the number of samples (data.shape[1]) is {data.shape[1]}. "
-                "You may need to verify you have passed in the data correctly."
-            )
+            if data.shape[0] > data.shape[1]:
+                warnings.warn(
+                    "The ``data`` passed in has more channels than samples: the number of channels (data.shape[0]) "
+                    f"is {data.shape[0]} and the number of samples (data.shape[1]) is {data.shape[1]}. "
+                    "You may need to verify you have passed in the data correctly."
+                )
 
         self._data = data
 
@@ -108,9 +108,8 @@ class Sound:
             # evfuncs always gives us 1-dim
             data = data[np.newaxis, :]
         else:
-            data, samplerate = soundfile.read(self.path)
-            if data.ndim == 1:
-                data = data[np.newaxis, :]
+            data, samplerate = soundfile.read(self.path, always_2d=True)
+            data = data.transpose((1, 0))  # dimensions (samples, channels) -> (channels, samples)
 
         self._data = data
         self._samplerate = samplerate
@@ -196,6 +195,8 @@ class Sound:
         **kwargs : dict, optional
             Extra arguments to :func:`soundfile.read`: refer to
             :module:`soundfile` documentation for details.
+            Note that :method:`vocalpy.Sound.read` passes in the argument
+            ``always_2d=True``.
 
         Returns
         -------
@@ -209,8 +210,11 @@ class Sound:
 
         if path.name.endswith("cbin"):
             data, samplerate = evfuncs.load_cbin(path)
+            # evfuncs always gives us 1-dim
+            data = data[np.newaxis, :]
         else:
-            data, samplerate = soundfile.read(path, **kwargs)
+            data, samplerate = soundfile.read(path, always_2d=True, **kwargs)
+            data = data.transpose((1, 0))  # dimensions (samples, channels) -> (channels, samples)
 
         return cls(data=data, samplerate=samplerate, path=path)
 
@@ -228,7 +232,8 @@ class Sound:
             Refer to :module:`soundfile` documentation for details.
         """
         path = pathlib.Path(path)
-        soundfile.write(file=path, data=self.data, samplerate=self.samplerate, **kwargs)
+        # next line: swap axes because soundfile expects dimensions to be (samples, channels)
+        soundfile.write(file=path, data=self.data.transpose((1, 0)), samplerate=self.samplerate, **kwargs)
         return AudioFile(path=path)
 
     @contextlib.contextmanager
