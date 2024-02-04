@@ -25,7 +25,8 @@ class Spectrogram:
         The spectrogram itself, typically a matrix
         :math:`f \times t` where there are :math:`f`
         frequency bins and :math:`t` time bins.
-        Must have at least 2 dimensions.
+        Must have either 2 dimensions (frequencies, times)
+        or 3 dimensions (channels, frequencies, times).
     frequencies : numpy.ndarray
         A vector of size :math:`f` where values are frequencies
         at center of frequency bins in spectrogram.
@@ -37,7 +38,7 @@ class Spectrogram:
         Optional, added automatically by the :meth:`~vocalpy.Spectrogram.read` method.
     audio_path : pathlib.Path, optional
         Path to audio file from which spectrogram was generated.
-        Optional, default None. Can be specified as argument
+        Optional, default is None. Can be specified as argument
         to :meth:`~vocalpy.Spectrogram.read` method.
 
     Examples
@@ -57,7 +58,7 @@ class Spectrogram:
 
     >>> spect = voc.Spectrogram.read("llb3_0066_2018_04_23_17_31_55.wav.npz")
     >>> spect
-    Spectrogram(s=array([[0.561... 0.        ]]), f=array([[    0...50.        ]]), t=array([[0.000...6053968e+01]]),
+    Spectrogram(data=array([[0.561... 0.        ]]), fequencies=array([[    0...50.        ]]), times=array([[0.000...6053968e+01]]),
     spect_path=PosixPath('llb3_0066_2018_04_23_17_31_55.wav.mat'), audio_path=None)
     """
     data: npt.NDArray = attrs.field()
@@ -67,9 +68,10 @@ class Spectrogram:
         if not isinstance(value, np.ndarray):
             raise TypeError(f"Spectrogram array `data` should be a numpy array, " f"but type was {type(value)}.")
 
-        if value.ndim < 2:
+        if value.ndim not in (2, 3):
             raise ValueError(
-                f"Spectrogram array `data` should have at least 2 dimensions, "
+                "Spectrogram array `data` must have either 2 dimensions (frequencies, times) "
+                "or 3 dimensions (channels, frequencies, times), "
                 f"but number of dimensions was {value.ndim}."
             )
 
@@ -88,14 +90,17 @@ class Spectrogram:
     )
 
     def __attrs_post_init__(self):
-        if not self.data.shape[0] == self.frequencies.shape[0]:
+        if self.data.ndim == 2:
+            # "canonicalize" to always have 3 dimensions, (channels, frequencies, times)
+            self.data = self.data[np.newaxis, ...]
+
+        if not self.data.shape[1] == self.frequencies.shape[0]:
             raise ValueError(
                 "Number of rows in spectrogram `data` should match number of elements in "
                 f"`frequencies vector, but `data` has {self.data.shape[0]} rows and there are "
                 f"{self.frequencies.shape[0]} elements in `frequencies`."
             )
-
-        if not self.data.shape[1] == self.times.shape[0]:
+        if not self.data.shape[2] == self.times.shape[0]:
             raise ValueError(
                 "Number of columns in spectrogram `data` should match number of elements in "
                 f"`times` vector, but `data` has {self.data.shape[1]} columns and there are "
@@ -143,24 +148,24 @@ class Spectrogram:
     @classmethod
     def read(cls, path: str | pathlib.Path, audio_path: str | pathlib.Path | None = None):
         """Read spectrogram and associated arrays from a Numpy npz file
-            at the given ``path``.
+        at the given ``path``.
 
-            Parameters
-            ----------
-            path : str, pathlib.Path
-                The path to the file containing the spectrogram ``s``
-                and associated arrays ``f`` and ``t``.
+        Parameters
+        ----------
+        path : str, pathlib.Path
+            The path to the file containing the spectrogram ``s``
+            and associated arrays ``f`` and ``t``.
         audio_path : str or pathlib.Path, optional
             Path to audio file from which spectrogram was generated.
             Optional, default None. Note this argument is not validated
             (to guarantee that the spectrogram was actually generated
             from the specified audio path.)
 
-            Returns
-            -------
-            spect : vocalpy.Spectrogram
-                An instance of :class:`vocalpy.Spectrogram`
-                containing the arrays loaded from ``path``.
+        Returns
+        -------
+        spect : vocalpy.Spectrogram
+            An instance of :class:`vocalpy.Spectrogram`
+            containing the arrays loaded from ``path``.
         """
         path = pathlib.Path(path)
         if not path.exists():
@@ -183,7 +188,7 @@ class Spectrogram:
 
         return cls(path=path, audio_path=audio_path, **kwargs)
 
-    def write(self, path: [str, pathlib.Path]):
+    def write(self, path: [str, pathlib.Path]) -> SpectrogramFile:
         """Write this :class:`vocalpy.Spectrogram`
         to a Numpy .npz file at the given ``path``.
 
@@ -193,6 +198,12 @@ class Spectrogram:
             The path to where the path should be saved
             containing the spectrogram ``data``
             and associated arrays ``frequencies`` and ``times``.
+
+        Returns
+        -------
+        spectrogram_file : SpectrogramFile
+            An instance of :class:`SpectrogramFile`
+            representing the saved spectrogram.
         """
         # TODO: deal with extension here
         path = pathlib.Path(path)
