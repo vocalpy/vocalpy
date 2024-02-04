@@ -43,9 +43,9 @@ class Sound:
     Reading audio from a file
 
     >>> import vocalpy as voc
-    >>> audio = voc.Sound.read("1291.WAV")
-    >>> audio
-    Audio(data=array([ 0.   ... -0.00115967]), samplerate=44100, channels=1)
+    >>> sound = voc.Sound.read("1291.WAV")
+    >>> sound
+    Sound(data=array([ 0.   ... -0.00115967]), samplerate=44100, channels=1)
     """
 
     def __init__(
@@ -155,7 +155,7 @@ class Sound:
 
         Returns
         -------
-        audio_dict : dict
+        sound_dict : dict
             A :class:`dict` with keys {'data', 'samplerate', 'path'} that map
             to the corresponding attributes of this :class:`vocalpy.Sound`.
         """
@@ -197,7 +197,7 @@ class Sound:
 
         Returns
         -------
-        audio : vocalpy.Sound
+        sound : vocalpy.Sound
             A :class:`vocalpy.Sound` instance with ``data``
             read from ``path``.
         """

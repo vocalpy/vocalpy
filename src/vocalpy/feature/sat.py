@@ -318,7 +318,7 @@ def pitch(
 
     Parameters
     ----------
-    audio : vocalpy.Sound
+    sound : vocalpy.Sound
         A :class:`vocalpy.Sound` instance.
     fmin : float
         Minimum frequency in Hertz.
@@ -391,7 +391,7 @@ def similarity_features(
 
     Parameters
     ----------
-    audio : vocalpy.Sound
+    sound : vocalpy.Sound
         Audio loaded from a file.
     n_fft : int
         FFT window size.

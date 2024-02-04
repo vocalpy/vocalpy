@@ -90,7 +90,7 @@ class Segmenter:
 
         Parameters
         ----------
-        audio : vocalpy.Sound or list of Sound
+        sound : vocalpy.Sound or list of Sound
             A `class`:vocalpy.Sound` instance
             or list of :class:`vocalpy.Sound` instances
             to segment.
