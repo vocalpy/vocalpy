@@ -33,6 +33,9 @@ class TestSound:
             else:
                 assert getattr(sound, attr_name) is attr_val
 
+        assert sound.samples == sound.data.shape[1]
+        assert sound.duration == sound.data.shape[1] / sound.samplerate
+
     @pytest.mark.parametrize(
         "data, samplerate, expected_exception",
         [
@@ -55,6 +58,7 @@ class TestSound:
             vocalpy.Sound(data=data, samplerate=samplerate)
 
     def test_init_warns(self):
+        """Test that we get a warning if number channels > number of samples"""
         with pytest.warns():
             vocalpy.Sound(data=RNG.normal(size=(int(32000 * 2.17), 1)), samplerate=32000)
 
@@ -145,6 +149,8 @@ class TestSound:
             else:
                 assert getattr(sound, attr_name) == attr_val
 
+        assert sound.samples == sound.data.shape[1]
+        assert sound.duration == sound.data.shape[1] / sound.samplerate
 
     def test_write(self, a_wav_path, tmp_path):
         """Test that :meth:`vocalpy.Sound.write` works as expected.
@@ -201,6 +207,8 @@ class TestSound:
 
         assert sound._samplerate == samplerate
         assert sound.channels == channels
+        assert sound.samples == sound.data.shape[1]
+        assert sound.duration == sound.data.shape[1] / sound.samplerate
 
     def test_open(self, a_wav_path):
         data, samplerate = soundfile.read(a_wav_path)
@@ -220,8 +228,9 @@ class TestSound:
                 assert np.array_equal(sound._data, data)
             assert sound._samplerate == samplerate
             assert sound.channels == channels
+            assert sound.samples == sound.data.shape[1]
+            assert sound.duration == sound.data.shape[1] / sound.samplerate
 
         # check that attributes go back to none after we __exit__ the context
         assert sound._data is None
         assert sound._samplerate is None
-
