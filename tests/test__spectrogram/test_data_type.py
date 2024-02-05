@@ -24,6 +24,7 @@ class TestSpectrogram:
         """Test that we can initialize a :class:`vocalpy.Sound` instance."""
         spect = vocalpy.Spectrogram(data=data, frequencies=frequencies, times=times)
         assert isinstance(spect, vocalpy.Spectrogram)
+        assert spect.data.ndim == 3
 
         for attr_name, attr_val in zip(("data", "frequencies", "times"), (data, frequencies, times)):
             assert hasattr(spect, attr_name)
@@ -117,6 +118,7 @@ class TestSpectrogram:
 
         spect = vocalpy.Spectrogram.read(path)
         assert isinstance(spect, vocalpy.Spectrogram)
+        assert spect.data.ndim == 3
         for attr_name, attr_val in zip(("data", "frequencies", "times"), (data, frequencies, times)):
             assert hasattr(spect, attr_name)
             if attr_name == "data" and attr_val.ndim == 2:
@@ -141,6 +143,7 @@ class TestSpectrogram:
         To do this we make a spectrogram file "by hand".
         """
         spect = vocalpy.Spectrogram(data=data, frequencies=frequencies, times=times)
+        assert spect.data.ndim == 3
         path = tmp_path / "spect.npz"
 
         spect.write(path)
