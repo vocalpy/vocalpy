@@ -47,6 +47,8 @@ class TestSpectrogram:
             (DATA.tolist(), TIMES, FREQS, TypeError),
             # ``data`` is not 2 dimensional
             (DATA.ravel(), TIMES, FREQS, ValueError),
+            # ``data`` has more than 3 dimensions
+            (DATA[np.newaxis, np.newaxis, :, :], TIMES, FREQS, ValueError),
             # ``times`` is not a Numpy array
             (DATA, TIMES.tolist(), FREQS, TypeError),
             # ``times`` is not 1 dimensional
@@ -146,8 +148,10 @@ class TestSpectrogram:
         assert spect.data.ndim == 3
         path = tmp_path / "spect.npz"
 
-        spect.write(path)
+        spect_file = spect.write(path)
         assert path.exists()
+        assert isinstance(spect_file, vocalpy.SpectrogramFile)
+        assert spect_file.path.name.endswith(".npz")
 
         spect_loaded = vocalpy.Spectrogram.read(path)
         assert isinstance(spect_loaded, vocalpy.Spectrogram)
