@@ -120,55 +120,54 @@ class TestSound:
         other = vocalpy.Sound(data=data.copy() + 0.001, samplerate=samplerate)
         assert sound != other
 
-    def test_read(self, a_wav_path, tmp_path):
-        """Test that :meth:`vocalpy.Sound.read` works as expected.
-
-        To do this we make an audio file "by hand".
-        """
-        data, samplerate = soundfile.read(a_wav_path)
-        if data.ndim == 1:
+    def test_read(self, an_audio_path, tmp_path):
+        """Test that :meth:`vocalpy.Sound.read` works as expected."""
+        if an_audio_path.name.endswith("cbin"):
+            data, samplerate = vocalpy._vendor.evfuncs.load_cbin(an_audio_path)
             channels = 1
         else:
+            data, samplerate = soundfile.read(an_audio_path, always_2d=True)
             channels = data.shape[1]
+            data = np.transpose(data, (1, 0))
 
-        # to make sure round-tripping works as we'd expect,
-        # we first write what we read with soundfile to a temporary file
-        # then use `vocalpy.Sound` to read that temporary file
-        # and test that it matches what we read directly from the original file
-        tmp_wav_path = tmp_path / a_wav_path.name
-        soundfile.write(tmp_wav_path, data, samplerate)
-
-        sound = vocalpy.Sound.read(tmp_wav_path)
+        sound = vocalpy.Sound.read(an_audio_path)
         assert isinstance(sound, vocalpy.Sound)
         for attr_name, attr_val in zip(("data", "samplerate", "channels"), (data, samplerate, channels)):
             assert hasattr(sound, attr_name)
-            if attr_name == "data" and attr_val.ndim == 1:
-                assert np.array_equal(
-                    getattr(sound, attr_name), attr_val[np.newaxis, :]
-                )
+            if attr_name == "data":
+                if attr_val.ndim == 1:
+                    np.testing.assert_allclose(
+                        getattr(sound, attr_name), attr_val[np.newaxis, :]
+                    )
+                else:
+                    np.testing.assert_allclose(
+                        getattr(sound, attr_name), attr_val
+                    )
             else:
                 assert getattr(sound, attr_name) == attr_val
 
         assert sound.samples == sound.data.shape[1]
         assert sound.duration == sound.data.shape[1] / sound.samplerate
 
-    def test_write(self, a_wav_path, tmp_path):
+    def test_write(self, an_audio_path, tmp_path):
         """Test that :meth:`vocalpy.Sound.write` works as expected.
 
-        To do this we make a spectrogram file "by hand".
+        To do this we instantiate a Sound instance directly,
+        write it to a file, read it, and then test that the loaded
+        data is what we expect.
         """
-        data, samplerate = soundfile.read(a_wav_path)
-        if data.ndim == 1:
+        if an_audio_path.name.endswith("cbin"):
+            data, samplerate = vocalpy._vendor.evfuncs.load_cbin(an_audio_path)
+            # https://stackoverflow.com/a/42544738/4906855
+            data = data.astype(np.float32) / 32768.0
             channels = 1
         else:
+            data, samplerate = soundfile.read(an_audio_path, always_2d=True)
             channels = data.shape[1]
+            data = np.transpose(data, (1, 0))
 
-        # to make sure round-tripping works as we'd expect,
-        # we first write what we read with soundfile to a temporary file
-        # then use `vocalpy.Sound` to read that temporary file
-        # and test that it matches what we read directly from the original file
         sound = vocalpy.Sound(data=data, samplerate=samplerate)
-        tmp_wav_path = tmp_path / a_wav_path.name
+        tmp_wav_path = tmp_path / (an_audio_path.stem + ".wav")
         assert not tmp_wav_path.exists()
 
         sound.write(tmp_wav_path)
@@ -179,12 +178,25 @@ class TestSound:
         assert isinstance(sound_loaded, vocalpy.Sound)
         for attr_name, attr_val in zip(("data", "samplerate", "channels"), (data, samplerate, channels)):
             assert hasattr(sound_loaded, attr_name)
-            if isinstance(attr_val, np.ndarray):
-                assert np.array_equal(getattr(sound_loaded, attr_name), attr_val[np.newaxis, :])
+            if attr_name == "data":
+                if attr_val.ndim == 1:
+                    np.testing.assert_allclose(
+                        getattr(sound_loaded, attr_name), attr_val[np.newaxis, :]
+                    )
+                else:
+                    np.testing.assert_allclose(
+                        getattr(sound_loaded, attr_name), attr_val
+                    )
             else:
                 assert getattr(sound_loaded, attr_name) == attr_val
 
-    def test_lazy(self, a_wav_path):
+    def test_write_raises(self, a_cbin_path, tmp_path):
+        sound = vocalpy.Sound.read(a_cbin_path)
+        tmp_cbin_path = tmp_path / a_cbin_path.name
+        with pytest.raises(ValueError):
+            sound.write(tmp_cbin_path)
+
+    def test_lazy(self, an_audio_path):
         """Test that :meth:`vocalpy.Sound.read` works as expected.
 
         To do this we make an audio file "by hand".
@@ -195,7 +207,7 @@ class TestSound:
         else:
             channels = data.shape[1]
 
-        sound = vocalpy.Sound(path=a_wav_path)
+        sound = vocalpy.Sound(path=an_audio_path)
         assert sound._data is None
         assert sound._samplerate is None
 
@@ -210,14 +222,14 @@ class TestSound:
         assert sound.samples == sound.data.shape[1]
         assert sound.duration == sound.data.shape[1] / sound.samplerate
 
-    def test_open(self, a_wav_path):
-        data, samplerate = soundfile.read(a_wav_path)
+    def test_open(self, an_audio_path):
+        data, samplerate = soundfile.read(an_audio_path)
         if data.ndim == 1:
             channels = 1
         else:
             channels = data.shape[1]
 
-        sound = vocalpy.Sound(path=a_wav_path)
+        sound = vocalpy.Sound(path=an_audio_path)
         assert sound._data is None
         assert sound._samplerate is None
 
