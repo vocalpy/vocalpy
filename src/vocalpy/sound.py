@@ -229,6 +229,16 @@ class Sound:
             Refer to :module:`soundfile` documentation for details.
         """
         path = pathlib.Path(path)
+        if path.name.endswith("cbin"):
+            raise ValueError(
+                "Extension for `path` was 'cbin', but `vocalpy.Sound.write` cannot write to the cbin format. "
+                "Audio data from cbin files can be converted to wav as follows:\n"
+                ">>> sound.data = sound.data.astype(np.float32) / 32768.0\n"
+                "The above converts the int16 values to float values between -1.0 and 1.0. "
+                "You can then save the data as a wav file:\n"
+                ">>> sound.write('path.wav')\n"
+
+            )
         # next line: swap axes because soundfile expects dimensions to be (samples, channels)
         soundfile.write(file=path, data=self.data.transpose((1, 0)), samplerate=self.samplerate, **kwargs)
         return AudioFile(path=path)
