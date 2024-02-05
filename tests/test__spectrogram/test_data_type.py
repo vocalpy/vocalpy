@@ -161,4 +161,3 @@ class TestSpectrogram:
                 np.testing.assert_allclose(
                     getattr(spect, attr_name), attr_val
                 )
-
