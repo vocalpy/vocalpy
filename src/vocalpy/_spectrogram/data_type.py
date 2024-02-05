@@ -190,7 +190,7 @@ class Spectrogram:
 
     def write(self, path: [str, pathlib.Path]) -> SpectrogramFile:
         """Write this :class:`vocalpy.Spectrogram`
-        to a Numpy .npz file at the given ``path``.
+        to a Numpy npz file at the given ``path``.
 
         Parameters
         ----------
@@ -198,6 +198,9 @@ class Spectrogram:
             The path to where the path should be saved
             containing the spectrogram ``data``
             and associated arrays ``frequencies`` and ``times``.
+            If this path does not already end with the extension
+            ".npz", that extension will be added
+            (by :func:`numpy.savez`).
 
         Returns
         -------
@@ -205,7 +208,6 @@ class Spectrogram:
             An instance of :class:`SpectrogramFile`
             representing the saved spectrogram.
         """
-        # TODO: deal with extension here
         path = pathlib.Path(path)
         np.savez(path, data=self.data, frequencies=self.frequencies, times=self.times)
         if self.audio_path:
