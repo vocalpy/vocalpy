@@ -259,17 +259,18 @@ class TestSound:
     )
     def test___getitem__(self, a_wav_path, key):
         sound = vocalpy.Sound.read(a_wav_path)
-        sound_item = sound[key]
+        sound_channel = sound[key]
+        assert isinstance(sound_channel, vocalpy.Sound)
         if isinstance(key, int):
-            assert sound_item.data.shape[0] == 1
+            assert sound_channel.data.shape[0] == 1
             np.testing.assert_allclose(
-                sound_item.data, sound.data[key][np.newaxis, ...]
+                sound_channel.data, sound.data[key][np.newaxis, ...]
             )
         elif isinstance(key, slice):
             sliced = sound.data[key]
-            assert sound_item.data.shape[0] == sliced.shape[0]
+            assert sound_channel.data.shape[0] == sliced.shape[0]
             np.testing.assert_allclose(
-                sound_item.data, sliced
+                sound_channel.data, sliced
             )
 
     @pytest.mark.parametrize(
