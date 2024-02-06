@@ -20,7 +20,7 @@ def assert_sound_is_instance_with_expected_attrs(
         if attr_name == "data":
             if attr_val.ndim == 1:
                 np.testing.assert_allclose(
-                    getattr(sound, attr_name), attr_val[np.newaxis, :]
+                    getattr(sound, attr_name), attr_val[np.newaxis, ...]
                 )
             else:
                 np.testing.assert_allclose(
@@ -244,6 +244,44 @@ class TestSound:
         )
         for channel, sound_channel in enumerate(sound_channels):
             np.testing.assert_allclose(
-                sound_channel.data, sound.data[channel][np.newaxis, :]
+                sound_channel.data, sound.data[channel][np.newaxis, ...]
             )
         assert len(sound_channels) == sound.data.shape[0]
+
+    @pytest.mark.parametrize(
+        'a_wav_path, key',
+        [
+            # audio with one channel
+            (BIRDSONGREC_WAV_LIST[0], 0),
+            # audio with more than one channel
+            (MULTICHANNEL_FLY_WAV[0], slice(None, 2)),
+        ]
+    )
+    def test___getitem__(self, a_wav_path, key):
+        sound = vocalpy.Sound.read(a_wav_path)
+        sound_item = sound[key]
+        if isinstance(key, int):
+            assert sound_item.data.shape[0] == 1
+            np.testing.assert_allclose(
+                sound_item.data, sound.data[key][np.newaxis, ...]
+            )
+        elif isinstance(key, slice):
+            sliced = sound.data[key]
+            assert sound_item.data.shape[0] == sliced.shape[0]
+            np.testing.assert_allclose(
+                sound_item.data, sliced
+            )
+
+    @pytest.mark.parametrize(
+        'a_wav_path, key',
+        [
+            # audio with one channel
+            (BIRDSONGREC_WAV_LIST[0], 1),
+            # audio with more than one channel
+            (MULTICHANNEL_FLY_WAV[0], 5),
+        ]
+    )
+    def test___getitem__raises(self, a_wav_path, key):
+        sound = vocalpy.Sound.read(a_wav_path)
+        with pytest.raises(IndexError):
+            _ = sound[key]
