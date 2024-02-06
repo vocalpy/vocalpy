@@ -4,6 +4,9 @@ import soundfile
 
 import vocalpy
 
+from .fixtures.audio import MULTICHANNEL_FLY_WAV, BIRDSONGREC_WAV_LIST
+
+
 RNG = np.random.default_rng()
 
 def assert_sound_is_instance_with_expected_attrs(
@@ -220,3 +223,27 @@ class TestSound:
         # check that attributes go back to none after we __exit__ the context
         assert sound._data is None
         assert sound._samplerate is None
+
+    @pytest.mark.parametrize(
+        'a_wav_path',
+        [
+            # audio with one channel
+            BIRDSONGREC_WAV_LIST[0],
+            # audio with more than one channel
+            MULTICHANNEL_FLY_WAV[0],
+        ]
+    )
+    def test___iter__(self, a_wav_path):
+        sound = vocalpy.Sound.read(a_wav_path)
+        sound_channels = [
+            sound_ for sound_ in sound
+        ]
+        assert all(
+            [isinstance(sound_, vocalpy.Sound)
+             for sound_ in sound_channels]
+        )
+        for channel, sound_channel in enumerate(sound_channels):
+            np.testing.assert_allclose(
+                sound_channel.data, sound.data[channel][np.newaxis, :]
+            )
+        assert len(sound_channels) == sound.data.shape[0]
