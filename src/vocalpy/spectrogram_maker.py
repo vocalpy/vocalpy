@@ -44,7 +44,7 @@ def default_spect_fname_func(audio_path: Union[str, pathlib.Path]):
     return audio_path.name + vocalpy.constants.SPECT_FILE_EXT
 
 
-def validate_audio(sound: Sound | AudioFile | Sequence[Sound | AudioFile]) -> None:
+def validate_sound(sound: Sound | AudioFile | Sequence[Sound | AudioFile]) -> None:
     if not isinstance(sound, (Sound, AudioFile, list, tuple)):
         raise TypeError(
             "`sound` must be a `vocalpy.Sound` instance, "
@@ -125,16 +125,16 @@ class SpectrogramMaker:
         -------
         spectrogram : vocalpy.Spectrogram or list of vocalpy.Spectrogram
         """
-        validate_audio(audio)
+        validate_sound(audio)
 
         # define nested function so vars are in scope and ``dask`` can call it
-        def _to_spect(audio_):
+        def _to_spect(sound_):
             """Make a ``Spectrogram`` from an ``Sound`` instance,
             using self.callback"""
-            if isinstance(audio_, AudioFile):
-                audio_ = Sound.read(audio_.path)
-            spect = self.callback(audio_, **self.spect_params)
-            spect.audio_path = audio_.path
+            if isinstance(sound_, AudioFile):
+                sound_ = Sound.read(sound_.path)
+            spect = self.callback(sound_, **self.spect_params)
+            spect.audio_path = sound_.path
             return spect
 
         if isinstance(sound, (Sound, AudioFile)):
@@ -143,9 +143,9 @@ class SpectrogramMaker:
         spects = []
         for sound_ in sound:
             if parallelize:
-                spects.append(dask.delayed(_to_spect(audio_)))
+                spects.append(dask.delayed(_to_spect(sound_)))
             else:
-                spects.append(_to_spect(audio_))
+                spects.append(_to_spect(sound_))
 
         if parallelize:
             graph = dask.delayed()(spects)
@@ -192,32 +192,32 @@ class SpectrogramMaker:
         spectrogram_file : SpectrogramFile, list of SpectrogramFile
             The file(s) containing the spectrogram(s).
         """
-        validate_audio(audio)
+        validate_sound(sound)
         dir_path = pathlib.Path(dir_path)
         if not dir_path.exists() or not dir_path.is_dir():
             raise NotADirectoryError(f"`dir_path` not found or not recognized as a directory:\n{dir_path}")
 
         # define nested function so vars are in scope and ``dask`` can call it
-        def _to_spect_file(audio_):
+        def _to_spect_file(sound_):
             """Compute a `Spectrogram` from an `Sound` instance,
             using self.callback"""
-            if isinstance(audio_, AudioFile):
-                audio_ = Sound.read(audio_.path)
-            spect = self.callback(audio_, **self.spect_params)
-            spect_fname = namer(audio_.path)
+            if isinstance(sound_, AudioFile):
+                sound_ = Sound.read(sound_.path)
+            spect = self.callback(sound_, **self.spect_params)
+            spect_fname = namer(sound_.path)
             spect_path = dir_path / spect_fname
             spect_file = spect.write(spect_path)
             return spect_file
 
         if isinstance(sound, (Sound, AudioFile)):
-            return _to_spect_file(audio)
+            return _to_spect_file(sound)
 
         spect_files = []
         for sound_ in sound:
             if parallelize:
-                spect_files.append(dask.delayed(_to_spect_file(audio_)))
+                spect_files.append(dask.delayed(_to_spect_file(sound_)))
             else:
-                spect_files.append(_to_spect_file(audio_))
+                spect_files.append(_to_spect_file(sound_))
 
         if parallelize:
             graph = dask.delayed()(spect_files)
