@@ -21,8 +21,8 @@ class TestAnnotationFile:
             assert isinstance(getattr(annot_file, attr_name), attr_type)
             assert getattr(annot_file, attr_name) == attr_val
 
-    def test_init_list_of_wav(self, annot_file_koumura, audio_list_wav):
-        audio_files = [vocalpy.AudioFile(path=wav_path) for wav_path in audio_list_wav]
+    def test_init_list_of_wav(self, annot_file_koumura, birdsongrec_wav_list):
+        audio_files = [vocalpy.AudioFile(path=wav_path) for wav_path in birdsongrec_wav_list]
         annot_file = vocalpy.AnnotationFile(path=annot_file_koumura, annotates=audio_files)
         assert isinstance(annot_file, vocalpy.AnnotationFile)
         for attr_name, attr_type, attr_val in zip(
@@ -44,8 +44,8 @@ class TestAnnotationFile:
             assert isinstance(getattr(annot_file, attr_name), attr_type)
             assert getattr(annot_file, attr_name) == attr_val
 
-    def test_raises(self, annot_file_koumura, audio_list_wav, spect_list_mat):
-        audio_files = [vocalpy.AudioFile(path=wav_path) for wav_path in audio_list_wav]
+    def test_raises(self, annot_file_koumura, birdsongrec_wav_list, spect_list_mat):
+        audio_files = [vocalpy.AudioFile(path=wav_path) for wav_path in birdsongrec_wav_list]
         spect_files = [vocalpy.SpectrogramFile(path=mat_spect_path) for mat_spect_path in spect_list_mat]
         mixed_list = audio_files + spect_files
 
