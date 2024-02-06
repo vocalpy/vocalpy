@@ -250,3 +250,24 @@ class Sound:
         self._data = None
         self._samplerate = None
         self._channels = None
+
+    def __iter__(self):
+        for channel in self.data:
+            yield Sound(
+                data=channel[np.newaxis, ...],
+                samplerate=self.samplerate,
+                path=self.path,
+            )
+
+    def __getitem__(self, key):
+        # TODO: try-except here?
+        if isinstance(key, (int, slice)):
+            return Sound(
+                    data=self.data[key],
+                    samplerate=self.samplerate,
+                    path=self.path,
+                )
+        else:
+            raise TypeError(
+                f"Sound can be indexed with integer or slice, but type was: {type(key)}"
+            )
