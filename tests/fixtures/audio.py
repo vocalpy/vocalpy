@@ -68,13 +68,17 @@ def a_zebra_finch_wav(request):
     and :func:`vocalpy.feature.sat`"""
     return request.param
 
+
 MULTICHANNEL_FLY_DIR = SOURCE_TEST_DATA_ROOT / 'fly-multichannel'
 MULTICHANNEL_FLY_WAV = [
     MULTICHANNEL_FLY_DIR / '160420_1746_manual-clip.wav'
 ]
 
+
+# only use a few wav files from birdsongrec, to speed up tests
+N_BIRDSONGREC_WAVS = 5
 ALL_WAV_PATHS = (
-    BIRDSONGREC_WAV_LIST +
+    BIRDSONGREC_WAV_LIST[:N_BIRDSONGREC_WAVS] +
     ALL_ZEBRA_FINCH_WAVS +
     MULTICHANNEL_FLY_WAV
 )
