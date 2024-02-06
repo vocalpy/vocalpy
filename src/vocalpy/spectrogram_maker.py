@@ -55,7 +55,8 @@ def validate_sound(sound: Sound | AudioFile | Sequence[Sound | AudioFile]) -> No
 
     if isinstance(sound, list) or isinstance(sound, tuple):
         if not (
-            all([isinstance(item, (Sound, AudioFile)) for item in sound])
+            all([isinstance(item, Sound) for item in sound]) or
+            all([isinstance(item, AudioFile) for item in sound])
         ):
             types_in_sound = set([type(sound) for sound in sound])
             raise TypeError(
@@ -125,7 +126,7 @@ class SpectrogramMaker:
         -------
         spectrogram : vocalpy.Spectrogram or list of vocalpy.Spectrogram
         """
-        validate_sound(audio)
+        validate_sound(sound)
 
         # define nested function so vars are in scope and ``dask`` can call it
         def _to_spect(sound_):
@@ -138,7 +139,7 @@ class SpectrogramMaker:
             return spect
 
         if isinstance(sound, (Sound, AudioFile)):
-            return _to_spect(audio)
+            return _to_spect(sound)
 
         spects = []
         for sound_ in sound:
