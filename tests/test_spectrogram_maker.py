@@ -2,37 +2,30 @@ import pytest
 
 import vocalpy
 
-from .fixtures.audio import AUDIO_LIST_WAV
+from .fixtures.audio import BIRDSONGREC_WAV_LIST
 from .fixtures.spect import SPECT_LIST_NPZ
 
 
 @pytest.mark.parametrize(
-    "audio_format",
-    [
-        "wav",
-        "cbin",
-    ],
+    'a_wav_path',
+    BIRDSONGREC_WAV_LIST[:3]
 )
-def test_default_spect_fname_func(specific_audio_dir, audio_format):
-    audio_dir = specific_audio_dir(audio_format)
-    audio_paths = sorted(audio_dir.glob(f"*{audio_format}"))
-
-    for audio_path in audio_paths:
-        spect_fname = vocalpy.spectrogram_maker.default_spect_fname_func(audio_path)
-        assert spect_fname == audio_path.name + vocalpy.constants.SPECT_FILE_EXT
+def test_default_spect_fname_func(a_wav_path):
+    spect_fname = vocalpy.spectrogram_maker.default_spect_fname_func(a_wav_path)
+    assert spect_fname == a_wav_path.name + vocalpy.constants.SPECT_FILE_EXT
 
 
 @pytest.mark.parametrize(
     "audio",
     [
-        vocalpy.Sound.read(AUDIO_LIST_WAV[0]),
-        vocalpy.AudioFile(path=AUDIO_LIST_WAV[0]),
-        [vocalpy.Sound.read(path) for path in AUDIO_LIST_WAV[:3]],
-        [vocalpy.AudioFile(path=path) for path in AUDIO_LIST_WAV[:3]],
+        vocalpy.Sound.read(BIRDSONGREC_WAV_LIST[0]),
+        vocalpy.AudioFile(path=BIRDSONGREC_WAV_LIST[0]),
+        [vocalpy.Sound.read(path) for path in BIRDSONGREC_WAV_LIST[:3]],
+        [vocalpy.AudioFile(path=path) for path in BIRDSONGREC_WAV_LIST[:3]],
     ],
 )
-def test_validate_audio(audio):
-    assert vocalpy.spectrogram_maker.validate_audio(audio) is None
+def test_validate_sound(audio):
+    assert vocalpy.spectrogram_maker.validate_sound(audio) is None
 
 
 @pytest.mark.parametrize(
@@ -42,15 +35,15 @@ def test_validate_audio(audio):
         (dict(), TypeError),
         ([vocalpy.Spectrogram.read(path) for path in SPECT_LIST_NPZ[:3]], TypeError),
         (
-            [vocalpy.Sound.read(path) for path in AUDIO_LIST_WAV[:3]]
-            + [vocalpy.AudioFile(path=path) for path in AUDIO_LIST_WAV[:3]],
+            [vocalpy.Sound.read(path) for path in BIRDSONGREC_WAV_LIST[:3]]
+            + [vocalpy.AudioFile(path=path) for path in BIRDSONGREC_WAV_LIST[:3]],
             TypeError,
         ),
     ],
 )
-def test_validate_audio_not_audio_raises(not_audio, expected_exception):
+def test_validate_sound_not_audio_raises(not_audio, expected_exception):
     with pytest.raises(expected_exception=expected_exception):
-        vocalpy.spectrogram_maker.validate_audio(not_audio)
+        vocalpy.spectrogram_maker.validate_sound(not_audio)
 
 
 class TestSpectrogramMaker:
@@ -73,10 +66,10 @@ class TestSpectrogramMaker:
     @pytest.mark.parametrize(
         "audio",
         [
-            vocalpy.Sound.read(AUDIO_LIST_WAV[0]),
-            vocalpy.AudioFile(path=AUDIO_LIST_WAV[0]),
-            [vocalpy.Sound.read(path) for path in AUDIO_LIST_WAV[:3]],
-            [vocalpy.AudioFile(path=path) for path in AUDIO_LIST_WAV[:3]],
+            vocalpy.Sound.read(BIRDSONGREC_WAV_LIST[0]),
+            vocalpy.AudioFile(path=BIRDSONGREC_WAV_LIST[0]),
+            [vocalpy.Sound.read(path) for path in BIRDSONGREC_WAV_LIST[:3]],
+            [vocalpy.AudioFile(path=path) for path in BIRDSONGREC_WAV_LIST[:3]],
         ],
     )
     def test_make(self, audio):
@@ -90,10 +83,10 @@ class TestSpectrogramMaker:
     @pytest.mark.parametrize(
         "audio",
         [
-            vocalpy.Sound.read(AUDIO_LIST_WAV[0]),
-            vocalpy.AudioFile(path=AUDIO_LIST_WAV[0]),
-            [vocalpy.Sound.read(path) for path in AUDIO_LIST_WAV[:3]],
-            [vocalpy.AudioFile(path=path) for path in AUDIO_LIST_WAV[:3]],
+            vocalpy.Sound.read(BIRDSONGREC_WAV_LIST[0]),
+            vocalpy.AudioFile(path=BIRDSONGREC_WAV_LIST[0]),
+            [vocalpy.Sound.read(path) for path in BIRDSONGREC_WAV_LIST[:3]],
+            [vocalpy.AudioFile(path=path) for path in BIRDSONGREC_WAV_LIST[:3]],
         ],
     )
     def test_write(self, audio, tmp_path):
