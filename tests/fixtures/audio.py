@@ -70,9 +70,18 @@ def a_zebra_finch_wav(request):
 
 
 MULTICHANNEL_FLY_DIR = SOURCE_TEST_DATA_ROOT / 'fly-multichannel'
-MULTICHANNEL_FLY_WAV = [
-    MULTICHANNEL_FLY_DIR / '160420_1746_manual-clip.wav'
-]
+MULTICHANNEL_FLY_WAV = MULTICHANNEL_FLY_DIR / '160420_1746_manual-clip.wav'
+
+
+@pytest.fixture
+def multichannel_fly_wav_path():
+    return MULTICHANNEL_FLY_WAV
+
+
+@pytest.fixture
+def multichannel_fly_wav_sound():
+    import vocalpy
+    return vocalpy.Sound.read(MULTICHANNEL_FLY_WAV)
 
 
 # only use a few wav files from birdsongrec, to speed up tests
@@ -80,7 +89,8 @@ N_BIRDSONGREC_WAVS = 5
 ALL_WAV_PATHS = (
     BIRDSONGREC_WAV_LIST[:N_BIRDSONGREC_WAVS] +
     ALL_ZEBRA_FINCH_WAVS +
-    MULTICHANNEL_FLY_WAV
+    # next line: one-element list so we can concatenate with `+`
+    [MULTICHANNEL_FLY_WAV]
 )
 
 
@@ -98,7 +108,7 @@ ALL_AUDIO_PATHS = (
     BIRDSONGREC_WAV_LIST +
     AUDIO_LIST_CBIN +
     ALL_ZEBRA_FINCH_WAVS +
-    MULTICHANNEL_FLY_WAV
+    [MULTICHANNEL_FLY_WAV]
 )
 
 
