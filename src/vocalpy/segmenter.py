@@ -86,7 +86,7 @@ class Segmenter:
         sound: Sound | AudioFile | list[Sound | AudioFile],
         parallelize: bool = True,
     ) -> Sequence | None | list[Sequence | None]:
-        """Segment audio into sequences.
+        """Segment sound into sequences.
 
         Parameters
         ----------
@@ -123,14 +123,14 @@ class Segmenter:
 
             return Sequence(
                 units=units,
-                # note we make a new audio instance **without** data loaded
-                audio=Sound(path=sound_.path),
+                # note we make a new sound instance **without** data loaded
+                sound=Sound(path=sound_.path),
                 method=self.callback.__name__,
                 segment_params=self.segment_params,
             )
 
         if isinstance(sound, (Sound, AudioFile)):
-            return _to_sequence(audio)
+            return _to_sequence(sound)
 
         seqs = []
         for sound_ in sound:
