@@ -41,6 +41,11 @@ def birdsongrec_wav_dir(source_test_data_root):
 BIRDSONGREC_WAV_LIST = sorted(BIRDSONGREC_WAV_DIR.glob('*.wav'))
 
 
+@pytest.fixture
+def birdsongrec_wav_list():
+    return BIRDSONGREC_WAV_LIST
+
+
 @pytest.fixture(params=BIRDSONGREC_WAV_LIST)
 def a_birdsongrec_wav_path(request):
     return request.param
