@@ -260,13 +260,17 @@ class Sound:
             )
 
     def __getitem__(self, key):
-        # TODO: try-except here?
         if isinstance(key, (int, slice)):
-            return Sound(
-                    data=self.data[key],
-                    samplerate=self.samplerate,
-                    path=self.path,
-                )
+            try:
+                return Sound(
+                        data=self.data[key],
+                        samplerate=self.samplerate,
+                        path=self.path,
+                    )
+            except IndexError as e:
+                raise IndexError(
+                    f"Invalid integer or slice for Sound with {self.data.shape[0]} channels: {key}"
+                ) from e
         else:
             raise TypeError(
                 f"Sound can be indexed with integer or slice, but type was: {type(key)}"
