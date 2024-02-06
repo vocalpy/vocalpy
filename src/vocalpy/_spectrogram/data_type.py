@@ -215,3 +215,30 @@ class Spectrogram:
         else:
             source_audio_file = None
         return SpectrogramFile(path=path, source_audio_file=source_audio_file)
+
+    def __iter__(self):
+        for channel in self.data:
+            yield Spectrogram(
+                data=channel[np.newaxis, ...],
+                frequencies=self.frequencies,
+                times=self.times,
+                path=self.path,
+            )
+
+    def __getitem__(self, key):
+        if isinstance(key, (int, slice)):
+            try:
+                return Spectrogram(
+                    data=self.data[key],
+                    frequencies=self.frequencies,
+                    times=self.times,
+                    path=self.path,
+                    )
+            except IndexError as e:
+                raise IndexError(
+                    f"Invalid integer or slice for Spectrogram with {self.data.shape[0]} channels: {key}"
+                ) from e
+        else:
+            raise TypeError(
+                f"Spectrogram can be indexed with integer or slice, but type was: {type(key)}"
+            )
