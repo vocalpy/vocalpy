@@ -67,7 +67,21 @@ def meansquared(
     offsets_s : numpy.ndarray
         Vector of offset times of segments, in seconds.
     """
+    if sound.data.shape[0] > 1:
+        raise ValueError(
+            f"The ``sound`` has {sound.data.shape[0]} channels, but segmentation is not implemented "
+            "for sounds with multiple channels. This is because there can be a different number of segments "
+            "per channel, which cannot be represented as a rectangular array. To segment each channel, "
+            "first split the channels into separate ``vocalpy.Sound`` instances, then pass each to this function."
+            "For example,\n"
+            ">>> sound_channels = [sound_ for sound_ in sound]  # split with a list comprehension\n"
+            ">>> channel_segments = [vocalpy.segment.meansquared(sound_) for sound_ in sound_channels]\n"
+        )
+
     meansquared_ = signal.audio.meansquared(sound, freq_cutoffs, smooth_win)
+    # we get rid of the channel dimension *after* calling ``signal.audio.meansquared``
+    # because that function *does* work on multi-channel data
+    meansquared_ = np.squeeze(meansquared_, axis=0)
     above_th = meansquared_ > threshold
     h = [1, -1]
     # convolving with h causes:
