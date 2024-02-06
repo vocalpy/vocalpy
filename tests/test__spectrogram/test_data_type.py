@@ -165,3 +165,63 @@ class TestSpectrogram:
                 np.testing.assert_allclose(
                     getattr(spect, attr_name), attr_val
                 )
+
+    @pytest.mark.parametrize(
+        'data, frequencies, times',
+        [
+            (rng.normal(size=(N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS),
+            (rng.normal(size=(1, N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS),
+            (rng.normal(size=(3, N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS),
+        ]
+    )
+    def test___iter__(self, data, frequencies, times):
+        spect = vocalpy.Spectrogram(data=data, frequencies=frequencies, times=times)
+        spect_channels = [
+            spect_ for spect_ in spect
+        ]
+        assert all(
+            [isinstance(spect_, vocalpy.Spectrogram)
+             for spect_ in spect_channels]
+        )
+        for channel, spect_channel in enumerate(spect_channels):
+            np.testing.assert_allclose(
+                spect_channel.data, spect.data[channel][np.newaxis, ...]
+            )
+        assert len(spect_channels) == spect.data.shape[0]
+
+    @pytest.mark.parametrize(
+        'data, frequencies, times, key',
+        [
+            (rng.normal(size=(N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS, 0),
+            (rng.normal(size=(1, N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS, 0),
+            (rng.normal(size=(3, N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS, slice(None, 2)),
+        ]
+    )
+    def test___getitem__(self, data, frequencies, times, key):
+        spect = vocalpy.Spectrogram(data=data, frequencies=frequencies, times=times)
+        spect_channel = spect[key]
+        assert isinstance(spect_channel, vocalpy.Spectrogram)
+        if isinstance(key, int):
+            assert spect_channel.data.shape[0] == 1
+            np.testing.assert_allclose(
+                spect_channel.data, spect.data[key][np.newaxis, ...]
+            )
+        elif isinstance(key, slice):
+            sliced = spect.data[key]
+            assert spect_channel.data.shape[0] == sliced.shape[0]
+            np.testing.assert_allclose(
+                spect_channel.data, sliced
+            )
+
+    @pytest.mark.parametrize(
+        'data, frequencies, times, key',
+        [
+            (rng.normal(size=(N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS, 1),
+            (rng.normal(size=(1, N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS, 1),
+            (rng.normal(size=(3, N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS, 5),
+        ]
+    )
+    def test___getitem__raises(self, data, frequencies, times, key):
+        spect = vocalpy.Spectrogram(data=data, frequencies=frequencies, times=times)
+        with pytest.raises(IndexError):
+            _ = spect[key]
