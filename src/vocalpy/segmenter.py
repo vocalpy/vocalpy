@@ -9,7 +9,7 @@ import dask.diagnostics
 from .audio_file import AudioFile
 from .sequence import Sequence
 from .sound import Sound
-from .spectrogram_maker import validate_audio
+from .spectrogram_maker import validate_sound
 from .unit import Unit
 
 DEFAULT_SEGMENT_PARAMS = {
@@ -105,7 +105,7 @@ class Segmenter:
             If a list of :class:`~vocalpy.Sound` instances is passed in,
             a list of :class:`~vocalpy.Sequence` instances will be returned.
         """
-        validate_audio(sound)
+        validate_sound(sound)
 
         # define nested function so vars are in scope and ``dask`` can call it
         def _to_sequence(sound_: Sound):
