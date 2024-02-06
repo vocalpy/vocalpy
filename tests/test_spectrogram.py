@@ -2,7 +2,7 @@ import pytest
 
 import vocalpy
 
-from .fixtures.audio import AUDIO_LIST_WAV
+from .fixtures.audio import BIRDSONGREC_WAV_LIST
 
 
 @pytest.mark.parametrize(
@@ -23,13 +23,13 @@ def test_spectrogram(method, a_wav_path):
 
 def test_input_not_audio_raises():
     """Test :func:`vocalpy.spectrogram` raises ValueError when first arg is not Sound"""
-    audio = vocalpy.Sound.read(AUDIO_LIST_WAV[0])
+    audio = vocalpy.Sound.read(BIRDSONGREC_WAV_LIST[0])
     with pytest.raises(TypeError):
         vocalpy.spectrogram(audio.data)
 
 
 def test_method_not_valid_raises():
     """Test :func:`vocalpy.spectrogram` raises ValueError when method arg is not valid"""
-    audio = vocalpy.Sound.read(AUDIO_LIST_WAV[0])
+    audio = vocalpy.Sound.read(BIRDSONGREC_WAV_LIST[0])
     with pytest.raises(ValueError):
         vocalpy.spectrogram(audio, method='incorrect-method-name')
