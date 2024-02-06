@@ -6,6 +6,11 @@ from .test_data import DATA_ROOTS_WITH_SUBDIRS, SOURCE_TEST_DATA_ROOT, GOFFINET_
 
 AUDIO_DIR_CBIN = SOURCE_TEST_DATA_ROOT / 'audio_cbin_annot_notmat' / 'gy6or6' / '032312'
 
+
+@pytest.fixture
+def audio_dir_cbin():
+    return AUDIO_DIR_CBIN
+
 AUDIO_LIST_CBIN = sorted(AUDIO_DIR_CBIN.glob('*.cbin'))
 
 
