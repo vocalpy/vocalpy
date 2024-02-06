@@ -2,7 +2,7 @@ import pytest
 
 import vocalpy
 
-from .fixtures.audio import AUDIO_LIST_WAV
+from .fixtures.audio import BIRDSONGREC_WAV_LIST
 
 
 def assert_is_expected_sequence(sequence, audio, method, segment_params):
@@ -34,10 +34,10 @@ class TestSegmenter:
     @pytest.mark.parametrize(
         "audio",
         [
-            vocalpy.Sound.read(AUDIO_LIST_WAV[0]),
-            vocalpy.AudioFile(path=AUDIO_LIST_WAV[0]),
-            [vocalpy.Sound.read(path) for path in AUDIO_LIST_WAV[:3]],
-            [vocalpy.AudioFile(path=path) for path in AUDIO_LIST_WAV[:3]],
+            vocalpy.Sound.read(BIRDSONGREC_WAV_LIST[0]),
+            vocalpy.AudioFile(path=BIRDSONGREC_WAV_LIST[0]),
+            [vocalpy.Sound.read(path) for path in BIRDSONGREC_WAV_LIST[:3]],
+            [vocalpy.AudioFile(path=path) for path in BIRDSONGREC_WAV_LIST[:3]],
         ],
     )
     def test_segment(self, audio):
