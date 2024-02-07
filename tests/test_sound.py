@@ -230,7 +230,7 @@ class TestSound:
             # audio with one channel
             BIRDSONGREC_WAV_LIST[0],
             # audio with more than one channel
-            MULTICHANNEL_FLY_WAV[0],
+            MULTICHANNEL_FLY_WAV,
         ]
     )
     def test___iter__(self, a_wav_path):
@@ -254,7 +254,7 @@ class TestSound:
             # audio with one channel
             (BIRDSONGREC_WAV_LIST[0], 0),
             # audio with more than one channel
-            (MULTICHANNEL_FLY_WAV[0], slice(None, 2)),
+            (MULTICHANNEL_FLY_WAV, slice(None, 2)),
         ]
     )
     def test___getitem__(self, a_wav_path, key):
@@ -279,7 +279,7 @@ class TestSound:
             # audio with one channel
             (BIRDSONGREC_WAV_LIST[0], 1),
             # audio with more than one channel
-            (MULTICHANNEL_FLY_WAV[0], 5),
+            (MULTICHANNEL_FLY_WAV, 5),
         ]
     )
     def test___getitem__raises(self, a_wav_path, key):
