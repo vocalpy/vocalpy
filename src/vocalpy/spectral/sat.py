@@ -48,7 +48,8 @@ def sat(
         A multi-taper spectrogram computed using DPSS tapers
         as described in [1]_. See [2]_ and [3]_ for rationale.
     cepstrogram : numpy.ndarray
-        The cepstra computed for every window.
+        The real cepstrum, computed from the spectra found
+        with one of the two tapers used.
     quefrencies : numpy.ndarray
         The quefrencies for the cepstrogram.
     max_freq : float
@@ -68,6 +69,8 @@ def sat(
 
     Notes
     -----
+    This function is a direct translation to Python
+    of code in SAT_sound.m (see References).
     Code adapted from [4]_, [5]_, and [6]_.
 
     References
@@ -91,46 +94,46 @@ def sat(
             f"to use when extracting features with a frequency range"
         )
     # ---- make power spec
-    audio_pad = np.pad(sound.data, pad_width=n_fft // 2)
-    windows = librosa.util.frame(audio_pad, frame_length=n_fft, hop_length=hop_length, axis=0)
+    audio_pad = np.pad(
+        sound.data, pad_width=((0, 0), (n_fft // 2, n_fft // 2))
+    )
+    # calling util.frame with default axis=-1 gives us dimensions (channels, window size, number of windows)
+    windows = librosa.util.frame(audio_pad, frame_length=n_fft, hop_length=hop_length)
     tapers = scipy.signal.windows.dpss(n_fft, 1.5, Kmax=2)
-    windows1 = windows * tapers[0, :]
-    windows2 = windows * tapers[1, :]
-
-    spectra1 = np.fft.fft(windows1, n=n_fft)
-    spectra2 = np.fft.fft(windows2, n=n_fft)
+    # we apply tapers to windows by array broadcasting
+    windows1 = windows * tapers[0, :][:, np.newaxis]
+    windows2 = windows * tapers[1, :][:, np.newaxis]
+    # fft with axis 1 gives us arrays with dimensions (channels, n_fft, timebins)
+    spectra1 = np.fft.fft(windows1, n=n_fft, axis=1)
+    spectra2 = np.fft.fft(windows2, n=n_fft, axis=1)
     power_spectrogram = (np.abs(spectra1) + np.abs(spectra2)) ** 2
-    f = librosa.fft_frequencies(sr=audio.samplerate, n_fft=n_fft)
-    power_spectrogram = power_spectrogram.T[: f.shape[-1], :]
-
+    f = librosa.fft_frequencies(sr=sound.samplerate, n_fft=n_fft)
+    power_spectrogram = power_spectrogram[:, :f.shape[-1], :]
     # make power spectrum into Spectrogram
-    t = librosa.frames_to_time(np.arange(windows.shape[0]), sr=sound.samplerate, hop_length=hop_length, n_fft=n_fft)
+    t = librosa.frames_to_time(np.arange(windows.shape[-1]), sr=sound.samplerate, hop_length=hop_length, n_fft=n_fft)
     from .. import Spectrogram
-
     power_spectrogram = Spectrogram(data=power_spectrogram, frequencies=f, times=t)
 
+    # ---- make "cepstrogram" and quefrencies
     spectra1_for_cepstrum = np.copy(spectra1)
     # next line is a fancy way of adding eps to zero values
     # so we don't get the enigmatic divide-by-zero error, and we don't get np.inf values
     # see https://github.com/numpy/numpy/issues/21560
     spectra1_for_cepstrum[spectra1_for_cepstrum == 0.] += np.finfo(spectra1_for_cepstrum.dtype).eps
     cepstrogram = np.fft.ifft(
-        np.log(np.abs(spectra1_for_cepstrum)), n=n_fft
+        np.log(np.abs(spectra1_for_cepstrum)), n=n_fft, axis=1
     ).real
-    cepstrogram = cepstrogram.T
     quefrencies = np.array(np.arange(n_fft)) / sound.samplerate
 
-    # freq_range means "use first `freq_range` percent of frequencies"
+    # in SAT, freq_range means "use first `freq_range` percent of frequencies". Next line finds that range.
     max_freq_idx = int(np.floor(f.shape[0] * freq_range))
     max_freq = f[max_freq_idx]
 
-    spectra1 = spectra1[:, :max_freq_idx]
-    spectra2 = spectra2[:, :max_freq_idx]
+    spectra1 = spectra1[:, :max_freq_idx, :]
+    spectra2 = spectra2[:, :max_freq_idx, :]
     # time derivative of spectrum
     dSdt = (-spectra1.real * spectra2.real) - (spectra1.imag * spectra2.imag)
-    dSdt = dSdt.T
     # frequency derivative of spectrum
     dSdf = (spectra1.imag * spectra2.real) - (spectra1.real * spectra2.imag)
-    dSdf = dSdf.T
 
     return power_spectrogram, cepstrogram, quefrencies, max_freq, dSdt, dSdf
