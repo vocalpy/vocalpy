@@ -90,7 +90,6 @@ def sat(
             f"Please specify a value between zero and one inclusive specifying the percentage of the frequencies "
             f"to use when extracting features with a frequency range"
         )
-    f = librosa.fft_frequencies(sr=audio.samplerate, n_fft=n_fft)
 
     # ---- make power spec
     audio_pad = np.pad(audio.data, pad_width=n_fft // 2)
@@ -102,6 +101,7 @@ def sat(
     spectra1 = np.fft.fft(windows1, n=n_fft)
     spectra2 = np.fft.fft(windows2, n=n_fft)
     power_spectrogram = (np.abs(spectra1) + np.abs(spectra2)) ** 2
+    f = librosa.fft_frequencies(sr=audio.samplerate, n_fft=n_fft)
     power_spectrogram = power_spectrogram.T[: f.shape[-1], :]
 
     # make power spectrum into Spectrogram
@@ -110,8 +110,14 @@ def sat(
 
     power_spectrogram = Spectrogram(data=power_spectrogram, frequencies=f, times=t)
 
-    log_spectra = np.log(spectra1, where=spectra1 > 0)
-    cepstrogram = np.fft.ifft(log_spectra, n=n_fft).real
+    spectra1_for_cepstrum = np.copy(spectra1)
+    # next line is a fancy way of adding eps to zero values
+    # so we don't get the enigmatic divide-by-zero error, and we don't get np.inf values
+    # see https://github.com/numpy/numpy/issues/21560
+    spectra1_for_cepstrum[spectra1_for_cepstrum == 0.] += np.finfo(spectra1_for_cepstrum.dtype).eps
+    cepstrogram = np.fft.ifft(
+        np.log(np.abs(spectra1_for_cepstrum)), n=n_fft
+    ).real
     cepstrogram = cepstrogram.T
     quefrencies = np.array(np.arange(n_fft)) / audio.samplerate
 
