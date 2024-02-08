@@ -246,7 +246,7 @@ def entropy(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_freq: f
        by Therese Koch, specifically the acoustics module
     """
     freq_inds = (power_spectrogram.frequencies > min_freq) & (power_spectrogram.frequencies < max_freq)
-    P = power_spectrogram.data[freq_inds, :]
+    P = power_spectrogram.data[:, freq_inds, :]
     P[P == 0.0] += np.finfo(P.dtype).eps
     # calculate entropy for current frame
     sum_log = np.sum(np.log(P), axis=1)
@@ -298,9 +298,9 @@ def amplitude(
        by Therese Koch, specifically the acoustics module
     """
     freq_inds = (power_spectrogram.frequencies > min_freq) & (power_spectrogram.frequencies < max_freq)
-    P = power_spectrogram.data[freq_inds, :]
-    P[P == 0.0] = EPS
-    return 10 * np.log10(np.sum(P, axis=0)) + baseline
+    P = power_spectrogram.data[:, freq_inds, :]
+    P[P == 0.0] += np.finfo(P.dtype).eps
+    return 10 * np.log10(np.sum(P, axis=1)) + baseline
 
 
 def pitch(
@@ -426,7 +426,6 @@ def similarity_features(
         An xarray.Dataset where the data variables are the features,
         and the coordinate is the time for each time bin.
     """
-    # pitch, goodness, AM, FM, entropy
     power_spectrogram, cepstrogram, quefrencies, max_freq, dSdt, dSdf = spectral.sat(
         sound, n_fft, hop_length, freq_range
     )
@@ -438,14 +437,17 @@ def similarity_features(
     FM = frequency_modulation(dSdt, dSdf)
     AM = amplitude_modulation(dSdt)
     entropy_ = entropy(power_spectrogram, min_freq, max_freq)
+
+    channels = np.arange(sound.data.shape[0])
+
     return xr.Dataset(
         {
-            "amplitude": (["time"], amp_),
-            "pitch": (["time"], pitch_),
-            "goodness_of_pitch": (["time"], goodness_),
-            "frequency_modulation": (["time"], FM),
-            "amplitude_modulation": (["time"], AM),
-            "entropy": (["time"], entropy_),
+            "amplitude": (["channel", "time"], amp_),
+            "pitch": (["channel", "time"], pitch_),
+            "goodness_of_pitch": (["channel", "time"], goodness_),
+            "frequency_modulation": (["channel", "time"], FM),
+            "amplitude_modulation": (["channel", "time"], AM),
+            "entropy": (["channel", "time"], entropy_),
         },
-        coords={"time": power_spectrogram.times},
+        coords={"channel": channels, "time": power_spectrogram.times},
     )
