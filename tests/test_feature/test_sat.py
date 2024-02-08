@@ -110,4 +110,4 @@ def test_similarity_features(a_zebra_finch_wav):
     out = vocalpy.feature.sat.similarity_features(audio)
     assert isinstance(out, xr.Dataset)
     assert len(out.data_vars) == 6
-    assert len(out.coords) == 1  # time
+    assert len(out.coords) == 2  # time
