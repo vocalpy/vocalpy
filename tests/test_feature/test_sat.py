@@ -19,7 +19,7 @@ def test_goodness_of_pitch(spectral_sat_result):
         cepstrogram, quefrencies,
     )
     assert isinstance(out, np.ndarray)
-    assert out.ndim == 1
+    assert out.ndim == 2
     assert out.shape[-1] == cepstrogram.shape[-1]
 
 
@@ -30,7 +30,7 @@ def test_mean_frequency(spectral_sat_result):
         power_spectrogram, max_freq=max_freq
     )
     assert isinstance(out, np.ndarray)
-    assert out.ndim == 1
+    assert out.ndim == 2
     assert out.shape[-1] == power_spectrogram.data.shape[-1]
     # sanity check, mean should be less than/equal to max_freq
     assert np.all(
@@ -45,7 +45,7 @@ def test_frequency_modulation(spectral_sat_result):
         dSdt, dSdf
     )
     assert isinstance(out, np.ndarray)
-    assert out.ndim == 1
+    assert out.ndim == 2
     assert out.shape[-1] == dSdt.shape[-1]
 
 
@@ -56,7 +56,7 @@ def test_amplitude_modulation(spectral_sat_result):
         dSdt
     )
     assert isinstance(out, np.ndarray)
-    assert out.ndim == 1
+    assert out.ndim == 2
     assert out.shape[-1] == dSdt.shape[-1]
 
 
@@ -67,7 +67,7 @@ def test_entropy(spectral_sat_result):
         power_spectrogram, max_freq=max_freq
     )
     assert isinstance(out, np.ndarray)
-    assert out.ndim == 1
+    assert out.ndim == 2
     assert out.shape[-1] == power_spectrogram.data.shape[-1]
 
 
@@ -78,7 +78,7 @@ def test_amplitude(spectral_sat_result):
         power_spectrogram, max_freq=max_freq
     )
     assert isinstance(out, np.ndarray)
-    assert out.ndim == 1
+    assert out.ndim == 2
     assert out.shape[-1] == power_spectrogram.data.shape[-1]
 
 
@@ -100,7 +100,7 @@ def test_pitch(frame_length, hop_length, a_zebra_finch_wav):
     power_spectrogram = spectral_sat_result_[0]
 
     assert isinstance(out, np.ndarray)
-    assert out.ndim == 1
+    assert out.ndim == 2
     assert out.shape[-1] == power_spectrogram.data.shape[-1]
 
 
