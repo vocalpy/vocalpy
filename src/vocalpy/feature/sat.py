@@ -36,7 +36,7 @@ def goodness_of_pitch(cepstrogram: npt.NDArray, quefrencies: npt.NDArray, max_F0
     ----------
     cepstrogram : numpy.ndarray
         Cepstrogram returned by :func:`vocalpy.spectral.sat`,
-        matrix with dimensions (quefrencies, time bins).
+        matrix with dimensions (channels, quefrencies, time bins).
     quefrencies : numpy.ndarray
         The quefrencies for the cepstrogram.
     max_F0 : float
@@ -75,8 +75,8 @@ def goodness_of_pitch(cepstrogram: npt.NDArray, quefrencies: npt.NDArray, max_F0
             f"but this is greater than the max value in `quefrencies`: {quefrencies.max()}"
         )
     min_quef_idx = np.min(np.argwhere(quefrencies > quefrency_cutoff)) - 1
-    max_quef_idx = int(np.floor(len(cepstrogram) / 2))
-    return np.max(cepstrogram[min_quef_idx:max_quef_idx, :], axis=0)
+    max_quef_idx = int(np.floor(cepstrogram.shape[1] / 2))
+    return np.max(cepstrogram[:, min_quef_idx:max_quef_idx, :], axis=1)
 
 
 def mean_frequency(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_freq: float = 11025.0) -> npt.NDArray:
@@ -90,8 +90,7 @@ def mean_frequency(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_
     Parameters
     ----------
     power_spectrogram : vocalpy.Spectrogram
-        Spectrogram, returned by
-        :func:`vocalpy.spectral.sat`.
+        Spectrogram, returned by :func:`vocalpy.spectral.sat`.
     min_freq : float
         The minimum frequency to consider in ``power_spectrogram``.
     max_freq : float
@@ -125,10 +124,10 @@ def mean_frequency(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_
     pitch
     """
     freq_inds = (power_spectrogram.frequencies > min_freq) & (power_spectrogram.frequencies < max_freq)
-    P = power_spectrogram.data[freq_inds, :]
-    P[P == 0.0] = EPS
+    P = power_spectrogram.data[:, freq_inds, :]
+    P[P == 0.0] += np.finfo(P.dtype).eps
     frequencies = power_spectrogram.frequencies[freq_inds]
-    return np.sum(P * frequencies[:, np.newaxis], axis=0) / np.sum(P, axis=0)
+    return np.sum(P * frequencies[:, np.newaxis], axis=1) / np.sum(P, axis=1)
 
 
 def frequency_modulation(dSdt: npt.NDArray, dSdf: npt.NDArray) -> npt.NDArray:
@@ -165,7 +164,7 @@ def frequency_modulation(dSdt: npt.NDArray, dSdf: npt.NDArray) -> npt.NDArray:
     .. [4] Bradbury, Jack W., and Sandra Lee Vehrencamp. Principles of animal communication. Vol. 132.
        Sunderland, MA: Sinauer Associates, 1998.
     """
-    return np.arctan(np.max(dSdt, axis=0) / (np.max(dSdf, axis=0) + EPS))
+    return np.arctan(np.max(dSdt, axis=1) / (np.max(dSdf, axis=1) + np.finfo(dSdt.dtype).eps))
 
 
 def amplitude_modulation(dSdt: npt.NDArray) -> npt.NDArray:
@@ -199,7 +198,7 @@ def amplitude_modulation(dSdt: npt.NDArray) -> npt.NDArray:
     .. [4] Bradbury, Jack W., and Sandra Lee Vehrencamp. Principles of animal communication. Vol. 132.
        Sunderland, MA: Sinauer Associates, 1998.
     """
-    return np.sum(dSdt, axis=0)
+    return np.sum(dSdt, axis=1)
 
 
 def entropy(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_freq: float = 11025.0) -> npt.NDArray:
@@ -248,11 +247,11 @@ def entropy(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_freq: f
     """
     freq_inds = (power_spectrogram.frequencies > min_freq) & (power_spectrogram.frequencies < max_freq)
     P = power_spectrogram.data[freq_inds, :]
-    P[P == 0.0] = EPS
+    P[P == 0.0] += np.finfo(P.dtype).eps
     # calculate entropy for current frame
-    sum_log = np.sum(np.log(P), axis=0)
-    log_sum = np.log(np.sum(P, axis=0) / (P.shape[0] - 1))
-    return sum_log / (P.shape[0] - 1) - log_sum
+    sum_log = np.sum(np.log(P), axis=1)
+    log_sum = np.log(np.sum(P, axis=1) / (P.shape[1] - 1))
+    return sum_log / (P.shape[1] - 1) - log_sum
 
 
 def amplitude(
@@ -319,7 +318,7 @@ def pitch(
     Parameters
     ----------
     sound : vocalpy.Sound
-        A :class:`vocalpy.Sound` instance.
+        A :class:`vocalpy.Sound` instance. Multi-channel is supported.
     fmin : float
         Minimum frequency in Hertz.
         The recommended minimum is ``librosa.note_to_hz('C2')`` (~65 Hz)
@@ -392,7 +391,7 @@ def similarity_features(
     Parameters
     ----------
     sound : vocalpy.Sound
-        Audio loaded from a file.
+        Audio loaded from a file. Multi-channel is supported.
     n_fft : int
         FFT window size.
     hop_length : int
