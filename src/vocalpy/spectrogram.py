@@ -45,7 +45,7 @@ def spectrogram(sound: Sound, n_fft: int = 512, hop_length: int = 64, method="li
         computed according to `method`
     """
     if not isinstance(sound, Sound):
-        raise TypeError(f"audio must be an instance of `vocalpy.Sound` but was: {type(audio)}")
+        raise TypeError(f"audio must be an instance of `vocalpy.Sound` but was: {type(sound)}")
     if method == "librosa-db":
         S = librosa.stft(sound.data, n_fft=n_fft, hop_length=hop_length)
         S = librosa.amplitude_to_db(np.abs(S))
