@@ -43,7 +43,8 @@ def spectrogram(
             f"Spectrogram data has more than one channel. Number of channels was: {spect.data.shape[0]}."
             "This happens when spectral representations are generated from multi-channel audio. "
             "Plotting multiple channels is not currently supported. "
-            "To plot individual channels, either index into the spectrogram to get a new spectrogram of a specific channel:\n"
+            "To plot individual channels, either index into the spectrogram "
+            "to get a new spectrogram of a specific channel:\n"
             ">>> spect0 = spect[0]  # gets channel 0\n"
             "Or iterate through the spectrogram to get all the channels:\n"
             ">>> per_channel_spects = [channel_spect for channel_spect in spect]"
@@ -55,9 +56,7 @@ def spectrogram(
     if pcolormesh_kwargs is None:
         pcolormesh_kwargs = {}
 
-    ax.pcolormesh(
-        spect.times, spect.frequencies, np.squeeze(spect.data, axis=0), **pcolormesh_kwargs
-    )
+    ax.pcolormesh(spect.times, spect.frequencies, np.squeeze(spect.data, axis=0), **pcolormesh_kwargs)
 
     if tlim is not None:
         ax.set_xlim(tlim)

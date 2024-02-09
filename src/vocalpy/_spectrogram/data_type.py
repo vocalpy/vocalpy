@@ -233,12 +233,10 @@ class Spectrogram:
                     frequencies=self.frequencies,
                     times=self.times,
                     path=self.path,
-                    )
+                )
             except IndexError as e:
                 raise IndexError(
                     f"Invalid integer or slice for Spectrogram with {self.data.shape[0]} channels: {key}"
                 ) from e
         else:
-            raise TypeError(
-                f"Spectrogram can be indexed with integer or slice, but type was: {type(key)}"
-            )
+            raise TypeError(f"Spectrogram can be indexed with integer or slice, but type was: {type(key)}")

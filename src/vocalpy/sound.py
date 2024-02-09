@@ -237,7 +237,6 @@ class Sound:
                 "The above converts the int16 values to float values between -1.0 and 1.0. "
                 "You can then save the data as a wav file:\n"
                 ">>> sound.write('path.wav')\n"
-
             )
         # next line: swap axes because soundfile expects dimensions to be (samples, channels)
         soundfile.write(file=path, data=self.data.transpose((1, 0)), samplerate=self.samplerate, **kwargs)
@@ -263,15 +262,11 @@ class Sound:
         if isinstance(key, (int, slice)):
             try:
                 return Sound(
-                        data=self.data[key],
-                        samplerate=self.samplerate,
-                        path=self.path,
-                    )
+                    data=self.data[key],
+                    samplerate=self.samplerate,
+                    path=self.path,
+                )
             except IndexError as e:
-                raise IndexError(
-                    f"Invalid integer or slice for Sound with {self.data.shape[0]} channels: {key}"
-                ) from e
+                raise IndexError(f"Invalid integer or slice for Sound with {self.data.shape[0]} channels: {key}") from e
         else:
-            raise TypeError(
-                f"Sound can be indexed with integer or slice, but type was: {type(key)}"
-            )
+            raise TypeError(f"Sound can be indexed with integer or slice, but type was: {type(key)}")

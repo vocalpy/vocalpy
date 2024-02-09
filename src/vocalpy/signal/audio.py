@@ -2,8 +2,8 @@
 from __future__ import annotations
 
 import numbers
-from typing import Sequence
 import warnings
+from typing import Sequence
 
 import numpy as np
 import numpy.typing as npt
@@ -107,9 +107,7 @@ def meansquared(sound: Sound, freq_cutoffs=(500, 10000), smooth_win: int = 2) ->
     # to convolve per channel, seems like the best we can do is a list comprehension
     # followed by re-building the array.
     # see https://scipy-cookbook.readthedocs.io/items/ApplyFIRFilter.html
-    smooth = np.array(
-        [np.convolve(squared_, h) for squared_ in squared]
-    )
+    smooth = np.array([np.convolve(squared_, h) for squared_ in squared])
     # next two lines are basically the same as np.convolve(mode='valid'), but off by one
     # I think I did it this way to exactly replicate code in evsonganaly
     offset = round((smooth.shape[-1] - data.shape[-1]) / 2)

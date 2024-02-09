@@ -55,8 +55,7 @@ def validate_sound(sound: Sound | AudioFile | Sequence[Sound | AudioFile]) -> No
 
     if isinstance(sound, list) or isinstance(sound, tuple):
         if not (
-            all([isinstance(item, Sound) for item in sound]) or
-            all([isinstance(item, AudioFile) for item in sound])
+            all([isinstance(item, Sound) for item in sound]) or all([isinstance(item, AudioFile) for item in sound])
         ):
             types_in_sound = set([type(sound) for sound in sound])
             raise TypeError(
