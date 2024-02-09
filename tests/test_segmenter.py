@@ -5,9 +5,9 @@ import vocalpy
 from .fixtures.audio import BIRDSONGREC_WAV_LIST
 
 
-def assert_is_expected_sequence(sequence, audio, method, segment_params):
+def assert_is_expected_sequence(sequence, sound, method, segment_params):
     assert isinstance(sequence, vocalpy.Sequence)
-    assert sequence.audio.path == audio.path
+    assert sequence.sound.path == sound.path
     assert sequence.method == method
     assert sequence.segment_params == segment_params
 
@@ -32,7 +32,7 @@ class TestSegmenter:
             assert segmenter.segment_params == segment_params
 
     @pytest.mark.parametrize(
-        "audio",
+        "sound",
         [
             vocalpy.Sound.read(BIRDSONGREC_WAV_LIST[0]),
             vocalpy.AudioFile(path=BIRDSONGREC_WAV_LIST[0]),
@@ -40,7 +40,7 @@ class TestSegmenter:
             [vocalpy.AudioFile(path=path) for path in BIRDSONGREC_WAV_LIST[:3]],
         ],
     )
-    def test_segment(self, audio):
+    def test_segment(self, sound):
         # have to use different segment params from default for these .wav files
         segment_params = {
             "threshold": 5e-05,
@@ -48,11 +48,11 @@ class TestSegmenter:
             "min_silent_dur": 0.002,
         }
         segmenter = vocalpy.Segmenter(segment_params=segment_params)
-        out = segmenter.segment(audio)
-        if isinstance(audio, (vocalpy.Sound, vocalpy.AudioFile)):
+        out = segmenter.segment(sound)
+        if isinstance(sound, (vocalpy.Sound, vocalpy.AudioFile)):
             assert_is_expected_sequence(
-                sequence=out, audio=audio, segment_params=segment_params, method=segmenter.callback.__name__
+                sequence=out, sound=sound, segment_params=segment_params, method=segmenter.callback.__name__
             )
             assert isinstance(out, vocalpy.Sequence)
-        elif isinstance(audio, list):
+        elif isinstance(sound, list):
             assert all([isinstance(spect, vocalpy.Sequence) for spect in out])
