@@ -4,7 +4,7 @@ import attrs
 import numpy as np
 
 from ._spectrogram.data_type import Spectrogram
-from .audio import Audio
+from .sound import Sound
 from .unit import Unit
 
 
@@ -31,7 +31,7 @@ class Sequence:
         This attribute is added by a
         :class:`vocalpy.Segmenter` when it
         creates a :class:`vocalpy.Sequence`.
-    audio : vocalpy.Audio, optional
+    sound : vocalpy.Sound, optional
         The audio from which this sequence was segmented.
         Optional, default is None.
     spectrogram : vocalpy.Spectrogram, optional
@@ -49,7 +49,7 @@ class Sequence:
     method: str = attrs.field(converter=str, validator=attrs.validators.instance_of(str))
     segment_params: dict = attrs.field(converter=dict, validator=attrs.validators.instance_of(dict))
 
-    audio: Audio = attrs.field(validator=attrs.validators.optional(attrs.validators.instance_of(Audio)), default=None)
+    sound: Sound = attrs.field(validator=attrs.validators.optional(attrs.validators.instance_of(Sound)), default=None)
     spectrogram: Spectrogram = attrs.field(
         validator=attrs.validators.optional(attrs.validators.instance_of(Spectrogram)), default=None
     )

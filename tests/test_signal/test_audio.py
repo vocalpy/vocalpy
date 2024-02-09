@@ -5,14 +5,20 @@ import vocalpy
 
 def test_bandpass_filtfilt(an_audio_path):
     """Smoke test for bandpass_filtfilt"""
-    audio = vocalpy.Audio.read(an_audio_path)
-    out = vocalpy.signal.audio.bandpass_filtfilt(audio)
-    assert isinstance(out, vocalpy.Audio)
-    assert not np.array_equal(out.data, audio.data)
+    sound = vocalpy.Sound.read(an_audio_path)
+    if sound.samplerate <= 10000:  # fly multichannel has low samplerate
+        out = vocalpy.signal.audio.bandpass_filtfilt(sound, freq_cutoffs=(100, 4900))
+    else:
+        out = vocalpy.signal.audio.bandpass_filtfilt(sound)
+    assert isinstance(out, vocalpy.Sound)
+    assert not np.array_equal(out.data, sound.data)
 
 
 def test_meansquared(an_audio_path):
-    audio = vocalpy.Audio.read(an_audio_path)
-    out = vocalpy.signal.audio.meansquared(audio)
+    sound = vocalpy.Sound.read(an_audio_path)
+    if sound.samplerate <= 10000:  # fly multichannel has low samplerate
+        out = vocalpy.signal.audio.meansquared(sound, freq_cutoffs=(100, 4900))
+    else:
+        out = vocalpy.signal.audio.meansquared(sound)
     assert isinstance(out, np.ndarray)
     assert np.all(out >= 0.)  # because it's squared

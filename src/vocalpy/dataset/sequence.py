@@ -7,8 +7,8 @@ import attrs
 from sqlalchemy import create_engine, select
 from sqlalchemy.orm import Session
 
-from ..audio import Audio
 from ..sequence import Sequence
+from ..sound import Sound
 from ..unit import Unit
 from . import schema
 
@@ -119,15 +119,15 @@ class SequenceDataset:
                 session.add(an_orm_segment_params)
 
             for seq in self.sequences:
-                audio = schema.sequence.Audio(path=str(seq.audio.path))
-                session.add(audio)
+                sound = schema.sequence.Sound(path=str(seq.sound.path))
+                session.add(sound)
 
                 # make and add sequence, referring to audio and segment params
                 ind = uniq_segment_params.index(seq.segment_params)
                 an_orm_segment_params = orm_segment_params[ind]
 
                 sequence = schema.sequence.Sequence(
-                    audio=audio,
+                    audio=sound,
                     segment_params=an_orm_segment_params,
                     onset=seq.onset,
                     offset=seq.offset,
@@ -194,10 +194,10 @@ class SequenceDataset:
                 segment_params.append(this_seg_params)
 
             audios = []
-            audio_stmt = select(schema.sequence.Audio).order_by(schema.sequence.Audio.id)
+            audio_stmt = select(schema.sequence.Sound).order_by(schema.sequence.Sound.id)
             audio_result = session.scalars(audio_stmt).all()
             for model_audio in audio_result:
-                audios.append(Audio(path=model_audio.path))
+                audios.append(Sound(path=model_audio.path))
 
             seqs_stmt = select(schema.sequence.Sequence).order_by(schema.sequence.Sequence.id)
             seqs_result = session.scalars(seqs_stmt).all()
@@ -218,7 +218,7 @@ class SequenceDataset:
 
                 seq = Sequence(
                     units=units,
-                    audio=audios[model_sequence.audio_id - 1],
+                    sound=audios[model_sequence.audio_id - 1],
                     method=model_sequence.method,
                     segment_params=segment_params[model_sequence.segment_params_id - 1],
                 )

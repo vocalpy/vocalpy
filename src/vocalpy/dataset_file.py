@@ -64,7 +64,7 @@ class DatasetFile:
     >>> import vocalpy as voc
     >>> audio_paths = voc.paths.from_dir('./dir', 'wav')
     >>> audio_files = [voc.AudioFile(path=path) for path in audio_paths]
-    >>> dataset_files = [voc.DatasetFile(file=audio_file) for audio_file in audio_files]
+    >>> dataset_files = [voc.DatasetFile(file=audio_file) for sound_file in audio_files]
     >>> dataset = voc.Dataset(files=dataset_files)
     """
 

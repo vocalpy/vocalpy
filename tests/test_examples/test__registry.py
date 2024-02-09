@@ -22,7 +22,7 @@ def test_EXAMPLES():
 def test_example(example):
     out = vocalpy.examples._registry.example(example.name)
     if example.type == 'audio':
-        assert isinstance(out, vocalpy.Audio)
+        assert isinstance(out, vocalpy.Sound)
 
 
 def test_list(capsys):

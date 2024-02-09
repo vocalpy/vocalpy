@@ -6,10 +6,10 @@ from typing import Callable
 import dask
 import dask.diagnostics
 
-from .audio import Audio
 from .audio_file import AudioFile
 from .sequence import Sequence
-from .spectrogram_maker import validate_audio
+from .sound import Sound
+from .spectrogram_maker import validate_sound
 from .unit import Unit
 
 DEFAULT_SEGMENT_PARAMS = {
@@ -83,16 +83,16 @@ class Segmenter:
 
     def segment(
         self,
-        audio: Audio | AudioFile | list[Audio | AudioFile],
+        sound: Sound | AudioFile | list[Sound | AudioFile],
         parallelize: bool = True,
     ) -> Sequence | None | list[Sequence | None]:
-        """Segment audio into sequences.
+        """Segment sound into sequences.
 
         Parameters
         ----------
-        audio : vocalpy.Audio or list of Audio
-            A `class`:vocalpy.Audio` instance
-            or list of :class:`vocalpy.Audio` instances
+        sound : vocalpy.Sound or list of Sound
+            A `class`:vocalpy.Sound` instance
+            or list of :class:`vocalpy.Sound` instances
             to segment.
         parallelize : bool
             If True, parallelize segmentation using :mod:`dask`.
@@ -100,18 +100,18 @@ class Segmenter:
         Returns
         -------
         seq : vocalpy.Sequence, None, or list of vocalpy.Sequence or None
-            If a single :class:`~vocalpy.Audio` instance is passed in,
+            If a single :class:`~vocalpy.Sound` instance is passed in,
             a single :class:`~vocalpy.Sequence` instance will be returned.
-            If a list of :class:`~vocalpy.Audio` instances is passed in,
+            If a list of :class:`~vocalpy.Sound` instances is passed in,
             a list of :class:`~vocalpy.Sequence` instances will be returned.
         """
-        validate_audio(audio)
+        validate_sound(sound)
 
         # define nested function so vars are in scope and ``dask`` can call it
-        def _to_sequence(audio_: Audio):
-            if isinstance(audio_, AudioFile):
-                audio_ = Audio.read(audio_.path)
-            out = self.callback(audio_, **self.segment_params)
+        def _to_sequence(sound_: Sound):
+            if isinstance(sound_, AudioFile):
+                sound_ = Sound.read(sound_.path)
+            out = self.callback(sound_, **self.segment_params)
             if out is None:
                 return out
             else:
@@ -123,21 +123,21 @@ class Segmenter:
 
             return Sequence(
                 units=units,
-                # note we make a new audio instance **without** data loaded
-                audio=Audio(path=audio_.path),
+                # note we make a new sound instance **without** data loaded
+                sound=Sound(path=sound_.path),
                 method=self.callback.__name__,
                 segment_params=self.segment_params,
             )
 
-        if isinstance(audio, (Audio, AudioFile)):
-            return _to_sequence(audio)
+        if isinstance(sound, (Sound, AudioFile)):
+            return _to_sequence(sound)
 
         seqs = []
-        for audio_ in audio:
+        for sound_ in sound:
             if parallelize:
-                seqs.append(dask.delayed(_to_sequence(audio_)))
+                seqs.append(dask.delayed(_to_sequence(sound_)))
             else:
-                seqs.append(_to_sequence(audio_))
+                seqs.append(_to_sequence(sound_))
 
         if parallelize:
             graph = dask.delayed()(seqs)

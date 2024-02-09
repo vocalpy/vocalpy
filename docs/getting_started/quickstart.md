@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.15.2
+    jupytext_version: 1.16.1
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -29,6 +29,7 @@ First we download some example data, from the [Bengalese Finch song repository](
 
 ```{code-cell} ipython3
 :tags: [hide-output]
+
 !curl -sSL https://raw.githubusercontent.com/vocalpy/vak/main/src/scripts/download_autoannotate_data.py | python3 -
 ```
 
@@ -68,51 +69,57 @@ data_dir = ('data/bfsongrepo/gy6or6/032312/')
 wav_paths = voc.paths.from_dir(data_dir, 'wav')
 ```
 
-### Data type for audio: `vocalpy.Audio`
+### Data type for sound: `vocalpy.Sound`
 
 +++
 
-Next we load all the wav files into the data type that VocalPy provides for audio, `vocalpy.Audio`, using the method `vocalpy.Audio.read`:
+Next we load all the wav files into the data type that VocalPy provides for audio, `vocalpy.Sound`, using the method `vocalpy.Sound.read`:
 
 ```{code-cell} ipython3
-audios = [
-    voc.Audio.read(wav_path) for wav_path in wav_paths
+sounds = [
+    voc.Sound.read(wav_path) for wav_path in wav_paths
 ]
 ```
 
-Let's inspect one of the `vocalpy.Audio` instances
+Let's inspect one of the `vocalpy.Sound` instances
 
 ```{code-cell} ipython3
-an_audio = audios[0]
-print(an_audio)
+a_sound = sounds[0]
+print(a_sound)
 ```
 
-We can see that it has four attributes:
+We can see that it has three attributes:
 
-1. `data`, the audio signal itself
+1. `data`, the audio signal itself, with two dimensions: (channels, samples)
 
 ```{code-cell} ipython3
-print(an_audio.data)
+print(a_sound.data)
 ```
 
 2. `samplerate`, the sampling rate for the audio
 
 ```{code-cell} ipython3
-print(an_audio.samplerate)
-```
-
-3. `channels`, the number of channels
-
-```{code-cell} ipython3
-print(an_audio.channels)
+print(a_sound.samplerate)
 ```
 
 and finally,  
 
-4. `path`, the path to the file that the audio was read from
+3. `path`, the path to the file that the sound was read from
 
 ```{code-cell} ipython3
-print(an_audio.path)
+print(a_sound.path)
+```
+
+A `Sound` also has three properties, derived from its data:
+1. `channels`, the number of channels
+2. `samples`, the number of samples, and
+3. `duration`, the number of samples divided by the sampling rate.
+
+```{code-cell} ipython3
+print(
+    f"This sound comes from an audio file with {a_sound.channels} channel, "
+    f"{a_sound.samples} samples, and a duration of {a_sound.duration:.3f} seconds"
+)
 ```
 
 One of the reasons VocalPy provides this data type, and the others we're about to show you here, is that it helps you write more succinct code that's easier to read: for you, when you come back to your code months from now, and for others that want to read the code you share.
@@ -132,16 +139,16 @@ Let's use one of those classes, `SpectrogramMaker`, to make a spectrogram from e
 We'll write a brief snippet to do so, and then we'll explain what we did.
 
 ```{code-cell} ipython3
-spect_params = {'fft_size': 512, 'step_size': 64}
-callback = voc.signal.spectrogram.spectrogram
+spect_params = {'fft_size': 512, 'hop_length': 64}
+callback = voc.spectrogram
 spect_maker = voc.SpectrogramMaker(callback=callback, spect_params=spect_params)
-spects = spect_maker.make(audios, parallelize=True)
+spects = spect_maker.make(sounds, parallelize=True)
 ```
 
 Notice a couple of things about this snippet:
 - In line 1, you declare the parameters that you use to generate spectrograms explicitly, as a dictionary. This helps with reproducibility by encouraging you to document those parameters
-- In line 2, you also decide what code you will use to generate the spectrograms, by using what's called a "callback", because the `SpectrogramMaker` will call this function for you.
-- In line 3, you create an instance of the `SpectrogramMaker` class with the function you want to use to generate spectrograms, and the parameters to use with that function.
+- In line 2, you also decide what function you will use to generate the spectrograms. Here we use the helper function `vocalpy.spectrogram`.
+- In line 3, you create an instance of the `SpectrogramMaker` class with the function you want to use to generate spectrograms, and the parameters to use with that function. We refer to the function we pass in as a `callback`, because the `SpectrogramMaker` will "call back" to this function when it makes a spectrogram.
 - In line 4, you make the spectrograms, with a single call to the method `vocalpy.SpectrogramMaker.make`. You pass in the audio we loaded earlier, and you tell VocalPy that you want to parallelize the generation of the spectrograms. This is done for you, using the library `dask`.
 
 +++
@@ -152,7 +159,7 @@ Notice a couple of things about this snippet:
 
 As you might have guessed, when we call `SpectrogramMaker.make`, we get back a list of spectrograms.
 
-This is the next data type we'll look at. 
+This is the next data type we'll look at.
 
 +++
 
@@ -168,28 +175,11 @@ But since the whole point of a spectrogram is to let us see sound, let's actuall
 
 We'll make a new spectrogram where we log transform the data so it's easier to visualize.
 
-+++
-
-We import NumPy so we can do a quick-and-dirty transform.
-
-```{code-cell} ipython3
-import numpy as np
-```
-
-```{code-cell} ipython3
-a_spect_log = voc.Spectrogram(data=np.log(a_spect.data),
-                              frequencies=a_spect.frequencies,
-                              times=a_spect.times)
-```
-
-Then we'll plot the log-transformed spectrogram using a function built into the `vocalpy.plot` module.
-
 ```{code-cell} ipython3
 voc.plot.spectrogram(
-    a_spect_log,
+    a_spect,
     tlim = [2.6, 4],
     flim=[500,12500],
-    pcolormesh_kwargs={'vmin':-25, 'vmax': -10}
 )
 ```
 
@@ -201,7 +191,7 @@ Now that we know what we're working with, let's actually inspect the attributes 
 
 There are five attributes we care about here.
 
-1. `data`: this is the spectrogram itself -- as with the other data types,like `vocalpy.Audio`, the attribute name `data` indiciates this main data we care about
+1. `data`: this is the spectrogram itself -- as with the other data types,like `vocalpy.Sound`, the attribute name `data` indiciates this main data we care about
 
 ```{code-cell} ipython3
 print(a_spect.data)
@@ -213,7 +203,7 @@ Let's look at the shape of `data`. It's really just a NumPy array, so we inspect
 print(a_spect.data.shape)
 ```
 
-We see that we have a matrix with some number of rows and columns. These correspond to the next two attributes we will look at.
+We see that we have an array with dimensions (channels, frequencies, times). The last two dimensions correspond to the next two attributes we will look at.
 
 +++
 
@@ -239,7 +229,7 @@ print(a_spect.times[:10])
 print(a_spect.times.shape)
 ```
 
-Just like with the `Audio` class, VocalPy gives us the ability to conveniently read and write spectrograms from files. This saves us from generating spectrograms over and over. Computing spectrograms can be computionally expensive, if your audio has a high sampling rate or you are using methods like multi-taper spectrograms. Saving spectrograms from files also makes it easier for you to share your data in the exact form you used it, so that it's easier to replicate your analyses.
+Just like with the `Sound` class, VocalPy gives us the ability to conveniently read and write spectrograms from files. This saves us from generating spectrograms over and over. Computing spectrograms can be computionally expensive, if your audio has a high sampling rate or you are using methods like multi-taper spectrograms. Saving spectrograms from files also makes it easier for you to share your data in the exact form you used it, so that it's easier to replicate your analyses.
 
 +++
 
@@ -309,14 +299,11 @@ We plot the spectrogram along with the annotations.
 
 ```{code-cell} ipython3
 voc.plot.annotated_spectrogram(
-    spect=voc.Spectrogram(data=np.log(spects[1].data),
-                    frequencies=spects[1].frequencies,
-                    times=spects[1].times),
+    spect=spects[1],
     annot=annots[1],
     tlim = [3.2, 3.9],
     flim=[500,12500],
-    pcolormesh_kwargs={'vmin':-25, 'vmax': -10}
 );
 ```
 
-This crash course in VocalPy has introduced you to the key features and goals of the library. To learn more, please check out [the documentation](https://vocalpy.readthedocs.io/en/latest/) and read our Forum Acusticum 2023 Proceedings Paper, ["Introducing VocalPy"](https://github.com/vocalpy/vocalpy/blob/main/docs/fa2023/Introducing_VocalPy__a_core_Python_package_for_researchers_studying_animal_acoustic_communication.pdf). We are actively developing the library to meet your needs and would love to hear your feedback in [our forum](https://forum.vocalpy.org/)
+This crash course in VocalPy has introduced you to the key features and goals of the library. To learn more, please check out [the documentation](https://vocalpy.readthedocs.io/en/latest/) and read our Forum Acusticum 2023 Proceedings Paper, ["Introducing VocalPy"](https://github.com/vocalpy/vocalpy/blob/main/docs/fa2023/Introducing_VocalPy__a_core_Python_package_for_researchers_studying_animal_acoustic_communication.pdf). We are actively developing the library to meet your needs and would love to hear your feedback in [our forum](https://forum.vocalpy.org/).

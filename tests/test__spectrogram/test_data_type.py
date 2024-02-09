@@ -12,14 +12,33 @@ TIMES = np.arange(N_T) / FS
 
 
 class TestSpectrogram:
-    def test_init(self):
-        """Test that we can initialize a :class:`vocalpy.Audio` instance."""
-        spect = vocalpy.Spectrogram(data=DATA, frequencies=FREQS, times=TIMES)
-        assert isinstance(spect, vocalpy.Spectrogram)
 
-        for attr_name, attr_val in zip(("data", "frequencies", "times"), (DATA, FREQS, TIMES)):
+    @pytest.mark.parametrize(
+        'data, frequencies, times',
+        [
+            (rng.normal(size=(N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS),
+            (rng.normal(size=(1, N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS),
+        ]
+    )
+    def test_init(self, data, frequencies, times):
+        """Test that we can initialize a :class:`vocalpy.Sound` instance."""
+        spect = vocalpy.Spectrogram(data=data, frequencies=frequencies, times=times)
+        assert isinstance(spect, vocalpy.Spectrogram)
+        assert spect.data.ndim == 3
+
+        for attr_name, attr_val in zip(("data", "frequencies", "times"), (data, frequencies, times)):
             assert hasattr(spect, attr_name)
-            assert getattr(spect, attr_name) is attr_val
+            if attr_name == "data":
+                if attr_val.ndim == 2:
+                    np.testing.assert_allclose(
+                        getattr(spect, attr_name), attr_val[np.newaxis, ...]
+                    )
+                else:
+                    np.testing.assert_allclose(
+                        getattr(spect, attr_name), attr_val
+                    )
+            else:
+                assert getattr(spect, attr_name) is attr_val
 
     @pytest.mark.parametrize(
         "data, times, frequencies, expected_exception",
@@ -28,6 +47,8 @@ class TestSpectrogram:
             (DATA.tolist(), TIMES, FREQS, TypeError),
             # ``data`` is not 2 dimensional
             (DATA.ravel(), TIMES, FREQS, ValueError),
+            # ``data`` has more than 3 dimensions
+            (DATA[np.newaxis, np.newaxis, :, :], TIMES, FREQS, ValueError),
             # ``times`` is not a Numpy array
             (DATA, TIMES.tolist(), FREQS, TypeError),
             # ``times`` is not 1 dimensional
@@ -56,7 +77,17 @@ class TestSpectrogram:
 
         for attr_name, attr_val in zip(("data", "frequencies", "times"), (DATA, FREQS, TIMES)):
             assert attr_name in asdict
-            assert asdict[attr_name] is attr_val
+            if attr_name == "data":
+                if attr_val.ndim == 2:
+                    np.testing.assert_allclose(
+                        asdict[attr_name], attr_val[np.newaxis, ...]
+                    )
+                else:
+                    np.testing.assert_allclose(
+                        asdict[attr_name], attr_val
+                    )
+            else:
+                assert asdict[attr_name] is attr_val
 
     def test___eq__(self):
         spect = vocalpy.Spectrogram(data=DATA, frequencies=FREQS, times=TIMES)
@@ -68,34 +99,129 @@ class TestSpectrogram:
         other = vocalpy.Spectrogram(data=DATA.copy() + 0.001, frequencies=FREQS.copy(), times=TIMES.copy())
         assert spect != other
 
-    def test_read(self, tmp_path):
+    @pytest.mark.parametrize(
+        'data, frequencies, times',
+        [
+            (rng.normal(size=(N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS),
+            (rng.normal(size=(1, N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS),
+        ]
+    )
+    def test_read(self, tmp_path, data, frequencies, times):
         """Test that :meth:`vocalpy.Spectrogram.read` works as expected.
 
         To do this we make a spectrogram file "by hand".
         """
-        spect_dict = {"data": DATA, "times": TIMES, "frequencies": FREQS}
+        if data.ndim == 3:
+            spect_dict = {"data": data, "frequencies": frequencies, "times": times}
+        elif data.ndim == 2:
+            spect_dict = {"data": data[np.newaxis, ...], "frequencies": frequencies, "times": times}
         path = tmp_path / "spect.npz"
         np.savez(path, **spect_dict)
 
         spect = vocalpy.Spectrogram.read(path)
         assert isinstance(spect, vocalpy.Spectrogram)
-        for attr_name, attr_val in zip(("data", "frequencies", "times"), (DATA, FREQS, TIMES)):
+        assert spect.data.ndim == 3
+        for attr_name, attr_val in zip(("data", "frequencies", "times"), (data, frequencies, times)):
             assert hasattr(spect, attr_name)
-            assert np.array_equal(getattr(spect, attr_name), attr_val)
+            if attr_name == "data" and attr_val.ndim == 2:
+                    np.testing.assert_allclose(
+                        getattr(spect, attr_name), attr_val[np.newaxis, ...]
+                    )
+            else:
+                np.testing.assert_allclose(
+                    getattr(spect, attr_name), attr_val
+                )
 
-    def test_write(self, tmp_path):
+    @pytest.mark.parametrize(
+        'data, frequencies, times',
+        [
+            (rng.normal(size=(N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS),
+            (rng.normal(size=(1, N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS),
+        ]
+    )
+    def test_write(self, tmp_path, data, frequencies, times):
         """Test that :meth:`vocalpy.Spectrogram.write` works as expected.
 
         To do this we make a spectrogram file "by hand".
         """
-        spect = vocalpy.Spectrogram(data=DATA, frequencies=FREQS, times=TIMES)
+        spect = vocalpy.Spectrogram(data=data, frequencies=frequencies, times=times)
+        assert spect.data.ndim == 3
         path = tmp_path / "spect.npz"
 
-        spect.write(path)
+        spect_file = spect.write(path)
         assert path.exists()
+        assert isinstance(spect_file, vocalpy.SpectrogramFile)
+        assert spect_file.path.name.endswith(".npz")
 
         spect_loaded = vocalpy.Spectrogram.read(path)
         assert isinstance(spect_loaded, vocalpy.Spectrogram)
-        for attr_name, attr_val in zip(("data", "frequencies", "times"), (DATA, FREQS, TIMES)):
-            assert hasattr(spect_loaded, attr_name)
-            assert np.array_equal(getattr(spect_loaded, attr_name), attr_val)
+        for attr_name, attr_val in zip(("data", "frequencies", "times"), (data, frequencies, times)):
+            assert hasattr(spect, attr_name)
+            if attr_name == "data" and attr_val.ndim == 2:
+                    np.testing.assert_allclose(
+                        getattr(spect, attr_name), attr_val[np.newaxis, ...]
+                    )
+            else:
+                np.testing.assert_allclose(
+                    getattr(spect, attr_name), attr_val
+                )
+
+    @pytest.mark.parametrize(
+        'data, frequencies, times',
+        [
+            (rng.normal(size=(N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS),
+            (rng.normal(size=(1, N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS),
+            (rng.normal(size=(3, N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS),
+        ]
+    )
+    def test___iter__(self, data, frequencies, times):
+        spect = vocalpy.Spectrogram(data=data, frequencies=frequencies, times=times)
+        spect_channels = [
+            spect_ for spect_ in spect
+        ]
+        assert all(
+            [isinstance(spect_, vocalpy.Spectrogram)
+             for spect_ in spect_channels]
+        )
+        for channel, spect_channel in enumerate(spect_channels):
+            np.testing.assert_allclose(
+                spect_channel.data, spect.data[channel][np.newaxis, ...]
+            )
+        assert len(spect_channels) == spect.data.shape[0]
+
+    @pytest.mark.parametrize(
+        'data, frequencies, times, key',
+        [
+            (rng.normal(size=(N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS, 0),
+            (rng.normal(size=(1, N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS, 0),
+            (rng.normal(size=(3, N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS, slice(None, 2)),
+        ]
+    )
+    def test___getitem__(self, data, frequencies, times, key):
+        spect = vocalpy.Spectrogram(data=data, frequencies=frequencies, times=times)
+        spect_channel = spect[key]
+        assert isinstance(spect_channel, vocalpy.Spectrogram)
+        if isinstance(key, int):
+            assert spect_channel.data.shape[0] == 1
+            np.testing.assert_allclose(
+                spect_channel.data, spect.data[key][np.newaxis, ...]
+            )
+        elif isinstance(key, slice):
+            sliced = spect.data[key]
+            assert spect_channel.data.shape[0] == sliced.shape[0]
+            np.testing.assert_allclose(
+                spect_channel.data, sliced
+            )
+
+    @pytest.mark.parametrize(
+        'data, frequencies, times, key',
+        [
+            (rng.normal(size=(N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS, 1),
+            (rng.normal(size=(1, N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS, 1),
+            (rng.normal(size=(3, N_F, N_T)), np.linspace(0, 10000, N_F), np.arange(N_T) / FS, 5),
+        ]
+    )
+    def test___getitem__raises(self, data, frequencies, times, key):
+        spect = vocalpy.Spectrogram(data=data, frequencies=frequencies, times=times)
+        with pytest.raises(IndexError):
+            _ = spect[key]

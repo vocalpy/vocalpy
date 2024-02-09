@@ -5,11 +5,11 @@ import vocalpy as voc
 from .fixtures.audio import (
     AUDIO_DIR_CBIN,
     AUDIO_DIR_CBIN_WITH_SUBDIRS,
-    AUDIO_DIR_WAV,
+    BIRDSONGREC_WAV_DIR,
     AUDIO_DIR_WAV_WITH_SUBDIRS,
     AUDIO_LIST_CBIN,
     AUDIO_LIST_CBIN_WITH_SUBDIRS,
-    AUDIO_LIST_WAV,
+    BIRDSONGREC_WAV_LIST,
     AUDIO_LIST_WAV_WITH_SUBDIRS,
 )
 from .fixtures.spect import SPECT_DIR_MAT, SPECT_LIST_MAT
@@ -18,15 +18,15 @@ from .fixtures.spect import SPECT_DIR_MAT, SPECT_LIST_MAT
 @pytest.mark.parametrize(
     "dir, ext, recurse, expected_paths",
     [
-        (AUDIO_DIR_WAV, "wav", None, AUDIO_LIST_WAV),
+        (BIRDSONGREC_WAV_DIR, "wav", None, BIRDSONGREC_WAV_LIST),
         # directly test passing in recurse arg
-        (AUDIO_DIR_WAV, "wav", False, AUDIO_LIST_WAV),
+        (BIRDSONGREC_WAV_DIR, "wav", False, BIRDSONGREC_WAV_LIST),
         # should be the same result if we do recurse, since there's no sub-dir
-        (AUDIO_DIR_WAV, "wav", True, AUDIO_LIST_WAV),
+        (BIRDSONGREC_WAV_DIR, "wav", True, BIRDSONGREC_WAV_LIST),
         # now test with period in extension
-        (AUDIO_DIR_WAV, ".wav", None, AUDIO_LIST_WAV),
-        (AUDIO_DIR_WAV, ".wav", False, AUDIO_LIST_WAV),
-        (AUDIO_DIR_WAV, ".wav", True, AUDIO_LIST_WAV),
+        (BIRDSONGREC_WAV_DIR, ".wav", None, BIRDSONGREC_WAV_LIST),
+        (BIRDSONGREC_WAV_DIR, ".wav", False, BIRDSONGREC_WAV_LIST),
+        (BIRDSONGREC_WAV_DIR, ".wav", True, BIRDSONGREC_WAV_LIST),
         (AUDIO_DIR_CBIN, "cbin", None, AUDIO_LIST_CBIN),
         (AUDIO_DIR_CBIN, "cbin", False, AUDIO_LIST_CBIN),
         (AUDIO_DIR_CBIN, "cbin", True, AUDIO_LIST_CBIN),

@@ -3,45 +3,46 @@ from __future__ import annotations
 
 import numbers
 import warnings
+from typing import Sequence
 
 import numpy as np
 import numpy.typing as npt
 import scipy.signal
 
-from ..audio import Audio
+from ..sound import Sound
 
 
-def bandpass_filtfilt(audio: Audio, freq_cutoffs=(500, 10000)) -> Audio:
+def bandpass_filtfilt(sound: Sound, freq_cutoffs: Sequence[int] = (500, 10000)) -> Sound:
     """Filter audio with band-pass filter, then perform zero-phase
     filtering with :func:`scipy.signal.filtfilt`.
 
     Parameters
     ----------
-    audio: vocalpy.Audio
+    sound: vocalpy.Sound
         An audio signal.
-    freq_cutoffs : Iterable
+    freq_cutoffs : Sequence
         Cutoff frequencies for bandpass filter.
         List or tuple with two elements, default is ``(500, 10000)``.
 
     Returns
     -------
-    audio : vocalpy.Audio
+    sound : vocalpy.Sound
         New audio instance
     """
     if freq_cutoffs[0] <= 0:
-        raise ValueError("Low frequency cutoff {} is invalid, " "must be greater than zero.".format(freq_cutoffs[0]))
+        raise ValueError("Low frequency cutoff {} is invalid, must be greater than zero.".format(freq_cutoffs[0]))
 
-    nyquist_rate = audio.samplerate / 2
+    nyquist_rate = sound.samplerate / 2
     if freq_cutoffs[1] >= nyquist_rate:
         raise ValueError(
-            f"High frequency cutoff ({freq_cutoffs[1]}) is invalid, " f"must be less than Nyquist rate: {nyquist_rate}."
+            f"High frequency cutoff ({freq_cutoffs[1]}) is invalid, must be less than Nyquist rate: {nyquist_rate}."
         )
 
-    if audio.data.shape[-1] < 387:
+    if sound.data.shape[-1] < 387:
         numtaps = 64
-    elif audio.data.shape[-1] < 771:
+    elif sound.data.shape[-1] < 771:
         numtaps = 128
-    elif audio.data.shape[-1] < 1539:
+    elif sound.data.shape[-1] < 1539:
         numtaps = 256
     else:
         numtaps = 512
@@ -57,21 +58,21 @@ def bandpass_filtfilt(audio: Audio, freq_cutoffs=(500, 10000)) -> Audio:
     a = np.zeros((numtaps + 1,))
     a[0] = 1  # make an "all-zero filter"
     padlen = np.max((b.shape[-1] - 1, a.shape[-1] - 1))
-    filtered = scipy.signal.filtfilt(b, a, audio.data, padlen=padlen)
-    return Audio(data=filtered, samplerate=audio.samplerate)
+    filtered = scipy.signal.filtfilt(b, a, sound.data, padlen=padlen)
+    return Sound(data=filtered, samplerate=sound.samplerate)
 
 
-def meansquared(audio: Audio, freq_cutoffs=(500, 10000), smooth_win: int = 2) -> npt.NDArray:
-    """Convert audio to a Root-Mean-Square-like trace
+def meansquared(sound: Sound, freq_cutoffs=(500, 10000), smooth_win: int = 2) -> npt.NDArray:
+    """Convert audio to a Root-Mean-Square-like trace.
 
-    First applied a band-pass filter
-    Rectifies audio signal by squaring, then smooths by taking
+    This function first applies a band-pass filter, and then
+    rectifies the audio signal by squaring. Finally, it smooths by taking
     the average within a window of size ``smooth_win``.
 
     Parameters
     ----------
-    audio: vocalpy.Audio
-        An audio signal.
+    sound: vocalpy.Sound
+        An audio signal. Multi-channel is supported.
     freq_cutoffs : Iterable
         Cutoff frequencies for bandpass filter.
         List or tuple with two elements, default is ``(500, 10000)``.
@@ -81,11 +82,15 @@ def meansquared(audio: Audio, freq_cutoffs=(500, 10000), smooth_win: int = 2) ->
     Returns
     -------
     meansquared : numpy.ndarray
-        The ``vocalpy.Audio.data`` after squaring and smoothing.
-    """
-    audio = bandpass_filtfilt(audio, freq_cutoffs)
+        The ``vocalpy.Sound.data`` after squaring and smoothing.
 
-    data = np.array(audio.data)
+    See Also
+    --------
+    vocalpy.segment.meansquared
+    """
+    sound = bandpass_filtfilt(sound, freq_cutoffs)
+
+    data = np.array(sound.data)
     if issubclass(data.dtype.type, numbers.Integral):
         while np.any(np.abs(data) > np.sqrt(np.iinfo(data.dtype).max)):
             warnings.warn(
@@ -97,8 +102,13 @@ def meansquared(audio: Audio, freq_cutoffs=(500, 10000), smooth_win: int = 2) ->
             new_dtype_str = str(data.dtype)[:-1] + str(int(str(data.dtype)[-1]) ** 2)
             data = data.astype(np.dtype(new_dtype_str))
     squared = np.power(data, 2)
-    len = np.round(audio.samplerate * smooth_win / 1000).astype(int)
+    len = np.round(sound.samplerate * smooth_win / 1000).astype(int)
     h = np.ones((len,)) / len
-    smooth = np.convolve(squared, h)
+    # to convolve per channel, seems like the best we can do is a list comprehension
+    # followed by re-building the array.
+    # see https://scipy-cookbook.readthedocs.io/items/ApplyFIRFilter.html
+    smooth = np.array([np.convolve(squared_, h) for squared_ in squared])
+    # next two lines are basically the same as np.convolve(mode='valid'), but off by one
+    # I think I did it this way to exactly replicate code in evsonganaly
     offset = round((smooth.shape[-1] - data.shape[-1]) / 2)
-    return smooth[offset : data.shape[-1] + offset]  # noqa: E203
+    return smooth[:, offset : data.shape[-1] + offset]  # noqa: E203

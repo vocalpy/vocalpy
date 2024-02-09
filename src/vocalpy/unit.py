@@ -1,7 +1,7 @@
 import attrs
 
 from ._spectrogram.data_type import Spectrogram
-from .audio import Audio
+from .sound import Sound
 
 DEFAULT_LABEL = "-"
 
@@ -20,7 +20,7 @@ class Unit:
     label : str
         A string label applied by an annotator to the unit.
         Default is determined by :data:`vocalpy.unit.DEFAULT_LABEL`.
-    audio : vocalpy.Audio, optional
+    sound : vocalpy.Sound, optional
         The audio for this unit.
         Optional, default is None.
     spectrogram : vocalpy.Spectrogram, optional
@@ -34,7 +34,7 @@ class Unit:
     label: str = attrs.field(
         validator=attrs.validators.optional(attrs.validators.instance_of(str)), default=DEFAULT_LABEL
     )
-    audio: Audio = attrs.field(validator=attrs.validators.optional(attrs.validators.instance_of(Audio)), default=None)
+    sound: Sound = attrs.field(validator=attrs.validators.optional(attrs.validators.instance_of(Sound)), default=None)
     spectrogram: Spectrogram = attrs.field(
         validator=attrs.validators.optional(attrs.validators.instance_of(Spectrogram)), default=None
     )

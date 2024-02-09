@@ -30,8 +30,8 @@ def generate_npz_spect_files():
     so we can test that we can load these files
     """
     for wav_path in AUDIO_LIST_WAV:
-        audio = voc.Audio.read(wav_path)
-        spect = voc.signal.spectrogram.spectrogram(audio)
+        sound = voc.Sound.read(wav_path)
+        spect = voc.signal.spectrogram.spectrogram(sound)
         dst_path = SPECT_NPZ_DIR / f'{wav_path.name}.npz'
         spect.write(path=dst_path)
 
