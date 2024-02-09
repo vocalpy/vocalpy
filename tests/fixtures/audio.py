@@ -84,7 +84,7 @@ def multichannel_fly_wav_sound():
     return vocalpy.Sound.read(MULTICHANNEL_FLY_WAV)
 
 
-# only use a few wav files from birdsongrec, to speed up tests
+
 N_BIRDSONGREC_WAVS = 5
 ALL_WAV_PATHS = (
     BIRDSONGREC_WAV_LIST[:N_BIRDSONGREC_WAVS] +
@@ -103,10 +103,11 @@ def a_wav_path(request):
 GOFFINET_ETAL_2021_WAV_DIR = GOFFINET_ETAL_2021_BM003_ROOT / 'wavs'
 GOFFINET_ETAL_2021_WAV_LIST = sorted(GOFFINET_ETAL_2021_WAV_DIR.glob('*.wav'))
 
-
+# only use a few wav files from cbins, to speed up tests
+N_CBINS = 5
 ALL_AUDIO_PATHS = (
-    BIRDSONGREC_WAV_LIST +
-    AUDIO_LIST_CBIN +
+    BIRDSONGREC_WAV_LIST[:N_BIRDSONGREC_WAVS] +
+    AUDIO_LIST_CBIN[:N_CBINS] +
     ALL_ZEBRA_FINCH_WAVS +
     [MULTICHANNEL_FLY_WAV]
 )
