@@ -4,6 +4,27 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+### Added
+- Add attributes `channels`, `samples`, and `duration` to `vocalpy.Sound`
+  [#124](https://github.com/vocalpy/vocalpy/pull/124).
+  Fixes [#90](https://github.com/vocalpy/vocalpy/issues/90).
+
+### Changed
+- Rename `vocalpy.Audio` to `vocalpy.Sound` 
+  [#124](https://github.com/vocalpy/vocalpy/pull/124).
+  Fixes [#90](https://github.com/vocalpy/vocalpy/issues/90).
+
+### Fixed
+- Fix how we handle the number of channels in audio to be consistent 
+  across single and multi-channel. `vocalpy.Sound.data` always has 
+  dimensions (channel, sample), and likewise `vocalpy.Spectrogram.data` 
+  has dimensions (channel, frequency, time), and feature extraction 
+  functions that extract one feature value per frame return arrays with
+  dimensions (shape, time)
+  [#124](https://github.com/vocalpy/vocalpy/pull/124).
+  Fixes [#90](https://github.com/vocalpy/vocalpy/issues/90).
+
 ## 0.8.2
 ### Fixed
 - Fix how we compute cepstrum in `vocalpy.spectral.sat`
