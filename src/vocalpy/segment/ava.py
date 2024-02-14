@@ -1,50 +1,31 @@
+"""Find segments in audio, using algorithm from ``ava`` package."""
 from __future__ import annotations
 
-from typing import Callable
+from dataclasses import dataclass
+from typing import TYPE_CHECKING
 
-import librosa
 import numpy as np
 import numpy.typing as npt
 from scipy.ndimage import gaussian_filter
 from scipy.signal import stft
 
+if TYPE_CHECKING:
+    from .. import Sound
+
+
 EPSILON = 1e-9
 
 
-def log_magnitude(spect: npt.NDArray) -> npt.NDArray:
-    """Helper function that transform a spectrogram
-    by converting the values of the magnitude to log"""
-    return np.log(spect + EPSILON)
+@dataclass
+class AvaParams:
+    """Data class that represents parameters
+    for :func:`vocalpy.segment.ava.segment`.
 
+    Constants in this module are instances of this class
+    that represent parameters used in papers.
 
-TRANSFORMS = {
-    "log_magnitude": log_magnitude,
-    "amplitude_to_db": librosa.amplitude_to_db,
-}
-
-
-def get_spectrogram(
-    data: npt.NDArray,
-    samplerate: int,
-    nperseg: int = 1024,
-    noverlap: int = 512,
-    min_freq: int = 30e3,
-    max_freq: int = 110e3,
-    transform: str = "amplitude_to_db",
-    spect_min_val: float | None = None,
-    spect_max_val: float | None = None,
-) -> tuple[npt.NDArray, npt.NDArray, npt.NDArray]:
-    """Compute a spectrogram the same way the ``ava`` package does.
-
-    This is the default function used to generate spectrograms by
-    :func:`vocalpy.segment.ava.segment`.
-
-    Parameters
+    Attributes
     ----------
-    data : numpy.ndarray
-        Sound data.
-    samplerate : int
-        Sampling rate for audio.
     nperseg : int
         Number of samples per segment for Short-Time Fourier Transform.
         Default is 1024.
@@ -60,13 +41,6 @@ def get_spectrogram(
         Maximum frequency. Spectrogram is "cropped"
         above this frequency (instead of, e.g.,
         bandpass filtering). Default is 110e3.
-    transform : str
-        One of ``{'log_magnitude', 'amplitude_to_db'}``.
-        If ``'log_amplitude'``, the computed spectrogram
-        is transformed by calling ``np.log(np.abs(spect) + EPSILON``.
-        If ``'amplitude-to-db'``, the spectrogram
-        is transformed with
-        :func:`librosa.amplitude_to_db`.
     spect_min_val : float, optional
         Expected minimum value of spectrogram
         after transforming to the log of the
@@ -83,74 +57,105 @@ def get_spectrogram(
         where ``spect_min_val`` is :math:`s_{min}`.
         Default is None, in which case
         the maximum value of the spectrogram is used.
+    thresh_max : float
+        Threshold used to find local maxima.
+    thresh_min : float
+        Threshold used to find local minima,
+        in relation to local maxima.
+        Used to find onsets and offsets of segments.
+    thresh_lowest : float
+        Lowest threshold used to find onsets and offsets
+        of segments.
+    min_dur : float
+        Minimum duration of a segment, in seconds.
+    max_dur : float
+        Maximum duration of a segment, in seconds.
+    use_softmax_amp : bool
+        If True, compute summed spectral power from spectrogram
+        with a softmax operation on each column.
+        Default is True.
+    temperature : float
+        Temperature for softmax. Only used if ``use_softmax_amp`` is True.
+    smoothing_timescale : float
+        Timescale to use when smoothing summed spectral power
+        with a gaussian filter.
+        The window size will be ``dt - smoothing_timescale / samplerate``,
+        where ``dt`` is the size of a time bin in the spectrogram.
 
-    Returns
-    -------
-    spect : numpy.ndarray
-        Spectrogram, a matrix with shape ``(f, t)``.
-    f : numpy.ndarray
-        Vector of frequencies, same size as
-        the ``f`` dimension of ``spec``.
-    t : numpy.ndarray
-        Vector of times, same size as
-        the ``t`` dimension of ``spec``.
-
-    Notes
-    -----
-    Default parameters are taking from example script here:
-    https://github.com/pearsonlab/autoencoded-vocal-analysis/blob/master/examples/mouse_sylls_mwe.py
-    Note that example script suggests tuning these parameters using functionality built into it,
-    that we do not replicate here.
-
-    The following modifications were made to the defaults:
-    - We use the minimum and maximum of the computed spectrogram by default
-      when min-max scaling so the
-    - We default to converting the spectrogram to decibel-scaled values,
-      using :func:`librosa.amplitude_to_db`.
+    Examples
+    --------
+    >>> all_onsets, all_offsets = [], []
+    >>> jourjineetal2023paths = vocalpy.example('jourjine-et-al-2023')
+    >>> for wav_path in jourjine2023paths:
+    >>>     sound = voc.Sound.read(wav_path)
+    ...     onsets, offsets = voc.segment.ava.segment(sound,
+    ...         **dataclasses.asdict(voc.segment.ava.JOURJINEETAL2023)
+    ...     )
+    ...     all_onsets.append(onsets)
+    ...     all_offsets.append(offsets)
     """
-    if not len(data) >= nperseg:
-        raise ValueError(f"length of `sound`` {(len(data))} must be greater than or equal to ``nperseg``: {nperseg}")
-
-    if spect_min_val is not None or spect_max_val is not None:
-        if not (spect_min_val is not None and spect_max_val is not None):
-            raise ValueError(
-                "If a value is specified for either ``spect_min_val`` or ``spect_max_val``, "
-                "then both values must be specified: "
-                f"spect_min_val: {spect_min_val}, spect_max_val: {spect_max_val}"
-            )
-
-    if transform not in TRANSFORMS:
-        raise ValueError(f"Invalid ``transform``: {transform}. " f"Valid values are: {TRANSFORMS}.")
-
-    f, t, spect = stft(data, samplerate, nperseg=nperseg, noverlap=noverlap)
-    min_freq_ind = np.searchsorted(f, min_freq)
-    max_freq_ind = np.searchsorted(f, max_freq)
-    f, spect = f[min_freq_ind:max_freq_ind], spect[min_freq_ind:max_freq_ind]
-
-    # next line, we apply transform using the dict that maps names to functions.
-    # note we take ``np.abs`` here to preserve original behavior and to avoid librosa warning
-    spect = TRANSFORMS[transform](np.abs(spect))
-
-    if spect_min_val is None and spect_max_val is None:
-        spect_min_val = spect.min()
-        spect_max_val = spect.max()
-
-    spect = (spect - spect_min_val) / (spect_max_val - spect_min_val)
-    spect = np.clip(spect, 0.0, 1.0)
-    return spect, f, t
+    nperseg: int = 1024
+    noverlap: int = 512
+    min_freq: float = 20e3
+    max_freq: float = 125e3
+    spec_min_val: float = .8
+    spec_max_val: float = 6.
+    thresh_lowest: float = .3
+    thresh_min: float = .3
+    thresh_max: float = .35
+    min_dur: float = 0.015
+    max_dur: float = 1.
+    use_softmax_amp: bool = False
+    temperature: float = 0.01
+    smoothing_timescale: float = 0.00025
 
 
-def softmax(arr: npt.NDArray, t=0.5):
-    """Softmax along first array dimension. Not numerically stable."""
-    temp = np.exp(arr / t)
-    temp /= np.sum(temp, axis=0) + EPSILON
-    return np.sum(np.multiply(arr, temp), axis=0)
+# https://github.com/nickjourjine/peromyscus-pup-vocal-evolution/blob/main/scripts/Segmenting%20and%20UMAP.ipynb
+JOURJINE2023 = AvaParams(
+    nperseg=1024,
+    noverlap=512,
+    min_freq=20e3,
+    max_freq=125e3,
+    spec_min_val=.8,
+    spec_max_val=6.,
+    thresh_lowest=.3,
+    thresh_min=.3,
+    thresh_max=.35,
+    min_dur=0.015,
+    max_dur=1.,
+    use_softmax_amp=False,
+    temperature=0.01,
+    smoothing_timescale=0.00025,
+)
+
+
+# https://github.com/ralphpeterson/gerbil-vocal-dialects/blob/main/figure1-audio-segmenting-example.ipynb
+PETERSONETAL2023 = AvaParams(
+    nperseg=512,
+    noverlap=256,
+    min_freq=500.,
+    max_freq=62.5E3,
+    spec_min_val=-8.0,
+    spec_max_val=-7.25,
+    thresh_lowest=2,
+    thresh_min=5,
+    thresh_max=2,
+    min_dur=0.03,
+    max_dur=0.3,
+    use_softmax_amp=False,
+    temperature=0.01,
+    smoothing_timescale=0.007,
+)
 
 
 def segment(
-    data: npt.NDArray,
-    samplerate: int,
-    spect_callback: Callable | None = None,
+    sound: Sound,
+    nperseg: int = 1024,
+    noverlap: int = 512,
+    min_freq: int = 30e3,
+    max_freq: int = 110e3,
+    spect_min_val: float | None = None,
+    spect_max_val: float | None = None,
     thresh_lowest: float = 0.1,
     thresh_min: float = 0.2,
     thresh_max: float = 0.3,
@@ -159,7 +164,7 @@ def segment(
     use_softmax_amp: bool = True,
     temperature: float = 0.5,
     smoothing_timescale: float = 0.007,
-):
+) -> tuple[npt.NDArray, npt.NDArray]:
     """Find segments in audio, using algorithm
     from ``ava`` package.
 
@@ -183,14 +188,39 @@ def segment(
 
     Parameters
     ----------
-    audio : numpy.ndarray
-        Raw audio samples.
-    samplerate : int
-        Sampling rate for audio.
-    spect_callback : callable, optional
-        Function used to compute spectrogram.
-        If None, then :func:`vocalpy.segment.ava_segmenter.ava_spectrogram`
-        is used with the default parameters.
+    sound : vocalpy.Sound
+        Sound loaded from an audio file.
+    nperseg : int
+        Number of samples per segment for Short-Time Fourier Transform.
+        Default is 1024.
+    noverlap : int
+        Number of samples to overlap per segment
+        for Short-Time Fourier Transform.
+        Default is 512.
+    min_freq : int
+        Minimum frequency. Spectrogram is "cropped"
+        below this frequency (instead of, e.g.,
+        bandpass filtering). Default is 30e3.
+    max_freq : int
+        Maximum frequency. Spectrogram is "cropped"
+        above this frequency (instead of, e.g.,
+        bandpass filtering). Default is 110e3.
+    spect_min_val : float, optional
+        Expected minimum value of spectrogram
+        after transforming to the log of the
+        magnitude. Used for a min-max scaling:
+        :math:`(s - s_{min} / (s_{max} - s_{min})`
+        where ``spect_min_val`` is :math:`s_{min}`.
+        Default is None, in which case
+        the minimum value of the spectrogram is used.
+    spect_max_val : float, optional
+        Expected maximum value of spectrogram
+        after transforming to the log of the
+        magnitude. Used for a min-max scaling:
+        :math:`(s - s_{min} / (s_{max} - s_{min})`
+        where ``spect_min_val`` is :math:`s_{min}`.
+        Default is None, in which case
+        the maximum value of the spectrogram is used.
     thresh_max : float
         Threshold used to find local maxima.
     thresh_min : float
@@ -230,7 +260,7 @@ def segment(
     from the dataset associated with [1]_.
 
     Code is adapted from [2]_.
-    Default parameters are taking from example script here:
+    Default parameters are taken from example script here:
     https://github.com/pearsonlab/autoencoded-vocal-analysis/blob/master/examples/mouse_sylls_mwe.py
     Note that example script suggests tuning these parameters using functionality built into it,
     that we do not replicate here.
@@ -266,14 +296,26 @@ def segment(
 
     .. [7] https://github.com/ralphpeterson/gerbil-vocal-dialects/blob/main/vocalization_segmenting.py
     """
-    if spect_callback is None:
-        spect_callback = get_spectrogram
-    spect, f, t = spect_callback(data, samplerate)
+    # ---- compute spectrogram
+    # TODO: return Spectrogram for each Segment when we return Segments
+    f, t, spect = stft(sound.data, sound.samplerate, nperseg=nperseg, noverlap=noverlap)
+    i1 = np.searchsorted(f, min_freq)
+    i2 = np.searchsorted(f, max_freq)
+    f, spect = f[i1:i2], spect[i1:i2]
+    spect = np.log(np.abs(spect) + EPSILON)
+    spect -= spect_min_val
+    spect /= spect_max_val - spect_min_val
+    spect = np.clip(spect, 0.0, 1.0)
 
+    # we determinte `dt` here in case we need it for `amps`
+    # we also use it below to remove segments shorter than the minimum allowed value
     dt = t[1] - t[0]
-    # Calculate amplitude and smooth.
+
+    # ---- calculate amplitude and smooth.
     if use_softmax_amp:
-        amps = softmax(spect, t=temperature)
+        temp = np.exp(spect / temperature)
+        temp /= np.sum(temperature, axis=0) + EPSILON
+        amps = np.sum(np.multiply(spect, temp), axis=0)
     else:
         amps = np.sum(spect, axis=0)
     amps = gaussian_filter(amps, smoothing_timescale / dt)
