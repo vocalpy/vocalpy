@@ -70,6 +70,11 @@ class AvaParams:
         Minimum duration of a segment, in seconds.
     max_dur : float
         Maximum duration of a segment, in seconds.
+    min_isi_dur : float, optional
+        Minimum duration of inter-segment intervals, in seconds.
+        If specified, any inter-segment intervals shorter than this value
+        will be removed, and the adjacent segments merged.
+        Default is None.
     use_softmax_amp : bool
         If True, compute summed spectral power from spectrogram
         with a softmax operation on each column.
@@ -105,6 +110,7 @@ class AvaParams:
     thresh_max: float = .35
     min_dur: float = 0.015
     max_dur: float = 1.
+    min_isi_dur: float | None = None
     use_softmax_amp: bool = False
     temperature: float = 0.01
     smoothing_timescale: float = 0.00025
@@ -123,6 +129,7 @@ JOURJINE2023 = AvaParams(
     thresh_max=.35,
     min_dur=0.015,
     max_dur=1.,
+    min_isi_dur=0.004,
     use_softmax_amp=False,
     temperature=0.01,
     smoothing_timescale=0.00025,
@@ -161,6 +168,7 @@ def segment(
     thresh_max: float = 0.3,
     min_dur: float = 0.03,
     max_dur: float = 0.2,
+    min_isi_dur: float | None = None,
     use_softmax_amp: bool = True,
     temperature: float = 0.5,
     smoothing_timescale: float = 0.007,
@@ -234,6 +242,11 @@ def segment(
         Minimum duration of a segment, in seconds.
     max_dur : float
         Maximum duration of a segment, in seconds.
+    min_isi_dur : float, optional
+        Minimum duration of inter-segment intervals, in seconds.
+        If specified, any inter-segment intervals shorter than this value
+        will be removed, and the adjacent segments merged.
+        Default is None.
     use_softmax_amp : bool
         If True, compute summed spectral power from spectrogram
         with a softmax operation on each column.
@@ -373,15 +386,28 @@ def segment(
             onsets = onsets[: len(offsets)]
             continue
 
-    # Throw away syllables that are too long or too short.
+    # Throw away segments that are too long or too short.
     min_dur_samples = int(np.floor(min_dur / dt))
     max_dur_samples = int(np.ceil(max_dur / dt))
-    new_onsets = []
-    new_offsets = []
+    new_onsets, new_offsets = [], []
     for i in range(len(offsets)):
         t1, t2 = onsets[i], offsets[i]
         if t2 - t1 + 1 <= max_dur_samples and t2 - t1 + 1 >= min_dur_samples:
             new_onsets.append(t1 * dt)
             new_offsets.append(t2 * dt)
+    onsets = np.array(new_onsets)
+    offsets = np.array(new_offsets)
 
-    return np.array(new_onsets), np.array(new_offsets)
+    # Throw away inter-segment intervals that are too short, as is done in Jourjine et al., 2023
+    # Note we do this **after** throwing away segments that are too long or too short.
+    # We do this to replicate what was done in Jourjine et al., 2023, where they call `ava.get_onsets_offsets`
+    # and then remove inter-syllable intervals less than a specified duration.
+    # This means there is the possibility of throwing away some short segments that we might have merged,
+    # if we'd removed inter-segment intervals *first*, which is what `vocalpy.segment.meansquared` does.
+    if min_isi_dur is not None:
+        isi_durs = offsets[:-1] - onsets[1:]
+        keep_these = isi_durs > min_isi_dur
+        onsets = np.concatenate((onsets[0, np.newaxis], onsets[1:][keep_these]))
+        offsets = np.concatenate((offsets[:-1][keep_these], offsets[-1, np.newaxis]))
+
+    return onsets, offsets
