@@ -1,7 +1,7 @@
 """fixtures relating to audio files"""
 import pytest
 
-from .test_data import DATA_ROOTS_WITH_SUBDIRS, SOURCE_TEST_DATA_ROOT, GOFFINET_ETAL_2021_BM003_ROOT
+from .test_data import DATA_ROOTS_WITH_SUBDIRS, SOURCE_TEST_DATA_ROOT
 
 
 AUDIO_DIR_CBIN = SOURCE_TEST_DATA_ROOT / 'audio_cbin_annot_notmat' / 'gy6or6' / '032312'
@@ -99,9 +99,8 @@ def a_wav_path(request):
     return request.param
 
 
-# FIXME: these files are missing from source data!
-GOFFINET_ETAL_2021_WAV_DIR = GOFFINET_ETAL_2021_BM003_ROOT / 'wavs'
-GOFFINET_ETAL_2021_WAV_LIST = sorted(GOFFINET_ETAL_2021_WAV_DIR.glob('*.wav'))
+JOURJINE_ETAL_2021_WAV_DIR = SOURCE_TEST_DATA_ROOT / 'jourjine-et-al-2023/developmentLL'
+JOURJINE_ETAL_2021_WAV_LIST = sorted(JOURJINE_ETAL_2021_WAV_DIR.glob('*.wav'))
 
 # only use a few wav files from cbins, to speed up tests
 N_CBINS = 5
