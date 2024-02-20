@@ -28,4 +28,7 @@ docs/getting_started/data
 
 # test data
 tests/data-for-tests/source/
+tests/data-for-tests/generated/paths/
+tests/data-for-tests/generated/segment/
+tests/data-for-tests/generated/spectrogram/
 *.tar.gz
