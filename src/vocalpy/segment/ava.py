@@ -90,7 +90,7 @@ class AvaParams:
 
     Examples
     --------
-    >>> jourjineetal2023paths = vocalpy.example('jourjine-et-al-2023')
+    >>> jourjineetal2023paths = voc.example('jourjine-et-al-2023')
     >>> wav_path = jourjine2023paths[0]
     >>> sound = voc.Sound.read(wav_path)
     >>> onsets, offsets = voc.segment.ava.segment(sound, **voc.segment.ava.JOURJINEETAL2023)
@@ -297,7 +297,7 @@ def segment(
 
     Examples
     --------
-    >>> jourjineetal2023paths = vocalpy.example('jourjine-et-al-2023')
+    >>> jourjineetal2023paths = voc.example('jourjine-et-al-2023')
     >>> wav_path = jourjineetal2023paths[0]
     >>> sound = voc.Sound.read(wav_path)
     >>> params = {**voc.segment.ava.JOURJINEETAL2023}
