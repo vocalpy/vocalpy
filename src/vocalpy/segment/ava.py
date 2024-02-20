@@ -90,15 +90,10 @@ class AvaParams:
 
     Examples
     --------
-    >>> all_onsets, all_offsets = [], []
     >>> jourjineetal2023paths = vocalpy.example('jourjine-et-al-2023')
-    >>> for wav_path in jourjine2023paths:
-    >>>     sound = voc.Sound.read(wav_path)
-    ...     onsets, offsets = voc.segment.ava.segment(sound,
-    ...         **dataclasses.asdict(voc.segment.ava.JOURJINEETAL2023)
-    ...     )
-    ...     all_onsets.append(onsets)
-    ...     all_offsets.append(offsets)
+    >>> wav_path = jourjine2023paths[0]
+    >>> sound = voc.Sound.read(wav_path)
+    >>> onsets, offsets = voc.segment.ava.segment(sound, **voc.segment.ava.JOURJINEETAL2023)
     """
     scale: bool = True
     scale_val: int | float = 2**15
@@ -299,6 +294,28 @@ def segment(
         Vector of onset times of segments, in seconds.
     offsets_s : numpy.ndarray
         Vector of offset times of segments, in seconds.
+
+    Examples
+    --------
+    >>> jourjineetal2023paths = vocalpy.example('jourjine-et-al-2023')
+    >>> wav_path = jourjineetal2023paths[0]
+    >>> sound = voc.Sound.read(wav_path)
+    >>> params = {**voc.segment.ava.JOURJINEETAL2023}
+    >>> del params['min_isi_dur']
+    >>> onsets, offsets = voc.segment.ava.segment(sound, **params)
+    >>> spect = voc.spectrogram(sound)
+    >>> rows = cols = int(np.ceil(np.sqrt(onsets.shape[0])))
+    >>> fig, ax_arr = plt.subplots(rows, cols)
+    >>> for on, off, ax in zip(onsets, offsets, ax_arr.ravel()[:onsets.shape[0]]):
+    ...     on_ind, off_ind = int(on * sound.samplerate), int(off * sound.samplerate)
+    ...     data = sound.data[:, on_ind:off_ind]
+    ...     newsound = voc.Sound(data=data, samplerate=sound.samplerate)
+    ...     spect = voc.spectrogram(newsound)
+    ...     ax.pcolormesh(spect.times, spect.frequencies, np.squeeze(spect.data))
+    >>> for ax in ax_arr.ravel()[:onsets.shape[0]]:
+    ...     ax.set_axis_off()
+    >>> for ax in ax_arr.ravel()[onsets.shape[0]:]:
+    ...     ax.remove()
 
     Notes
     -----
