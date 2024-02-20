@@ -1,8 +1,8 @@
 """fixtures relating to audio files"""
 import pytest
 
-from .test_data import DATA_ROOTS_WITH_SUBDIRS, SOURCE_TEST_DATA_ROOT
-
+from .test_data import SOURCE_TEST_DATA_ROOT
+from .paths import DATA_ROOTS_WITH_SUBDIRS
 
 AUDIO_DIR_CBIN = SOURCE_TEST_DATA_ROOT / 'audio_cbin_annot_notmat' / 'gy6or6' / '032312'
 
