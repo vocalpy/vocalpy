@@ -187,6 +187,17 @@ def test_data_download_source(session) -> None:
         tf.extractall(path='.')
 
 
+TEST_DATA_GENERATE_AVA_SEGMENTS_SCRIPT = './tests/scripts/generate_ava_segment_test_data/generate_ava_segment_text_files_from_jourjine_et_al_2023.py'
+
+
+@nox.session(name='test-data-generate-ava-segments', python="3.10")
+def test_data_generate(session) -> None:
+    """Produce generated test data for ava segments"""
+    session.install("joblib==1.3.2")
+    session.install("numpy==1.26.3")
+    session.install("scipy==1.12.0")
+    session.run("python", TEST_DATA_GENERATE_AVA_SEGMENTS_SCRIPT)
+
 
 TEST_DATA_GENERATE_SCRIPT = './tests/scripts/generate_data_for_tests.py'
 
@@ -200,14 +211,15 @@ def test_data_generate(session) -> None:
     session.run("python", TEST_DATA_GENERATE_SCRIPT)
 
 
-# TODO: fix this url!
-GENERATED_TEST_DATA_DIR = DATA_FOR_TESTS_DIR / "generated"
+# add project root to path so we can import constants from fixtures instead of duplicating here
+sys.path.insert(0, str(DIR))
+from tests.fixtures.test_data import GENERATED_TEST_DATA_ROOT
 GENERATED_TEST_DATA_SUBDIRS = [
     dir_ for dir_
-    in sorted(pathlib.Path(GENERATED_TEST_DATA_DIR).glob('*/'))
+    in GENERATED_TEST_DATA_ROOT.iterdir()
     if dir_.is_dir()
 ]
-GENERATED_TEST_DATA_TAR = GENERATED_TEST_DATA_DIR / 'generated_test_data.tar.gz'
+GENERATED_TEST_DATA_TAR = GENERATED_TEST_DATA_ROOT / 'generated_test_data.tar.gz'
 
 
 @nox.session(name='test-data-clean-generated')
@@ -215,7 +227,8 @@ def test_data_clean_generated(session) -> None:
     """
     Clean (remove) 'generated' test data.
     """
-    clean_dir(GENERATED_TEST_DATA_DIR)
+    for dir_ in GENERATED_TEST_DATA_SUBDIRS:
+        clean_dir(dir_)
 
 
 @nox.session(name='test-data-tar-generated')
