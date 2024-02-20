@@ -1,46 +1,40 @@
-import functools
-
 import numpy as np
+import pytest
+
 import vocalpy as voc
 
-
-SPECT_PARAMS = {
-    'min_freq': 30000.0,
-    'max_freq': 110000.0,
-    'nperseg': 1024,
-    'noverlap': 512,
-    'spect_min_val': -10.0,
-    'spect_max_val': 2.0,
-    'transform': 'log_magnitude',
-}
-
-SEGMENT_PARAMS = {
-    'thresh_max': 0.305,
-    'thresh_min': 0.3,
-    'thresh_lowest': 0.295,
-    'min_dur': 0.03,
-    'max_dur': 0.2,
-    'smoothing_timescale': 0.007,
-    'temperature': 0.5,
-}
+from ..fixtures.audio import JOURJINE_ETAL_2021_WAV_LIST
+from ..fixtures.segments import JOURJINE_ETAL_2023_SEG_TXT_LIST
 
 
-def test_ava(goffinet_etal_2021_wav_seg_tuple):
+WAV_PATH_SEG_TXT_PATH_TUPLES = zip(
+    JOURJINE_ETAL_2021_WAV_LIST,
+    JOURJINE_ETAL_2023_SEG_TXT_LIST
+)
+
+
+@pytest.fixture(params=WAV_PATH_SEG_TXT_PATH_TUPLES)
+def wav_path_seg_txt_path_tuple(request):
+    return request.param
+
+
+def test_ava(wav_path_seg_txt_path_tuple):
     """Test that :func:`vocalpy.segment.ava.segment` replicates segmenting results
     obtained with the ``ava`` package."""
-    wav_path, seg_txt_path = goffinet_etal_2021_wav_seg_tuple
-
-    spect_callable = functools.partial(voc.segment.ava.get_spectrogram, **SPECT_PARAMS)
+    wav_path, seg_txt_path = wav_path_seg_txt_path_tuple
 
     segs = np.loadtxt(seg_txt_path)
     segs = segs.reshape(-1,2)
-    onsets_txt, offsets_txt = segs[:,0], segs[:,1]
+    onsets_gt, offsets_gt = segs[:,0], segs[:,1]
 
     sound = voc.Sound.read(wav_path)
-    onsets, offsets = voc.segment.ava.segment(sound.data, sound.samplerate,
-                                          spect_callback=spect_callable,
-                                          **SEGMENT_PARAMS)
+    params = {**voc.segment.ava.JOURJINEETAL2023}
+    del params['min_isi_dur']
+    onsets, offsets = voc.segment.ava.segment(sound, **params)
+
     assert isinstance(onsets, np.ndarray)
     assert isinstance(offsets, np.ndarray)
-    np.allclose(onsets_txt, onsets)
-    np.allclose(offsets_txt, offsets)
+    # we set atol=1e-5 because we expect values to be the same up to roughly 5th decimal place
+    # https://stackoverflow.com/questions/65909842/what-is-rtol-for-in-numpys-allclose-function
+    np.testing.assert_allclose(onsets, onsets_gt, atol=1e-5, rtol=0)
+    np.testing.assert_allclose(offsets, offsets_gt, atol=1e-5, rtol=0)
