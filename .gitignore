@@ -28,5 +28,4 @@ docs/getting_started/data
 
 # test data
 tests/data-for-tests/source/
-tests/data-for-tests/generated/
 *.tar.gz
