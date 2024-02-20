@@ -275,12 +275,14 @@ seg_params = {
 
 # from autoencoded-vocal-analysis/examples/mouse_sylls_mwe.py
 import pathlib
+
 REPO_ROOT = pathlib.Path(__file__).parent / '..' / '..' / '..'
 root = REPO_ROOT / 'tests/data-for-tests/source/jourjine-et-al-2023'
 audio_dirs = [os.path.join(root, 'developmentLL')]
 SEG_DIR_ROOT = REPO_ROOT / 'tests/data-for-tests/generated/jourjine-et-al-2023'
 seg_dirs = [os.path.join(SEG_DIR_ROOT, 'segs')]
 
-n_jobs = min(len(audio_dirs), os.cpu_count()-1)
-gen = zip(audio_dirs, seg_dirs, repeat(seg_params))
-Parallel(n_jobs=n_jobs)(delayed(segment)(*args) for args in gen)
+def main():
+	n_jobs = min(len(audio_dirs), os.cpu_count()-1)
+	gen = zip(audio_dirs, seg_dirs, repeat(seg_params))
+	Parallel(n_jobs=n_jobs)(delayed(segment)(*args) for args in gen)
