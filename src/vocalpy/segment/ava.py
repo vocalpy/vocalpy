@@ -1,13 +1,14 @@
 """Find segments in audio, using algorithm from ``ava`` package."""
 from __future__ import annotations
 
-from dataclasses import dataclass
+from dataclasses import asdict, dataclass
 from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
 from scipy.ndimage import gaussian_filter
 from scipy.signal import stft
+
 
 if TYPE_CHECKING:
     from .. import Sound
@@ -99,12 +100,15 @@ class AvaParams:
     ...     all_onsets.append(onsets)
     ...     all_offsets.append(offsets)
     """
+    scale: bool = True
+    scale_val: int | float = 2**15
+    scale_dtype: npt.DTypeLike = np.int16
     nperseg: int = 1024
     noverlap: int = 512
     min_freq: float = 20e3
     max_freq: float = 125e3
-    spec_min_val: float = .8
-    spec_max_val: float = 6.
+    spect_min_val: float = .8
+    spect_max_val: float = 6.
     thresh_lowest: float = .3
     thresh_min: float = .3
     thresh_max: float = .35
@@ -115,15 +119,23 @@ class AvaParams:
     temperature: float = 0.01
     smoothing_timescale: float = 0.00025
 
+    def keys(self):
+        return asdict(self).keys()
 
-# https://github.com/nickjourjine/peromyscus-pup-vocal-evolution/blob/main/scripts/Segmenting%20and%20UMAP.ipynb
-JOURJINE2023 = AvaParams(
+    def __getitem__(self, item):
+        if getattr(self, '_dict', None) is None:
+            self._dict = asdict(self)
+        return self._dict[item]
+
+
+# from https://github.com/nickjourjine/peromyscus-pup-vocal-evolution/blob/main/scripts/Segmenting%20and%20UMAP.ipynb
+JOURJINEETAL2023 = AvaParams(
     nperseg=1024,
     noverlap=512,
     min_freq=20e3,
     max_freq=125e3,
-    spec_min_val=.8,
-    spec_max_val=6.,
+    spect_min_val=.8,
+    spect_max_val=6.,
     thresh_lowest=.3,
     thresh_min=.3,
     thresh_max=.35,
@@ -136,14 +148,14 @@ JOURJINE2023 = AvaParams(
 )
 
 
-# https://github.com/ralphpeterson/gerbil-vocal-dialects/blob/main/figure1-audio-segmenting-example.ipynb
+# from https://github.com/ralphpeterson/gerbil-vocal-dialects/blob/main/figure1-audio-segmenting-example.ipynb
 PETERSONETAL2023 = AvaParams(
     nperseg=512,
     noverlap=256,
     min_freq=500.,
     max_freq=62.5E3,
-    spec_min_val=-8.0,
-    spec_max_val=-7.25,
+    spect_min_val=-8.0,
+    spect_max_val=-7.25,
     thresh_lowest=2,
     thresh_min=5,
     thresh_max=2,
@@ -157,6 +169,9 @@ PETERSONETAL2023 = AvaParams(
 
 def segment(
     sound: Sound,
+    scale: bool = True,
+    scale_val: int | float = 2**15,
+    scale_dtype: npt.DTypeLike = np.int16,
     nperseg: int = 1024,
     noverlap: int = 512,
     min_freq: int = 30e3,
@@ -198,6 +213,25 @@ def segment(
     ----------
     sound : vocalpy.Sound
         Sound loaded from an audio file.
+    scale : bool
+        If True, scale the ``sound.data``.
+        Default is True.
+        This is needed to replicate the behavior of ``ava``,
+        which assumes the audio data is loaded as 16-bit integers.
+        The default behavior that replicates this is to
+        multiply the ``float64`` audio by 2**15 and then cast to the ``int16`` dtype.
+    scale_val :
+        Value to multiply the ``sound.data`` by, to scale the data.
+        Default is 2**15.
+        Only used if ``scale`` is ``True``.
+        This is needed to replicate the behavior of ``ava``,
+        which assumes the audio data is loaded as 16-bit integers.
+    scale_dtype : numpy.dtype
+        Numpy Dtype to cast ``sound.data`` to, after scaling.
+        Default is ``np.int16``.
+        Only used if ``scale`` is ``True``.
+        This is needed to replicate the behavior of ``ava``,
+        which assumes the audio data is loaded as 16-bit integers.
     nperseg : int
         Number of samples per segment for Short-Time Fourier Transform.
         Default is 1024.
@@ -309,9 +343,25 @@ def segment(
 
     .. [7] https://github.com/ralphpeterson/gerbil-vocal-dialects/blob/main/vocalization_segmenting.py
     """
+    if sound.data.shape[0] > 1:
+        raise ValueError(
+            f"The ``sound`` has {sound.data.shape[0]} channels, but segmentation is not implemented "
+            "for sounds with multiple channels. This is because there can be a different number of segments "
+            "per channel, which cannot be represented as a rectangular array. To segment each channel, "
+            "first split the channels into separate ``vocalpy.Sound`` instances, then pass each to this function."
+            "For example,\n"
+            ">>> sound_channels = [sound_ for sound_ in sound]  # split with a list comprehension\n"
+            ">>> channel_segments = [vocalpy.segment.meansquared(sound_) for sound_ in sound_channels]\n"
+        )
+
+    data = np.squeeze(sound.data, axis=0)  # get rid of channels dim so we operate on scalars in main loop
+
+    if scale:
+        data = (data * scale_val).astype(scale_dtype)
+
     # ---- compute spectrogram
     # TODO: return Spectrogram for each Segment when we return Segments
-    f, t, spect = stft(sound.data, sound.samplerate, nperseg=nperseg, noverlap=noverlap)
+    f, t, spect = stft(data, sound.samplerate, nperseg=nperseg, noverlap=noverlap)
     i1 = np.searchsorted(f, min_freq)
     i2 = np.searchsorted(f, max_freq)
     f, spect = f[i1:i2], spect[i1:i2]
@@ -320,7 +370,7 @@ def segment(
     spect /= spect_max_val - spect_min_val
     spect = np.clip(spect, 0.0, 1.0)
 
-    # we determinte `dt` here in case we need it for `amps`
+    # we determine `dt` here in case we need it for `amps`
     # we also use it below to remove segments shorter than the minimum allowed value
     dt = t[1] - t[0]
 
@@ -335,9 +385,6 @@ def segment(
 
     # Find local maxima greater than thresh_max.
     local_maxima = []
-    # replace this with a convolution to find local maxima?
-    # actually I think we want `find_peaks`
-    # https://docs.scipy.org/doc/scipy/reference/generated/scipy.signal.find_peaks.html
     for i in range(1, len(amps) - 1, 1):
         if amps[i] > thresh_max and amps[i] == np.max(amps[i - 1 : i + 2]):  # noqa: E203
             local_maxima.append(i)
@@ -345,7 +392,7 @@ def segment(
     # Then search to the left and right for onsets and offsets.
     onsets, offsets = [], []
     for local_max in local_maxima:
-        # skip this local_max if we are in a region we already declared a syllabel
+        # skip this local_max if we are in a region we already declared a segment
         if len(offsets) > 1 and local_max < offsets[-1]:
             continue
 
@@ -405,6 +452,9 @@ def segment(
     # This means there is the possibility of throwing away some short segments that we might have merged,
     # if we'd removed inter-segment intervals *first*, which is what `vocalpy.segment.meansquared` does.
     if min_isi_dur is not None:
+        if onsets.size == 0:
+            # can't throw any intervals away if there's not any intervals
+            return onsets, offsets
         isi_durs = offsets[:-1] - onsets[1:]
         keep_these = isi_durs > min_isi_dur
         onsets = np.concatenate((onsets[0, np.newaxis], onsets[1:][keep_these]))
