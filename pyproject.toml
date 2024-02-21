@@ -52,6 +52,7 @@ doc = [
     "jupyterlab >=3.0.3",
     "jupytext >=1.13.8",
     "myst-nb >=0.15.0",
+    "numpydoc >=1.6.0",
     "Sphinx >=3.4.3",
     "sphinx-autobuild >= 2021.3.14",
     "sphinx-book-theme >=0.3.2",
