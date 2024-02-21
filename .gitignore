@@ -26,6 +26,9 @@ docs/_build/
 docs/api/generated
 docs/getting_started/data
 
+# example data
+src/scripts/example_data
+
 # test data
 tests/data-for-tests/source/
 tests/data-for-tests/generated/paths/
