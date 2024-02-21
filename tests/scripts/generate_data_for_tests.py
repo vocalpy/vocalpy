@@ -98,6 +98,14 @@ def generate_data_roots_with_subdirs():
                 shutil.copy(path, path_dst)
 
 
+def check_ava_segment_data_exists():
+    from tests.fixtures.segments import AVA_SEGMENT_TXT_DIR, AVA_SEGMENT_TXT_LIST
+    if len(AVA_SEGMENT_TXT_LIST) < 1:
+        raise ValueError(
+            f"No segment .txt files from ava segmentation found in directory: {AVA_SEGMENT_TXT_DIR}."
+            f"Run the nox session 'test-data-generate-ava-segment' before running the session that runs this script."
+        )
+
 def main():
     """Makes directories in `./tests/data-for-tests/generated
     (after those have been removed by running ``nox -s test-data-clean-generated``).
@@ -109,6 +117,7 @@ def main():
     mkdirs()
     generate_npz_spect_files()
     generate_data_roots_with_subdirs()
+    check_ava_segment_data_exists()
 
 
 main()
