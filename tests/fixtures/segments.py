@@ -1,5 +1,5 @@
 from .test_data import GENERATED_TEST_DATA_ROOT
 
 SEGMENT_ROOT = GENERATED_TEST_DATA_ROOT / 'segment'
-AVA_SEGMENT_TXT_DIR = GENERATED_TEST_DATA_ROOT / 'ava-segment-txt'
+AVA_SEGMENT_TXT_DIR = SEGMENT_ROOT / 'ava-segment-txt'
 AVA_SEGMENT_TXT_LIST = sorted(AVA_SEGMENT_TXT_DIR.glob('*.txt'))
