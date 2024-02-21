@@ -60,7 +60,6 @@ https://nickledave.github.io/bfsongrepo
 Files are approximately 20 songs from bird with ID "gy6or6", from the day "032312"
 """,
         type="audio",
-        ext="cbin",
         fname="bfsongrepo.tar.gz",
         requires_download=True,
     ),
