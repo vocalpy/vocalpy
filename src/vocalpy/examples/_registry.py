@@ -86,7 +86,7 @@ REGISTRY = {example.name: example for example in EXAMPLES}
 
 POOCH = pooch.create(
     path=pooch.os_cache("vocalpy"),
-    base_url="doi:10.5281/zenodo.10685640",
+    base_url="doi:10.5281/zenodo.10685782",
     registry=None,
 )
 POOCH.load_registry_from_doi()
