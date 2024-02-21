@@ -5,6 +5,8 @@ import importlib.resources
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+import pooch
+
 if TYPE_CHECKING:
     import vocalpy
 
@@ -14,6 +16,9 @@ class Example:
     name: str
     metadata: str
     type: str
+    fname: str | None = None
+    ext: str = "wav"
+    requires_download: bool = False
 
 
 EXAMPLES = [
@@ -47,13 +52,47 @@ Adapted under Creative Commons License 1.0: https://creativecommons.org/publicdo
 File name in dataset: BM003_day9_air_20s_sparse_chunk007_0297.wav""",
         type="audio",
     ),
+    Example(
+        name="bfsongrepo",
+        metadata="""Sample of song from Bengalese Finch Song Repository.    
+Nicholson, David; Queen, Jonah E.; J. Sober, Samuel (2017). Bengalese Finch song repository. figshare. Dataset. https://doi.org/10.6084/m9.figshare.4805749.v9
+https://nickledave.github.io/bfsongrepo
+Files are approximately 20 songs from bird with ID "gy6or6", from the day "032312"
+""",
+        type="audio",
+        ext="cbin",
+        fname="bfsongrepo.tar.gz",
+        requires_download=True,
+    ),
+    Example(
+        name="jourjine-et-al-2023",
+        metadata="""Sample of deer mouse vocalizations from:
+Jourjine, Nicholas et al. (2023). Data from: 
+Two pup vocalization types are genetically and functionally separable in deer mice [Dataset].
+Dryad. https://doi.org/10.5061/dryad.g79cnp5ts
+Audio files are 20-second clips from approximately 10 files in the developmentLL data,
+(https://datadryad.org/stash/downloads/file_stream/2143657), generated with the script:
+tests/scripts/generate_ava_segment_test_data/generate_test_audio_for_ava_segment_from_jourjine_etal_2023.py
+""",
+        type="audio",
+        fname="jourjine-et-al-2023.tar.gz",
+        requires_download=True,
+    )
 ]
 
 
 REGISTRY = {example.name: example for example in EXAMPLES}
 
 
-def example(name: str) -> vocalpy.Sound:
+POOCH = pooch.create(
+    path=pooch.os_cache("vocalpy"),
+    base_url="doi:10.5281/zenodo.10685640",
+    registry=None,
+)
+POOCH.load_registry_from_doi()
+
+
+def example(name: str) -> vocalpy.Sound | list[vocalpy.Sound]:
     """Get an example from :mod:`vocalpy.examples`.
 
     Returns a single example, e.g., a :class:`vocalpy.Sound`.
@@ -87,14 +126,33 @@ def example(name: str) -> vocalpy.Sound:
     """
     if name not in REGISTRY:
         raise ValueError(f"No example found with name: {name}. " f"For a list of examples, call ")
-    example_ = REGISTRY[name]
-    path = importlib.resources.files("vocalpy.examples").joinpath(name)
-    if example_.type == "audio":
-        import vocalpy
+    import vocalpy  # avoid circular import
 
-        return vocalpy.Sound.read(path)
+    example_: Example = REGISTRY[name]
+    if example_.requires_download:
+        if example_.fname.endswith('.tar.gz'):
+            paths = POOCH.fetch(example_.fname, processor=pooch.Untar())
+            if example_.ext.endswith("cbin"):
+                sounds = [
+                    vocalpy.Sound.read(path) for path in paths
+                    # don't try to load .rec files
+                    if path.endswith("cbin")
+                ]
+            else:
+                sounds = [
+                    vocalpy.Sound.read(path) for path in paths
+                ]
+            return sounds
+        else:
+            path = POOCH.fetch(example_.fname)
+            sound = vocalpy.Sound.read(path)
+            return sound
     else:
-        raise ValueError(f"The ``type`` for the example was invalid: {example_.type}")
+        path = importlib.resources.files("vocalpy.examples").joinpath(name)
+        if example_.type == "audio":
+            return vocalpy.Sound.read(path)
+        else:
+            raise ValueError(f"The ``type`` for the example was invalid: {example_.type}")
 
 
 def list():
