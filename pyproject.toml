@@ -30,6 +30,7 @@ dependencies = [
     "matplotlib >=3.7.1",
     "numpy >=1.22.0",
     "pandas >= 1.4.0",
+    "pooch >= 1.8.1",
     "scipy >=1.8.0",
     "SoundFile >=0.12.1",
     "SQLAlchemy >=2.0.12",
