@@ -107,19 +107,7 @@ def build(session: nox.Session) -> None:
     session.run("flit", "build")
 
 
-# ---- the bottom half of the noxfile, the rest of the sessions have to do with data for tests -------------------------
-# either generating, downloading, or archiving
-
-DATA_FOR_TESTS_DIR = pathlib.Path("./tests/data-for-tests/")
-SOURCE_TEST_DATA_DIR = DATA_FOR_TESTS_DIR / "source"
-SOURCE_TEST_DATA_DIRS = [
-    dir_ for dir_
-    in sorted(pathlib.Path(SOURCE_TEST_DATA_DIR).glob('*/'))
-    if dir_.is_dir()
-]
-
-
-# ---- used by sessions that "clean up" data for tests
+# ---- used by sessions that "clean up" data, for example data and for tests
 def clean_dir(dir_path):
     """
     "clean" a directory by removing all files
@@ -136,6 +124,27 @@ def clean_dir(dir_path):
                 # e.g., .gitkeep file we don't want to delete
                 continue
             content.unlink()
+
+@nox.session(name='make-example-data')
+def make_example_data(session: nox.Session) -> None:
+    """
+    Make example data.
+    Runs scripts in
+    """
+    clean_dir("./src/scripts/example_data/")
+    session.run("python", "./src/scripts/make_example_data.py")
+
+# ---- sessions that have to do with data for tests --------------------------------------------------------------------
+# either generating, downloading, or archiving
+
+DATA_FOR_TESTS_DIR = pathlib.Path("./tests/data-for-tests/")
+SOURCE_TEST_DATA_DIR = DATA_FOR_TESTS_DIR / "source"
+SOURCE_TEST_DATA_DIRS = [
+    dir_ for dir_
+    in sorted(pathlib.Path(SOURCE_TEST_DATA_DIR).glob('*/'))
+    if dir_.is_dir()
+]
+
 
 
 @nox.session(name='test-data-clean-source')
