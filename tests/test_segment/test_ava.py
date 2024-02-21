@@ -4,12 +4,12 @@ import pytest
 import vocalpy as voc
 
 from ..fixtures.audio import JOURJINE_ETAL_2021_WAV_LIST
-from ..fixtures.segments import JOURJINE_ETAL_2023_SEG_TXT_LIST
+from ..fixtures.segments import AVA_SEGMENT_TXT_LIST
 
 
 WAV_PATH_SEG_TXT_PATH_TUPLES = zip(
     JOURJINE_ETAL_2021_WAV_LIST,
-    JOURJINE_ETAL_2023_SEG_TXT_LIST
+    AVA_SEGMENT_TXT_LIST
 )
 
 
