@@ -25,7 +25,9 @@ sys.path.insert(0, srcpath)
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#general-configuration
 
 extensions = [
+    'matplotlib.sphinxext.plot_directive',
     'myst_nb',
+    'numpydoc',
     'sphinx.ext.autodoc',
     'sphinx.ext.autosummary',
     'sphinx.ext.coverage',
@@ -41,6 +43,9 @@ extensions = [
     'sphinxext.opengraph',
     'sphinx_tabs.tabs',
 ]
+
+numpydoc_use_plots = True
+
 
 templates_path = ['_templates']
 
@@ -87,6 +92,30 @@ html_static_path = ['_static']
 
 # -- Extension configuration -------------------------------------------------
 autosummary_ignore_module_all = False
+
+# -- doctest -----------------------------------------------------------------
+
+doctest_global_setup = """
+import numpy as np
+import vocalpy as voc
+
+np.random.seed(42)
+np.set_printoptions(precision=3, linewidth=64, edgeitems=2, threshold=200)
+"""
+
+plot_pre_code = (
+    doctest_global_setup
+    + """
+import matplotlib
+matplotlib.rcParams['figure.constrained_layout.use'] = True
+"""
+)
+plot_include_source = True
+plot_html_show_source_link = False
+plot_formats = [("png", 100), ("pdf", 100)]
+plot_html_show_formats = False
+
+font_size = 12
 
 # -- Options for intersphinx extension ---------------------------------------
 

@@ -25,32 +25,18 @@ This tutorial will introduce you to VocalPy, a core Python package for acoustic 
 
 +++
 
-First we download some example data, from the [Bengalese Finch song repository](https://nickledave.github.io/bfsongrepo/).
+First we import `vocalpy`.
+
+```{code-cell} ipython3
+import vocalpy as voc
+```
+
+Then we get some example data, from the [Bengalese Finch song repository](https://nickledave.github.io/bfsongrepo/).
 
 ```{code-cell} ipython3
 :tags: [hide-output]
 
-!curl -sSL https://raw.githubusercontent.com/vocalpy/vak/main/src/scripts/download_autoannotate_data.py | python3 -
-```
-
-And then we'll move that data into a `./data` directory.
-
-```{code-cell} ipython3
-import pathlib
-```
-
-```{code-cell} ipython3
-pathlib.Path('./data').mkdir(exist_ok=True,parents=True)
-```
-
-```{code-cell} ipython3
-pathlib.Path('./bfsongrepo').rename('./data/bfsongrepo')
-```
-
-Now that we've got some data to work with, we can import `vocalpy`
-
-```{code-cell} ipython3
-import vocalpy as voc
+sounds = voc.example('bfsongrepo', return_type='sound')
 ```
 
 ## Data types for acoustic communication
@@ -61,27 +47,12 @@ Let's look at the data types that VocalPy provides for acoustic comunication.
 
 +++
 
-We load all the wav files from a directory using a convenience function that VocalPy gives us in its `paths`, `vocalpy.paths.from_dir`:
-
-```{code-cell} ipython3
-data_dir = ('data/bfsongrepo/gy6or6/032312/')
-
-wav_paths = voc.paths.from_dir(data_dir, 'wav')
-```
-
 ### Data type for sound: `vocalpy.Sound`
 
 +++
 
-Next we load all the wav files into the data type that VocalPy provides for audio, `vocalpy.Sound`, using the method `vocalpy.Sound.read`:
-
-```{code-cell} ipython3
-sounds = [
-    voc.Sound.read(wav_path) for wav_path in wav_paths
-]
-```
-
-Let's inspect one of the `vocalpy.Sound` instances
+Calling `vocalpy.example('bfsongrepo')` gave us back a list of of `vocalpy.Sound` instances.
+Let's inspect one of them.
 
 ```{code-cell} ipython3
 a_sound = sounds[0]
@@ -123,6 +94,22 @@ print(
 ```
 
 One of the reasons VocalPy provides this data type, and the others we're about to show you here, is that it helps you write more succinct code that's easier to read: for you, when you come back to your code months from now, and for others that want to read the code you share.
+
++++
+
+When you are working with your own data, instead of example data built into VocalPy, you will do something like:  
+
+1. Load all the sound files from a directory using a convenience function that VocalPy gives us in its `paths` module, `vocalpy.paths.from_dir`
+2. Load all the wav files into the data type that VocalPy provides for sound, `vocalpy.Sound`, using the method `vocalpy.Sound.read`:
+
+This is shown in the snippet below.
+```python
+data_dir = ('data/bfsongrepo/gy6or6/032312/')
+wav_paths = voc.paths.from_dir(data_dir, 'wav')
+sounds = [
+    voc.Sound.read(wav_path) for wav_path in wav_paths
+]
+```
 
 +++
 
@@ -173,7 +160,7 @@ print(a_spect)
 As before, we'll walk through the attributes of this class.
 But since the whole point of a spectrogram is to let us see sound, let's actually look at the spectrogram, instead of staring at arrays of numbers.
 
-We'll make a new spectrogram where we log transform the data so it's easier to visualize.
+We do so by calling `vocalpy.plot.spectrogram`.
 
 ```{code-cell} ipython3
 voc.plot.spectrogram(
@@ -207,7 +194,7 @@ We see that we have an array with dimensions (channels, frequencies, times). The
 
 +++
 
-2. `frequencies`, a vector of the number of frequency bins
+2. `frequencies`, a vector of the frequency for each row of the spectrogram.
 
 ```{code-cell} ipython3
 print(a_spect.frequencies[:10])
@@ -219,7 +206,7 @@ print(a_spect.frequencies.shape)
 
 (We see it is equal to the number of rows.)
 
-3. `times`, a vector of time bin centers
+3. `times`, a vector of the time for each column in the spectrogram.
 
 ```{code-cell} ipython3
 print(a_spect.times[:10])
@@ -238,9 +225,12 @@ To see this in action, let's write our spectrograms to files.
 ```{code-cell} ipython3
 import pathlib
 
+DATA_DIR = pathlib.Path('./data')
+DATA_DIR.mkdir(exist_ok=True)
+
 for spect in spects:
     spect.write(
-        spect.audio_path.parent / (spect.audio_path.name + '.spect.npz')
+        DATA_DIR / (spect.audio_path.name + '.spect.npz')
     )
 ```
 
@@ -251,7 +241,7 @@ Notice that the extension is `'npz'`; this is a file format that NumPy uses to s
 We can confirm that reading and writing spectrograms to disk works as we expect using the method `vocalpy.Spectrogram.read`
 
 ```{code-cell} ipython3
-spect_paths = voc.paths.from_dir(data_dir, '.wav.spect.npz')
+spect_paths = voc.paths.from_dir(DATA_DIR, '.spect.npz')
 ```
 
 ```{code-cell} ipython3
@@ -263,11 +253,11 @@ spects_loaded = [
 
 We compare with the equality operator to confirm we loaded what we saved.
 
+Before doing so, we sort the original ``spects`` by the ``audio_path`` of the sound they were generated from, and the ``spects_loaded`` by the path they were loaded from. In this case, doing so puts both lists in the same order, because we used the audio file's filename as part of the spectrogram file's filename. (It might not work more generally, if you name your files differently.)
+
 ```{code-cell} ipython3
-# this happens to work 
-# because VocalPy always gives us back `sorted` lists,
-# but it wouldn't work in the more general case--
-# we'd need to pair by filename first or something
+spects = sorted(spects, key=lambda spect: spect.audio_path)
+spects_loaded = sorted(spects_loaded, key=lambda spect: spect.path)
 for spect, spect_loaded in zip(spects, spects_loaded):
     assert spect == spect_loaded
 ```
@@ -281,7 +271,10 @@ The last data type we'll look at is for annotations. Such annotations are import
 ```{code-cell} ipython3
 import vocalpy as voc
 
-csv_paths = voc.paths.from_dir(data_dir, '.wav.csv')
+# We get back the paths to all the files in this example dataset, 
+# but only keep the ones that are csv files, because those are the annotations.
+# This filters out the wav files.
+csv_paths = [path for path in voc.example('bfsongrepo') if path.name.endswith('csv')]
 ```
 
 ```{code-cell} ipython3

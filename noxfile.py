@@ -107,19 +107,7 @@ def build(session: nox.Session) -> None:
     session.run("flit", "build")
 
 
-# ---- the bottom half of the noxfile, the rest of the sessions have to do with data for tests -------------------------
-# either generating, downloading, or archiving
-
-DATA_FOR_TESTS_DIR = pathlib.Path("./tests/data-for-tests/")
-SOURCE_TEST_DATA_DIR = DATA_FOR_TESTS_DIR / "source"
-SOURCE_TEST_DATA_DIRS = [
-    dir_ for dir_
-    in sorted(pathlib.Path(SOURCE_TEST_DATA_DIR).glob('*/'))
-    if dir_.is_dir()
-]
-
-
-# ---- used by sessions that "clean up" data for tests
+# ---- used by sessions that "clean up" data, for example data and for tests
 def clean_dir(dir_path):
     """
     "clean" a directory by removing all files
@@ -136,6 +124,29 @@ def clean_dir(dir_path):
                 # e.g., .gitkeep file we don't want to delete
                 continue
             content.unlink()
+
+@nox.session(name='make-example-data')
+def make_example_data(session: nox.Session) -> None:
+    """
+    Make example data.
+    Runs scripts in
+    """
+    clean_dir("./src/scripts/example_data/")
+    session.run("python", "./src/scripts/make_example_data.py")
+
+# ---- sessions that have to do with data for tests --------------------------------------------------------------------
+# either generating, downloading, or archiving
+
+DATA_FOR_TESTS_DIR = pathlib.Path("./tests/data-for-tests/")
+# THIS PATH NEEDS TO BE RELATIVE TO PROJECT ROOT OR WE BREAK TESTS ON CI THAT USE TAR'ED TEST DATA
+# i.e., keep as is, don't use the constant in tests.fixtures that involve paths relative to fixtures dir
+SOURCE_TEST_DATA_DIR = DATA_FOR_TESTS_DIR / "source"
+SOURCE_TEST_DATA_DIRS = [
+    dir_ for dir_
+    in sorted(pathlib.Path(SOURCE_TEST_DATA_DIR).glob('*/'))
+    if dir_.is_dir()
+]
+
 
 
 @nox.session(name='test-data-clean-source')
@@ -187,6 +198,17 @@ def test_data_download_source(session) -> None:
         tf.extractall(path='.')
 
 
+TEST_DATA_GENERATE_AVA_SEGMENTS_SCRIPT = './tests/scripts/generate_ava_segment_test_data/generate_ava_segment_text_files_from_jourjine_et_al_2023.py'
+
+
+@nox.session(name='test-data-generate-ava-segments', python="3.10")
+def test_data_generate(session) -> None:
+    """Produce generated test data for ava segments"""
+    session.install("joblib==1.3.2")
+    session.install("numpy==1.26.3")
+    session.install("scipy==1.12.0")
+    session.run("python", TEST_DATA_GENERATE_AVA_SEGMENTS_SCRIPT)
+
 
 TEST_DATA_GENERATE_SCRIPT = './tests/scripts/generate_data_for_tests.py'
 
@@ -200,11 +222,12 @@ def test_data_generate(session) -> None:
     session.run("python", TEST_DATA_GENERATE_SCRIPT)
 
 
-# TODO: fix this url!
+# THIS PATH NEEDS TO BE RELATIVE TO PROJECT ROOT OR WE BREAK TESTS ON CI THAT USE TAR'ED TEST DATA
+# i.e., keep as is, don't use the constant in tests.fixtures that involve paths relative to fixtures dir
 GENERATED_TEST_DATA_DIR = DATA_FOR_TESTS_DIR / "generated"
 GENERATED_TEST_DATA_SUBDIRS = [
     dir_ for dir_
-    in sorted(pathlib.Path(GENERATED_TEST_DATA_DIR).glob('*/'))
+    in GENERATED_TEST_DATA_DIR.iterdir()
     if dir_.is_dir()
 ]
 GENERATED_TEST_DATA_TAR = GENERATED_TEST_DATA_DIR / 'generated_test_data.tar.gz'
@@ -215,7 +238,8 @@ def test_data_clean_generated(session) -> None:
     """
     Clean (remove) 'generated' test data.
     """
-    clean_dir(GENERATED_TEST_DATA_DIR)
+    for dir_ in GENERATED_TEST_DATA_SUBDIRS:
+        clean_dir(dir_)
 
 
 @nox.session(name='test-data-tar-generated')

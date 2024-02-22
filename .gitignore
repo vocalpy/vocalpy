@@ -26,7 +26,12 @@ docs/_build/
 docs/api/generated
 docs/getting_started/data
 
+# example data
+src/scripts/example_data
+
 # test data
 tests/data-for-tests/source/
-tests/data-for-tests/generated/
+tests/data-for-tests/generated/paths/
+tests/data-for-tests/generated/segment/
+tests/data-for-tests/generated/spectrogram/
 *.tar.gz
