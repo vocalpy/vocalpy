@@ -231,6 +231,9 @@ def example(
         path = pathlib.Path(
             importlib.resources.files("vocalpy.examples").joinpath(name)
         )
+    if isinstance(path, list):
+        # enforce consisting sorting across platforms
+        path = sorted(path)
     if return_type == "path":
         return path
     else:
