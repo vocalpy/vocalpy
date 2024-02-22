@@ -469,7 +469,7 @@ def segment(
         if onsets.size == 0:
             # can't throw any intervals away if there's not any intervals
             return onsets, offsets
-        isi_durs = offsets[:-1] - onsets[1:]
+        isi_durs = onsets[1:] - offsets[:-1]
         keep_these = isi_durs > min_isi_dur
         onsets = np.concatenate((onsets[0, np.newaxis], onsets[1:][keep_these]))
         offsets = np.concatenate((offsets[:-1][keep_these], offsets[-1, np.newaxis]))
