@@ -81,3 +81,10 @@ filterwarnings = [
 exclude = [
     "tests/data-for-tests"
 ]
+
+[tool.coverage.run]
+omit = [
+    "src/scripts/",
+    "tests/scripts/",
+    "noxfile.py",
+]
