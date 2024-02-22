@@ -9,14 +9,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add attributes `channels`, `samples`, and `duration` to `vocalpy.Sound`
   [#124](https://github.com/vocalpy/vocalpy/pull/124).
   Fixes [#90](https://github.com/vocalpy/vocalpy/issues/90).
+- Add functionality to `vocalpy.segment.ava.segment` to replicate segmenting in
+  papers that use this method
+  [#130](https://github.com/vocalpy/vocalpy/pull/130).
+  Fixes [#126](https://github.com/vocalpy/vocalpy/issues/126).
+- Add larger example datasets, that are downloaded with `pooch`
+  [#130](https://github.com/vocalpy/vocalpy/pull/130).
+  Fixes [#33](https://github.com/vocalpy/vocalpy/issues/33).
 
 ### Changed
 - Rename `vocalpy.Audio` to `vocalpy.Sound` 
   [#124](https://github.com/vocalpy/vocalpy/pull/124).
   Fixes [#90](https://github.com/vocalpy/vocalpy/issues/90).
-
-### Fixed
-- Fix how we handle the number of channels in audio to be consistent 
+- Change how we handle the number of channels in audio to be consistent 
   across single and multi-channel. `vocalpy.Sound.data` always has 
   dimensions (channel, sample), and likewise `vocalpy.Spectrogram.data` 
   has dimensions (channel, frequency, time), and feature extraction 
@@ -24,6 +29,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   dimensions (shape, time)
   [#124](https://github.com/vocalpy/vocalpy/pull/124).
   Fixes [#90](https://github.com/vocalpy/vocalpy/issues/90).
+
+### Fixed
+- Fix `vocalpy.segment.ava.segment` to better replicate original function
+  [#130](https://github.com/vocalpy/vocalpy/pull/130).
+  Fixes [#126](https://github.com/vocalpy/vocalpy/issues/126).
 
 ## 0.8.2
 ### Fixed
