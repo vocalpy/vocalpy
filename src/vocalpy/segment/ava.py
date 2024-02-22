@@ -304,7 +304,8 @@ def segment(
     >>> del params['min_isi_dur']
     >>> onsets, offsets = voc.segment.ava.segment(sound, **params)
     >>> spect = voc.spectrogram(sound)
-    >>> rows = cols = int(np.ceil(np.sqrt(onsets.shape[0])))
+    >>> rows = 3; cols = 4
+    >>> import matplotlib.pyplot as plt
     >>> fig, ax_arr = plt.subplots(rows, cols)
     >>> for on, off, ax in zip(onsets, offsets, ax_arr.ravel()[:onsets.shape[0]]):
     ...     on_ind, off_ind = int(on * sound.samplerate), int(off * sound.samplerate)
@@ -319,10 +320,6 @@ def segment(
 
     Notes
     -----
-    This algorithm works well for isolated calls in short sound clips.
-    For examples, see the mouse data in [3]_,
-    from the dataset associated with [1]_.
-
     Code is adapted from [2]_.
     Default parameters are taken from example script here:
     https://github.com/pearsonlab/autoencoded-vocal-analysis/blob/master/examples/mouse_sylls_mwe.py
