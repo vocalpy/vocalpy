@@ -138,6 +138,8 @@ def make_example_data(session: nox.Session) -> None:
 # either generating, downloading, or archiving
 
 DATA_FOR_TESTS_DIR = pathlib.Path("./tests/data-for-tests/")
+# THIS PATH NEEDS TO BE RELATIVE TO PROJECT ROOT OR WE BREAK TESTS ON CI THAT USE TAR'ED TEST DATA
+# i.e., keep as is, don't use the constant in tests.fixtures that involve paths relative to fixtures dir
 SOURCE_TEST_DATA_DIR = DATA_FOR_TESTS_DIR / "source"
 SOURCE_TEST_DATA_DIRS = [
     dir_ for dir_
@@ -220,15 +222,15 @@ def test_data_generate(session) -> None:
     session.run("python", TEST_DATA_GENERATE_SCRIPT)
 
 
-# add project root to path so we can import constants from fixtures instead of duplicating here
-sys.path.insert(0, str(DIR))
-from tests.fixtures.test_data import GENERATED_TEST_DATA_ROOT
+# THIS PATH NEEDS TO BE RELATIVE TO PROJECT ROOT OR WE BREAK TESTS ON CI THAT USE TAR'ED TEST DATA
+# i.e., keep as is, don't use the constant in tests.fixtures that involve paths relative to fixtures dir
+GENERATED_TEST_DATA_DIR = DATA_FOR_TESTS_DIR / "generated"
 GENERATED_TEST_DATA_SUBDIRS = [
     dir_ for dir_
-    in GENERATED_TEST_DATA_ROOT.iterdir()
+    in GENERATED_TEST_DATA_DIR.iterdir()
     if dir_.is_dir()
 ]
-GENERATED_TEST_DATA_TAR = GENERATED_TEST_DATA_ROOT / 'generated_test_data.tar.gz'
+GENERATED_TEST_DATA_TAR = GENERATED_TEST_DATA_DIR / 'generated_test_data.tar.gz'
 
 
 @nox.session(name='test-data-clean-generated')
