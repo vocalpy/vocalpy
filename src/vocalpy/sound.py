@@ -102,6 +102,12 @@ class Sound:
             )
         if self.path.name.endswith("cbin"):
             data, samplerate = evfuncs.load_cbin(self.path)
+            # for consistency with soundfile,
+            # we need to convert cbin int16 to float64,
+            # and scale data to range [-1.0, 1.0]
+            # Next line is from https://stackoverflow.com/a/42544738/4906855, see comments there
+            # Fixes
+            data = data.astype(np.float64) / 32768.0
             # evfuncs always gives us 1-dim
             data = data[np.newaxis, :]
         else:
@@ -207,6 +213,12 @@ class Sound:
 
         if path.name.endswith("cbin"):
             data, samplerate = evfuncs.load_cbin(path)
+            # for consistency with soundfile,
+            # we need to convert cbin int16 to float64,
+            # and scale data to range [-1.0, 1.0]
+            # Next line is from https://stackoverflow.com/a/42544738/4906855, see comments there
+            # Fixes
+            data = data.astype(np.float64) / 32768.0
             # evfuncs always gives us 1-dim
             data = data[np.newaxis, :]
         else:
