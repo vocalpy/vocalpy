@@ -9,7 +9,6 @@ import numpy.typing as npt
 from scipy.ndimage import gaussian_filter
 from scipy.signal import stft
 
-
 if TYPE_CHECKING:
     from .. import Sound
 
@@ -95,6 +94,7 @@ class AvaParams:
     >>> sound = voc.Sound.read(wav_path)
     >>> onsets, offsets = voc.segment.ava.segment(sound, **voc.segment.ava.JOURJINEETAL2023)
     """
+
     scale: bool = True
     scale_val: int | float = 2**15
     scale_dtype: npt.DTypeLike = np.int16
@@ -102,13 +102,13 @@ class AvaParams:
     noverlap: int = 512
     min_freq: float = 20e3
     max_freq: float = 125e3
-    spect_min_val: float = .8
-    spect_max_val: float = 6.
-    thresh_lowest: float = .3
-    thresh_min: float = .3
-    thresh_max: float = .35
+    spect_min_val: float = 0.8
+    spect_max_val: float = 6.0
+    thresh_lowest: float = 0.3
+    thresh_min: float = 0.3
+    thresh_max: float = 0.35
     min_dur: float = 0.015
-    max_dur: float = 1.
+    max_dur: float = 1.0
     min_isi_dur: float | None = None
     use_softmax_amp: bool = False
     temperature: float = 0.01
@@ -118,7 +118,7 @@ class AvaParams:
         return asdict(self).keys()
 
     def __getitem__(self, item):
-        if getattr(self, '_dict', None) is None:
+        if getattr(self, "_dict", None) is None:
             self._dict = asdict(self)
         return self._dict[item]
 
@@ -129,13 +129,13 @@ JOURJINEETAL2023 = AvaParams(
     noverlap=512,
     min_freq=20e3,
     max_freq=125e3,
-    spect_min_val=.8,
-    spect_max_val=6.,
-    thresh_lowest=.3,
-    thresh_min=.3,
-    thresh_max=.35,
+    spect_min_val=0.8,
+    spect_max_val=6.0,
+    thresh_lowest=0.3,
+    thresh_min=0.3,
+    thresh_max=0.35,
     min_dur=0.015,
-    max_dur=1.,
+    max_dur=1.0,
     min_isi_dur=0.004,
     use_softmax_amp=False,
     temperature=0.01,
@@ -147,8 +147,8 @@ JOURJINEETAL2023 = AvaParams(
 PETERSONETAL2023 = AvaParams(
     nperseg=512,
     noverlap=256,
-    min_freq=500.,
-    max_freq=62.5E3,
+    min_freq=500.0,
+    max_freq=62.5e3,
     spect_min_val=-8.0,
     spect_max_val=-7.25,
     thresh_lowest=2,

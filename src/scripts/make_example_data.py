@@ -34,7 +34,6 @@ import time
 import urllib.request
 import warnings
 
-
 BFSONGREPO_DATA_TO_DOWNLOAD = {
     "gy6or6": {
         "sober.repo1.gy6or6.032212.wav.csv.tar.gz": {
@@ -58,16 +57,12 @@ def reporthook(count: int, block_size: int, total_size: int) -> None:
     speed = int(progress_size / (1024 * duration))
     percent = int(count * block_size * 100 / total_size)
     sys.stdout.write(
-        "\r...%d%%, %d MB, %d KB/s, %d seconds passed"
-        % (percent, progress_size / (1024 * 1024), speed, duration)
+        "\r...%d%%, %d MB, %d KB/s, %d seconds passed" % (percent, progress_size / (1024 * 1024), speed, duration)
     )
     sys.stdout.flush()
 
 
-def download_bfsongrepo_data(
-    download_urls_by_bird_ID: dict,
-    dst: pathlib.Path
-) -> None:
+def download_bfsongrepo_data(download_urls_by_bird_ID: dict, dst: pathlib.Path) -> None:
     """Download part of bfsgonrepo dataset, given a dict of download urls"""
     tar_dir = dst / "bfsongrepo-tars"
     tar_dir.mkdir()
@@ -90,23 +85,20 @@ def extract_bfsongrepo_tars(bfsongrepo_dir: pathlib.Path) -> None:
     for tar_path in tars:
         print(f"\nunpacking: {tar_path}")
 
-        shutil.unpack_archive(
-            filename=tar_path, extract_dir=bfsongrepo_dir, format="gztar"
-        )
+        shutil.unpack_archive(filename=tar_path, extract_dir=bfsongrepo_dir, format="gztar")
 
 
 def download_and_extract_bfsongrepo_tar(dst: str | pathlib.Path) -> None:
     """Downloads and extracts bfsongrepo tar"""
     dst = pathlib.Path(dst).expanduser().resolve()
     if not dst.is_dir():
-        raise NotADirectoryError(
-            f"Value for 'dst' argument not recognized as a directory: {dst}"
-        )
+        raise NotADirectoryError(f"Value for 'dst' argument not recognized as a directory: {dst}")
     bfsongrepo_dir = dst / "bfsongrepo"
     if bfsongrepo_dir.exists():
         warnings.warn(
             f"Directory already exists: {bfsongrepo_dir}\n"
-            "Will download and write over any existing files. Press Ctrl-C to stop."
+            "Will download and write over any existing files. Press Ctrl-C to stop.",
+            stacklevel=2,
         )
 
     try:
@@ -124,55 +116,44 @@ def download_and_extract_bfsongrepo_tar(dst: str | pathlib.Path) -> None:
     extract_bfsongrepo_tars(bfsongrepo_dir)
 
 
-def tar_source_data_subdir(dataset_root,
-                           tar_dst,
-                           archive_name,
-                           ext=['wav'],
-                           dry_run=False,
-                           skip_exists=False):
+def tar_source_data_subdir(dataset_root, tar_dst, archive_name, ext=None, dry_run=False, skip_exists=False):
+    if ext is None:
+        ext = ["wav"]
     dataset_root = pathlib.Path(dataset_root).expanduser().resolve()
     if not dataset_root.exists():
-        raise NotADirectoryError(
-            f'Dataset root not found: {dataset_root}'
-        )
+        raise NotADirectoryError(f"Dataset root not found: {dataset_root}")
     tar_dst = pathlib.Path(tar_dst).expanduser().resolve()
     if not tar_dst.exists():
-        raise NotADirectoryError(
-            f'.tar destination root not found: {tar_dst}'
-        )
+        raise NotADirectoryError(f".tar destination root not found: {tar_dst}")
 
     archive_path = tar_dst / f"{archive_name}.tar.gz"
-    print(
-        f'will create archive: {archive_path}'
-    )
+    print(f"will create archive: {archive_path}")
 
     if not dry_run:
         if skip_exists:
             if archive_path.exists():
-                print('Archive exists already, skipping.')
+                print("Archive exists already, skipping.")
                 return
 
         print("Adding files to archive.")
-        with tarfile.open(archive_path, 'w:gz') as tf:
+        with tarfile.open(archive_path, "w:gz") as tf:
             for ext_ in ext:
-                paths = sorted(dataset_root.glob(f'*{ext_}'))
+                paths = sorted(dataset_root.glob(f"*{ext_}"))
                 for path in paths:
-                    print(
-                        f'Adding: {path.name}'
-                    )
-                    arcname = str(path).replace(str(dataset_root) + '/', '')
+                    print(f"Adding: {path.name}")
+                    arcname = str(path).replace(str(dataset_root) + "/", "")
                     tf.add(name=path, arcname=arcname)
 
 
 HERE = pathlib.Path(__file__).parent
-EXAMPLE_DATA = HERE / 'example_data'
-REPO_ROOT = HERE / '..' / '..'
-SOURCE_DATA_ROOT = REPO_ROOT / 'tests/data-for-tests/source'
+EXAMPLE_DATA = HERE / "example_data"
+REPO_ROOT = HERE / ".." / ".."
+SOURCE_DATA_ROOT = REPO_ROOT / "tests/data-for-tests/source"
 BFSONGREPO_ROOT = EXAMPLE_DATA / "bfsongrepo"
 
 DIRS_TO_TAR_EXT_ARCHIVE_NAME = [
-    (BFSONGREPO_ROOT, ['.wav', '.csv'], 'bfsongrepo'),
-    (SOURCE_DATA_ROOT / 'jourjine-et-al-2023/developmentLL', ['.wav'], 'jourjine-et-al-2023'),
+    (BFSONGREPO_ROOT, [".wav", ".csv"], "bfsongrepo"),
+    (SOURCE_DATA_ROOT / "jourjine-et-al-2023/developmentLL", [".wav"], "jourjine-et-al-2023"),
 ]
 
 
@@ -197,12 +178,7 @@ def main():
 
     # ---- make tars
     for dataset_dir, ext, archive_name in DIRS_TO_TAR_EXT_ARCHIVE_NAME:
-        tar_source_data_subdir(
-            dataset_dir,
-            EXAMPLE_DATA,
-            archive_name,
-            ext
-        )
+        tar_source_data_subdir(dataset_dir, EXAMPLE_DATA, archive_name, ext)
 
 
 main()

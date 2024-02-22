@@ -13,11 +13,15 @@ import pooch
 
 if TYPE_CHECKING:
     import vocalpy
+
     ExampleType = Union[
-        pathlib.Path, list[pathlib.Path],
-        vocalpy.Sound, list[vocalpy.Sound],
+        pathlib.Path,
+        list[pathlib.Path],
+        vocalpy.Sound,
+        list[vocalpy.Sound],
         vocalpy.Spectrogram | list[vocalpy.Spectrogram],
-        vocalpy.Annotation, list[vocalpy.Annotation],
+        vocalpy.Annotation,
+        list[vocalpy.Annotation],
     ]
 
 
@@ -59,6 +63,7 @@ class ExampleMeta:
         String that is recognized by :module:`crowsetta`
         as a valid annotation format.
     """
+
     name: str
     metadata: str
     type: list[str] = field(default_factory=lambda: copy.copy(["sound"]))
@@ -97,8 +102,9 @@ File name in dataset: BM003_day9_air_20s_sparse_chunk007_0297.wav""",
     ),
     ExampleMeta(
         name="bfsongrepo",
-        metadata="""Sample of song from Bengalese Finch Song Repository.    
-Nicholson, David; Queen, Jonah E.; J. Sober, Samuel (2017). Bengalese Finch song repository. figshare. Dataset. https://doi.org/10.6084/m9.figshare.4805749.v9
+        metadata="""Sample of song from Bengalese Finch Song Repository.
+Nicholson, David; Queen, Jonah E.; J. Sober, Samuel (2017). Bengalese Finch song repository. figshare. 
+Dataset. https://doi.org/10.6084/m9.figshare.4805749.v9
 https://nickledave.github.io/bfsongrepo
 Files are approximately 20 songs from bird with ID "gy6or6", from the day "032312"
 """,
@@ -106,12 +112,12 @@ Files are approximately 20 songs from bird with ID "gy6or6", from the day "03231
         fname="bfsongrepo.tar.gz",
         requires_download=True,
         ext={"sound": ".wav", "annotation": ".csv"},
-        annot_format='simple-seq',
+        annot_format="simple-seq",
     ),
     ExampleMeta(
         name="jourjine-et-al-2023",
         metadata="""Sample of deer mouse vocalizations from:
-Jourjine, Nicholas et al. (2023). Data from: 
+Jourjine, Nicholas et al. (2023). Data from:
 Two pup vocalization types are genetically and functionally separable in deer mice [Dataset].
 Dryad. https://doi.org/10.5061/dryad.g79cnp5ts
 Audio files are 20-second clips from approximately 10 files in the developmentLL data,
@@ -120,7 +126,7 @@ tests/scripts/generate_ava_segment_test_data/generate_test_audio_for_ava_segment
 """,
         fname="jourjine-et-al-2023.tar.gz",
         requires_download=True,
-    )
+    ),
 ]
 
 
@@ -134,10 +140,7 @@ ZENODO_DATASET_BASE_URL = "doi:10.5281/zenodo.10688472"
 
 
 POOCH = pooch.create(
-    path=pooch.os_cache("vocalpy"),
-    base_url=ZENODO_DATASET_BASE_URL,
-    registry=None,
-    env=VOCALPY_DATA_DIR
+    path=pooch.os_cache("vocalpy"), base_url=ZENODO_DATASET_BASE_URL, registry=None, env=VOCALPY_DATA_DIR
 )
 POOCH.load_registry_from_doi()
 
@@ -156,12 +159,10 @@ def clear_cache() -> None:
     shutil.rmtree(cache_dir)
 
 
-VALID_RETURN_TYPE = ('path', 'sound', 'annotation', 'spectrogram')
+VALID_RETURN_TYPE = ("path", "sound", "annotation", "spectrogram")
 
 
-def example(
-        name: str, return_type: str | None = None
-    ) -> ExampleType:
+def example(name: str, return_type: str | None = None) -> ExampleType:
     """Get an example from :mod:`vocalpy.examples`.
 
     To see all available example data, call :func:`vocalpy.examples.show`.
@@ -219,7 +220,7 @@ def example(
 
     example_: ExampleMeta = REGISTRY[name]
     if example_.requires_download:
-        if example_.fname.endswith('.tar.gz'):
+        if example_.fname.endswith(".tar.gz"):
             path = POOCH.fetch(example_.fname, processor=pooch.Untar())
         else:
             path = POOCH.fetch(example_.fname)
@@ -228,9 +229,7 @@ def example(
         else:
             path = pathlib.Path(path)
     else:
-        path = pathlib.Path(
-            importlib.resources.files("vocalpy.examples").joinpath(name)
-        )
+        path = pathlib.Path(importlib.resources.files("vocalpy.examples").joinpath(name))
     if isinstance(path, list):
         # enforce consisting sorting across platforms
         path = sorted(path)
@@ -246,16 +245,14 @@ def example(
             if isinstance(path, pathlib.Path):
                 return vocalpy.Sound.read(path)
             elif isinstance(path, list):
-                return [
-                    vocalpy.Sound.read(path_) for path_ in path
-                    if path_.name.endswith(example_.ext["sound"])
-                ]
+                return [vocalpy.Sound.read(path_) for path_ in path if path_.name.endswith(example_.ext["sound"])]
         elif return_type == "spectrogram":
             if isinstance(path, pathlib.Path):
                 return vocalpy.Spectrogram.read(path)
             elif isinstance(path, list):
                 return [
-                    vocalpy.Spectrogram.read(path_) for path_ in path
+                    vocalpy.Spectrogram.read(path_)
+                    for path_ in path
                     if path_.name.endswith(example_.ext["spectrogram"])
                 ]
         elif return_type == "annotation":
