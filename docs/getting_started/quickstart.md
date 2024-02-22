@@ -97,10 +97,12 @@ One of the reasons VocalPy provides this data type, and the others we're about t
 
 +++
 
-When you are working with your own data, you will do something like:
+When you are working with your own data, instead of example data built into VocalPy, you will do something like:  
+
 1. Load all the sound files from a directory using a convenience function that VocalPy gives us in its `paths` module, `vocalpy.paths.from_dir`
 2. Load all the wav files into the data type that VocalPy provides for sound, `vocalpy.Sound`, using the method `vocalpy.Sound.read`:
 
+This is shown in the snippet below.
 ```python
 data_dir = ('data/bfsongrepo/gy6or6/032312/')
 wav_paths = voc.paths.from_dir(data_dir, 'wav')
@@ -158,7 +160,7 @@ print(a_spect)
 As before, we'll walk through the attributes of this class.
 But since the whole point of a spectrogram is to let us see sound, let's actually look at the spectrogram, instead of staring at arrays of numbers.
 
-We'll make a new spectrogram where we log transform the data so it's easier to visualize.
+We do so by calling `vocalpy.plot.spectrogram`.
 
 ```{code-cell} ipython3
 voc.plot.spectrogram(
@@ -192,7 +194,7 @@ We see that we have an array with dimensions (channels, frequencies, times). The
 
 +++
 
-2. `frequencies`, a vector of the number of frequency bins
+2. `frequencies`, a vector of the frequency for each row of the spectrogram.
 
 ```{code-cell} ipython3
 print(a_spect.frequencies[:10])
@@ -204,7 +206,7 @@ print(a_spect.frequencies.shape)
 
 (We see it is equal to the number of rows.)
 
-3. `times`, a vector of time bin centers
+3. `times`, a vector of the time for each column in the spectrogram.
 
 ```{code-cell} ipython3
 print(a_spect.times[:10])
