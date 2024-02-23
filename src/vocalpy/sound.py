@@ -94,6 +94,12 @@ class Sound:
         self._samplerate = samplerate
 
     def _read(self):
+        """Private method that lazy loads data.
+
+        This method is called the first time a property is accessed,
+        if the Sound instance was instantiated by passing in *just*
+        a `path` argument.
+        """
         if self._data is not None:
             raise ValueError(
                 "This Sound instance already has data loaded into it. "
