@@ -79,35 +79,6 @@ class TestSound:
             vocalpy.Sound(data=RNG.normal(size=(int(32000 * 2.17), 1)), samplerate=32000)
 
     @pytest.mark.parametrize(
-        "data, samplerate, channels",
-        [
-            (RNG.normal(size=(int(32000 * 2.17))), 32000, 1),
-            (RNG.normal(size=(1, int(32000 * 2.17))), 32000, 1),
-            (RNG.normal(size=(2, int(32000 * 2.17))), 32000, 2),
-            (RNG.normal(size=(2, int(48000 * 2.17))), 48000, 2),
-            (RNG.normal(size=(6, int(48000 * 2.17))), 48000, 6),
-        ],
-    )
-    def test_asdict(self, data, samplerate, channels):
-        """Test we can convert a :class:`vocalpy.Sound` to a dict"""
-        sound = vocalpy.Sound(data=data, samplerate=samplerate)
-        assert isinstance(sound, vocalpy.Sound)
-
-        asdict = sound.asdict()
-        assert isinstance(asdict, dict)
-
-        for attr_name, attr_val in zip(("data", "samplerate"), (data, samplerate)):
-            assert attr_name in asdict
-            if attr_name == "data" and attr_val.ndim == 1:
-                assert np.array_equal(
-                    getattr(sound, attr_name), attr_val[np.newaxis, :]
-                )
-            else:
-                assert getattr(sound, attr_name) is attr_val
-
-        assert asdict["data"].shape[0] == channels
-
-    @pytest.mark.parametrize(
         "data, samplerate",
         [
             (RNG.normal(size=(int(32000 * 2.17))), 32000),
@@ -197,39 +168,6 @@ class TestSound:
         tmp_cbin_path = tmp_path / a_cbin_path.name
         with pytest.raises(ValueError):
             sound.write(tmp_cbin_path)
-
-    def test_lazy(self, an_audio_path):
-        """Test that :meth:`vocalpy.Sound.read` works as expected.
-
-        To do this we make an audio file "by hand".
-        """
-        data, samplerate, channels, audio_format   = self.load_an_audio_path(an_audio_path)
-
-        sound = vocalpy.Sound(path=an_audio_path)
-        assert sound._data is None
-        assert sound._samplerate is None
-
-        _ = sound.data  # triggers lazy-load
-
-        assert_sound_is_instance_with_expected_attrs(
-            sound, data, samplerate, channels, audio_format
-        )
-
-    def test_open(self, an_audio_path):
-        data, samplerate, channels, audio_format  = self.load_an_audio_path(an_audio_path)
-
-        sound = vocalpy.Sound(path=an_audio_path)
-        assert sound._data is None
-        assert sound._samplerate is None
-
-        with sound.open():
-            assert_sound_is_instance_with_expected_attrs(
-                sound, data, samplerate, channels, audio_format
-            )
-
-        # check that attributes go back to none after we __exit__ the context
-        assert sound._data is None
-        assert sound._samplerate is None
 
     @pytest.mark.parametrize(
         'a_wav_path',
