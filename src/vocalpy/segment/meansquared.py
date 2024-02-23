@@ -18,6 +18,9 @@ def meansquared(
     min_silent_dur: float = 0.002,
     freq_cutoffs: Iterable = (500, 10000),
     smooth_win: int = 2,
+    scale: bool = True,
+    scale_val: int | float = 2 ** 15,
+    scale_dtype: npt.DTypeLike = np.int16,
 ) -> tuple[npt.NDArray, npt.NDArray] | None:
     """Segment audio by thresholding the mean squared signal.
 
@@ -59,6 +62,31 @@ def meansquared(
         List or tuple with two elements, default is ``(500, 10000)``.
     smooth_win : int
         Size of smoothing window in milliseconds. Default is 2.
+    scale : bool
+        If True, scale the ``sound.data``.
+        Default is True.
+        This is needed to replicate the behavior of ``evsonganaly``,
+        which assumes the audio data is loaded as 16-bit integers.
+        Since the default for :class:`vocalpy.Sound` is to load sounds
+        with a numpy dtype of float64, this function defaults to
+        multiplying the ``sound.data`` by 2**15,
+        and then casting to the int16 dtype.
+        This replicates the behavior of the ``evsonganaly`` function,
+        given data with dtype float64.
+        If you have loaded a sound with a dtype of int16,
+        then set this to False.
+    scale_val :
+        Value to multiply the ``sound.data`` by, to scale the data.
+        Default is 2**15.
+        Only used if ``scale`` is ``True``.
+        This is needed to replicate the behavior of ``evsonganaly``,
+        which assumes the audio data is loaded as 16-bit integers.
+    scale_dtype : numpy.dtype
+        Numpy Dtype to cast ``sound.data`` to, after scaling.
+        Default is ``np.int16``.
+        Only used if ``scale`` is ``True``.
+        This is needed to replicate the behavior of ``ava``,
+        which assumes the audio data is loaded as 16-bit integers.
 
     Returns
     -------
@@ -77,6 +105,9 @@ def meansquared(
             ">>> sound_channels = [sound_ for sound_ in sound]  # split with a list comprehension\n"
             ">>> channel_segments = [vocalpy.segment.meansquared(sound_) for sound_ in sound_channels]\n"
         )
+
+    if scale:
+        sound.data = (sound.data * scale_val).astype(scale_dtype)
 
     meansquared_ = signal.audio.meansquared(sound, freq_cutoffs, smooth_win)
     # we get rid of the channel dimension *after* calling ``signal.audio.meansquared``
