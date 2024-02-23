@@ -197,7 +197,7 @@ class SequenceDataset:
             audio_stmt = select(schema.sequence.Sound).order_by(schema.sequence.Sound.id)
             audio_result = session.scalars(audio_stmt).all()
             for model_audio in audio_result:
-                audios.append(Sound(path=model_audio.path))
+                audios.append(Sound.read(path=model_audio.path))
 
             seqs_stmt = select(schema.sequence.Sequence).order_by(schema.sequence.Sequence.id)
             seqs_result = session.scalars(seqs_stmt).all()
