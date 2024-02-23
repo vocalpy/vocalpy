@@ -10,7 +10,7 @@ from .fixtures.audio import MULTICHANNEL_FLY_WAV, BIRDSONGREC_WAV_LIST
 RNG = np.random.default_rng()
 
 def assert_sound_is_instance_with_expected_attrs(
-        sound, data, samplerate, channels
+        sound, data, samplerate, channels, audio_format
 ):
     """Assertions helper we use in TestSound methods"""
     assert isinstance(sound, vocalpy.Sound)
@@ -18,14 +18,14 @@ def assert_sound_is_instance_with_expected_attrs(
     for attr_name, attr_val in zip(("data", "samplerate", "channels"), (data, samplerate, channels)):
         assert hasattr(sound, attr_name)
         if attr_name == "data":
+            if audio_format == "cbin":
+                # add channel dim to data, needed for cbin audio
+                attr_val = (attr_val.astype(np.float64) / 32768.0)
             if attr_val.ndim == 1:
-                np.testing.assert_allclose(
-                    getattr(sound, attr_name), attr_val[np.newaxis, ...]
-                )
-            else:
-                np.testing.assert_allclose(
-                    getattr(sound, attr_name), attr_val
-                )
+                attr_val = attr_val[np.newaxis, ...]
+            np.testing.assert_allclose(
+                getattr(sound, attr_name), attr_val
+            )
         else:
             assert getattr(sound, attr_name) == attr_val
 
@@ -49,7 +49,7 @@ class TestSound:
         sound = vocalpy.Sound(data=data, samplerate=samplerate)
 
         assert_sound_is_instance_with_expected_attrs(
-            sound, data, samplerate, channels
+            sound, data, samplerate, channels, audio_format="wav"
         )
 
     @pytest.mark.parametrize(
@@ -142,19 +142,25 @@ class TestSound:
         if an_audio_path.name.endswith("cbin"):
             data, samplerate = vocalpy._vendor.evfuncs.load_cbin(an_audio_path)
             channels = 1
-        else:
+            audio_format = "cbin"
+        elif an_audio_path.name.endswith("wav"):
             data, samplerate = soundfile.read(an_audio_path, always_2d=True)
             channels = data.shape[1]
             data = np.transpose(data, (1, 0))
-        return data, samplerate, channels
+            audio_format = "wav"
+        else:
+            raise ValueError(
+                f"Unrecognized format: {an_audio_path.suffix}"
+            )
+        return data, samplerate, channels, audio_format
 
-    def test_read(self, an_audio_path, tmp_path):
+    def test_read(self, an_audio_path):
         """Test that :meth:`vocalpy.Sound.read` works as expected."""
-        data, samplerate, channels = self.load_an_audio_path(an_audio_path)
+        data, samplerate, channels, audio_format = self.load_an_audio_path(an_audio_path)
 
         sound = vocalpy.Sound.read(an_audio_path)
         assert_sound_is_instance_with_expected_attrs(
-            sound, data, samplerate, channels
+            sound, data, samplerate, channels, audio_format
         )
 
     def test_write(self, an_audio_path, tmp_path):
@@ -164,14 +170,15 @@ class TestSound:
         write it to a file, read it, and then test that the loaded
         data is what we expect.
         """
-        data, samplerate, channels = self.load_an_audio_path(an_audio_path)
+        data, samplerate, channels, audio_format = self.load_an_audio_path(an_audio_path)
 
-        if an_audio_path.name.endswith("cbin"):
-            # we can't save cbin format so we convert to wav
+        if audio_format == "cbin":
+            # we have to normalize cbin
             # https://stackoverflow.com/a/42544738/4906855
-            data = data.astype(np.float32) / 32768.0
-
-        sound = vocalpy.Sound(data=data, samplerate=samplerate)
+            data_float_normal = data.astype(np.float64) / 32768.0
+            sound = vocalpy.Sound(data=data_float_normal, samplerate=samplerate)
+        else:
+            sound = vocalpy.Sound(data=data, samplerate=samplerate)
         tmp_wav_path = tmp_path / (an_audio_path.stem + ".wav")
         assert not tmp_wav_path.exists()
 
@@ -182,7 +189,7 @@ class TestSound:
         sound_loaded = vocalpy.Sound.read(tmp_wav_path)
 
         assert_sound_is_instance_with_expected_attrs(
-            sound_loaded, data, samplerate, channels
+            sound_loaded, data, samplerate, channels, audio_format
         )
 
     def test_write_raises(self, a_cbin_path, tmp_path):
@@ -196,7 +203,7 @@ class TestSound:
 
         To do this we make an audio file "by hand".
         """
-        data, samplerate, channels = self.load_an_audio_path(an_audio_path)
+        data, samplerate, channels, audio_format   = self.load_an_audio_path(an_audio_path)
 
         sound = vocalpy.Sound(path=an_audio_path)
         assert sound._data is None
@@ -205,11 +212,11 @@ class TestSound:
         _ = sound.data  # triggers lazy-load
 
         assert_sound_is_instance_with_expected_attrs(
-            sound, data, samplerate, channels
+            sound, data, samplerate, channels, audio_format
         )
 
     def test_open(self, an_audio_path):
-        data, samplerate, channels = self.load_an_audio_path(an_audio_path)
+        data, samplerate, channels, audio_format  = self.load_an_audio_path(an_audio_path)
 
         sound = vocalpy.Sound(path=an_audio_path)
         assert sound._data is None
@@ -217,7 +224,7 @@ class TestSound:
 
         with sound.open():
             assert_sound_is_instance_with_expected_attrs(
-                sound, data, samplerate, channels
+                sound, data, samplerate, channels, audio_format
             )
 
         # check that attributes go back to none after we __exit__ the context
