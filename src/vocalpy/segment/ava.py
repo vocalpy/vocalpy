@@ -86,6 +86,31 @@ class AvaParams:
         with a gaussian filter.
         The window size will be ``dt - smoothing_timescale / samplerate``,
         where ``dt`` is the size of a time bin in the spectrogram.
+    scale : bool
+        If True, scale the ``sound.data``.
+        Default is True.
+        This is needed to replicate the behavior of ``ava``,
+        which assumes the audio data is loaded as 16-bit integers.
+        Since the default for :class:`vocalpy.Sound` is to load sounds
+        with a numpy dtype of float64, this function defaults to
+        multiplying the ``sound.data`` by 2**15,
+        and then casting to the int16 dtype.
+        This replicates the behavior of the ``ava`` function,
+        given data with dtype float64.
+        If you have loaded a sound with a dtype of int16,
+        then set this to False.
+    scale_val :
+        Value to multiply the ``sound.data`` by, to scale the data.
+        Default is 2**15.
+        Only used if ``scale`` is ``True``.
+        This is needed to replicate the behavior of ``ava``,
+        which assumes the audio data is loaded as 16-bit integers.
+    scale_dtype : numpy.dtype
+        Numpy Dtype to cast ``sound.data`` to, after scaling.
+        Default is ``np.int16``.
+        Only used if ``scale`` is ``True``.
+        This is needed to replicate the behavior of ``ava``,
+        which assumes the audio data is loaded as 16-bit integers.
 
     Examples
     --------
@@ -95,9 +120,6 @@ class AvaParams:
     >>> onsets, offsets = voc.segment.ava.segment(sound, **voc.segment.ava.JOURJINEETAL2023)
     """
 
-    scale: bool = True
-    scale_val: int | float = 2**15
-    scale_dtype: npt.DTypeLike = np.int16
     nperseg: int = 1024
     noverlap: int = 512
     min_freq: float = 20e3
@@ -113,6 +135,9 @@ class AvaParams:
     use_softmax_amp: bool = False
     temperature: float = 0.01
     smoothing_timescale: float = 0.00025
+    scale: bool = True
+    scale_val: int | float = 2**15
+    scale_dtype: npt.DTypeLike = np.int16
 
     def keys(self):
         return asdict(self).keys()
@@ -164,9 +189,6 @@ PETERSONETAL2023 = AvaParams(
 
 def segment(
     sound: Sound,
-    scale: bool = True,
-    scale_val: int | float = 2**15,
-    scale_dtype: npt.DTypeLike = np.int16,
     nperseg: int = 1024,
     noverlap: int = 512,
     min_freq: int = 30e3,
@@ -182,6 +204,9 @@ def segment(
     use_softmax_amp: bool = True,
     temperature: float = 0.5,
     smoothing_timescale: float = 0.007,
+    scale: bool = True,
+    scale_val: int | float = 2 ** 15,
+    scale_dtype: npt.DTypeLike = np.int16,
 ) -> tuple[npt.NDArray, npt.NDArray]:
     """Find segments in audio, using algorithm
     from ``ava`` package.
@@ -208,25 +233,6 @@ def segment(
     ----------
     sound : vocalpy.Sound
         Sound loaded from an audio file.
-    scale : bool
-        If True, scale the ``sound.data``.
-        Default is True.
-        This is needed to replicate the behavior of ``ava``,
-        which assumes the audio data is loaded as 16-bit integers.
-        The default behavior that replicates this is to
-        multiply the ``float64`` audio by 2**15 and then cast to the ``int16`` dtype.
-    scale_val :
-        Value to multiply the ``sound.data`` by, to scale the data.
-        Default is 2**15.
-        Only used if ``scale`` is ``True``.
-        This is needed to replicate the behavior of ``ava``,
-        which assumes the audio data is loaded as 16-bit integers.
-    scale_dtype : numpy.dtype
-        Numpy Dtype to cast ``sound.data`` to, after scaling.
-        Default is ``np.int16``.
-        Only used if ``scale`` is ``True``.
-        This is needed to replicate the behavior of ``ava``,
-        which assumes the audio data is loaded as 16-bit integers.
     nperseg : int
         Number of samples per segment for Short-Time Fourier Transform.
         Default is 1024.
@@ -287,6 +293,31 @@ def segment(
         with a gaussian filter.
         The window size will be ``dt - smoothing_timescale / samplerate``,
         where ``dt`` is the size of a time bin in the spectrogram.
+    scale : bool
+        If True, scale the ``sound.data``.
+        Default is True.
+        This is needed to replicate the behavior of ``ava``,
+        which assumes the audio data is loaded as 16-bit integers.
+        Since the default for :class:`vocalpy.Sound` is to load sounds
+        with a numpy dtype of float64, this function defaults to
+        multiplying the ``sound.data`` by 2**15,
+        and then casting to the int16 dtype.
+        This replicates the behavior of the ``ava`` function,
+        given data with dtype float64.
+        If you have loaded a sound with a dtype of int16,
+        then set this to False.
+    scale_val :
+        Value to multiply the ``sound.data`` by, to scale the data.
+        Default is 2**15.
+        Only used if ``scale`` is ``True``.
+        This is needed to replicate the behavior of ``ava``,
+        which assumes the audio data is loaded as 16-bit integers.
+    scale_dtype : numpy.dtype
+        Numpy Dtype to cast ``sound.data`` to, after scaling.
+        Default is ``np.int16``.
+        Only used if ``scale`` is ``True``.
+        This is needed to replicate the behavior of ``ava``,
+        which assumes the audio data is loaded as 16-bit integers.
 
     Returns
     -------
