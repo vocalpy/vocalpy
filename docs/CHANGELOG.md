@@ -16,6 +16,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Add larger example datasets, that are downloaded with `pooch`
   [#130](https://github.com/vocalpy/vocalpy/pull/130).
   Fixes [#33](https://github.com/vocalpy/vocalpy/issues/33).
+- Add `dtype` argument to `Sound.read`, that defaults to `numpy.float64`.
+  This means that all audio loads with this numpy DType by default, 
+  including cbins. This makes the behavior of `vocalpy.Sound`
+  consistent with `soundfile`. 
+  [#132](https://github.com/vocalpy/vocalpy/pull/132).
+  Fixes [#131](https://github.com/vocalpy/vocalpy/issues/131).
 
 ### Changed
 - Rename `vocalpy.Audio` to `vocalpy.Sound` 
@@ -34,6 +40,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix `vocalpy.segment.ava.segment` to better replicate original function
   [#130](https://github.com/vocalpy/vocalpy/pull/130).
   Fixes [#126](https://github.com/vocalpy/vocalpy/issues/126).
+- Fix `vocalpy.segment.meansquared` so it replicates behavior of original
+  function `segment_song` in evsonganaly. As with `vocalpy.segment.ava.segment`,
+  we now assume the input is by default `numpy.float64` with range [-1.0, 1.0],
+  and we rescale to int16 range that the original function expected.
+  We now test that we replicate the original behavior using oracle data from the 
+  [evfuncs](https://github.com/NickleDave/evfuncs) package.
+  [#132](https://github.com/vocalpy/vocalpy/pull/132).
+  Fixes [#129](https://github.com/vocalpy/vocalpy/issues/129).
 
 ## 0.8.2
 ### Fixed
