@@ -125,6 +125,7 @@ def clean_dir(dir_path):
                 continue
             content.unlink()
 
+
 @nox.session(name='make-example-data')
 def make_example_data(session: nox.Session) -> None:
     """
@@ -202,7 +203,7 @@ TEST_DATA_GENERATE_AVA_SEGMENTS_SCRIPT = './tests/scripts/generate_ava_segment_t
 
 
 @nox.session(name='test-data-generate-ava-segments', python="3.10")
-def test_data_generate(session) -> None:
+def test_data_generate_ava_segments(session) -> None:
     """Produce generated test data for ava segments"""
     session.install("joblib==1.3.2")
     session.install("numpy==1.26.3")

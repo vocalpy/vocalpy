@@ -1,6 +1,6 @@
+"""Class that represents a sound."""
 from __future__ import annotations
 
-import contextlib
 import pathlib
 import reprlib
 import warnings
@@ -50,120 +50,59 @@ class Sound:
 
     def __init__(
         self,
-        data: npt.NDArray | None = None,
-        samplerate: int | None = None,
+        data: npt.NDArray,
+        samplerate: int,
         path: str | pathlib.Path | None = None,
     ):
-        if all([arg is None for arg in (data, samplerate, path)]):
-            raise ValueError("Must specify either audio path, or data and samplerate.")
+        if not isinstance(data, np.ndarray):
+            raise TypeError(f"Sound array `data` should be a numpy array, " f"but type was {type(data)}.")
+        if not (data.ndim == 1 or data.ndim == 2):
+            raise ValueError(
+                f"Sound array `data` should have either 1 or 2 dimensions, "
+                f"but number of dimensions was {data.ndim}."
+            )
+        if data.ndim == 1:
+            data = data[np.newaxis, :]
 
-        if path:
+        if data.shape[0] > data.shape[1]:
+            warnings.warn(
+                "The ``data`` passed in has more channels than samples: the number of channels (data.shape[0]) "
+                f"is {data.shape[0]} and the number of samples (data.shape[1]) is {data.shape[1]}. "
+                "You may need to verify you have passed in the data correctly.",
+                stacklevel=2,
+            )
+
+        self.data = data
+
+        if not isinstance(samplerate, int):
+            raise TypeError(f"Type of ``samplerate`` must be int but was: {type(samplerate)}")
+        if not samplerate > 0:
+            raise ValueError(f"Value of ``samplerate`` must be a positive integer, but was {samplerate}.")
+        self.samplerate = samplerate
+
+        if path is not None:
             path = pathlib.Path(path)
         self.path = path
 
-        if any((data is not None, samplerate is not None)):
-            if not all((data is not None, samplerate is not None)):
-                raise ValueError("Must provide both `data` and `samplerate`.")
-
-        if data is not None:
-            if not isinstance(data, np.ndarray):
-                raise TypeError(f"Sound array `data` should be a numpy array, " f"but type was {type(data)}.")
-            if not (data.ndim == 1 or data.ndim == 2):
-                raise ValueError(
-                    f"Sound array `data` should have either 1 or 2 dimensions, "
-                    f"but number of dimensions was {data.ndim}."
-                )
-            if data.ndim == 1:
-                data = data[np.newaxis, :]
-
-            if data.shape[0] > data.shape[1]:
-                warnings.warn(
-                    "The ``data`` passed in has more channels than samples: the number of channels (data.shape[0]) "
-                    f"is {data.shape[0]} and the number of samples (data.shape[1]) is {data.shape[1]}. "
-                    "You may need to verify you have passed in the data correctly.",
-                    stacklevel=2,
-                )
-
-        self._data = data
-
-        if samplerate is not None:
-            if not isinstance(samplerate, int):
-                raise TypeError(f"Type of ``samplerate`` must be int but was: {type(samplerate)}")
-            if not samplerate > 0:
-                raise ValueError(f"Value of ``samplerate`` must be a positive integer, but was {samplerate}.")
-        self._samplerate = samplerate
-
-    def _read(self):
-        if self._data is not None:
-            raise ValueError(
-                "This Sound instance already has data loaded into it. "
-                "Make a new Sound instance by calling ``Sound.read()`` or "
-                "by instantiating directly: ``sound = Sound(path=path)``."
-            )
-        if self.path.name.endswith("cbin"):
-            data, samplerate = evfuncs.load_cbin(self.path)
-            # evfuncs always gives us 1-dim
-            data = data[np.newaxis, :]
-        else:
-            data, samplerate = soundfile.read(self.path, always_2d=True)
-            data = data.transpose((1, 0))  # dimensions (samples, channels) -> (channels, samples)
-
-        self._data = data
-        self._samplerate = samplerate
-
-    @property
-    def data(self):
-        if self._data is None:
-            self._read()
-        return self._data
-
-    @property
-    def samplerate(self):
-        if self._samplerate is None:
-            self._read()
-        return self._samplerate
-
     @property
     def channels(self):
-        if self._data is None:
-            self._read()
-        return self._data.shape[0]
+        return self.data.shape[0]
 
     @property
     def samples(self):
-        if self._data is None:
-            self._read()
-        return self._data.shape[1]
+        return self.data.shape[1]
 
     @property
     def duration(self):
-        if self._data is None:
-            self._read()
-        return self._data.shape[1] / self._samplerate
+        return self.data.shape[1] / self.samplerate
 
     def __repr__(self):
         return (
             f"vocalpy.{self.__class__.__name__}("
-            f"data={reprlib.repr(self._data)}, "
-            f"samplerate={reprlib.repr(self._samplerate)}, "
+            f"data={reprlib.repr(self.data)}, "
+            f"samplerate={reprlib.repr(self.samplerate)}, "
             f"path={self.path})"
         )
-
-    def asdict(self):
-        """Convert this :class:`vocalpy.Sound`
-        to a :class:`dict`.
-
-        Returns
-        -------
-        sound_dict : dict
-            A :class:`dict` with keys {'data', 'samplerate', 'path'} that map
-            to the corresponding attributes of this :class:`vocalpy.Sound`.
-        """
-        return {
-            "data": self._data,
-            "samplerate": self._samplerate,
-            "path": self.path,
-        }
 
     def __eq__(self, other):
         if other.__class__ is not self.__class__:
@@ -182,7 +121,7 @@ class Sound:
         return not self.__eq__(other)
 
     @classmethod
-    def read(cls, path: str | pathlib.Path, **kwargs) -> "Self":  # noqa: F821
+    def read(cls, path: str | pathlib.Path, dtype: npt.DTypeLike=np.float64, **kwargs) -> "Self":  # noqa: F821
         """Read audio from ``path``.
 
         Parameters
@@ -190,10 +129,11 @@ class Sound:
         path : str, pathlib.Path
             Path to file from which audio data should be read.
         **kwargs : dict, optional
-            Extra arguments to :func:`soundfile.read`: refer to
+            Other arguments to :func:`soundfile.read`:, refer to
             :module:`soundfile` documentation for details.
             Note that :method:`vocalpy.Sound.read` passes in the argument
-            ``always_2d=True``.
+            ``always_2d=True``, because we require `Sound.data`
+            to always have a "channel" dimension.
 
         Returns
         -------
@@ -207,10 +147,23 @@ class Sound:
 
         if path.name.endswith("cbin"):
             data, samplerate = evfuncs.load_cbin(path)
-            # evfuncs always gives us 1-dim
+            if dtype in (np.float32, np.float64):
+                # for consistency with soundfile,
+                # we scale the cbin int16 data to range [-1.0, 1.0] when we cast to float
+                # Next line is from https://stackoverflow.com/a/42544738/4906855, see comments there
+                # Fixes
+                data = data.astype(dtype) / 32768.0
+            elif dtype == np.int16:
+                pass
+            else:
+                raise ValueError(
+                    f"Invalid ``dtype`` for cbin audio: {dtype}. "
+                    "Must be one of {numpy.int16, np.float32, np.float64}"
+                )
+            # evfuncs always gives us 1-dim, so we add channel dimension
             data = data[np.newaxis, :]
         else:
-            data, samplerate = soundfile.read(path, always_2d=True, **kwargs)
+            data, samplerate = soundfile.read(path, always_2d=True, dtype=dtype, **kwargs)
             data = data.transpose((1, 0))  # dimensions (samples, channels) -> (channels, samples)
 
         return cls(data=data, samplerate=samplerate, path=path)
@@ -241,14 +194,6 @@ class Sound:
         # next line: swap axes because soundfile expects dimensions to be (samples, channels)
         soundfile.write(file=path, data=self.data.transpose((1, 0)), samplerate=self.samplerate, **kwargs)
         return AudioFile(path=path)
-
-    @contextlib.contextmanager
-    def open(self, **kwargs):
-        self._read(**kwargs)
-        yield
-        self._data = None
-        self._samplerate = None
-        self._channels = None
 
     def __iter__(self):
         for channel in self.data:

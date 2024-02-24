@@ -123,8 +123,7 @@ class Segmenter:
 
             return Sequence(
                 units=units,
-                # note we make a new sound instance **without** data loaded
-                sound=Sound(path=sound_.path),
+                sound=Sound.read(path=sound_.path),
                 method=self.callback.__name__,
                 segment_params=self.segment_params,
             )

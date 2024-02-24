@@ -5,7 +5,12 @@ import pytest
 HERE = Path(__file__).parent
 
 
-TEST_DATA_ROOT = HERE.joinpath('..', 'data-for-tests')
+PROJ_ROOT = (HERE / '..' / '..').resolve()
+# next line, use `resolve` + `relative_to` so all paths we compute with this are relative to project root,
+# which matters e.g. when we have fixtures that use paths to files, we don't want them to be
+# absolute for a specific system (such as, my computer)
+TEST_DATA_ROOT = HERE.joinpath('..', 'data-for-tests').resolve().relative_to(PROJ_ROOT)
+
 
 @pytest.fixture
 def test_data_root():

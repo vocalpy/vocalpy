@@ -18,6 +18,9 @@ def wav_path_seg_txt_path_tuple(request):
     return request.param
 
 
+# we filter this warning because we expect that some of the loadtxt files contain no data;
+# we want to test that we don't get segments for those files
+@pytest.mark.filterwarnings("ignore: loadtxt")
 def test_segment_replicates(wav_path_seg_txt_path_tuple):
     """Test that :func:`vocalpy.segment.ava.segment` replicates segmenting results
     obtained with the ``ava`` package."""
