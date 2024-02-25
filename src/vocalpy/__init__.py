@@ -31,6 +31,7 @@ from .audio_file import AudioFile
 from .dataset_file import DatasetFile, DatasetFileType, DatasetFileTypeEnum
 from .examples import example
 from .feature_file import FeatureFile
+from .segments import Segment, Segments
 from .segmenter import Segmenter
 from .sequence import Sequence
 from .sound import Sound
