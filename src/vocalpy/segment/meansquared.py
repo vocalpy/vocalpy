@@ -6,6 +6,8 @@ import numpy as np
 import numpy.typing as npt
 
 from .. import signal
+from ..segments import Segments
+
 
 if TYPE_CHECKING:
     from .. import Sound
@@ -21,7 +23,7 @@ def meansquared(
     scale: bool = True,
     scale_val: int | float = 2 ** 15,
     scale_dtype: npt.DTypeLike = np.int16,
-) -> tuple[npt.NDArray, npt.NDArray] | None:
+) -> Segments:
     """Segment audio by thresholding the mean squared signal.
 
     Converts audio to the mean squared of the signal
@@ -94,6 +96,13 @@ def meansquared(
         Vector of onset times of segments, in seconds.
     offsets_s : numpy.ndarray
         Vector of offset times of segments, in seconds.
+
+    Examples
+    --------
+    >>> sounds = voc.examples('bfsongrepo')
+    >>> segments = voc.segment.meansquared(sounds[0])
+    >>> print(segments)
+
     """
     if sound.data.shape[0] > 1:
         raise ValueError(
@@ -134,11 +143,21 @@ def meansquared(
     keep_these = np.nonzero(silent_gap_durs > min_silent_dur)
     onsets_s = np.concatenate((onsets_s[0, np.newaxis], onsets_s[1:][keep_these]))
     offsets_s = np.concatenate((offsets_s[:-1][keep_these], offsets_s[-1, np.newaxis]))
+    # we do some double-bookkeeping here, not sure if there's a smarter way
+    onsets_sample = np.concatenate((onsets_sample[0, np.newaxis], onsets_sample[1:][keep_these]))
+    offsets_sample = np.concatenate((offsets_sample[:-1][keep_these], offsets_sample[-1, np.newaxis]))
 
     # eliminate syllables with duration shorter than min_dur
-    unit_durs = offsets_s - onsets_s
-    keep_these = np.nonzero(unit_durs > min_dur)
-    onsets_s = onsets_s[keep_these]
-    offsets_s = offsets_s[keep_these]
+    above_th_segment_durs = offsets_s - onsets_s
+    keep_these = np.nonzero(above_th_segment_durs > min_dur)
+    # we no longer need onsets/offsets in seconds, so we just update onsets_sample/offsets_sample
+    onsets_sample = onsets_sample[keep_these]
+    offsets_sample = offsets_sample[keep_these]
+    lengths = offsets_sample - onsets_sample
 
-    return onsets_s, offsets_s
+    return Segments(
+        start_inds=onsets_sample,
+        lengths=lengths,
+        sound=sound
+    )
+
