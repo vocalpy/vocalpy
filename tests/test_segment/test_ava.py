@@ -3,12 +3,12 @@ import pytest
 
 import vocalpy as voc
 
-from ..fixtures.audio import JOURJINE_ETAL_2021_WAV_LIST
+from ..fixtures.audio import JOURJINE_ETAL_2023_WAV_LIST
 from ..fixtures.segments import AVA_SEGMENT_TXT_LIST
 
 
 WAV_PATH_SEG_TXT_PATH_TUPLES = zip(
-    JOURJINE_ETAL_2021_WAV_LIST,
+    JOURJINE_ETAL_2023_WAV_LIST,
     AVA_SEGMENT_TXT_LIST
 )
 
@@ -43,7 +43,7 @@ def test_segment_replicates(wav_path_seg_txt_path_tuple):
     np.testing.assert_allclose(offsets, offsets_gt, atol=1e-5, rtol=0)
 
 
-@pytest.fixture(params=JOURJINE_ETAL_2021_WAV_LIST)
+@pytest.fixture(params=JOURJINE_ETAL_2023_WAV_LIST)
 def jourjine_et_al_wav_2023_path(request):
     return request.param
 
