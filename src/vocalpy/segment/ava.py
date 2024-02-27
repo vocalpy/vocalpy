@@ -9,6 +9,8 @@ import numpy.typing as npt
 from scipy.ndimage import gaussian_filter
 from scipy.signal import stft
 
+from ..segments import Segments
+
 if TYPE_CHECKING:
     from .. import Sound
 
@@ -207,7 +209,7 @@ def segment(
     scale: bool = True,
     scale_val: int | float = 2 ** 15,
     scale_dtype: npt.DTypeLike = np.int16,
-) -> tuple[npt.NDArray, npt.NDArray]:
+) -> Segments:
     """Find segments in audio, using algorithm
     from ``ava`` package.
 
@@ -481,14 +483,28 @@ def segment(
     # Throw away segments that are too long or too short.
     min_dur_samples = int(np.floor(min_dur / dt))
     max_dur_samples = int(np.ceil(max_dur / dt))
-    new_onsets, new_offsets = [], []
+    new_onsets_s, new_offsets_s = [], []
+    onsets_sample, offsets_sample = [], []
     for i in range(len(offsets)):
         t1, t2 = onsets[i], offsets[i]
         if t2 - t1 + 1 <= max_dur_samples and t2 - t1 + 1 >= min_dur_samples:
-            new_onsets.append(t1 * dt)
-            new_offsets.append(t2 * dt)
-    onsets = np.array(new_onsets)
-    offsets = np.array(new_offsets)
+            new_onsets_s.append(t1 * dt)
+            onsets_sample.append(t1)
+            new_offsets_s.append(t2 * dt)
+            offsets_sample.append(t2)
+    onsets_s = np.array(new_onsets_s)
+    offsets_s = np.array(new_offsets_s)
+    onsets_sample = np.array(onsets_sample)
+    offsets_sample = np.array(offsets_sample)
+
+    if onsets_s.size == 0 and offsets_s.size == 0:
+        # can't throw any intervals away (next code block)
+        # if there's not any intervals, so, return empty Segments
+        return Segments(
+            np.array([]),
+            np.array([]),
+            sound,
+        )
 
     # Throw away inter-segment intervals that are too short, as is done in Jourjine et al., 2023
     # Note we do this **after** throwing away segments that are too long or too short.
@@ -497,12 +513,16 @@ def segment(
     # This means there is the possibility of throwing away some short segments that we might have merged,
     # if we'd removed inter-segment intervals *first*, which is what `vocalpy.segment.meansquared` does.
     if min_isi_dur is not None:
-        if onsets.size == 0:
-            # can't throw any intervals away if there's not any intervals
-            return onsets, offsets
-        isi_durs = onsets[1:] - offsets[:-1]
+        isi_durs = onsets_s[1:] - offsets_s[:-1]
         keep_these = isi_durs > min_isi_dur
-        onsets = np.concatenate((onsets[0, np.newaxis], onsets[1:][keep_these]))
-        offsets = np.concatenate((offsets[:-1][keep_these], offsets[-1, np.newaxis]))
+        # we don't keep seconds anymore since we're returning samples
+        onsets_sample = np.concatenate((onsets_sample[0, np.newaxis], onsets_sample[1:][keep_these]))
+        offsets_sample = np.concatenate((offsets_sample[:-1][keep_these], offsets_sample[-1, np.newaxis]))
 
-    return onsets, offsets
+    lengths = offsets_sample - onsets_sample
+
+    return Segments(
+        start_inds=onsets_sample,
+        lengths=lengths,
+        sound=sound
+    )
