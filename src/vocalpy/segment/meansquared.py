@@ -92,14 +92,13 @@ def meansquared(
 
     Returns
     -------
-    onsets_s : numpy.ndarray
-        Vector of onset times of segments, in seconds.
-    offsets_s : numpy.ndarray
-        Vector of offset times of segments, in seconds.
+    segments : vocalpy.Segments
+        Instance of :class:`vocalpy.Segments` representing
+        the segments found.
 
     Examples
     --------
-    >>> sounds = voc.examples('bfsongrepo')
+    >>> sounds = voc.examples('bfsongrepo', return_type='sound')
     >>> segments = voc.segment.meansquared(sounds[0])
     >>> print(segments)
 
