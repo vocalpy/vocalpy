@@ -439,8 +439,11 @@ def segment(
     # Then search to the left and right for onsets and offsets.
     onsets, offsets = [], []
     for local_max in local_maxima:
-        # skip this local_max if we are in a region we already declared a segment
-        if len(offsets) > 1 and local_max < offsets[-1]:
+        # skip this local_max if we are in a region we already declared a segment.
+        # Note the next line in the original implementation had an off-by-one error,
+        # that is fixed here to avoid occasionally duplicating the first segment. See:
+        # https://github.com/pearsonlab/autoencoded-vocal-analysis/issues/12
+        if len(offsets) > 0 and local_max < offsets[-1]:
             continue
 
         # first find onset
