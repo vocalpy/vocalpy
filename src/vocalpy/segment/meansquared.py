@@ -115,9 +115,22 @@ def meansquared(
         )
 
     if scale:
-        sound.data = (sound.data * scale_val).astype(scale_dtype)
+        # make a copy so we don't mutate data of input argument silently
+        # since a user won't expect this.
+        # we need to make a new Sound since that's what `signal.audio.meansquared` expect.
+        # we could avoid this by just moving the logic of those functions inside this one
+        # or move them into this module, since it's currently the only place they're used internally
+        # (and probably externally)
+        from .. import Sound
+        sound_copy = Sound(
+            data=(sound.data * scale_val).astype(scale_dtype),
+            samplerate=sound.samplerate,
+            path=sound.path
+        )
+        meansquared_ = signal.audio.meansquared(sound_copy, freq_cutoffs, smooth_win)
+    else:
+        meansquared_ = signal.audio.meansquared(sound, freq_cutoffs, smooth_win)
 
-    meansquared_ = signal.audio.meansquared(sound, freq_cutoffs, smooth_win)
     # we get rid of the channel dimension *after* calling ``signal.audio.meansquared``
     # because that function *does* work on multi-channel data
     meansquared_ = np.squeeze(meansquared_, axis=0)
