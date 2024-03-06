@@ -95,21 +95,21 @@ class Segmenter:
         validate_sound(sound)
 
         # define nested function so vars are in scope and ``dask`` can call it
-        def _to_sequence(sound_: Sound):
+        def _to_segments(sound_: Sound | AudioFile) -> Segments:
             if isinstance(sound_, AudioFile):
                 sound_ = Sound.read(sound_.path)
             segments = self.callback(sound_, **self.segment_params)
             return segments
 
         if isinstance(sound, (Sound, AudioFile)):
-            return _to_sequence(sound)
+            return _to_segments(sound)
 
         segments = []
         for sound_ in sound:
             if parallelize:
-                segments.append(dask.delayed(_to_sequence(sound_)))
+                segments.append(dask.delayed(_to_segments(sound_)))
             else:
-                segments.append(_to_sequence(sound_))
+                segments.append(_to_segments(sound_))
 
         if parallelize:
             graph = dask.delayed()(segments)
