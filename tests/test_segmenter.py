@@ -5,24 +5,26 @@ import vocalpy
 from .fixtures.audio import BIRDSONGREC_WAV_LIST
 
 
-def assert_is_expected_sequence(sequence, sound, method, segment_params):
-    assert isinstance(sequence, vocalpy.Sequence)
-    assert sequence.sound.path == sound.path
-    assert sequence.method == method
-    assert sequence.segment_params == segment_params
+def assert_segments_is_expected(segments, sound):
+    assert isinstance(segments, vocalpy.Segments)
+    if isinstance(sound, vocalpy.Sound):
+        assert segments.sound is sound
+    elif isinstance(sound, vocalpy.AudioFile):
+        assert segments.sound == vocalpy.Sound.read(sound.path)
 
 
 class TestSegmenter:
     @pytest.mark.parametrize(
-        "callback, method, segment_params",
+        "callback, segment_params",
         [
-            (None, None, None),
-            (vocalpy.segment.meansquared, None, {"smooth_win": 2}),
-            # TODO: test 'method'
+            (None, None),
+            (vocalpy.segment.meansquared, {"smooth_win": 2}),
+            # TODO: test `ava.segment`
+            # TODO: test `ava.segment` with AvaParams
         ],
     )
-    def test_init(self, callback, method, segment_params):
-        segmenter = vocalpy.Segmenter(callback=callback, method=method, segment_params=segment_params)
+    def test_init(self, callback, segment_params):
+        segmenter = vocalpy.Segmenter(callback=callback, segment_params=segment_params)
         assert isinstance(segmenter, vocalpy.Segmenter)
         if callback is None and segment_params is None:
             assert segmenter.callback is vocalpy.segment.meansquared
@@ -50,9 +52,9 @@ class TestSegmenter:
         segmenter = vocalpy.Segmenter(segment_params=segment_params)
         out = segmenter.segment(sound)
         if isinstance(sound, (vocalpy.Sound, vocalpy.AudioFile)):
-            assert_is_expected_sequence(
-                sequence=out, sound=sound, segment_params=segment_params, method=segmenter.callback.__name__
-            )
-            assert isinstance(out, vocalpy.Sequence)
+            assert_segments_is_expected(out, sound)
         elif isinstance(sound, list):
-            assert all([isinstance(spect, vocalpy.Sequence) for spect in out])
+            assert isinstance(out, list)
+            assert len(sound) == len(out)
+            for sound_, segments in zip(sound, out):
+                assert_segments_is_expected(segments, sound)
