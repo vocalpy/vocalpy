@@ -2,7 +2,6 @@
 from . import (
     _vendor,
     constants,
-    dataset,
     examples,
     feature,
     metrics,
@@ -56,7 +55,6 @@ __all__ = [
     "Sound",
     "AudioFile",
     "constants",
-    "dataset",
     "DatasetFile",
     "DatasetFileType",
     "DatasetFileTypeEnum",
