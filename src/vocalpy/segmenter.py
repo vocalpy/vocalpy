@@ -31,14 +31,12 @@ class Segmenter:
         that is used to segment.
         If not specified, defaults to
         :func:`vocalpy.segment.meansquared`.
-    method : str, optional.
-        The name of the function to use to segment.
     segment_params : dict, optional.
         If not specified, defaults to
         :const:`vocalpy.segmenter.DEFAULT_SEGMENT_PARAMS`.
     """
 
-    def __init__(self, callback: Callable | None = None, method: str | None = None, segment_params: dict | None = None):
+    def __init__(self, callback: Callable | None = None, segment_params: dict | None = None):
         """Initialize a new :class:`vocalpy.Segmenter` instance.
 
         Parameters
@@ -48,36 +46,23 @@ class Segmenter:
             that is used to segment.
             If not specified, defaults to
             :func:`vocalpy.segment.meansquared`.
-        method : str, optional.
-            The name of the function to use to segment.
         segment_params : dict, optional.
             If not specified, defaults to
             :data:`vocalpy.segmenter.DEFAULT_SEGMENT_PARAMS`.
         """
-        if callback and method:
-            raise ValueError("Cannot specify both `callback` and `method`, only one or the other.")
-
-        if method:
-            import vocalpy.signal.segment
-
-            # TODO: fix this
-            try:
-                callback = getattr(vocalpy.segment, method)
-            except AttributeError:
-                raise AttributeError(f"Method was '{method}' but `vocalpy.segment` has no function named `{method}`")
-
         if callback is None:
             from vocalpy.segment import meansquared as default_segment_func
 
             callback = default_segment_func
 
-        if callback is not None and not callable(callback):
+        if not callable(callback):
             raise ValueError(f"`callback` should be callable, but `callable({callback})` returns False")
 
         self.callback = callback
 
         if segment_params is None:
             segment_params = DEFAULT_SEGMENT_PARAMS
+
         if not isinstance(segment_params, dict):
             raise TypeError(f"`segment_params` should be a `dict` but type was: {type(segment_params)}")
 
