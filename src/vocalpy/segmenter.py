@@ -1,16 +1,18 @@
 """Class that represents the segmenting step in a pipeline."""
 from __future__ import annotations
 
-from typing import Callable
+from typing import Callable, TYPE_CHECKING
 
 import dask
 import dask.diagnostics
 
 from .audio_file import AudioFile
-from .sequence import Sequence
 from .sound import Sound
 from .spectrogram_maker import validate_sound
-from .unit import Unit
+
+if TYPE_CHECKING:
+    from .segments import Segments
+
 
 DEFAULT_SEGMENT_PARAMS = {
     "threshold": 5000,
@@ -85,8 +87,8 @@ class Segmenter:
         self,
         sound: Sound | AudioFile | list[Sound | AudioFile],
         parallelize: bool = True,
-    ) -> Sequence | None | list[Sequence | None]:
-        """Segment sound into sequences.
+    ) -> Segments | list[Segments]:
+        """Segment sound.
 
         Parameters
         ----------
@@ -99,11 +101,11 @@ class Segmenter:
 
         Returns
         -------
-        seq : vocalpy.Sequence, None, or list of vocalpy.Sequence or None
-            If a single :class:`~vocalpy.Sound` instance is passed in,
-            a single :class:`~vocalpy.Sequence` instance will be returned.
-            If a list of :class:`~vocalpy.Sound` instances is passed in,
-            a list of :class:`~vocalpy.Sequence` instances will be returned.
+        segments : vocalpy.Segments, list
+            If a :class:`~vocalpy.Sound` is passed in,
+            a single set of :class:`~vocalpy.Segments` will be returned.
+            If a list of :class:`~vocalpy.Sound` is passed in,
+            a list of :class:`~vocalpy.Segments` will be returned.
         """
         validate_sound(sound)
 
@@ -111,36 +113,22 @@ class Segmenter:
         def _to_sequence(sound_: Sound):
             if isinstance(sound_, AudioFile):
                 sound_ = Sound.read(sound_.path)
-            out = self.callback(sound_, **self.segment_params)
-            if out is None:
-                return out
-            else:
-                onsets, offsets = out
-
-            units = []
-            for onset, offset in zip(onsets, offsets):
-                units.append(Unit(onset=onset, offset=offset))
-
-            return Sequence(
-                units=units,
-                sound=Sound.read(path=sound_.path),
-                method=self.callback.__name__,
-                segment_params=self.segment_params,
-            )
+            segments = self.callback(sound_, **self.segment_params)
+            return segments
 
         if isinstance(sound, (Sound, AudioFile)):
             return _to_sequence(sound)
 
-        seqs = []
+        segments = []
         for sound_ in sound:
             if parallelize:
-                seqs.append(dask.delayed(_to_sequence(sound_)))
+                segments.append(dask.delayed(_to_sequence(sound_)))
             else:
-                seqs.append(_to_sequence(sound_))
+                segments.append(_to_sequence(sound_))
 
         if parallelize:
-            graph = dask.delayed()(seqs)
+            graph = dask.delayed()(segments)
             with dask.diagnostics.ProgressBar():
                 return graph.compute()
         else:
-            return seqs
+            return segments
