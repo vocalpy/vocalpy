@@ -184,8 +184,8 @@ SEGMENTS_ARGVALS = [
     ),
     # empty segments
     (
-        np.array([]),
-        np.array([]),
+        np.array([]).astype(int),
+        np.array([]).astype(int),
         TEST_SOUND,
         None,
     ),
