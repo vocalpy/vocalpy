@@ -72,7 +72,7 @@ class TestSegment:
             # length is not positive
             (0, -100, TEST_SOUND_DATA[:100], 'x', ValueError),
             # data is not an xarray.DataArray
-            (0, -100, np.random.rand(100), 'x', TypeError),
+            (0, 100, np.random.rand(100), 'x', TypeError),
             # data.ndim != 1
             (0, -100, TEST_SOUND_DATA[:100].expand_dims({'channel': 0}), 'x', ValueError),
             # data.size != length
