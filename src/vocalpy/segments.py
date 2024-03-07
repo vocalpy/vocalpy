@@ -1,6 +1,7 @@
 """Classes that represent line segments returned by segmenting algorithms."""
 from __future__ import annotations
 
+import io
 import json
 import numbers
 import pathlib
@@ -11,6 +12,8 @@ import numpy as np
 import numpy.typing as npt
 import pandas as pd
 import xarray as xr
+
+from .sound import Sound
 
 if TYPE_CHECKING:
     import vocalpy
@@ -126,6 +129,14 @@ class Segments:
     a segmenting algorithm. For algorithms that find segments by thresholding energy,
     the length will be equal to
 
+    Attributes
+    ----------
+    start_inds : numpy.ndarray
+    lengths: numpy.ndarray
+    labels: list, optional
+        A :class:`list` of strings,
+        where each string is the label for each segment.
+
     Examples
     --------
 
@@ -142,10 +153,9 @@ class Segments:
     >>> sounds = voc.example('bfsongrepo', return_type='sound')
     >>> segments = voc.segment.meansquared(sound, threshold=1500, min_dur=0.2, min_silent_dur=0.02)
     >>> annots = voc.example('bfsongrepo', return_type='annotation')
-    >>> ref = annots[0].seq.onsets, annot[0].seq.offsets
+    >>> ref = np.sorted(np.concatenate(annots[0].seq.onsets, annot[0].seq.offsets))
     >>> hyp = segments.all_times
     >>> prec, _ = voc.metrics.segmentation.ir.precision(reference=ref, hypothesis=hyp)
-    >>>
 
     We can also use :class:`~vocalpy.Segments` to write the data in each :class:`Segment` to disk.
     This is a common step in workflows, such as those that extract acoustic features from each segment
@@ -215,12 +225,10 @@ class Segments:
                  start_inds: npt.NDArray,
                  lengths: npt.NDArray,
                  sound: vocalpy.Sound | None = None,
-                 labels: npt.NDArray | None = None,
+                 labels: list[str] | None = None,
                  ) -> None:
-        import vocalpy
-
         if sound is not None:
-            if not isinstance(sound, vocalpy.Sound):
+            if not isinstance(sound, Sound):
                 raise TypeError(
                     f"`sound` should be an instance of vocalpy.Sound, but type was: {type(sound)}"
                 )
@@ -268,34 +276,32 @@ class Segments:
             if not np.all(lengths >= 1):
                 raise ValueError(f"Values of `lengths` for `Segments` must all be positive.")
 
-            if start_inds[-1] + lengths[-1] > sound.data.shape[-1]:
-                raise ValueError(
-                    # TODO: check for off-by-one errors here and elsewhere where we use lengths
-                    "Length of last segment is longer than number of samples in sound. "
-                    f"Last segment ends at {start_inds[-1] + lengths[-1]} and sound has {sound.data.shape[-1]} samples."
-                )
+            if sound is not None:
+                if start_inds[-1] + lengths[-1] > sound.data.shape[-1]:
+                    raise ValueError(
+                        # TODO: check for off-by-one errors here and elsewhere where we use lengths
+                        "Length of last segment is longer than number of samples in sound. "
+                        f"Last segment ends at {start_inds[-1] + lengths[-1]} and sound has {sound.data.shape[-1]} samples."
+                    )
 
         if labels is not None:
-            if not isinstance(labels, np.ndarray):
+            if not isinstance(labels, list):
                 raise TypeError(
-                    f"`labels` must be a numpy array but type was: {type(labels)}"
+                    f"`labels` must be a list but type was: {type(labels)}"
                 )
-            if not issubclass(np.array(labels).dtype.type, np.character):
+            if not all([isinstance(lbl, str) for lbl in labels]):
+                types = set([type(lbl) for lbl in labels])
                 raise ValueError(
-                    f"`labels` of `Segments` must be a numpy array with character dtype, but dtype was: {labels.dtype}"
+                    f"`labels` of `Segments` must be a list of strings, but found the following types: {types}"
                 )
-            if not labels.ndim == 1:
-                raise ValueError(
-                    f"`labels` for `Segments` should be 1-dimensional array but labels.ndim was: {lengths.ndim}"
-                )
-            if labels.size != start_inds.size:
+            if len(labels) != start_inds.size:
                 raise ValueError(
                     "`labels` for `Segments` must have same number of elements as `start_inds`. "
-                    f"`labels` has {labels.size} elements but `start_inds` has {start_inds.size} elements."
+                    f"`labels` has {len(labels)} elements but `start_inds` has {start_inds.size} elements."
                 )
         else:  # if labels is None
             # then default to empty strings
-            labels = np.array([''] * start_inds.shape[0])
+            labels = [''] * start_inds.shape[0]
 
         self.start_inds = start_inds
         self.lengths = lengths
@@ -383,7 +389,7 @@ class Segments:
         df = pd.DataFrame(d)
         return df
 
-    def to_csv(self, csv_path: str | pathlib.Path, **to_csv_kwargs):
+    def to_csv(self, csv_path: str | pathlib.Path, **to_csv_kwargs) -> None:
         """Write :class:`Segments` to a csv file."""
         df = self.to_df()
         df.to_csv(csv_path, **to_csv_kwargs)
@@ -399,45 +405,90 @@ class Segments:
                 f"but not both"
             )
         if sound_path:
-            sound = vocalpy.Sound.read(sound_path)
-        df = pd.read_csv(csv_path)
+            sound = Sound.read(sound_path)
+        df = pd.read_csv(
+            csv_path,
+            # passing a converter is the only way to make sure that 'label'
+            # is an object array with strings:
+            # if we don't pass a converter, we get NaNs for empty strings,
+            converters={'label': str},
+            # and if we instead specify its dtype as 'string', we get weird StringType "<NA>"s
+            # even when we convert to list (I think). converters take precedence over dtype
+            dtype={'start_ind': int, 'length': int},
+        )
         start_inds = df['start_ind'].values
         lengths = df['length'].values
-        labels = df['label'].values
+        labels = df['label'].values.tolist()
         return cls(
             start_inds, lengths, sound, labels
         )
 
-    def to_json(self, json_path):
+    def to_json(self, json_path: str | pathlib.Path) -> None:
+        """Save :class:`Segments` to a json file
+
+        Parameters
+        ----------
+        json_path : str, pathlib.Path
+        """
         json_path = pathlib.Path(json_path)
         df = self.to_df()
-        dict_ = df.to_dict()
+        json_dict = {}
+        json_dict['data'] = df.to_json(orient="table")
+        json_dict['metadata'] = {
+            'sound_path': str(self.sound.path)
+        }
         with json_path.open('w') as fp:
-            json.dump(dict_, fp)
+            json.dump(json_dict, fp)
 
     @classmethod
-    def from_csv(cls, csv_path: str | pathlib.Path,
-                 sound: vocalpy.Sound | None = None,
-                 sound_path: str | pathlib.Path | None = None) -> Segments:
-        """Read :class:`Segments` from a csv file."""
-        if sound is not None and sound_path is not None:
-            raise ValueError(
-                f"`Segments.from_csv` can accept either `sound` or `sound_path`,"
-                f"but not both"
+    def from_json(cls, json_path: str | pathlib.Path) -> Segments:
+        """Load :class:`Segments` from a json file
+
+        Parameters
+        ----------
+        json_path
+
+        Returns
+        -------
+        segments : Segments
+        """
+        json_path = pathlib.Path(json_path)
+        with json_path.open('r') as fp:
+            json_dict = json.load(fp)
+
+        if json_dict['metadata']['sound_path'] == "None":
+            sound = None
+        else:
+            sound_path = pathlib.Path(
+                json_dict['metadata']['sound_path']
             )
-        if sound_path:
-            sound = vocalpy.Sound.read(sound_path)
-        df = pd.read_csv(csv_path, converters={'label': str})
+            if sound_path.exists():
+                sound = Sound.read(sound_path)
+            else:
+                sound = None
+
+        df = pd.read_json(
+            io.StringIO(json_dict['data']),
+            orient="table",
+        )
         start_inds = df['start_ind'].values
         lengths = df['length'].values
-        labels = df['label'].values
+        labels = df['label'].values.tolist()
         return cls(
             start_inds, lengths, sound, labels
         )
-
 
     def __len__(self):
         return len(self.start_times)
+
+    def __eq__(self, other: Segments) -> bool:
+        if not isinstance(other, Segments):
+            return False
+        return (
+            np.array_equal(self.start_inds, other.start_inds) and
+            np.array_equal(self.lengths, other.lengths) and
+            self.labels == other.labels
+        )
 
     def __iter__(self):
         if self.sound is None:
