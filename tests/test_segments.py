@@ -189,6 +189,12 @@ SEGMENTS_ARGVALS = [
         TEST_SOUND,
         None,
     ),
+    (
+        np.array([0, 10, 20, 30, 40]),
+        np.array([10, 10, 10, 10, 10]),
+        TEST_SOUND,
+        np.array(list('abcde')),
+    ),
 ]
 SEGMENTS_FOR_FIXTURE = [
     vocalpy.Segments(**{
@@ -464,7 +470,9 @@ class TestSegments:
         a_segments.to_csv(csv_path)
 
         assert csv_path.exists
-        df = pd.read_csv(csv_path)
+        # next line, need to read 'label' as str to avoid NaN for empty strings;
+        # this is what 'Segments.from_csv` does
+        df = pd.read_csv(csv_path, converters={'label': str})
         assert np.array_equal(
             a_segments.start_inds,
             df['start_ind'].values
