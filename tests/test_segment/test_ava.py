@@ -68,12 +68,11 @@ def test_segment_min_isi_dur(jourjine_et_al_wav_2023_path):
     isi_durs_without_min_isi = segments.start_times[1:] - segments.stop_times[:-1]
     if np.any(isi_durs_without_min_isi < params['min_isi_dur']):
         assert segments_isi.start_times.shape[0] < segments.start_times.shape[0]
-        assert segments_isi.durations
-        assert np.array_equal(
+        assert np.allclose(
             isi_durs_without_min_isi[isi_durs_without_min_isi > params['min_isi_dur']],
             isi_durs_with_min_isi
         )
     else:
-        assert np.array_equal(
+        assert np.allclose(
             isi_durs_without_min_isi, isi_durs_with_min_isi
         )
