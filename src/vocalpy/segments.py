@@ -427,7 +427,7 @@ class Segments:
             )
         if sound_path:
             sound = vocalpy.Sound.read(sound_path)
-        df = pd.read_csv(csv_path)
+        df = pd.read_csv(csv_path, converters={'label': str})
         start_inds = df['start_ind'].values
         lengths = df['length'].values
         labels = df['label'].values
