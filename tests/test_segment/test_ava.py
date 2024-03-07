@@ -27,6 +27,12 @@ def test_segment_replicates(wav_path_seg_txt_path_tuple):
     obtained with the ``ava`` package."""
     wav_path, seg_txt_path = wav_path_seg_txt_path_tuple
 
+    if seg_txt_path.name == "LL_21462x24783_ltr2_pup2_ch4_2600_f_359_278_fr0_p5_2020-02-27_11-45-23-clip.txt":
+        pytest.xfail(
+            "Extra segment in oracle data because of bug that is now fixed, see:"
+            "https://github.com/pearsonlab/autoencoded-vocal-analysis/pull/13"
+        )
+
     segs = np.loadtxt(seg_txt_path)
     segs = segs.reshape(-1,2)
     onsets_gt, offsets_gt = segs[:,0], segs[:,1]
