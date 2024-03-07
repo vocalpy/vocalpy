@@ -1,3 +1,7 @@
+import io
+import json
+import pathlib
+
 import numpy as np
 import pandas as pd
 import pytest
@@ -5,15 +9,10 @@ import xarray as xr
 
 import vocalpy.segments
 
-N_AUDIO_FILES_TO_USE = 5
-from .fixtures.audio import AUDIO_LIST_CBIN
-from .fixtures.audio import JOURJINE_ETAL_2023_WAV_LIST
-AUDIO_FILES = AUDIO_LIST_CBIN[:N_AUDIO_FILES_TO_USE] + JOURJINE_ETAL_2023_WAV_LIST[:N_AUDIO_FILES_TO_USE]
-
 
 TEST_SOUND = vocalpy.Sound(
     data=np.random.rand(1, 32000),
-    samplerate=32000
+    samplerate=32000,
 )
 
 TEST_SOUND_DATA = xr.DataArray(TEST_SOUND.data.squeeze(0))
@@ -174,7 +173,7 @@ SEGMENTS_ARGVALS = [
         np.array([0, 10, 20, 30, 40]),
         np.array([10, 10, 10, 10, 10]),
         TEST_SOUND,
-        np.array([''] * 5),
+        [''] * 5,
     ),
     (
         np.array([0, 10, 20, 30, 40]),
@@ -193,7 +192,7 @@ SEGMENTS_ARGVALS = [
         np.array([0, 10, 20, 30, 40]),
         np.array([10, 10, 10, 10, 10]),
         TEST_SOUND,
-        np.array(list('abcde')),
+        list('abcde'),
     ),
 ]
 SEGMENTS_FOR_FIXTURE = [
@@ -205,7 +204,18 @@ SEGMENTS_FOR_FIXTURE = [
 ]
 @pytest.fixture(params=SEGMENTS_FOR_FIXTURE)
 def a_segments(request):
-    return request.param
+    segments = request.param
+    # make a copy of segments.sound here
+    # so we can mutate it inside unit test, without breaking other tests
+    # (if we make a copy in constants above,
+    # we'd still mutate across unit tests)
+    sound_copy = vocalpy.Sound(
+        data=segments.sound.data,
+        samplerate=segments.sound.samplerate,
+        path=segments.sound.path
+    )
+    segments.sound = sound_copy
+    return segments
 
 
 class TestSegments:
@@ -255,7 +265,7 @@ class TestSegments:
                 np.array([0, 10, 20, 30, 40]),
                 np.array([10, 10, 10, 10, 10]),
                 np.random.rand(1, 100),
-                np.array([''] * 5),
+                [''] * 5,
                 TypeError
             ),
             # start inds not numpy array
@@ -263,7 +273,7 @@ class TestSegments:
                 [0, 10, 20, 30, 40],
                 np.array([10, 10, 10, 10, 10]),
                 TEST_SOUND,
-                np.array([''] * 5),
+                [''] * 5,
                 TypeError
             ),
             # lengths not numpy array
@@ -271,7 +281,7 @@ class TestSegments:
                 np.array([0, 10, 20, 30, 40]),
                 [10, 10, 10, 10, 10],
                 TEST_SOUND,
-                np.array([''] * 5),
+                [''] * 5,
                 TypeError
             ),
             # start inds not dtype int
@@ -279,7 +289,7 @@ class TestSegments:
                 np.array([0, 10, 20, 30, 40]).astype(np.float32),
                 np.array([10, 10, 10, 10, 10]),
                 TEST_SOUND,
-                np.array([''] * 5),
+                [''] * 5,
                 ValueError
             ),
             # lengths not dtype int
@@ -287,7 +297,7 @@ class TestSegments:
                 np.array([0, 10, 20, 30, 40]),
                 np.array([10, 10, 10, 10, 10]).astype(np.float32),
                 TEST_SOUND,
-                np.array([''] * 5),
+                [''] * 5,
                 ValueError
             ),
             # start inds not 1-d
@@ -295,7 +305,7 @@ class TestSegments:
                 np.array([[0, 10, 20, 30, 40]]),
                 np.array([10, 10, 10, 10, 10]),
                 TEST_SOUND,
-                np.array([''] * 5),
+                [''] * 5,
                 ValueError
             ),
             # start inds not 1-d
@@ -303,7 +313,7 @@ class TestSegments:
                 np.array(0),
                 np.array([10]),
                 TEST_SOUND,
-                np.array([''] * 5),
+                [''] * 5,
                 ValueError
             ),
             # lengths not 1-d
@@ -311,7 +321,7 @@ class TestSegments:
                 np.array([0, 10, 20, 30, 40]),
                 np.array([[10, 10, 10, 10, 10]]),
                 TEST_SOUND,
-                np.array([''] * 5),
+                [''] * 5,
                 ValueError
             ),
             # lengths not 1-d
@@ -319,7 +329,7 @@ class TestSegments:
                 np.array([0]),
                 np.array(10),
                 TEST_SOUND,
-                np.array([''] * 5),
+                [''] * 5,
                 ValueError
             ),
             # start_inds.size != lengths.size
@@ -327,7 +337,7 @@ class TestSegments:
                 np.array([0, 10]),
                 np.array([10, 10, 10, 10, 10]),
                 TEST_SOUND,
-                np.array([''] * 5),
+                [''] * 5,
                 ValueError
             ),
             # start inds not all non-negative
@@ -335,7 +345,7 @@ class TestSegments:
                 np.array([-10, 10, 20, 30, 40]),
                 np.array([10, 10, 10, 10, 10]),
                 TEST_SOUND,
-                np.array([''] * 5),
+                [''] * 5,
                 ValueError
             ),
             # start inds not monotonically increasing
@@ -343,7 +353,7 @@ class TestSegments:
                 np.array([40, 30, 20, 10, 0]),
                 np.array([10, 10, 10, 10, 10]),
                 TEST_SOUND,
-                np.array([''] * 5),
+                [''] * 5,
                 ValueError
             ),
             # lengths not all positive
@@ -351,7 +361,7 @@ class TestSegments:
                 np.array([0, 10, 20, 30, 40]),
                 np.array([0, 10, 10, 10, 10]),
                 TEST_SOUND,
-                np.array([''] * 5),
+                [''] * 5,
                 ValueError
             ),
             # lengths not all positive
@@ -359,7 +369,7 @@ class TestSegments:
                 np.array([0, 10, 20, 30, 40]),
                 np.array([-1, 10, 10, 10, 10]),
                 TEST_SOUND,
-                np.array([''] * 5),
+                [''] * 5,
                 ValueError
             ),
             # total length of start_ind[-1] + lengths[-1] > length of sound.data
@@ -367,15 +377,15 @@ class TestSegments:
                 np.array([0, 10, 20, 30, TEST_SOUND.data.shape[1] - 10]),
                 np.array([10, 10, 10, 10, TEST_SOUND.data.shape[1] + 11]),
                 TEST_SOUND,
-                [5] * 5,
+                [''] * 5,
                 ValueError
             ),
-            # labels not ndarray
+            # labels not list
             (
                 np.array([0, 10, 20, 30, 40]),
                 np.array([10, 10, 10, 10, 10]),
                 TEST_SOUND,
-                [''] * 5,
+                np.array([''] * 5),
                 TypeError
             ),
             # labels not str
@@ -383,23 +393,15 @@ class TestSegments:
                 np.array([0, 10, 20, 30, 40]),
                 np.array([10, 10, 10, 10, 10]),
                 TEST_SOUND,
-                np.array([5] * 5),
+                [5] * 5,
                 ValueError
             ),
-            # labels not 1-d
+            # len(labels) != start_inds.size
             (
                 np.array([0, 10, 20, 30, 40]),
                 np.array([10, 10, 10, 10, 10]),
                 TEST_SOUND,
-                np.array([5] * 5)[np.newaxis, :],
-                ValueError
-            ),
-            # labels.size != start_inds.size
-            (
-                np.array([0, 10, 20, 30, 40]),
-                np.array([10, 10, 10, 10, 10]),
-                TEST_SOUND,
-                np.array([''] * 2),
+                [''] * 2,
                 ValueError
             ),
         ],
@@ -495,9 +497,131 @@ class TestSegments:
         # TODO: implement __eq__ for Segments
         assert a_segments == a_segments_from_csv
 
-    def test___len__(self, a_segments):
-        # TODO: test empty Segment has len 0
-        assert False
+    @pytest.mark.parametrize(
+        'start_inds, lengths, sound, labels, expected_len',
+        [
+            (
+                np.array([0, 10, 20, 30, 40]),
+                np.array([10, 10, 10, 10, 10]),
+                TEST_SOUND,
+                [''] * 5,
+                5
+            ),
+            (
+                np.array([0, 10, 20, 30, 40]),
+                np.array([10, 10, 10, 10, 10]),
+                TEST_SOUND,
+                None,
+                5
+            ),
+            # empty segments
+            (
+                np.array([]).astype(int),
+                np.array([]).astype(int),
+                TEST_SOUND,
+                None,
+                0
+            ),
+            (
+                np.array([0, 10, 20, 30, 40]),
+                np.array([10, 10, 10, 10, 10]),
+                TEST_SOUND,
+                list('abcde'),
+                5,
+            ),
+        ]
+    )
+    def test___len__(self, start_inds, lengths, sound, labels, expected_len):
+        segments = vocalpy.Segments(
+            start_inds, lengths, sound, labels
+        )
+        assert len(segments) == expected_len
+
+    @pytest.mark.parametrize(
+        'segments, other, expected_eq',
+        [
+            (
+                vocalpy.Segments(
+                    np.array([0, 10, 20, 30, 40]),
+                    np.array([10, 10, 10, 10, 10]),
+                    TEST_SOUND,
+                    [''] * 5,
+                ),
+                vocalpy.Segments(
+                    np.array([0, 10, 20, 30, 40]),
+                    np.array([10, 10, 10, 10, 10]),
+                    TEST_SOUND,
+                    [''] * 5,
+                ),
+                True,
+            ),
+            (
+                vocalpy.Segments(
+                    np.array([0, 10, 20, 30, 40]),
+                    np.array([10, 10, 10, 10, 10]),
+                    TEST_SOUND,
+                    [''] * 5,
+                ),
+                vocalpy.Segments(
+                    np.array([0, 10, 20, 30, 40]),
+                    np.array([10, 10, 10, 10, 10]),
+                    TEST_SOUND,
+                    None,
+                ),
+                False,
+            ),
+            # empty segments
+            (
+                vocalpy.Segments(
+                    np.array([]).astype(int),
+                    np.array([]).astype(int),
+                    TEST_SOUND,
+                    None,
+                ),
+                vocalpy.Segments(
+                    np.array([]).astype(int),
+                    np.array([]).astype(int),
+                    TEST_SOUND,
+                    None,
+                ),
+                True,
+            ),
+            (
+                vocalpy.Segments(
+                    np.array([0, 10, 20, 30, 40]),
+                    np.array([10, 10, 10, 10, 10]),
+                    TEST_SOUND,
+                    list('abcde'),
+                ),
+                vocalpy.Segments(
+                    np.array([0, 10, 20, 30, 40]),
+                    np.array([10, 10, 10, 10, 10]),
+                    TEST_SOUND,
+                    list('abcde'),
+                ),
+                True,
+            ),
+            (
+                vocalpy.Segments(
+                    np.array([0, 10, 20, 30, 40]),
+                    np.array([10, 10, 10, 10, 10]),
+                    TEST_SOUND,
+                    list('abcde'),
+                ),
+                vocalpy.Segments(
+                    np.array([]).astype(int),
+                    np.array([]).astype(int),
+                    TEST_SOUND,
+                    None,
+                ),
+                False,
+            ),
+        ]
+    )
+    def test___eq__(self, segments, other, expected_eq):
+        assert (
+            (segments == other) == expected_eq
+        )
 
     def test___iter__(self, a_segments):
         segment_list = list(iter(a_segments))
@@ -505,6 +629,7 @@ class TestSegments:
             [isinstance(segment, vocalpy.segments.Segment)
              for segment in segment_list]
         )
+        assert len(segment_list) == len(a_segments)
 
     @pytest.mark.parametrize(
         'key',
@@ -514,25 +639,90 @@ class TestSegments:
         ]
     )
     def test___getitem__(self, key, a_segments):
-        assert False
+        if isinstance(key, int):
+            if len(a_segments) > 0:
+                out = a_segments[key]
+                assert isinstance(out, vocalpy.Segment)
+                assert out.start_ind == a_segments.start_inds[key]
+            else:
+                with pytest.raises(IndexError):
+                    a_segments[key]
+        elif isinstance(key, slice):
+            out = a_segments[key]
+            assert isinstance(out, vocalpy.Segments)
+            if len(a_segments) > 0:
+                assert len(out) == len(key.indices(len(a_segments)))
+            else:
+                assert len(out) == 0
 
-    def test_to_json(self, a_segments, tmp_path):
+    @pytest.mark.parametrize(
+        'test_sound_has_path',
+        [
+            True,
+            False,
+        ]
+    )
+    def test_to_json(self, test_sound_has_path, a_segments, tmp_path):
+        if test_sound_has_path:
+            sound_path = tmp_path / 'test_sound.wav'
+            a_segments.sound.write(sound_path)
+            a_segments.sound.path = sound_path
+        else:
+            if a_segments.sound.path is not None:
+                pytest.fail('a_segments.path != None but test_sound_has_path was False')
         json_path = tmp_path / 'a_segments.json'
         a_segments.to_json(json_path)
         assert json_path.exists
-        with json_path.open('r') as fp:
-            segments_json = json.load(fp)
-        # TODO: assert df.values == a_segments.attributes
-        assert False
 
-    def test_from_json(self, a_segments, tmp_path):
+        with json_path.open('r') as fp:
+            json_dict = json.load(fp)
+
+        for key in ('data', 'metadata'):
+            assert key in json_dict
+
+        # assert metadata
+        assert 'sound_path' in json_dict['metadata']
+        if test_sound_has_path:
+            assert pathlib.Path(
+                json_dict['metadata']['sound_path']
+            ) == a_segments.sound.path
+        else:
+            assert json_dict['metadata']['sound_path'] == "None"
+
+        # assert data
+        df = pd.read_json(
+            io.StringIO(json_dict['data']),
+            orient="table",
+        )
+        assert np.array_equal(
+            a_segments.start_inds,
+            df['start_ind'].values
+        )
+        assert np.array_equal(
+            a_segments.lengths,
+            df['length'].values
+        )
+        assert df['label'].values.tolist() == a_segments.labels
+
+    @pytest.mark.parametrize(
+        'test_sound_has_path',
+        [
+            True,
+            False,
+        ]
+    )
+    def test_from_json(self, test_sound_has_path, a_segments, tmp_path):
+        if test_sound_has_path:
+            sound_path = tmp_path / 'test_sound.wav'
+            a_segments.sound.write(sound_path)
+            a_segments.sound.path = sound_path
+        else:
+            if a_segments.sound.path is not None:
+                pytest.fail('a_segments.path != None but test_sound_has_path was False')
+
         json_path = tmp_path / 'a_segments.json'
         a_segments.to_json(json_path)
-        sound_path = tmp_path / 'sound.wav'
-        TEST_SOUND.write(sound_path)
         a_segments_from_csv = vocalpy.segments.Segments.from_json(
-            json_path, sound_path=sound_path
+            json_path
         )
-        # TODO: implement __eq__ for Segments
         assert a_segments == a_segments_from_csv
-        assert False
