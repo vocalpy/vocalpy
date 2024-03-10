@@ -7,10 +7,14 @@ and algorithms that find bounding boxes in spectrograms
 with high and low frequencies in addition
 to the start and stop times.
 """
-from .ava import ava
-from .meansquared import meansquared
+from .ava import ava, AvaParams, JOURJINEETAL2023, PETERSONETAL2023
+from .meansquared import meansquared, MeanSquaredParams
 
 __all__ = [
     "ava",
+    "AvaParams",
     "meansquared",
+    "MeanSquaredParams",
+    "JOURJINEETAL2023",
+    "PETERSONETAL2023"
 ]
