@@ -74,7 +74,9 @@ filterwarnings = [
     'ignore:Deprecated call to `pkg_resources.declare_namespace:DeprecationWarning:pkg_resources',
     'ignore:pkg_resources is deprecated as an API:DeprecationWarning:',
     'ignore:\nPyarrow will become a required dependency::',
-    'ignore:use `parametric:DeprecationWarning:multimethod'
+    'ignore:use `parametric:DeprecationWarning:multimethod',
+    'ignore:base implementation will eventually ignore',
+    'ignore:The current Dask DataFrame'
 ]
 
 [tool.flit.sdist]
