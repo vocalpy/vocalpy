@@ -496,6 +496,75 @@ class TestSegments:
         # TODO: implement __eq__ for Segments
         assert a_segments == a_segments_from_csv
 
+
+    @pytest.mark.parametrize(
+        'test_sound_has_path',
+        [
+            True,
+            False,
+        ]
+    )
+    def test_to_json(self, test_sound_has_path, a_segments, tmp_path):
+        if test_sound_has_path:
+            sound_path = tmp_path / 'test_sound.wav'
+            a_segments.sound.path = sound_path
+        else:
+            a_segments.sound.path = None
+        json_path = tmp_path / 'a_segments.json'
+        a_segments.to_json(json_path)
+        assert json_path.exists
+
+        with json_path.open('r') as fp:
+            json_dict = json.load(fp)
+
+        for key in ('data', 'metadata'):
+            assert key in json_dict
+
+        # assert metadata
+        assert 'sound_path' in json_dict['metadata']
+        if test_sound_has_path:
+            assert pathlib.Path(
+                json_dict['metadata']['sound_path']
+            ) == a_segments.sound.path
+        else:
+            assert json_dict['metadata']['sound_path'] == "None"
+
+        # assert data
+        df = pd.read_json(
+            io.StringIO(json_dict['data']),
+            orient="table",
+        )
+        assert np.array_equal(
+            a_segments.start_inds,
+            df['start_ind'].values
+        )
+        assert np.array_equal(
+            a_segments.lengths,
+            df['length'].values
+        )
+        assert df['label'].values.tolist() == a_segments.labels
+
+    @pytest.mark.parametrize(
+        'test_sound_has_path',
+        [
+            True,
+            False,
+        ]
+    )
+    def test_from_json(self, test_sound_has_path, a_segments, tmp_path):
+        if test_sound_has_path:
+            sound_path = tmp_path / 'test_sound.wav'
+            a_segments.sound.path = sound_path
+        else:
+            a_segments.sound.path = None
+
+        json_path = tmp_path / 'a_segments.json'
+        a_segments.to_json(json_path)
+        a_segments_from_csv = vocalpy.segments.Segments.from_json(
+            json_path
+        )
+        assert a_segments == a_segments_from_csv
+
     @pytest.mark.parametrize(
         'start_inds, lengths, sound, labels, expected_len',
         [
@@ -656,75 +725,3 @@ class TestSegments:
                 assert len(out) == len(key.indices(len(a_segments)))
             else:
                 assert len(out) == 0
-
-    @pytest.mark.parametrize(
-        'test_sound_has_path',
-        [
-            True,
-            False,
-        ]
-    )
-    def test_to_json(self, test_sound_has_path, a_segments, tmp_path):
-        if test_sound_has_path:
-            sound_path = tmp_path / 'test_sound.wav'
-            a_segments.sound.write(sound_path)
-            a_segments.sound.path = sound_path
-        else:
-            if a_segments.sound.path is not None:
-                pytest.fail('a_segments.path != None but test_sound_has_path was False')
-        json_path = tmp_path / 'a_segments.json'
-        a_segments.to_json(json_path)
-        assert json_path.exists
-
-        with json_path.open('r') as fp:
-            json_dict = json.load(fp)
-
-        for key in ('data', 'metadata'):
-            assert key in json_dict
-
-        # assert metadata
-        assert 'sound_path' in json_dict['metadata']
-        if test_sound_has_path:
-            assert pathlib.Path(
-                json_dict['metadata']['sound_path']
-            ) == a_segments.sound.path
-        else:
-            assert json_dict['metadata']['sound_path'] == "None"
-
-        # assert data
-        df = pd.read_json(
-            io.StringIO(json_dict['data']),
-            orient="table",
-        )
-        assert np.array_equal(
-            a_segments.start_inds,
-            df['start_ind'].values
-        )
-        assert np.array_equal(
-            a_segments.lengths,
-            df['length'].values
-        )
-        assert df['label'].values.tolist() == a_segments.labels
-
-    @pytest.mark.parametrize(
-        'test_sound_has_path',
-        [
-            True,
-            False,
-        ]
-    )
-    def test_from_json(self, test_sound_has_path, a_segments, tmp_path):
-        if test_sound_has_path:
-            sound_path = tmp_path / 'test_sound.wav'
-            a_segments.sound.write(sound_path)
-            a_segments.sound.path = sound_path
-        else:
-            if a_segments.sound.path is not None:
-                pytest.fail('a_segments.path != None but test_sound_has_path was False')
-
-        json_path = tmp_path / 'a_segments.json'
-        a_segments.to_json(json_path)
-        a_segments_from_csv = vocalpy.segments.Segments.from_json(
-            json_path
-        )
-        assert a_segments == a_segments_from_csv
