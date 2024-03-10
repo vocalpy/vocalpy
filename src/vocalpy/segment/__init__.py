@@ -7,10 +7,10 @@ and algorithms that find bounding boxes in spectrograms
 with high and low frequencies in addition
 to the start and stop times.
 """
-from . import ava
+from .ava import ava
 from .meansquared import meansquared
 
 __all__ = [
-    "meansquared",
     "ava",
+    "meansquared",
 ]

@@ -189,7 +189,7 @@ PETERSONETAL2023 = AvaParams(
 )
 
 
-def segment(
+def ava(
     sound: Sound,
     nperseg: int = 1024,
     noverlap: int = 512,
