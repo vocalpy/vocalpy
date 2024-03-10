@@ -567,7 +567,10 @@ class TestSegments:
                     TEST_SOUND,
                     None,
                 ),
-                False,
+                # because labels is None,
+                # we will end up with the default empty string '' * len(start_inds)
+                # so these Segments will be equal
+                True,
             ),
             # empty segments
             (
@@ -619,7 +622,7 @@ class TestSegments:
     )
     def test___eq__(self, segments, other, expected_eq):
         assert (
-            (segments == other) == expected_eq
+            (segments == other) is expected_eq
         )
 
     def test___iter__(self, a_segments):
