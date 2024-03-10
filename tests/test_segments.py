@@ -135,7 +135,6 @@ class TestSegment:
         segment_loaded = vocalpy.Segment.read(segment_path)
         assert segment_loaded == segment
 
-
     @pytest.mark.parametrize(
         'segment, other_segment, expected_result',
         [
