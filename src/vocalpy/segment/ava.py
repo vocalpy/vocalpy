@@ -21,7 +21,7 @@ EPSILON = 1e-9
 @dataclass
 class AvaParams:
     """Data class that represents parameters
-    for :func:`vocalpy.segment.ava.segment`.
+    for :func:`vocalpy.segment.ava`.
 
     Constants in this module are instances of this class
     that represent parameters used in papers.
@@ -119,7 +119,7 @@ class AvaParams:
     >>> jourjineetal2023paths = voc.example('jourjine-et-al-2023')
     >>> wav_path = jourjine2023paths[0]
     >>> sound = voc.Sound.read(wav_path)
-    >>> onsets, offsets = voc.segment.ava.segment(sound, **voc.segment.ava.JOURJINEETAL2023)
+    >>> onsets, offsets = voc.segment.ava(sound, **voc.segment.ava.JOURJINEETAL2023)
     """
 
     nperseg: int = 1024
@@ -334,7 +334,7 @@ def ava(
     >>> sound = voc.Sound.read(wav_path)
     >>> params = {**voc.segment.ava.JOURJINEETAL2023}
     >>> del params['min_isi_dur']
-    >>> segments = voc.segment.ava.segment(sound, **params)
+    >>> segments = voc.segment.ava(sound, **params)
     >>> spect = voc.spectrogram(sound)
     >>> rows = 3; cols = 4
     >>> import matplotlib.pyplot as plt
