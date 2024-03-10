@@ -110,8 +110,7 @@ class SpectrogramMaker:
         using the parameters `self.params`.
 
         Takes as input :class:`vocalpy.Sound` or :class:`vocalpy.AudioFile`,
-        a sequence of either, or a :class:`vocalpy.Dataset` with an
-        ``audio_files`` attribute,
+        or a sequence of either
         and returns either a :class:`vocalpy.Spectrogram`
         (given a single :class:`vocalpy.Sound` or :class:`vocalpy.AudioFile` instance)
         or a list of :class:`vocalpy.Spectrogram` instances (given a sequence).
@@ -170,8 +169,7 @@ class SpectrogramMaker:
         using the parameters `self.params`.
 
         Takes as input :class:`vocalpy.Sound` or :class:`vocalpy.AudioFile`,
-        a sequence of either, or a :class:`vocalpy.Dataset` with an
-        ``audio_files`` attribute,
+        or a sequence of either,
         and returns either a :class:`vocalpy.SpectrogramFile`
         (given a single :class:`vocalpy.Sound` or :class:`vocalpy.AudioFile` instance)
         or a list of :class:`vocalpy.Spectrogram` instances (given a sequence).
