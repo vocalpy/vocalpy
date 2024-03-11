@@ -6,6 +6,7 @@ from typing import TYPE_CHECKING, Iterable
 import numpy as np
 import numpy.typing as npt
 
+from ..params import Params
 from .. import signal
 from ..segments import Segments
 
@@ -15,7 +16,7 @@ if TYPE_CHECKING:
 
 
 @dataclass
-class MeanSquaredParams:
+class MeanSquaredParams(Params):
     """Data class that represents parameters
     for :func:`vocalpy.segment.ava.segment`.
 
@@ -69,14 +70,6 @@ class MeanSquaredParams:
     scale: bool = True
     scale_val: int | float = 2 ** 15
     scale_dtype: npt.DTypeLike = np.int16
-
-    def keys(self):
-        return asdict(self).keys()
-
-    def __getitem__(self, item):
-        if getattr(self, "_dict", None) is None:
-            self._dict = asdict(self)
-        return self._dict[item]
 
 
 def meansquared(
