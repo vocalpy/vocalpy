@@ -9,6 +9,7 @@ import numpy.typing as npt
 from scipy.ndimage import gaussian_filter
 from scipy.signal import stft
 
+from ..params import Params
 from ..segments import Segments
 
 if TYPE_CHECKING:
@@ -19,7 +20,7 @@ EPSILON = 1e-9
 
 
 @dataclass
-class AvaParams:
+class AvaParams(Params):
     """Data class that represents parameters
     for :func:`vocalpy.segment.ava`.
 
@@ -140,14 +141,6 @@ class AvaParams:
     scale: bool = True
     scale_val: int | float = 2**15
     scale_dtype: npt.DTypeLike = np.int16
-
-    def keys(self):
-        return asdict(self).keys()
-
-    def __getitem__(self, item):
-        if getattr(self, "_dict", None) is None:
-            self._dict = asdict(self)
-        return self._dict[item]
 
 
 # from https://github.com/nickjourjine/peromyscus-pup-vocal-evolution/blob/main/scripts/Segmenting%20and%20UMAP.ipynb
