@@ -1,12 +1,14 @@
 """Class that represents the segmenting step in a pipeline."""
 from __future__ import annotations
 
-from typing import Callable, TYPE_CHECKING
+import collections.abc
+from typing import Callable, Mapping, TYPE_CHECKING
 
 import dask
 import dask.diagnostics
 
 from .audio_file import AudioFile
+from .params import Params
 from .sound import Sound
 from .spectrogram_maker import validate_sound
 
@@ -31,12 +33,17 @@ class Segmenter:
         that is used to segment.
         If not specified, defaults to
         :func:`vocalpy.segment.meansquared`.
-    segment_params : dict, optional.
+    segment_params : Mapping or Params, optional.
+        Parameters passed to ``callback``.
+        A :class:`Mapping` of keyword arguments,
+        or one of the :class:`Params` classes that
+        represents parameters, e.g.,
+        class:`vocalpy.segment.MeanSquaredParams`.
         If not specified, defaults to
         :const:`vocalpy.segmenter.DEFAULT_SEGMENT_PARAMS`.
     """
 
-    def __init__(self, callback: Callable | None = None, segment_params: dict | None = None):
+    def __init__(self, callback: Callable | None = None, segment_params: Mapping | Params | None = None):
         """Initialize a new :class:`vocalpy.Segmenter` instance.
 
         Parameters
@@ -46,7 +53,12 @@ class Segmenter:
             that is used to segment.
             If not specified, defaults to
             :func:`vocalpy.segment.meansquared`.
-        segment_params : dict, optional.
+        segment_params : Mapping or Params, optional.
+            Parameters passed to ``callback``.
+            A :class:`Mapping` of keyword arguments,
+            or one of the :class:`Params` classes that
+            represents parameters, e.g.,
+            class:`vocalpy.segment.MeanSquaredParams`.
             If not specified, defaults to
             :data:`vocalpy.segmenter.DEFAULT_SEGMENT_PARAMS`.
         """
@@ -63,8 +75,10 @@ class Segmenter:
         if segment_params is None:
             segment_params = DEFAULT_SEGMENT_PARAMS
 
-        if not isinstance(segment_params, dict):
-            raise TypeError(f"`segment_params` should be a `dict` but type was: {type(segment_params)}")
+        if not isinstance(segment_params, (collections.abc.Mapping, Params)):
+            raise TypeError(
+                f"`segment_params` should be a `Mapping` or `Params` but type was: {type(segment_params)}"
+            )
 
         self.segment_params = segment_params
 
