@@ -15,7 +15,7 @@ def assert_segments_is_expected(segments, sound):
 
 class TestSegmenter:
     @pytest.mark.parametrize(
-        "callback, segment_params",
+        "callback, params",
         [
             (None, None),
             (vocalpy.segment.meansquared, {"smooth_win": 2}),
@@ -23,15 +23,15 @@ class TestSegmenter:
             # TODO: test `ava.segment` with AvaParams
         ],
     )
-    def test_init(self, callback, segment_params):
-        segmenter = vocalpy.Segmenter(callback=callback, segment_params=segment_params)
+    def test_init(self, callback, params):
+        segmenter = vocalpy.Segmenter(callback=callback, params=params)
         assert isinstance(segmenter, vocalpy.Segmenter)
-        if callback is None and segment_params is None:
+        if callback is None and params is None:
             assert segmenter.callback is vocalpy.segment.meansquared
-            assert segmenter.segment_params == vocalpy.segmenter.DEFAULT_SEGMENT_PARAMS
+            assert segmenter.params == vocalpy.segmenter.DEFAULT_SEGMENT_PARAMS
         else:
             assert segmenter.callback is callback
-            assert segmenter.segment_params == segment_params
+            assert segmenter.params == params
 
     @pytest.mark.parametrize(
         "sound",
@@ -44,12 +44,12 @@ class TestSegmenter:
     )
     def test_segment(self, sound):
         # have to use different segment params from default for these .wav files
-        segment_params = {
+        params = {
             "threshold": 5e-05,
             "min_dur": 0.02,
             "min_silent_dur": 0.002,
         }
-        segmenter = vocalpy.Segmenter(segment_params=segment_params)
+        segmenter = vocalpy.Segmenter(params=params)
         out = segmenter.segment(sound)
         if isinstance(sound, (vocalpy.Sound, vocalpy.AudioFile)):
             assert_segments_is_expected(out, sound)
