@@ -2,6 +2,7 @@
 from __future__ import annotations
 
 import collections.abc
+import inspect
 from typing import Callable, Mapping, TYPE_CHECKING
 
 import dask
@@ -33,7 +34,7 @@ class Segmenter:
         that is used to segment.
         If not specified, defaults to
         :func:`vocalpy.segment.meansquared`.
-    segment_params : Mapping or Params, optional.
+    params : Mapping or Params, optional.
         Parameters passed to ``callback``.
         A :class:`Mapping` of keyword arguments,
         or one of the :class:`Params` classes that
@@ -43,7 +44,7 @@ class Segmenter:
         :const:`vocalpy.segmenter.DEFAULT_SEGMENT_PARAMS`.
     """
 
-    def __init__(self, callback: Callable | None = None, segment_params: Mapping | Params | None = None):
+    def __init__(self, callback: Callable | None = None, params: Mapping | Params | None = None):
         """Initialize a new :class:`vocalpy.Segmenter` instance.
 
         Parameters
@@ -53,7 +54,7 @@ class Segmenter:
             that is used to segment.
             If not specified, defaults to
             :func:`vocalpy.segment.meansquared`.
-        segment_params : Mapping or Params, optional.
+        params : Mapping or Params, optional.
             Parameters passed to ``callback``.
             A :class:`Mapping` of keyword arguments,
             or one of the :class:`Params` classes that
@@ -72,15 +73,29 @@ class Segmenter:
 
         self.callback = callback
 
-        if segment_params is None:
-            segment_params = DEFAULT_SEGMENT_PARAMS
+        if params is None:
+            params = DEFAULT_SEGMENT_PARAMS
 
-        if not isinstance(segment_params, (collections.abc.Mapping, Params)):
+        if not isinstance(params, (collections.abc.Mapping, Params)):
             raise TypeError(
-                f"`segment_params` should be a `Mapping` or `Params` but type was: {type(segment_params)}"
+                f"`params` should be a `Mapping` or `Params` but type was: {type(params)}"
             )
 
-        self.segment_params = segment_params
+        if isinstance(params, Params):
+            # coerce to dict
+            params = {**params}
+
+        signature = inspect.signature(callback)
+        if not all([param in signature.parameters for param in params]):
+            invalid_params = [
+                param for param in params if param not in signature.parameters
+            ]
+            raise ValueError(
+                f"Invalid params for callback: {invalid_params}\n"
+                f"Callback parameters are: {signature.parameters}"
+            )
+
+        self.params = params
 
     def segment(
         self,
@@ -112,7 +127,7 @@ class Segmenter:
         def _to_segments(sound_: Sound | AudioFile) -> Segments:
             if isinstance(sound_, AudioFile):
                 sound_ = Sound.read(sound_.path)
-            segments = self.callback(sound_, **self.segment_params)
+            segments = self.callback(sound_, **self.params)
             return segments
 
         if isinstance(sound, (Sound, AudioFile)):
