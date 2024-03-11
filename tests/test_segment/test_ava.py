@@ -38,9 +38,9 @@ def test_segment_replicates(wav_path_seg_txt_path_tuple):
     onsets_gt, offsets_gt = segs[:,0], segs[:,1]
 
     sound = voc.Sound.read(wav_path)
-    params = {**voc.segment.ava.JOURJINEETAL2023}
+    params = {**voc.segment.JOURJINEETAL2023}
     del params['min_isi_dur']
-    segments = voc.segment.ava.segment(sound, **params)
+    segments = voc.segment.ava(sound, **params)
 
     assert isinstance(segments, vocalpy.Segments)
     # we set atol=1e-5 because we expect values to be the same up to roughly 5th decimal place
@@ -57,10 +57,10 @@ def jourjine_et_al_wav_2023_path(request):
 def test_segment_min_isi_dur(jourjine_et_al_wav_2023_path):
     """Test that :func:`vocalpy.segment.ava.segment` parameter `min_isi_dur` works as expected"""
     sound = voc.Sound.read(jourjine_et_al_wav_2023_path)
-    params = {**voc.segment.ava.JOURJINEETAL2023}
-    segments_isi = voc.segment.ava.segment(sound, **params)
+    params = {**voc.segment.JOURJINEETAL2023}
+    segments_isi = voc.segment.ava(sound, **params)
     params_wout_isi = {k: v for k, v in params.items() if k != 'min_isi_dur'}
-    segments = voc.segment.ava.segment(sound, **params_wout_isi)
+    segments = voc.segment.ava(sound, **params_wout_isi)
 
     isi_durs_with_min_isi = segments_isi.start_times[1:] - segments_isi.stop_times[:-1]
     assert not np.any(isi_durs_with_min_isi < params['min_isi_dur'])
