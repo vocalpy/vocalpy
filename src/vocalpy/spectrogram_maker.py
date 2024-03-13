@@ -90,14 +90,25 @@ class SpectrogramMaker:
     def __init__(self, callback: Callable | None = None, params: Mapping | Params | None = None):
         if callback is None:
             import vocalpy.spectrogram
-
             callback = vocalpy.spectrogram
+            # if callback was None and we use the default,
+            # **and** params is None, we set these default params
+            if params is None:
+                params = DEFAULT_SPECT_PARAMS
+        else:
+            # if we *don't* use the default callback **and** params is None,
+            # then we instead get the defaults for the specified callback
+            if params is None:
+                params = {}
+                signature = inspect.signature(callback)
+                for name, param in signature.parameters.items():
+                    if param.default is not inspect._empty:
+                        params[name] = param.default
+
         if not callable(callback):
             raise ValueError(f"`callback` should be callable, but `callable({callback})` returns False")
         self.callback = callback
 
-        if params is None:
-            params = DEFAULT_SPECT_PARAMS
         if not isinstance(params, (collections.abc.Mapping, Params)):
             raise TypeError(f"`params` should be a `Mapping` or `Params` but type was: {type(params)}")
 
