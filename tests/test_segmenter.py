@@ -1,3 +1,5 @@
+import inspect
+
 import pytest
 
 import vocalpy
@@ -15,23 +17,47 @@ def assert_segments_is_expected(segments, sound):
 
 class TestSegmenter:
     @pytest.mark.parametrize(
-        "callback, params",
+        "callback, params, expected_callback, expected_params",
         [
-            (None, None),
-            (vocalpy.segment.meansquared, {"smooth_win": 2}),
-            # TODO: test `ava.segment`
-            # TODO: test `ava.segment` with AvaParams
+            (None,
+             None,
+             vocalpy.segment.meansquared,
+             vocalpy.segmenter.DEFAULT_SEGMENT_PARAMS),
+            (vocalpy.segment.meansquared,
+             None,
+             vocalpy.segment.meansquared,
+             {name: param.default
+              for name, param in inspect.signature(vocalpy.segment.meansquared).parameters.items()
+              if param.default is not inspect._empty}
+             ),
+            (vocalpy.segment.meansquared,
+             {"smooth_win": 2},
+             vocalpy.segment.meansquared,
+             {"smooth_win": 2}
+             ),
+            (vocalpy.segment.meansquared,
+             vocalpy.segment.MeanSquaredParams(threshold=1500),
+             vocalpy.segment.meansquared,
+             {**vocalpy.segment.MeanSquaredParams(threshold=1500)}),
+            (vocalpy.segment.ava,
+             None,
+             vocalpy.segment.ava,
+             {name: param.default
+              for name, param in inspect.signature(vocalpy.segment.ava).parameters.items()
+              if param.default is not inspect._empty},
+             ),
+            (vocalpy.segment.ava,
+             vocalpy.segment.AvaParams(thresh_min=3.0),
+             vocalpy.segment.ava,
+             {**vocalpy.segment.AvaParams(thresh_min=3.0)}
+             )
         ],
     )
-    def test_init(self, callback, params):
+    def test_init(self, callback, params, expected_callback, expected_params):
         segmenter = vocalpy.Segmenter(callback=callback, params=params)
         assert isinstance(segmenter, vocalpy.Segmenter)
-        if callback is None and params is None:
-            assert segmenter.callback is vocalpy.segment.meansquared
-            assert segmenter.params == vocalpy.segmenter.DEFAULT_SEGMENT_PARAMS
-        else:
-            assert segmenter.callback is callback
-            assert segmenter.params == params
+        assert segmenter.callback is expected_callback
+        assert segmenter.params == expected_params
 
     @pytest.mark.parametrize(
         "sound",
