@@ -64,17 +64,28 @@ class Segmenter:
             :data:`vocalpy.segmenter.DEFAULT_SEGMENT_PARAMS`.
         """
         if callback is None:
-            from vocalpy.segment import meansquared as default_segment_func
-
-            callback = default_segment_func
+            from vocalpy.segment import meansquared
+            callback = meansquared
+            # if callback was None and we use the default,
+            # **and** params is None, we set these default params
+            if params is None:
+                params = DEFAULT_SEGMENT_PARAMS
+        else:
+            # if we *don't* use the default callback **and** params is None,
+            # then we instead get the defaults for the specified callback
+            if params is None:
+                params = {}
+                signature = inspect.signature(callback)
+                for name, param in signature.parameters.items():
+                    if param.default is not inspect._empty:
+                        params[name] = param.default
 
         if not callable(callback):
-            raise ValueError(f"`callback` should be callable, but `callable({callback})` returns False")
+            raise ValueError(
+                f"`callback` should be callable, but `callable({callback})` returns False"
+            )
 
         self.callback = callback
-
-        if params is None:
-            params = DEFAULT_SEGMENT_PARAMS
 
         if not isinstance(params, (collections.abc.Mapping, Params)):
             raise TypeError(
