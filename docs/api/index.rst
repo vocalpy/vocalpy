@@ -71,17 +71,6 @@ Metrics
    metrics.segmentation
    metrics.segmentation.ir
 
-Datasets
---------
-
-.. autosummary::
-   :template: class
-   :toctree: generated
-
-   dataset.SequenceDataset
-   Sequence
-   Unit
-
 Visualization
 -------------
 .. autosummary::
