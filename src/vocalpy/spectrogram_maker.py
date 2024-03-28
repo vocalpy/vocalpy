@@ -81,7 +81,7 @@ class SpectrogramMaker:
     ----------
     callback : Callable
         Callable that takes audio and returns spectrograms.
-        Default is :func:`vocalpy.signal.spectrogram.spectrogram`.
+        Default is :func:`vocalpy.spectrogram`.
     params : dict
         Parameters for making spectrograms.
         Passed as keyword arguments to ``callback``.
