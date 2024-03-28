@@ -14,20 +14,33 @@ kernelspec:
 
 # How do I evaluate segmentation methods with information retrieval metrics?
 
-This how-to walks through using metrics from information retrieval to evaluate segmentation methods.
+The first step in many analyses of acoustic communication is to segment audio into units of analyis, as discussed in [#1](#1) and [#2](#2).
+This how-to walks through using metrics from information retrieval to evaluate methods for segmenting audio.
 
-We will compare two algorithms that take as input a :class:`vocalpy.Sound`, and return as output :class:`~vocalpy.Segments`. The :class:`vocalpy.Segments` class represents a set of line segments, with each segment having a starting index and length (or, equivalently, a start time and a stop time). One of the goals of this how-to is to show you how using the :class:`vocalpy.Segments` class makes it easier for you to evaluate segmentation algorithms.
+We will compare two algorithms that take as input a {py:class}`vocalpy.Sound`, and return as output {py:class}`~vocalpy.Segments`. The {py:class}`vocalpy.Segments` class represents a set of line segments, with each segment having a starting index and length (or, equivalently, a start time and a stop time). One of the goals of this how-to is to show you the ways that using the {py:class}`vocalpy.Segments` class makes it easier for you to evaluate segmentation algorithms.
 
-The goal of our evaluation is to get a measure of how close the segments are to a ground truth segmentation, produced by a human annotator. In this case, the human annotator used a Graphical User Interface (GUI) to clean up segments that were returned by one of the algorithms we will look at. So it shouldn't be too surprising if that algorithm in particular does a pretty good job of getting close to the ground truth segmentation. The algorithm in question is :func:`vocalpy.segment.meansquared`. This algorithm is used by a Matlab GUI `evsonganaly` originally developed by Evren Tumer in the Brainard Lab, as used in [Tumer Brainard 2012](link). The version of the algorithm built into VocalPy is adapted from the Python implementation in the `evfuncs` package.
++++
 
-* talk about energy here -- plot energy and show threshold?
+## Background
 
+The goal of our evaluation is to get a measure of how close the segments from an algorithm are to a segmentation created by a human annotator. We will call the annotation created by the human annotator the *ground truth* or *reference* segmentation, and we will call the output of an algorithm the *hypothesis*. In this case, the human annotator used a Graphical User Interface (GUI) to clean up segments produced by one of the algorithms we will look at. So it shouldn't be too surprising if that algorithm in particular does a pretty good job of getting close to the ground truth. The algorithm in question is :func:`vocalpy.segment.meansquared`. This algorithm is used by a Matlab GUI `evsonganaly` originally developed by Evren Tumer in the Brainard Lab, as used in [Tumer Brainard 2007](https://www.nature.com/articles/nature06390). The version of the algorithm built into VocalPy is adapted from the Python implementation in the [`evfuncs` package](https://github.com/NickleDave/evfuncs).
 
-* define "information retrieval" and the metrics? reference the papers that we reference in the docstrings?
++++
+
+### Energy-based methods for segmenting audio
+
+The algorithms we will look at here all work in basically the same way: they start by computing some measure of the [*energy*](https://en.wikipedia.org/wiki/Energy_(signal_processing%29) of an audio signal, then they set a threshold on that energy, and finally they find all the periods above that threshold. The periods above the threshold become the segments returned by the algorithm. There are other methods for segmenting audio, for example those discussed in [3]_ and [4]_, but here we will just consider those that threshold energy.
+
++++
+
+### Information retrieval metrics
+
+The metrics we will use to evaluate segmentation are adapted from the field of [information retrieval](https://en.wikipedia.org/wiki/Information_retrieval). Broadly speaking, this field builds systems to retrieve information, e.g. a program that lets a user query a database of documents (think Google Search). Methods for evaluating these systems have been borrowed by related fields, and by machine learning more broadly. For example, one can also conceive of querying a dataset of audio, as is done in [music information retrieval](https://musicinformationretrieval.com/), and information retrieval metrics have been adapted to evaluate the segentation of audio. See for example the segmentation metrics in the [`mir_eval`](https://craffel.github.io/mir_eval/#module-mir_eval.segment) package.
+
 
 What we want to understand is the role that different parameters play in the algorithm. To understand 
 
-talk @ clean-up
+
 
 To understand the role of these parameters, we will evaluate the output of :func:`vocalpy.segment.meansquared` with and without the clean-up parameters. We will also compare with another algorithm that simply sets the threshold to the average of the signal.
 
@@ -36,9 +49,32 @@ There are three conditions we want to compare:
 2. The
 3. A baseline algorithm that 
 
-This how-to replicates in part the analysis from Ghaffari Devos 2023 [^1].
+This how-to replicates in part the analysis from [5]_.
 
-[Ghaffari Devos 2023](https://dael.euracoustics.org/confs/fa2023/data/articles/000897.pdf).
+## References
+
+{#1}
+Kershenbaum, Arik, et al.
+"Acoustic sequences in non‐human animals: a tutorial review and prospectus." 
+Biological Reviews 91.1 (2016): 13-52.
+
+{#2}
+Odom, Karan J., et al. 
+"Comparative bioacoustics: a roadmap for quantifying and comparing animal sounds across diverse taxa." 
+Biological Reviews 96.4 (2021): 1135-1159.
+
+.. [3] Kemp, T., Schmidt, M., Whypphal, M., & Waibel, A. (2000, June).
+   Strategies for automatic segmentation of audio data.
+   In 2000 ieee international conference on acoustics, speech, and signal processing.
+   proceedings (cat. no. 00ch37100) (Vol. 3, pp. 1423-1426). IEEE.
+
+.. [4] Jordán, P. G., & Giménez, A. O. (2023).
+   Advances in Binary and Multiclass Sound Segmentation with Deep Learning Techniques.
+
+.. [5] Ghaffari, Houtan, and Paul Devos.
+   "Consistent Birdsong Syllable Segmentation Using Deep Semi-Supervised Learning." (2023).
+   https://dael.euracoustics.org/confs/fa2023/data/articles/000897.pdf
+   https://github.com/houtan-ghaffari/bird_syllable_segmentation
 
 +++
 
@@ -217,7 +253,7 @@ for name, hypothesis_segments_list in algo_segments_map.items():
 results_df = pd.DataFrame.from_records(results_records)
 ```
 
-We inspect the dataframe to check that it looks like what we expect.  
+We inspect the dataframe to check that it looks like what we expect.
 
 ```{code-cell} ipython3
 results_df.head()
