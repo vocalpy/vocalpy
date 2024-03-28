@@ -1,3 +1,8 @@
 # How-Tos
 
-🚧 under construction 🚧 
+```{toctree}
+:maxdepth: 1
+
+segmentation
+```
+
