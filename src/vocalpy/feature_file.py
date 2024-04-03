@@ -18,8 +18,6 @@ class FeatureFile:
     The features file is part of a dataset used to study
     animal acoustic communication.
 
-    Used by the :class:`vocalpy.Dataset` class.
-
     Attributes
     ----------
     path : pathlib.Path

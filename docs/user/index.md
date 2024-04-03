@@ -9,6 +9,7 @@ concepts of VocalPy, with useful background information and explanation.
 ```{toctree}
 :maxdepth: 1
 
+howto/index
 whatisvocalpy
 background
 ```

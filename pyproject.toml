@@ -26,6 +26,7 @@ dependencies = [
     "attrs >=23.1.0",
     "crowsetta >=5.0.2",
     "dask >=2.10.1",
+    "h5netcdf >= 1.3.0",
     "librosa >= 0.10.0.post2",
     "matplotlib >=3.7.1",
     "numpy >=1.22.0",
@@ -33,7 +34,6 @@ dependencies = [
     "pooch >= 1.8.1",
     "scipy >=1.8.0",
     "SoundFile >=0.12.1",
-    "SQLAlchemy >=2.0.12",
     "xarray >= 2023.11.0",
 ]
 
@@ -74,7 +74,9 @@ filterwarnings = [
     'ignore:Deprecated call to `pkg_resources.declare_namespace:DeprecationWarning:pkg_resources',
     'ignore:pkg_resources is deprecated as an API:DeprecationWarning:',
     'ignore:\nPyarrow will become a required dependency::',
-    'ignore:use `parametric:DeprecationWarning:multimethod'
+    'ignore:use `parametric:DeprecationWarning:multimethod',
+    'ignore:base implementation will eventually ignore',
+    'ignore:The current Dask DataFrame'
 ]
 
 [tool.flit.sdist]

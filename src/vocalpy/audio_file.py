@@ -1,8 +1,6 @@
 """Class that represents an audio file,
 as part of a dataset used to study
 animal acoustic communication.
-
-Used by the :class:`vocalpy.Dataset` class.
 """
 from __future__ import annotations
 
@@ -16,8 +14,6 @@ class AudioFile:
     """Class that represents an audio file,
     as part of a dataset used to study
     animal acoustic communication.
-
-    Used by the :class:`vocalpy.Dataset` class.
 
     Attributes
     ----------

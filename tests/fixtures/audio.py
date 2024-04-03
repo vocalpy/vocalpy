@@ -99,8 +99,8 @@ def a_wav_path(request):
     return request.param
 
 
-JOURJINE_ETAL_2021_WAV_DIR = SOURCE_TEST_DATA_ROOT / 'jourjine-et-al-2023/developmentLL'
-JOURJINE_ETAL_2021_WAV_LIST = sorted(JOURJINE_ETAL_2021_WAV_DIR.glob('*.wav'))
+JOURJINE_ETAL_2023_WAV_DIR = SOURCE_TEST_DATA_ROOT / 'jourjine-et-al-2023/developmentLL'
+JOURJINE_ETAL_2023_WAV_LIST = sorted(JOURJINE_ETAL_2023_WAV_DIR.glob('*.wav'))
 
 # only use a few wav files from cbins, to speed up tests
 N_CBINS = 5

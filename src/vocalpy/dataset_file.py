@@ -43,7 +43,6 @@ DatasetFileType = Union[AnnotationFile, AudioFile, FeatureFile, SpectrogramFile]
 @attrs.define
 class DatasetFile:
     """A class that represents any file in a dataset.
-    Used when building a :class:`vocalpy.Dataset`.
 
     Attributes
     ----------
@@ -65,7 +64,6 @@ class DatasetFile:
     >>> audio_paths = voc.paths.from_dir('./dir', 'wav')
     >>> audio_files = [voc.AudioFile(path=path) for path in audio_paths]
     >>> dataset_files = [voc.DatasetFile(file=audio_file) for sound_file in audio_files]
-    >>> dataset = voc.Dataset(files=dataset_files)
     """
 
     file: DatasetFileType = attrs.field(

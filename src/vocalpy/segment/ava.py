@@ -1,13 +1,16 @@
 """Find segments in audio, using algorithm from ``ava`` package."""
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
 from scipy.ndimage import gaussian_filter
 from scipy.signal import stft
+
+from ..params import Params
+from ..segments import Segments
 
 if TYPE_CHECKING:
     from .. import Sound
@@ -17,9 +20,9 @@ EPSILON = 1e-9
 
 
 @dataclass
-class AvaParams:
+class AvaParams(Params):
     """Data class that represents parameters
-    for :func:`vocalpy.segment.ava.segment`.
+    for :func:`vocalpy.segment.ava`.
 
     Constants in this module are instances of this class
     that represent parameters used in papers.
@@ -117,7 +120,7 @@ class AvaParams:
     >>> jourjineetal2023paths = voc.example('jourjine-et-al-2023')
     >>> wav_path = jourjine2023paths[0]
     >>> sound = voc.Sound.read(wav_path)
-    >>> onsets, offsets = voc.segment.ava.segment(sound, **voc.segment.ava.JOURJINEETAL2023)
+    >>> onsets, offsets = voc.segment.ava(sound, **voc.segment.ava.JOURJINEETAL2023)
     """
 
     nperseg: int = 1024
@@ -138,14 +141,6 @@ class AvaParams:
     scale: bool = True
     scale_val: int | float = 2**15
     scale_dtype: npt.DTypeLike = np.int16
-
-    def keys(self):
-        return asdict(self).keys()
-
-    def __getitem__(self, item):
-        if getattr(self, "_dict", None) is None:
-            self._dict = asdict(self)
-        return self._dict[item]
 
 
 # from https://github.com/nickjourjine/peromyscus-pup-vocal-evolution/blob/main/scripts/Segmenting%20and%20UMAP.ipynb
@@ -187,7 +182,7 @@ PETERSONETAL2023 = AvaParams(
 )
 
 
-def segment(
+def ava(
     sound: Sound,
     nperseg: int = 1024,
     noverlap: int = 512,
@@ -205,9 +200,9 @@ def segment(
     temperature: float = 0.5,
     smoothing_timescale: float = 0.007,
     scale: bool = True,
-    scale_val: int | float = 2 ** 15,
+    scale_val: int | float = 2**15,
     scale_dtype: npt.DTypeLike = np.int16,
-) -> tuple[npt.NDArray, npt.NDArray]:
+) -> Segments:
     """Find segments in audio, using algorithm
     from ``ava`` package.
 
@@ -321,10 +316,9 @@ def segment(
 
     Returns
     -------
-    onsets_s : numpy.ndarray
-        Vector of onset times of segments, in seconds.
-    offsets_s : numpy.ndarray
-        Vector of offset times of segments, in seconds.
+    segments : vocalpy.Segments
+        Instance of :class:`vocalpy.Segments` representing
+        the segments found.
 
     Examples
     --------
@@ -333,20 +327,21 @@ def segment(
     >>> sound = voc.Sound.read(wav_path)
     >>> params = {**voc.segment.ava.JOURJINEETAL2023}
     >>> del params['min_isi_dur']
-    >>> onsets, offsets = voc.segment.ava.segment(sound, **params)
+    >>> segments = voc.segment.ava(sound, **params)
     >>> spect = voc.spectrogram(sound)
     >>> rows = 3; cols = 4
     >>> import matplotlib.pyplot as plt
     >>> fig, ax_arr = plt.subplots(rows, cols)
-    >>> for on, off, ax in zip(onsets, offsets, ax_arr.ravel()[:onsets.shape[0]]):
-    ...     on_ind, off_ind = int(on * sound.samplerate), int(off * sound.samplerate)
-    ...     data = sound.data[:, on_ind:off_ind]
+    >>> start_inds, stop_inds = segments.start_inds, segments.stop_inds
+    >>> ax_to_use = ax_arr.ravel()[:start_inds.shape[0]]
+    >>> for start_ind, stop_ind, ax in zip(start_inds, stop_inds, ax_to_use):
+    ...     data = sound.data[:, start_ind:stop_ind]
     ...     newsound = voc.Sound(data=data, samplerate=sound.samplerate)
     ...     spect = voc.spectrogram(newsound)
     ...     ax.pcolormesh(spect.times, spect.frequencies, np.squeeze(spect.data))
-    >>> for ax in ax_arr.ravel()[:onsets.shape[0]]:
+    >>> for ax in ax_arr.ravel()[:start_inds.shape[0]]:
     ...     ax.set_axis_off()
-    >>> for ax in ax_arr.ravel()[onsets.shape[0]:]:
+    >>> for ax in ax_arr.ravel()[start_inds.shape[0]:]:
     ...     ax.remove()
 
     Notes
@@ -437,8 +432,11 @@ def segment(
     # Then search to the left and right for onsets and offsets.
     onsets, offsets = [], []
     for local_max in local_maxima:
-        # skip this local_max if we are in a region we already declared a segment
-        if len(offsets) > 1 and local_max < offsets[-1]:
+        # skip this local_max if we are in a region we already declared a segment.
+        # Note the next line in the original implementation had an off-by-one error,
+        # that is fixed here to avoid occasionally duplicating the first segment. See:
+        # https://github.com/pearsonlab/autoencoded-vocal-analysis/issues/12
+        if len(offsets) > 0 and local_max < offsets[-1]:
             continue
 
         # first find onset
@@ -490,6 +488,15 @@ def segment(
     onsets = np.array(new_onsets)
     offsets = np.array(new_offsets)
 
+    if onsets.size == 0 and offsets.size == 0:
+        # can't throw any intervals away (next code block)
+        # if there's not any intervals, so, return empty Segments
+        return Segments(
+            np.array([]).astype(int),
+            np.array([]).astype(int),
+            sound,
+        )
+
     # Throw away inter-segment intervals that are too short, as is done in Jourjine et al., 2023
     # Note we do this **after** throwing away segments that are too long or too short.
     # We do this to replicate what was done in Jourjine et al., 2023, where they call `ava.get_onsets_offsets`
@@ -497,12 +504,13 @@ def segment(
     # This means there is the possibility of throwing away some short segments that we might have merged,
     # if we'd removed inter-segment intervals *first*, which is what `vocalpy.segment.meansquared` does.
     if min_isi_dur is not None:
-        if onsets.size == 0:
-            # can't throw any intervals away if there's not any intervals
-            return onsets, offsets
         isi_durs = onsets[1:] - offsets[:-1]
         keep_these = isi_durs > min_isi_dur
+        # we don't keep seconds anymore since we're returning samples
         onsets = np.concatenate((onsets[0, np.newaxis], onsets[1:][keep_these]))
         offsets = np.concatenate((offsets[:-1][keep_these], offsets[-1, np.newaxis]))
 
-    return onsets, offsets
+    onsets_sample = (onsets * sound.samplerate).astype(int)
+    offsets_sample = (offsets * sound.samplerate).astype(int)
+    lengths = offsets_sample - onsets_sample
+    return Segments(start_inds=onsets_sample, lengths=lengths, sound=sound)

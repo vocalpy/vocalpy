@@ -21,6 +21,7 @@ Data types for acoustic communication data.
    Sound
    Spectrogram
    Annotation
+   Segments
 
 
 Classes for Pipelines
@@ -70,17 +71,6 @@ Metrics
    metrics
    metrics.segmentation
    metrics.segmentation.ir
-
-Datasets
---------
-
-.. autosummary::
-   :template: class
-   :toctree: generated
-
-   dataset.SequenceDataset
-   Sequence
-   Unit
 
 Visualization
 -------------

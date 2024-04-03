@@ -1,16 +1,21 @@
 """Class that represents the segmenting step in a pipeline."""
 from __future__ import annotations
 
-from typing import Callable
+import collections.abc
+import inspect
+from typing import TYPE_CHECKING, Callable, Mapping
 
 import dask
 import dask.diagnostics
 
 from .audio_file import AudioFile
-from .sequence import Sequence
+from .params import Params
 from .sound import Sound
 from .spectrogram_maker import validate_sound
-from .unit import Unit
+
+if TYPE_CHECKING:
+    from .segments import Segments
+
 
 DEFAULT_SEGMENT_PARAMS = {
     "threshold": 5000,
@@ -29,14 +34,17 @@ class Segmenter:
         that is used to segment.
         If not specified, defaults to
         :func:`vocalpy.segment.meansquared`.
-    method : str, optional.
-        The name of the function to use to segment.
-    segment_params : dict, optional.
+    params : Mapping or Params, optional.
+        Parameters passed to ``callback``.
+        A :class:`Mapping` of keyword arguments,
+        or one of the :class:`Params` classes that
+        represents parameters, e.g.,
+        class:`vocalpy.segment.MeanSquaredParams`.
         If not specified, defaults to
         :const:`vocalpy.segmenter.DEFAULT_SEGMENT_PARAMS`.
     """
 
-    def __init__(self, callback: Callable | None = None, method: str | None = None, segment_params: dict | None = None):
+    def __init__(self, callback: Callable | None = None, params: Mapping | Params | None = None):
         """Initialize a new :class:`vocalpy.Segmenter` instance.
 
         Parameters
@@ -46,47 +54,60 @@ class Segmenter:
             that is used to segment.
             If not specified, defaults to
             :func:`vocalpy.segment.meansquared`.
-        method : str, optional.
-            The name of the function to use to segment.
-        segment_params : dict, optional.
+        params : Mapping or Params, optional.
+            Parameters passed to ``callback``.
+            A :class:`Mapping` of keyword arguments,
+            or one of the :class:`Params` classes that
+            represents parameters, e.g.,
+            class:`vocalpy.segment.MeanSquaredParams`.
             If not specified, defaults to
             :data:`vocalpy.segmenter.DEFAULT_SEGMENT_PARAMS`.
         """
-        if callback and method:
-            raise ValueError("Cannot specify both `callback` and `method`, only one or the other.")
-
-        if method:
-            import vocalpy.signal.segment
-
-            # TODO: fix this
-            try:
-                callback = getattr(vocalpy.segment, method)
-            except AttributeError:
-                raise AttributeError(f"Method was '{method}' but `vocalpy.segment` has no function named `{method}`")
-
         if callback is None:
-            from vocalpy.segment import meansquared as default_segment_func
+            from vocalpy.segment import meansquared
 
-            callback = default_segment_func
+            callback = meansquared
+            # if callback was None and we use the default,
+            # **and** params is None, we set these default params
+            if params is None:
+                params = DEFAULT_SEGMENT_PARAMS
+        else:
+            # if we *don't* use the default callback **and** params is None,
+            # then we instead get the defaults for the specified callback
+            if params is None:
+                params = {}
+                signature = inspect.signature(callback)
+                for name, param in signature.parameters.items():
+                    if param.default is not inspect._empty:
+                        params[name] = param.default
 
-        if callback is not None and not callable(callback):
+        if not callable(callback):
             raise ValueError(f"`callback` should be callable, but `callable({callback})` returns False")
 
         self.callback = callback
 
-        if segment_params is None:
-            segment_params = DEFAULT_SEGMENT_PARAMS
-        if not isinstance(segment_params, dict):
-            raise TypeError(f"`segment_params` should be a `dict` but type was: {type(segment_params)}")
+        if not isinstance(params, (collections.abc.Mapping, Params)):
+            raise TypeError(f"`params` should be a `Mapping` or `Params` but type was: {type(params)}")
 
-        self.segment_params = segment_params
+        if isinstance(params, Params):
+            # coerce to dict
+            params = {**params}
+
+        signature = inspect.signature(callback)
+        if not all([param in signature.parameters for param in params]):
+            invalid_params = [param for param in params if param not in signature.parameters]
+            raise ValueError(
+                f"Invalid params for callback: {invalid_params}\n" f"Callback parameters are: {signature.parameters}"
+            )
+
+        self.params = params
 
     def segment(
         self,
         sound: Sound | AudioFile | list[Sound | AudioFile],
         parallelize: bool = True,
-    ) -> Sequence | None | list[Sequence | None]:
-        """Segment sound into sequences.
+    ) -> Segments | list[Segments]:
+        """Segment sound.
 
         Parameters
         ----------
@@ -99,48 +120,34 @@ class Segmenter:
 
         Returns
         -------
-        seq : vocalpy.Sequence, None, or list of vocalpy.Sequence or None
-            If a single :class:`~vocalpy.Sound` instance is passed in,
-            a single :class:`~vocalpy.Sequence` instance will be returned.
-            If a list of :class:`~vocalpy.Sound` instances is passed in,
-            a list of :class:`~vocalpy.Sequence` instances will be returned.
+        segments : vocalpy.Segments, list
+            If a :class:`~vocalpy.Sound` is passed in,
+            a single set of :class:`~vocalpy.Segments` will be returned.
+            If a list of :class:`~vocalpy.Sound` is passed in,
+            a list of :class:`~vocalpy.Segments` will be returned.
         """
         validate_sound(sound)
 
         # define nested function so vars are in scope and ``dask`` can call it
-        def _to_sequence(sound_: Sound):
+        def _to_segments(sound_: Sound | AudioFile) -> Segments:
             if isinstance(sound_, AudioFile):
                 sound_ = Sound.read(sound_.path)
-            out = self.callback(sound_, **self.segment_params)
-            if out is None:
-                return out
-            else:
-                onsets, offsets = out
-
-            units = []
-            for onset, offset in zip(onsets, offsets):
-                units.append(Unit(onset=onset, offset=offset))
-
-            return Sequence(
-                units=units,
-                sound=Sound.read(path=sound_.path),
-                method=self.callback.__name__,
-                segment_params=self.segment_params,
-            )
+            segments = self.callback(sound_, **self.params)
+            return segments
 
         if isinstance(sound, (Sound, AudioFile)):
-            return _to_sequence(sound)
+            return _to_segments(sound)
 
-        seqs = []
+        segments = []
         for sound_ in sound:
             if parallelize:
-                seqs.append(dask.delayed(_to_sequence(sound_)))
+                segments.append(dask.delayed(_to_segments(sound_)))
             else:
-                seqs.append(_to_sequence(sound_))
+                segments.append(_to_segments(sound_))
 
         if parallelize:
-            graph = dask.delayed()(seqs)
+            graph = dask.delayed()(segments)
             with dask.diagnostics.ProgressBar():
                 return graph.compute()
         else:
-            return seqs
+            return segments

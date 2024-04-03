@@ -1,3 +1,5 @@
+import inspect
+
 import pytest
 
 import vocalpy
@@ -48,20 +50,27 @@ def test_validate_sound_not_audio_raises(not_audio, expected_exception):
 
 class TestSpectrogramMaker:
     @pytest.mark.parametrize(
-        "callback, spect_params",
+        "callback, params, expected_callback, expected_params",
         [
-            (None, None),
+            (None,
+             None,
+             vocalpy.spectrogram,
+             vocalpy.spectrogram_maker.DEFAULT_SPECT_PARAMS
+             ),
+            (vocalpy.spectrogram,
+             None,
+             vocalpy.spectrogram,
+             {name: param.default
+              for name, param in inspect.signature(vocalpy.spectrogram).parameters.items()
+              if param.default is not inspect._empty}
+             )
         ],
     )
-    def test_init(self, callback, spect_params):
-        spect_maker = vocalpy.SpectrogramMaker(callback=callback, spect_params=spect_params)
+    def test_init(self, callback, params, expected_callback, expected_params):
+        spect_maker = vocalpy.SpectrogramMaker(callback=callback, params=params)
         assert isinstance(spect_maker, vocalpy.SpectrogramMaker)
-        if callback is None and spect_params is None:
-            assert spect_maker.callback is vocalpy.spectrogram
-            assert spect_maker.spect_params == vocalpy.spectrogram_maker.DEFAULT_SPECT_PARAMS
-        else:
-            assert spect_maker.callback is callback
-            assert spect_maker.spect_params == spect_params
+        assert spect_maker.callback is expected_callback
+        assert spect_maker.params == expected_params
 
     @pytest.mark.parametrize(
         "sound",

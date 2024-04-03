@@ -23,8 +23,6 @@ class SpectrogramFile:
     one representing the time bins
     and one representing the frequency bins.
 
-    Used by the :class:`vocalpy.Dataset` class.
-
     Attributes
     ----------
     path : pathlib.Path

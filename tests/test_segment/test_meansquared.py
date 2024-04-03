@@ -17,13 +17,12 @@ def test_meansquared(a_cbin_path):
     min_silent_dur = nmd['min_int'] / 1000
     threshold = nmd['threshold']
 
-    onsets, offsets = vocalpy.segment.meansquared(sound, threshold, min_syl_dur, min_silent_dur)
-    assert isinstance(onsets, np.ndarray)
-    assert isinstance(offsets, np.ndarray)
-    assert len(onsets) == len(offsets)
+    segments = vocalpy.segment.meansquared(sound, threshold, min_syl_dur, min_silent_dur)
+    assert isinstance(segments, vocalpy.Segments)
 
 
 def test_meansquared_raises(multichannel_fly_wav_sound):
+    """Test :func:`vocalpy.segment.meansquared` raises an error when a sound has multiple channels"""
     with pytest.raises(ValueError):
         _ = vocalpy.segment.meansquared(multichannel_fly_wav_sound)
 
@@ -44,7 +43,7 @@ def test_meansquared_replicates_evsonganaly(evsonganaly_segment_dict):
     threshold = nmd['threshold']
 
     # ---- output
-    onsets, offsets = vocalpy.segment.meansquared(sound, threshold, min_syl_dur, min_silent_dur)
+    segments = vocalpy.segment.meansquared(sound, threshold, min_syl_dur, min_silent_dur)
 
     # ---- assert
     segment_dict = scipy.io.loadmat(segment_mat_path, squeeze_me=True)
@@ -58,5 +57,5 @@ def test_meansquared_replicates_evsonganaly(evsonganaly_segment_dict):
     atol = 0.0005
     rtol = 0.00001
     # i.e., 0.0005 + 0.00001 * some_onsets_or_offset_array ~ [0.0005, 0.0005, ...]
-    assert np.allclose(onsets, onsets_mat, rtol, atol)
-    assert np.allclose(offsets, offsets_mat, rtol, atol)
+    assert np.allclose(segments.start_times, onsets_mat, rtol, atol)
+    assert np.allclose(segments.stop_times, offsets_mat, rtol, atol)

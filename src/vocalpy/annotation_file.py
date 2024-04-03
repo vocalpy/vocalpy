@@ -17,13 +17,11 @@ class AnnotationFile:
     as part of a dataset used to study
     animal acoustic communication.
 
-    Used by the :class:`vocalpy.Dataset` class.
-
     Attributes
     ----------
     path : pathlib.Path
         The path to the annotation file.
-    annotates : vocalpy.dataset.AudioFile or vocalpy.dataset.SpectrogramFile
+    annotates : vocalpy.AudioFile or vocalpy.SpectrogramFile
         The file that this annotation file annotates.
     """
 

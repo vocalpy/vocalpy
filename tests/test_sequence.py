@@ -15,6 +15,6 @@ def units():
 
 class TestSequence:
     def test_init(self, units):
-        seq = vocalpy.Sequence(units=units, method="audio_amplitude", segment_params={"smooth_win": 2})
+        seq = vocalpy.Sequence(units=units)
         assert isinstance(seq, vocalpy.Sequence)
         assert seq.units == units

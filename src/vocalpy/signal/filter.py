@@ -1,18 +1,9 @@
-"""Functions for making spectrograms.
-
-.. autosummary::
-   :toctree: generated/
-
-   butter_bandpass
-   butter_bandpass_filter
-   spectrogram
+"""Filters for signal processing.
 
 Notes
 -----
-Filters adapted from SciPy cookbook:
+Adapted from SciPy cookbook:
 https://scipy-cookbook.readthedocs.io/items/ButterworthBandpass.html
-Spectrogram adapted from code by Kyle Kastner and Tim Sainburg:
-https://github.com/timsainb/python_spectrograms_and_inversion
 """
 from __future__ import annotations
 

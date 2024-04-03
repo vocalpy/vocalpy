@@ -1,8 +1,10 @@
 """Class that represents the step in a pipeline that makes spectrograms from audio."""
 from __future__ import annotations
 
+import collections.abc
+import inspect
 import pathlib
-from typing import Callable, List, Sequence, Union
+from typing import Callable, List, Mapping, Sequence, Union
 
 import dask
 import dask.diagnostics
@@ -11,6 +13,7 @@ import vocalpy.constants
 
 from ._spectrogram.data_type import Spectrogram
 from .audio_file import AudioFile
+from .params import Params
 from .sound import Sound
 from .spectrogram_file import SpectrogramFile
 
@@ -68,7 +71,7 @@ def validate_sound(sound: Sound | AudioFile | Sequence[Sound | AudioFile]) -> No
             )
 
 
-DEFAULT_SPECT_PARAMS = {"fft_size": 512, "step_size": 64}
+DEFAULT_SPECT_PARAMS = {"n_fft": 512, "hop_length": 64}
 
 
 class SpectrogramMaker:
@@ -78,26 +81,50 @@ class SpectrogramMaker:
     ----------
     callback : Callable
         Callable that takes audio and returns spectrograms.
-        Default is :func:`vocalpy.signal.spectrogram.spectrogram`.
-    spect_params : dict
+        Default is :func:`vocalpy.spectrogram`.
+    params : dict
         Parameters for making spectrograms.
         Passed as keyword arguments to ``callback``.
     """
 
-    def __init__(self, callback: Callable | None = None, spect_params: dict | None = None):
+    def __init__(self, callback: Callable | None = None, params: Mapping | Params | None = None):
         if callback is None:
             import vocalpy.spectrogram
 
             callback = vocalpy.spectrogram
+            # if callback was None and we use the default,
+            # **and** params is None, we set these default params
+            if params is None:
+                params = DEFAULT_SPECT_PARAMS
+        else:
+            # if we *don't* use the default callback **and** params is None,
+            # then we instead get the defaults for the specified callback
+            if params is None:
+                params = {}
+                signature = inspect.signature(callback)
+                for name, param in signature.parameters.items():
+                    if param.default is not inspect._empty:
+                        params[name] = param.default
+
         if not callable(callback):
             raise ValueError(f"`callback` should be callable, but `callable({callback})` returns False")
         self.callback = callback
 
-        if spect_params is None:
-            spect_params = DEFAULT_SPECT_PARAMS
-        if not isinstance(spect_params, dict):
-            raise TypeError(f"`spect_params` should be a `dict` but type was: {type(spect_params)}")
-        self.spect_params = spect_params
+        if not isinstance(params, (collections.abc.Mapping, Params)):
+            raise TypeError(f"`params` should be a `Mapping` or `Params` but type was: {type(params)}")
+
+        if isinstance(params, Params):
+            # coerce to dict
+            params = {**params}
+
+        signature = inspect.signature(callback)
+        if not all([param in signature.parameters for param in params]):
+            invalid_params = [param for param in params if param not in signature.parameters]
+            raise ValueError(
+                f"Invalid params for callback: {invalid_params}\n" f"Callback parameters are: {signature.parameters}"
+            )
+
+        self.params = params
 
     def make(
         self,
@@ -110,8 +137,7 @@ class SpectrogramMaker:
         using the parameters `self.params`.
 
         Takes as input :class:`vocalpy.Sound` or :class:`vocalpy.AudioFile`,
-        a sequence of either, or a :class:`vocalpy.Dataset` with an
-        ``audio_files`` attribute,
+        or a sequence of either
         and returns either a :class:`vocalpy.Spectrogram`
         (given a single :class:`vocalpy.Sound` or :class:`vocalpy.AudioFile` instance)
         or a list of :class:`vocalpy.Spectrogram` instances (given a sequence).
@@ -133,7 +159,7 @@ class SpectrogramMaker:
             using self.callback"""
             if isinstance(sound_, AudioFile):
                 sound_ = Sound.read(sound_.path)
-            spect = self.callback(sound_, **self.spect_params)
+            spect = self.callback(sound_, **self.params)
             spect.audio_path = sound_.path
             return spect
 
@@ -170,8 +196,7 @@ class SpectrogramMaker:
         using the parameters `self.params`.
 
         Takes as input :class:`vocalpy.Sound` or :class:`vocalpy.AudioFile`,
-        a sequence of either, or a :class:`vocalpy.Dataset` with an
-        ``audio_files`` attribute,
+        or a sequence of either,
         and returns either a :class:`vocalpy.SpectrogramFile`
         (given a single :class:`vocalpy.Sound` or :class:`vocalpy.AudioFile` instance)
         or a list of :class:`vocalpy.Spectrogram` instances (given a sequence).
@@ -203,7 +228,7 @@ class SpectrogramMaker:
             using self.callback"""
             if isinstance(sound_, AudioFile):
                 sound_ = Sound.read(sound_.path)
-            spect = self.callback(sound_, **self.spect_params)
+            spect = self.callback(sound_, **self.params)
             spect_fname = namer(sound_.path)
             spect_path = dir_path / spect_fname
             spect_file = spect.write(spect_path)
