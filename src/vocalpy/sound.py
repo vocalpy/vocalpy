@@ -121,7 +121,7 @@ class Sound:
         return not self.__eq__(other)
 
     @classmethod
-    def read(cls, path: str | pathlib.Path, dtype: npt.DTypeLike=np.float64, **kwargs) -> "Self":  # noqa: F821
+    def read(cls, path: str | pathlib.Path, dtype: npt.DTypeLike = np.float64, **kwargs) -> "Self":  # noqa: F821
         """Read audio from ``path``.
 
         Parameters

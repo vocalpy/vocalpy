@@ -1,17 +1,5 @@
 """A core package for acoustic communication research in Python."""
-from . import (
-    _vendor,
-    constants,
-    examples,
-    feature,
-    metrics,
-    paths,
-    plot,
-    segment,
-    signal,
-    spectral,
-    validators,
-)
+from . import _vendor, constants, examples, feature, metrics, paths, plot, segment, signal, spectral, validators
 from .__about__ import (
     __author__,
     __commit__,
@@ -30,8 +18,8 @@ from .audio_file import AudioFile
 from .dataset_file import DatasetFile, DatasetFileType, DatasetFileTypeEnum
 from .examples import example
 from .feature_file import FeatureFile
-from .segments import Segment, Segments
 from .segmenter import Segmenter
+from .segments import Segment, Segments
 from .sequence import Sequence
 from .sound import Sound
 from .spectrogram import spectrogram

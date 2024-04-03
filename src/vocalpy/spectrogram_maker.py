@@ -90,6 +90,7 @@ class SpectrogramMaker:
     def __init__(self, callback: Callable | None = None, params: Mapping | Params | None = None):
         if callback is None:
             import vocalpy.spectrogram
+
             callback = vocalpy.spectrogram
             # if callback was None and we use the default,
             # **and** params is None, we set these default params
@@ -118,12 +119,9 @@ class SpectrogramMaker:
 
         signature = inspect.signature(callback)
         if not all([param in signature.parameters for param in params]):
-            invalid_params = [
-                param for param in params if param not in signature.parameters
-            ]
+            invalid_params = [param for param in params if param not in signature.parameters]
             raise ValueError(
-                f"Invalid params for callback: {invalid_params}\n"
-                f"Callback parameters are: {signature.parameters}"
+                f"Invalid params for callback: {invalid_params}\n" f"Callback parameters are: {signature.parameters}"
             )
 
         self.params = params

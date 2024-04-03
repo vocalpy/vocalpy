@@ -18,6 +18,7 @@ class Params:
     so that instances of those dataclasses can be passed
     into the classes that represent steps in workflows.
     """
+
     def keys(self):
         return asdict(self).keys()
 

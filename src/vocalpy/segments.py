@@ -21,39 +21,31 @@ if TYPE_CHECKING:
 
 class Segment:
     def __init__(
-            self, start_ind: int, length: int, data: xr.DataArray, label: str = '',
+        self,
+        start_ind: int,
+        length: int,
+        data: xr.DataArray,
+        label: str = "",
     ) -> None:
         if not isinstance(start_ind, numbers.Integral):
-            raise TypeError(
-                f"Type of `start_ind` for `Segment` must be int but was: {type(start_ind)}"
-            )
+            raise TypeError(f"Type of `start_ind` for `Segment` must be int but was: {type(start_ind)}")
         if not isinstance(length, numbers.Integral):
-            raise TypeError(
-                f"Type of `length` for `Segment` must be int but was: {type(start_ind)}"
-            )
+            raise TypeError(f"Type of `length` for `Segment` must be int but was: {type(start_ind)}")
         if not isinstance(label, str):
-            raise TypeError(
-                f"`label` for `Segment` should be an instance of `str`, but type was: {type(label)}"
-            )
+            raise TypeError(f"`label` for `Segment` should be an instance of `str`, but type was: {type(label)}")
         # explicitly convert type numpy.str_ to a str instance so we can save as an attribute
         label = str(label)
         if not start_ind >= 0:
-            raise ValueError(
-                f"`start_ind` for `Segment` must be a non-negative number but was: {start_ind}"
-            )
+            raise ValueError(f"`start_ind` for `Segment` must be a non-negative number but was: {start_ind}")
         if not length >= 0:
-            raise ValueError(
-                f"`length` for `Segment` must be a non-negative number but was: {start_ind}"
-            )
+            raise ValueError(f"`length` for `Segment` must be a non-negative number but was: {start_ind}")
         if not isinstance(data, xr.DataArray):
             raise TypeError(
                 f"`data` for `Segment` should be an instance of xarray.DataArray, but type was: {type(data)}"
             )
 
         if not data.ndim == 1:
-            raise ValueError(
-                f"`data` for `Segment` should be have one dimension but `data.ndim` was: {data.ndim}"
-            )
+            raise ValueError(f"`data` for `Segment` should be have one dimension but `data.ndim` was: {data.ndim}")
 
         if not data.size == length:
             raise ValueError(
@@ -67,8 +59,10 @@ class Segment:
         self.data = data
 
     def __repr__(self):
-        return f"Segment(start_ind={self.start_ind!r}, length={self.length!r}, "\
-               f"label={self.label!r}, data={self.data!r}"
+        return (
+            f"Segment(start_ind={self.start_ind!r}, length={self.length!r}, "
+            f"label={self.label!r}, data={self.data!r}"
+        )
 
     def write(self, path: str | pathlib.Path) -> None:
         path = pathlib.Path(path)
@@ -77,9 +71,9 @@ class Segment:
         # the ``attrs`` of this instance's ``data``
         data = xr.DataArray(self.data)
         data.attrs = {
-            'start_ind': self.start_ind,
-            'length': self.length,
-            'label': self.label,
+            "start_ind": self.start_ind,
+            "length": self.length,
+            "label": self.label,
         }
         data.to_netcdf(path, engine="h5netcdf")
 
@@ -87,9 +81,9 @@ class Segment:
     def read(cls, path: str | pathlib.Path) -> Segment:
         path = pathlib.Path(path)
         data = xr.load_dataarray(path)
-        start_ind = data.attrs['start_ind']
-        length = data.attrs['length']
-        label = data.attrs['label']
+        start_ind = data.attrs["start_ind"]
+        length = data.attrs["length"]
+        label = data.attrs["label"]
         # throw away metadata; feels weird but want round-trip to give us back
         # an instance that is __eq__ual
         data.attrs = {}
@@ -104,10 +98,10 @@ class Segment:
         if not isinstance(other, Segment):
             return False
         return (
-            (self.start_ind == other.start_ind) and
-            (self.length == other.length) and
-            (self.label == other.label) and
-            (self.data.equals(other.data))
+            (self.start_ind == other.start_ind)
+            and (self.length == other.length)
+            and (self.label == other.label)
+            and (self.data.equals(other.data))
         )
 
 
@@ -221,34 +215,25 @@ class Segments:
 
     """
 
-    def __init__(self,
-                 start_inds: npt.NDArray,
-                 lengths: npt.NDArray,
-                 sound: vocalpy.Sound | None = None,
-                 labels: list[str] | None = None,
-                 ) -> None:
+    def __init__(
+        self,
+        start_inds: npt.NDArray,
+        lengths: npt.NDArray,
+        sound: vocalpy.Sound | None = None,
+        labels: list[str] | None = None,
+    ) -> None:
         if sound is not None:
             if not isinstance(sound, Sound):
-                raise TypeError(
-                    f"`sound` should be an instance of vocalpy.Sound, but type was: {type(sound)}"
-                )
+                raise TypeError(f"`sound` should be an instance of vocalpy.Sound, but type was: {type(sound)}")
         if not isinstance(start_inds, np.ndarray):
-            raise TypeError(
-                f"`start_inds` must be a numpy array but type was: {type(start_inds)}"
-            )
+            raise TypeError(f"`start_inds` must be a numpy array but type was: {type(start_inds)}")
         if not isinstance(lengths, np.ndarray):
-            raise TypeError(
-                f"`lengths` must be a numpy array but type was: {type(lengths)}"
-            )
+            raise TypeError(f"`lengths` must be a numpy array but type was: {type(lengths)}")
 
         if not issubclass(start_inds.dtype.type, numbers.Integral):
-            raise ValueError(
-                f"`start_inds` must have an integer dtype, but dtype was: {start_inds.dtype}"
-            )
+            raise ValueError(f"`start_inds` must have an integer dtype, but dtype was: {start_inds.dtype}")
         if not issubclass(lengths.dtype.type, numbers.Integral):
-            raise ValueError(
-                f"`lengths` must have an integer dtype, but dtype was: {lengths.dtype}"
-            )
+            raise ValueError(f"`lengths` must have an integer dtype, but dtype was: {lengths.dtype}")
 
         if start_inds.size == lengths.size == 0:
             # no need to validate
@@ -286,9 +271,7 @@ class Segments:
 
         if labels is not None:
             if not isinstance(labels, list):
-                raise TypeError(
-                    f"`labels` must be a list but type was: {type(labels)}"
-                )
+                raise TypeError(f"`labels` must be a list but type was: {type(labels)}")
             if not all([isinstance(lbl, str) for lbl in labels]):
                 types = set([type(lbl) for lbl in labels])
                 raise ValueError(
@@ -301,7 +284,7 @@ class Segments:
                 )
         else:  # if labels is None
             # then default to empty strings
-            labels = [''] * start_inds.shape[0]
+            labels = [""] * start_inds.shape[0]
 
         self.start_inds = start_inds
         self.lengths = lengths
@@ -326,11 +309,7 @@ class Segments:
 
            np.unique(np.concatenate(self.start_inds, self.stop_inds)
         """
-        return np.unique(
-            np.concatenate(
-                (self.start_inds, self.stop_inds)
-            )
-        )
+        return np.unique(np.concatenate((self.start_inds, self.stop_inds)))
 
     @property
     def start_times(self):
@@ -358,15 +337,13 @@ class Segments:
 
     @property
     def all_times(self):
-        return np.unique(
-            np.concatenate(
-                (self.start_times, self.stop_times)
-            )
-        )
+        return np.unique(np.concatenate((self.start_times, self.stop_times)))
 
     def __repr__(self):
-        return f"Segments(start_inds={reprlib.repr(self.start_inds)}, lengths={reprlib.repr(self.lengths)}, "\
-               f"labels={reprlib.repr(self.labels)}, sound={self.sound!r})"
+        return (
+            f"Segments(start_inds={reprlib.repr(self.start_inds)}, lengths={reprlib.repr(self.lengths)}, "
+            f"labels={reprlib.repr(self.labels)}, sound={self.sound!r})"
+        )
 
     def __str__(self):
         return f"Segments(start_times={self.start_times!r}, durations={self.durations!r}, labels={self.labels!r}, sound={self.sound!r})"
@@ -382,9 +359,9 @@ class Segments:
         >>> df['start_time'] = df['start_ind'] / segments.sound.samplerate
         """
         d = {
-            'start_ind': self.start_inds,
-            'length': self.lengths,
-            'label': self.labels,
+            "start_ind": self.start_inds,
+            "length": self.lengths,
+            "label": self.labels,
         }
         df = pd.DataFrame(d)
         return df
@@ -395,15 +372,15 @@ class Segments:
         df.to_csv(csv_path, **to_csv_kwargs)
 
     @classmethod
-    def from_csv(cls, csv_path: str | pathlib.Path,
-                 sound: vocalpy.Sound | None = None,
-                 sound_path: str | pathlib.Path | None = None) -> Segments:
+    def from_csv(
+        cls,
+        csv_path: str | pathlib.Path,
+        sound: vocalpy.Sound | None = None,
+        sound_path: str | pathlib.Path | None = None,
+    ) -> Segments:
         """Read :class:`Segments` from a csv file."""
         if sound is not None and sound_path is not None:
-            raise ValueError(
-                f"`Segments.from_csv` can accept either `sound` or `sound_path`,"
-                f"but not both"
-            )
+            raise ValueError(f"`Segments.from_csv` can accept either `sound` or `sound_path`," f"but not both")
         if sound_path:
             sound = Sound.read(sound_path)
         df = pd.read_csv(
@@ -411,17 +388,15 @@ class Segments:
             # passing a converter is the only way to make sure that 'label'
             # is an object array with strings:
             # if we don't pass a converter, we get NaNs for empty strings,
-            converters={'label': str},
+            converters={"label": str},
             # and if we instead specify its dtype as 'string', we get weird StringType "<NA>"s
             # even when we convert to list (I think). converters take precedence over dtype
-            dtype={'start_ind': int, 'length': int},
+            dtype={"start_ind": int, "length": int},
         )
-        start_inds = df['start_ind'].values
-        lengths = df['length'].values
-        labels = df['label'].values.tolist()
-        return cls(
-            start_inds, lengths, sound, labels
-        )
+        start_inds = df["start_ind"].values
+        lengths = df["length"].values
+        labels = df["label"].values.tolist()
+        return cls(start_inds, lengths, sound, labels)
 
     def to_json(self, json_path: str | pathlib.Path) -> None:
         """Save :class:`Segments` to a json file
@@ -433,11 +408,9 @@ class Segments:
         json_path = pathlib.Path(json_path)
         df = self.to_df()
         json_dict = {}
-        json_dict['data'] = df.to_json(orient="table")
-        json_dict['metadata'] = {
-            'sound_path': str(self.sound.path)
-        }
-        with json_path.open('w') as fp:
+        json_dict["data"] = df.to_json(orient="table")
+        json_dict["metadata"] = {"sound_path": str(self.sound.path)}
+        with json_path.open("w") as fp:
             json.dump(json_dict, fp)
 
     @classmethod
@@ -453,30 +426,26 @@ class Segments:
         segments : Segments
         """
         json_path = pathlib.Path(json_path)
-        with json_path.open('r') as fp:
+        with json_path.open("r") as fp:
             json_dict = json.load(fp)
 
-        if json_dict['metadata']['sound_path'] == "None":
+        if json_dict["metadata"]["sound_path"] == "None":
             sound = None
         else:
-            sound_path = pathlib.Path(
-                json_dict['metadata']['sound_path']
-            )
+            sound_path = pathlib.Path(json_dict["metadata"]["sound_path"])
             if sound_path.exists():
                 sound = Sound.read(sound_path)
             else:
                 sound = None
 
         df = pd.read_json(
-            io.StringIO(json_dict['data']),
+            io.StringIO(json_dict["data"]),
             orient="table",
         )
-        start_inds = df['start_ind'].values
-        lengths = df['length'].values
-        labels = df['label'].values.tolist()
-        return cls(
-            start_inds, lengths, sound, labels
-        )
+        start_inds = df["start_ind"].values
+        lengths = df["length"].values
+        labels = df["label"].values.tolist()
+        return cls(start_inds, lengths, sound, labels)
 
     def __len__(self):
         return len(self.start_times)
@@ -485,24 +454,19 @@ class Segments:
         if not isinstance(other, Segments):
             return False
         return (
-            np.array_equal(self.start_inds, other.start_inds) and
-            np.array_equal(self.lengths, other.lengths) and
-            self.labels == other.labels
+            np.array_equal(self.start_inds, other.start_inds)
+            and np.array_equal(self.lengths, other.lengths)
+            and self.labels == other.labels
         )
 
     def __iter__(self):
         if self.sound is None:
             raise ValueError(
-                "This `Segments` instance does not have a `sound`, "
-                "unable to iterate through each `Segment`."
+                "This `Segments` instance does not have a `sound`, " "unable to iterate through each `Segment`."
             )
         for start_ind, length, label in zip(self.start_inds, self.lengths, self.labels):
-            data = xr.DataArray(
-                data=self.sound.data[..., start_ind: start_ind + length].squeeze(0)
-            )
-            segment = Segment(
-                start_ind=start_ind, length=length, label=label, data=data
-                )
+            data = xr.DataArray(data=self.sound.data[..., start_ind : start_ind + length].squeeze(0))
+            segment = Segment(start_ind=start_ind, length=length, label=label, data=data)
             yield segment
 
     def __getitem__(self, key):
@@ -510,18 +474,13 @@ class Segments:
         if isinstance(key, numbers.Integral):
             if self.sound is None:
                 raise ValueError(
-                    "This `Segments` instance does not have a `sound`, "
-                    "unable to iterate through each `Segment`."
+                    "This `Segments` instance does not have a `sound`, " "unable to iterate through each `Segment`."
                 )
             start_ind = self.start_inds[key]
             length = self.lengths[key]
             label = self.labels[key]
-            data = xr.DataArray(
-                data=self.sound.data[..., start_ind: start_ind + length].squeeze(0)
-            )
-            return Segment(
-                start_ind=start_ind, length=length, label=label, data=data
-            )
+            data = xr.DataArray(data=self.sound.data[..., start_ind : start_ind + length].squeeze(0))
+            return Segment(start_ind=start_ind, length=length, label=label, data=data)
         elif isinstance(key, slice):
             start_inds = self.start_inds[key]
             lengths = self.lengths[key]
@@ -533,7 +492,4 @@ class Segments:
                 labels,
             )
         else:
-            raise TypeError(
-                f"{cls.__name__} indices must be integers or slice"
-            )
-
+            raise TypeError(f"{cls.__name__} indices must be integers or slice")

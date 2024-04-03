@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import collections.abc
 import inspect
-from typing import Callable, Mapping, TYPE_CHECKING
+from typing import TYPE_CHECKING, Callable, Mapping
 
 import dask
 import dask.diagnostics
@@ -65,6 +65,7 @@ class Segmenter:
         """
         if callback is None:
             from vocalpy.segment import meansquared
+
             callback = meansquared
             # if callback was None and we use the default,
             # **and** params is None, we set these default params
@@ -81,16 +82,12 @@ class Segmenter:
                         params[name] = param.default
 
         if not callable(callback):
-            raise ValueError(
-                f"`callback` should be callable, but `callable({callback})` returns False"
-            )
+            raise ValueError(f"`callback` should be callable, but `callable({callback})` returns False")
 
         self.callback = callback
 
         if not isinstance(params, (collections.abc.Mapping, Params)):
-            raise TypeError(
-                f"`params` should be a `Mapping` or `Params` but type was: {type(params)}"
-            )
+            raise TypeError(f"`params` should be a `Mapping` or `Params` but type was: {type(params)}")
 
         if isinstance(params, Params):
             # coerce to dict
@@ -98,12 +95,9 @@ class Segmenter:
 
         signature = inspect.signature(callback)
         if not all([param in signature.parameters for param in params]):
-            invalid_params = [
-                param for param in params if param not in signature.parameters
-            ]
+            invalid_params = [param for param in params if param not in signature.parameters]
             raise ValueError(
-                f"Invalid params for callback: {invalid_params}\n"
-                f"Callback parameters are: {signature.parameters}"
+                f"Invalid params for callback: {invalid_params}\n" f"Callback parameters are: {signature.parameters}"
             )
 
         self.params = params

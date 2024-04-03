@@ -1,15 +1,14 @@
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from typing import TYPE_CHECKING, Iterable
 
 import numpy as np
 import numpy.typing as npt
 
-from ..params import Params
 from .. import signal
+from ..params import Params
 from ..segments import Segments
-
 
 if TYPE_CHECKING:
     from .. import Sound
@@ -62,13 +61,14 @@ class MeanSquaredParams(Params):
         This is needed to replicate the behavior of ``ava``,
         which assumes the audio data is loaded as 16-bit integers.
     """
+
     threshold: int = 5000
     min_dur: float = 0.02
     min_silent_dur: float = 0.002
     freq_cutoffs: Iterable = (500, 10000)
     smooth_win: int = 2
     scale: bool = True
-    scale_val: int | float = 2 ** 15
+    scale_val: int | float = 2**15
     scale_dtype: npt.DTypeLike = np.int16
 
 
@@ -80,7 +80,7 @@ def meansquared(
     freq_cutoffs: Iterable = (500, 10000),
     smooth_win: int = 2,
     scale: bool = True,
-    scale_val: int | float = 2 ** 15,
+    scale_val: int | float = 2**15,
     scale_dtype: npt.DTypeLike = np.int16,
 ) -> Segments:
     """Segment audio by thresholding the mean squared signal.
@@ -181,10 +181,9 @@ def meansquared(
         # or move them into this module, since it's currently the only place they're used internally
         # (and probably externally)
         from .. import Sound
+
         sound_copy = Sound(
-            data=(sound.data * scale_val).astype(scale_dtype),
-            samplerate=sound.samplerate,
-            path=sound.path
+            data=(sound.data * scale_val).astype(scale_dtype), samplerate=sound.samplerate, path=sound.path
         )
         meansquared_ = signal.audio.meansquared(sound_copy, freq_cutoffs, smooth_win)
     else:
@@ -226,9 +225,4 @@ def meansquared(
     offsets_sample = offsets_sample[keep_these]
     lengths = offsets_sample - onsets_sample
 
-    return Segments(
-        start_inds=onsets_sample,
-        lengths=lengths,
-        sound=sound
-    )
-
+    return Segments(start_inds=onsets_sample, lengths=lengths, sound=sound)

@@ -1,6 +1,6 @@
 """Metrics for segmentation algorithms."""
 from . import ir
-from .ir import precision, recall, fscore
+from .ir import fscore, precision, recall
 
 __all__ = [
     "ir",

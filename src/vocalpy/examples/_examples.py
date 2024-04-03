@@ -103,7 +103,7 @@ File name in dataset: BM003_day9_air_20s_sparse_chunk007_0297.wav""",
     ExampleMeta(
         name="bfsongrepo",
         metadata="""Sample of song from Bengalese Finch Song Repository.
-Nicholson, David; Queen, Jonah E.; J. Sober, Samuel (2017). Bengalese Finch song repository. figshare. 
+Nicholson, David; Queen, Jonah E.; J. Sober, Samuel (2017). Bengalese Finch song repository. figshare.
 Dataset. https://doi.org/10.6084/m9.figshare.4805749.v9
 https://nickledave.github.io/bfsongrepo
 Files are approximately 20 songs from bird with ID "gy6or6", from the day "032312"

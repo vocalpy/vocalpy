@@ -1,7 +1,7 @@
 """Find segments in audio, using algorithm from ``ava`` package."""
 from __future__ import annotations
 
-from dataclasses import asdict, dataclass
+from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
 import numpy as np
@@ -200,7 +200,7 @@ def ava(
     temperature: float = 0.5,
     smoothing_timescale: float = 0.007,
     scale: bool = True,
-    scale_val: int | float = 2 ** 15,
+    scale_val: int | float = 2**15,
     scale_dtype: npt.DTypeLike = np.int16,
 ) -> Segments:
     """Find segments in audio, using algorithm
@@ -513,8 +513,4 @@ def ava(
     onsets_sample = (onsets * sound.samplerate).astype(int)
     offsets_sample = (offsets * sound.samplerate).astype(int)
     lengths = offsets_sample - onsets_sample
-    return Segments(
-        start_inds=onsets_sample,
-        lengths=lengths,
-        sound=sound
-    )
+    return Segments(start_inds=onsets_sample, lengths=lengths, sound=sound)
