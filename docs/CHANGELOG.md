@@ -22,6 +22,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   consistent with `soundfile`. 
   [#132](https://github.com/vocalpy/vocalpy/pull/132).
   Fixes [#131](https://github.com/vocalpy/vocalpy/issues/131).
+- Add `Segments` class, that represents a set of line segments returned by a segmenting algorithm
+  [#133](https://github.com/vocalpy/vocalpy/pull/133).
+  As discussed in [#127](https://github.com/vocalpy/vocalpy/issues/127).
+- Add how-to on using segmentation metrics from information retrieval
+  [#133](https://github.com/vocalpy/vocalpy/pull/133).
+- Add `Params` class, an abstract class that represents parameters used with a method.
+  Parameters for specific methods are represented by sub-classes of `Params`.
+  This makes it possible to annotate the expected type of the `params` argument for classes 
+  representing a workflow step as `Params` (usually, `Params | dict`).
+  The class also has the required methods that make it possible to unpack it 
+  with the `**` operator.
+  This means any workflow-step class boils down to doing the following: 
+  `self.callback(input, **self.params)`
+  [#133](https://github.com/vocalpy/vocalpy/pull/133).
 
 ### Changed
 - Rename `vocalpy.Audio` to `vocalpy.Sound` 
@@ -35,6 +49,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   dimensions (shape, time)
   [#124](https://github.com/vocalpy/vocalpy/pull/124).
   Fixes [#90](https://github.com/vocalpy/vocalpy/issues/90).
+- Rename `vocalpy.Segmenter.segment_params` and `vocalpy.SpectrogramMaker.spect_params`
+  to just `params`
+  [#133](https://github.com/vocalpy/vocalpy/pull/133).
+- Rename `vocalpy.segment.ava.segment` -> `vocalpy.segment.ava`
+  [#133](https://github.com/vocalpy/vocalpy/pull/133).
 
 ### Fixed
 - Fix `vocalpy.segment.ava.segment` to better replicate original function
@@ -48,6 +67,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   [evfuncs](https://github.com/NickleDave/evfuncs) package.
   [#132](https://github.com/vocalpy/vocalpy/pull/132).
   Fixes [#129](https://github.com/vocalpy/vocalpy/issues/129).
+
+### Removed
+- Remove `dataset` module and `SequenceDataset` class for now
+  [#133](https://github.com/vocalpy/vocalpy/pull/133).
 
 ## 0.8.2
 ### Fixed
