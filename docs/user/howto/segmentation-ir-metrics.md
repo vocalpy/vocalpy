@@ -14,7 +14,7 @@ kernelspec:
 
 # How do I evaluate segmentation methods with information retrieval metrics?
 
-The first step in many analyses of acoustic communication is to segment audio into units of analyis, as discussed in [#1](#1) and [#2](#2).
+The first step in many analyses of acoustic communication is to segment audio into units of analyis, as discussed in {cite:p}`kershenbaum_acoustic_2016` and {cite:p}`odom_comparative_2021`.
 This how-to walks through using metrics from information retrieval to evaluate methods for segmenting audio.
 
 We will compare two algorithms that take as input a {py:class}`vocalpy.Sound`, and return as output {py:class}`~vocalpy.Segments`. The {py:class}`vocalpy.Segments` class represents a set of line segments, with each segment having a starting index and length (or, equivalently, a start time and a stop time). One of the goals of this how-to is to show you the ways that using the {py:class}`vocalpy.Segments` class makes it easier for you to evaluate segmentation algorithms.
@@ -23,7 +23,7 @@ We will compare two algorithms that take as input a {py:class}`vocalpy.Sound`, a
 
 ## Background
 
-The goal of our evaluation is to get a measure of how close the segments from an algorithm are to a segmentation created by a human annotator. We will call the annotation created by the human annotator the *ground truth* or *reference* segmentation, and we will call the output of an algorithm the *hypothesis*. In this case, the human annotator used a Graphical User Interface (GUI) to clean up segments produced by one of the algorithms we will look at. So it shouldn't be too surprising if that algorithm in particular does a pretty good job of getting close to the ground truth. The algorithm in question is :func:`vocalpy.segment.meansquared`. This algorithm is used by a Matlab GUI `evsonganaly` originally developed by Evren Tumer in the Brainard Lab, as used in [Tumer Brainard 2007](https://www.nature.com/articles/nature06390). The version of the algorithm built into VocalPy is adapted from the Python implementation in the [`evfuncs` package](https://github.com/NickleDave/evfuncs).
+The goal of our evaluation is to get a measure of how close the segments from an algorithm are to a segmentation created by a human annotator. We will call the annotation created by the human annotator the *ground truth* or *reference* segmentation, and we will call the output of an algorithm the *hypothesis*. In this case, the human annotator used a Graphical User Interface (GUI) to clean up segments produced by one of the algorithms we will look at. So it shouldn't be too surprising if that algorithm in particular does a pretty good job of getting close to the ground truth. The algorithm in question is {py:func}`vocalpy.segment.meansquared`. This algorithm is used by a Matlab GUI `evsonganaly` originally developed by Evren Tumer in the Brainard Lab, as used in [Tumer Brainard 2007](https://www.nature.com/articles/nature06390). The version of the algorithm built into VocalPy is adapted from the Python implementation in the [`evfuncs` package](https://github.com/NickleDave/evfuncs).
 
 +++
 
@@ -42,7 +42,7 @@ What we want to understand is the role that different parameters play in the alg
 
 
 
-To understand the role of these parameters, we will evaluate the output of :func:`vocalpy.segment.meansquared` with and without the clean-up parameters. We will also compare with another algorithm that simply sets the threshold to the average of the signal.
+To understand the role of these parameters, we will evaluate the output of {py:func}`vocalpy.segment.meansquared` with and without the clean-up parameters. We will also compare with another algorithm that simply sets the threshold to the average of the signal.
 
 There are three conditions we want to compare:
 1. The 
@@ -50,31 +50,6 @@ There are three conditions we want to compare:
 3. A baseline algorithm that 
 
 This how-to replicates in part the analysis from [5]_.
-
-## References
-
-{#1}
-Kershenbaum, Arik, et al.
-"Acoustic sequences in non‐human animals: a tutorial review and prospectus." 
-Biological Reviews 91.1 (2016): 13-52.
-
-{#2}
-Odom, Karan J., et al. 
-"Comparative bioacoustics: a roadmap for quantifying and comparing animal sounds across diverse taxa." 
-Biological Reviews 96.4 (2021): 1135-1159.
-
-.. [3] Kemp, T., Schmidt, M., Whypphal, M., & Waibel, A. (2000, June).
-   Strategies for automatic segmentation of audio data.
-   In 2000 ieee international conference on acoustics, speech, and signal processing.
-   proceedings (cat. no. 00ch37100) (Vol. 3, pp. 1423-1426). IEEE.
-
-.. [4] Jordán, P. G., & Giménez, A. O. (2023).
-   Advances in Binary and Multiclass Sound Segmentation with Deep Learning Techniques.
-
-.. [5] Ghaffari, Houtan, and Paul Devos.
-   "Consistent Birdsong Syllable Segmentation Using Deep Semi-Supervised Learning." (2023).
-   https://dael.euracoustics.org/confs/fa2023/data/articles/000897.pdf
-   https://github.com/houtan-ghaffari/bird_syllable_segmentation
 
 +++
 
@@ -298,3 +273,36 @@ sns.catplot(
 ```
 
 We can see that the `'meansquared'` algorithm *with* the clean-up steps has the highest precision and recall. Perhaps surprisingly, the `'meansquared'` algorithm *without* clean-up has a *lower* precision than the `average_envelope_threshold`, and even more surprisingly, it has the highest recall of all. We can understand this as follows: the `'meansquared'` algorithm finds "more" segments than the `'average_envelope_threshold'` algorithm--giving it a higher recall--but that also means it returns more false positives. More generally, a result like this would suggest that the clean-up steps have a bigger impact on performance than the methods used to compute the energy and the exact threshold used. Keep in mind that we've shown here is just a demo. To really draw this conclusion we'd need to do an extensive analysis across datasets, and be very clear about our intended use cases for the algorithm.
+
++++
+
+## References
+
+{#1}
+Kershenbaum, Arik, et al.
+"Acoustic sequences in non‐human animals: a tutorial review and prospectus." 
+Biological Reviews 91.1 (2016): 13-52.
+
+{#2}
+Odom, Karan J., et al. 
+"Comparative bioacoustics: a roadmap for quantifying and comparing animal sounds across diverse taxa." 
+Biological Reviews 96.4 (2021): 1135-1159.
+
+.. [3] Kemp, T., Schmidt, M., Whypphal, M., & Waibel, A. (2000, June).
+   Strategies for automatic segmentation of audio data.
+   In 2000 ieee international conference on acoustics, speech, and signal processing.
+   proceedings (cat. no. 00ch37100) (Vol. 3, pp. 1423-1426). IEEE.
+
+.. [4] Jordán, P. G., & Giménez, A. O. (2023).
+   Advances in Binary and Multiclass Sound Segmentation with Deep Learning Techniques.
+
+.. [5] Ghaffari, Houtan, and Paul Devos.
+   "Consistent Birdsong Syllable Segmentation Using Deep Semi-Supervised Learning." (2023).
+   https://dael.euracoustics.org/confs/fa2023/data/articles/000897.pdf
+   https://github.com/houtan-ghaffari/bird_syllable_segmentation
+
++++
+
+## Bibliography
+
+{bibliography}
