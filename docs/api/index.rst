@@ -21,6 +21,7 @@ Data types for acoustic communication data.
    Sound
    Spectrogram
    Annotation
+   Segments
 
 
 Classes for Pipelines
