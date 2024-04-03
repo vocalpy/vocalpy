@@ -14,42 +14,33 @@ kernelspec:
 
 # How do I evaluate segmentation methods with information retrieval metrics?
 
-The first step in many analyses of acoustic communication is to segment audio into units of analyis, as discussed in {cite:p}`kershenbaum_acoustic_2016` and {cite:p}`odom_comparative_2021`.
+The first step in many analyses of acoustic communication is to segment audio into units of analyis, as discussed in [^1] and [^2].
 This how-to walks through using metrics from information retrieval to evaluate methods for segmenting audio.
 
-We will compare two algorithms that take as input a {py:class}`vocalpy.Sound`, and return as output {py:class}`~vocalpy.Segments`. The {py:class}`vocalpy.Segments` class represents a set of line segments, with each segment having a starting index and length (or, equivalently, a start time and a stop time). One of the goals of this how-to is to show you the ways that using the {py:class}`vocalpy.Segments` class makes it easier for you to evaluate segmentation algorithms.
+We will compare two algorithms that take as input a {py:class}`vocalpy.Sound`, and return as output {py:class}`vocalpy.Segments`. The {py:class}`vocalpy.Segments` class represents a set of line segments, with each segment having a starting index and length (or, equivalently, a start time and a stop time). One of the goals of this how-to is to show you the ways that using the {py:class}`vocalpy.Segments` class makes it easier for you to evaluate segmentation algorithms.
 
 +++
 
 ## Background
 
-The goal of our evaluation is to get a measure of how close the segments from an algorithm are to a segmentation created by a human annotator. We will call the annotation created by the human annotator the *ground truth* or *reference* segmentation, and we will call the output of an algorithm the *hypothesis*. In this case, the human annotator used a Graphical User Interface (GUI) to clean up segments produced by one of the algorithms we will look at. So it shouldn't be too surprising if that algorithm in particular does a pretty good job of getting close to the ground truth. The algorithm in question is {py:func}`vocalpy.segment.meansquared`. This algorithm is used by a Matlab GUI `evsonganaly` originally developed by Evren Tumer in the Brainard Lab, as used in [Tumer Brainard 2007](https://www.nature.com/articles/nature06390). The version of the algorithm built into VocalPy is adapted from the Python implementation in the [`evfuncs` package](https://github.com/NickleDave/evfuncs).
+The goal of our evaluation is to get a measure of how close the segments from an algorithm are to a segmentation created by a human annotator. We will call the annotation created by the human annotator the *ground truth* or *reference* segmentation, and we will call the output of an algorithm the *hypothesis*. In this how-to we will use a sample dataset where the human annotator used a Graphical User Interface (GUI) to clean up segments produced by one of the algorithms we will look at. So it shouldn't be too surprising if that algorithm in particular does a pretty good job of getting close to the ground truth. The algorithm in question is {py:func}`vocalpy.segment.meansquared`. This algorithm is used by a Matlab GUI `evsonganaly` originally developed by Evren Tumer in the Brainard Lab, as used in [^3]. The version of the algorithm built into VocalPy is adapted from the Python implementation in the [`evfuncs` package](https://github.com/NickleDave/evfuncs).
 
 +++
 
 ### Energy-based methods for segmenting audio
 
-The algorithms we will look at here all work in basically the same way: they start by computing some measure of the [*energy*](https://en.wikipedia.org/wiki/Energy_(signal_processing%29) of an audio signal, then they set a threshold on that energy, and finally they find all the periods above that threshold. The periods above the threshold become the segments returned by the algorithm. There are other methods for segmenting audio, for example those discussed in [3]_ and [4]_, but here we will just consider those that threshold energy.
+Both of the algorithms we will look at here work in basically the same way: they start by computing some measure of the [*energy*](https://en.wikipedia.org/wiki/Energy_(signal_processing%29) of an audio signal, then they set a threshold on that energy, and finally they find all the periods above that threshold. The periods above the threshold become the segments returned by the algorithm. There are other methods for segmenting audio, for example those discussed in [^4] and [^5], but here we will just consider those that threshold energy.
+
+What we want to understand is the role that different parameters play in the algorithm. 
+To understand the role of these parameters, we will evaluate the output of {py:func}`vocalpy.segment.meansquared` with and without the clean-up parameters. We will also compare with another algorithm that simply sets the threshold to the average of the energy. That function uses a different method to compute the energy, but we're glossing over that detail here.
+
+This how-to replicates in part the analysis from [^6]. For more detail on the baseline method, see that paper.
 
 +++
 
 ### Information retrieval metrics
 
 The metrics we will use to evaluate segmentation are adapted from the field of [information retrieval](https://en.wikipedia.org/wiki/Information_retrieval). Broadly speaking, this field builds systems to retrieve information, e.g. a program that lets a user query a database of documents (think Google Search). Methods for evaluating these systems have been borrowed by related fields, and by machine learning more broadly. For example, one can also conceive of querying a dataset of audio, as is done in [music information retrieval](https://musicinformationretrieval.com/), and information retrieval metrics have been adapted to evaluate the segentation of audio. See for example the segmentation metrics in the [`mir_eval`](https://craffel.github.io/mir_eval/#module-mir_eval.segment) package.
-
-
-What we want to understand is the role that different parameters play in the algorithm. To understand 
-
-
-
-To understand the role of these parameters, we will evaluate the output of {py:func}`vocalpy.segment.meansquared` with and without the clean-up parameters. We will also compare with another algorithm that simply sets the threshold to the average of the signal.
-
-There are three conditions we want to compare:
-1. The 
-2. The
-3. A baseline algorithm that 
-
-This how-to replicates in part the analysis from [5]_.
 
 +++
 
@@ -59,7 +50,7 @@ Before walking through the analysis, we need to implement the baseline we will u
 
 We include the function here to give a brief example of writing a segmenting algorithm.
 
-Notice that the first parameter of the function is a :class:`~vocalpy.Sound` and that it returns a :class:`vocalpy.Segments`. This is the key thing you will need to write a segmenting algorithm. You can then pass this function to the :class:`vocalpy.Segmenter` class, to be used as a "callback", the function that the class calls when you tell it to `segment` some `Sound`s.
+Notice that the first parameter of the function is a {py:class}`~vocalpy.Sound` and that it returns a {py:class}`vocalpy.Segments`. This is the key thing you will need to write a segmenting algorithm. You can then pass this function to the {py:class}`vocalpy.Segmenter` class, to be used as a "callback", the function that the class calls when you tell it to `segment` some `Sound`s.
 
 ```{code-cell} ipython3
 import numpy as np
@@ -77,7 +68,7 @@ def average_envelope_threshold(sound: voc.Sound, cutoff=500, order=40) -> voc.Se
     setting the threshold to average of the envelope.
     
     Adapted from https://github.com/houtan-ghaffari/bird_syllable_segmentation
-    See https://dael.euracoustics.org/confs/fa2023/data/articles/000897.pdf for detail.
+    See https://dael.euracoustics.org/confs/fa2023/data/articles/000897.pdf for more detail.
     """
     if sound.data.shape[0] > 1:
         raise ValueError(
@@ -130,10 +121,10 @@ sounds = voc.example('bfsongrepo', return_type='sound')
 
 ### Segment audio
 
-To set ourselves up to analyze the results below, we will make a Python dictionary that maps a string `'name'` (for the algorithm we are testing) to the :class:`list` of :class:`vocalpy.Segments` returned by the algorithm. Since we test the same algorithm twice with different parameters, we will think of this name as a "condition" (the three conditions we outlined above).
+To set ourselves up to analyze the results below, we will make a Python dictionary that maps a string `'name'` (for the algorithm we are testing) to the {py:class}`list` of {py:class}`vocalpy.Segments` returned by the algorithm. Since we test the same algorithm twice with different parameters, we will think of this name as a "condition" (the three conditions we outlined above).
 
 To actually get the results, we will write a loop.
-Inside the loop, we will use the :class:`vocalpy.Segmenter` class.  
+Inside the loop, we will use the {py:class}`vocalpy.Segmenter` class.  
 This class takes has two parameters: a `callback` function, and the `params` (parameters) we will pass to that function.
 Each time through the loop, we will make an instance of the `Segmenter` class by passing in a specific `callback` and set of `params` as the two arguments. Then when we call the `segment` method on that instance, the class will call the `callback` function.
 So, at the top of the loop, we define a tuple of 3-element tuples that we iterate through. Each 3-element tuple has the condition `name`, the `callback` and the `params` we will use with it.
@@ -158,7 +149,7 @@ for name, callback, params in (
 
 Now we need our reference segmentation to compare to.
 
-We will need list of :class:`vocalpy.Segments` for this too, but here we make them using :class:`~vocalpy.Annotation` that we load from the example datasets. These annotations contain the ground truth segmentation that we want to compare with the results from the algorithms.
+We will need list of {py:class}`vocalpy.Segments` for this too, but here we make them using {py:class}`~vocalpy.Annotation` that we load from the example datasets. These annotations contain the ground truth segmentation that we want to compare with the results from the algorithms.
 
 ```{code-cell} ipython3
 annots = voc.example('bfsongrepo', return_type='annotation')
@@ -179,13 +170,13 @@ for annot, sound in zip(annots, sounds):
 
 ### Compute metrics
 
-Finally we use the functions in the :mod:`vocalpy.metrics.segmentation.ir` module to compute metrics that we use to compare the segmentation algorithms.
+Finally we use the functions in the {py:module}`vocalpy.metrics.segmentation.ir` module to compute metrics that we use to compare the segmentation algorithms.
 
 The functions in this module expect two arguments: a `reference` segmentation, and a `hypothesis`. In other words, the ground truth and the output of some algorithm that we want to compare with that ground truth.
 
 Notice that we use a `tolerance` of 10 milliseconds. This is a standard value used in previous work--you may find it instructive to vary this value and examine the results.
 
-We will make a :class:`pandas.DataFrame` with the results, that we will then plot with :module:`seaborn`.
+We will make a {py:class}`pandas.DataFrame` with the results, that we will then plot with {py:module}`seaborn`.
 
 ```{code-cell} ipython3
 import pandas as pd
@@ -260,10 +251,10 @@ results_df['metric'] = results_df['metric'].map(
 ```{code-cell} ipython3
 import seaborn as sns
 
-sns.set_context('notebook')
+sns.set_context('talk', font_scale=1.25)
 sns.set_style('darkgrid')
 
-sns.catplot(
+g = sns.catplot(
     results_df,
     y='value',
     hue='condition',
@@ -278,31 +269,32 @@ We can see that the `'meansquared'` algorithm *with* the clean-up steps has the 
 
 ## References
 
-{#1}
-Kershenbaum, Arik, et al.
+[^1]: Kershenbaum, Arik, et al.
 "Acoustic sequences in non‐human animals: a tutorial review and prospectus." 
 Biological Reviews 91.1 (2016): 13-52.
+https://onlinelibrary.wiley.com/doi/abs/10.1111/brv.12160
 
-{#2}
-Odom, Karan J., et al. 
+[^2]: Odom, Karan J., et al. 
 "Comparative bioacoustics: a roadmap for quantifying and comparing animal sounds across diverse taxa." 
 Biological Reviews 96.4 (2021): 1135-1159.
+https://onlinelibrary.wiley.com/doi/abs/10.1111/brv.12695
 
-.. [3] Kemp, T., Schmidt, M., Whypphal, M., & Waibel, A. (2000, June).
-   Strategies for automatic segmentation of audio data.
-   In 2000 ieee international conference on acoustics, speech, and signal processing.
-   proceedings (cat. no. 00ch37100) (Vol. 3, pp. 1423-1426). IEEE.
+[^3]: Tumer, Evren C., and Michael S. Brainard.
+"Performance variability enables adaptive plasticity of ‘crystallized’ adult birdsong."
+Nature 450.7173 (2007): 1240-1244.
+https://www.academia.edu/download/46524972/nature06390.pdf
 
-.. [4] Jordán, P. G., & Giménez, A. O. (2023).
-   Advances in Binary and Multiclass Sound Segmentation with Deep Learning Techniques.
+[^4]: Kemp, T., Schmidt, M., Whypphal, M., & Waibel, A. (2000, June).
+Strategies for automatic segmentation of audio data.
+In 2000 ieee international conference on acoustics, speech, and signal processing.
+proceedings (cat. no. 00ch37100) (Vol. 3, pp. 1423-1426). IEEE.
+http://www1.icsi.berkeley.edu/~dpwe/research/etc/icassp2000/pdf/980_1114.PDF
 
-.. [5] Ghaffari, Houtan, and Paul Devos.
-   "Consistent Birdsong Syllable Segmentation Using Deep Semi-Supervised Learning." (2023).
-   https://dael.euracoustics.org/confs/fa2023/data/articles/000897.pdf
-   https://github.com/houtan-ghaffari/bird_syllable_segmentation
+[^5]: Jordán, P. G., & Giménez, A. O. (2023).
+Advances in Binary and Multiclass Sound Segmentation with Deep Learning Techniques.
+https://www.researchgate.net/profile/Pablo-Gimeno/publication/371567111_Advances_in_Binary_and_Multiclass_Audio_Segmentation_with_Deep_Learning_Techniques/links/648a2fba7fcc811dcdce3d3c/Advances-in-Binary-and-Multiclass-Audio-Segmentation-with-Deep-Learning-Techniques.pdf
 
-+++
-
-## Bibliography
-
-{bibliography}
+[^6]: Ghaffari, Houtan, and Paul Devos.
+"Consistent Birdsong Syllable Segmentation Using Deep Semi-Supervised Learning." (2023).
+https://dael.euracoustics.org/confs/fa2023/data/articles/000897.pdf
+https://github.com/houtan-ghaffari/bird_syllable_segmentation
