@@ -241,7 +241,8 @@ class Segments:
         else:
             if not start_inds.ndim == 1:
                 raise ValueError(
-                    f"`start_inds` for `Segments` should be 1-dimensional array but start_inds.ndim was: {start_inds.ndim}"
+                    "`start_inds` for `Segments` should be 1-dimensional array "
+                    f"but start_inds.ndim was: {start_inds.ndim}"
                 )
             if not lengths.ndim == 1:
                 raise ValueError(
@@ -253,20 +254,21 @@ class Segments:
                     f"`start_inds` has {start_inds.size} elements and `lengths` has {lengths.size} elements."
                 )
             if not np.all(start_inds >= 0):
-                raise ValueError(f"Values of `start_inds` for `Segments` must all be non-negative.")
+                raise ValueError("Values of `start_inds` for `Segments` must all be non-negative.")
 
             if not np.all(start_inds[1:] > start_inds[:-1]):
-                raise ValueError(f"Values of `start_inds` for `Segments` must be strictly increasing.")
+                raise ValueError("Values of `start_inds` for `Segments` must be strictly increasing.")
 
             if not np.all(lengths >= 1):
-                raise ValueError(f"Values of `lengths` for `Segments` must all be positive.")
+                raise ValueError("Values of `lengths` for `Segments` must all be positive.")
 
             if sound is not None:
                 if start_inds[-1] + lengths[-1] > sound.data.shape[-1]:
                     raise ValueError(
                         # TODO: check for off-by-one errors here and elsewhere where we use lengths
                         "Length of last segment is longer than number of samples in sound. "
-                        f"Last segment ends at {start_inds[-1] + lengths[-1]} and sound has {sound.data.shape[-1]} samples."
+                        f"Last segment ends at {start_inds[-1] + lengths[-1]} "
+                        f"and sound has {sound.data.shape[-1]} samples."
                     )
 
         if labels is not None:
@@ -346,7 +348,10 @@ class Segments:
         )
 
     def __str__(self):
-        return f"Segments(start_times={self.start_times!r}, durations={self.durations!r}, labels={self.labels!r}, sound={self.sound!r})"
+        return (
+            f"Segments(start_times={self.start_times!r}, durations={self.durations!r}, "
+            f"labels={self.labels!r}, sound={self.sound!r})"
+        )
 
     def to_df(self):
         """Convert :class:`Segments` to a :class:`pandas.DataFrame`.
@@ -380,7 +385,7 @@ class Segments:
     ) -> Segments:
         """Read :class:`Segments` from a csv file."""
         if sound is not None and sound_path is not None:
-            raise ValueError(f"`Segments.from_csv` can accept either `sound` or `sound_path`," f"but not both")
+            raise ValueError("`Segments.from_csv` can accept either `sound` or `sound_path`, but not both")
         if sound_path:
             sound = Sound.read(sound_path)
         df = pd.read_csv(
@@ -465,7 +470,7 @@ class Segments:
                 "This `Segments` instance does not have a `sound`, " "unable to iterate through each `Segment`."
             )
         for start_ind, length, label in zip(self.start_inds, self.lengths, self.labels):
-            data = xr.DataArray(data=self.sound.data[..., start_ind : start_ind + length].squeeze(0))
+            data = xr.DataArray(data=self.sound.data[..., start_ind : start_ind + length].squeeze(0))  # noqa: E203
             segment = Segment(start_ind=start_ind, length=length, label=label, data=data)
             yield segment
 
@@ -479,7 +484,7 @@ class Segments:
             start_ind = self.start_inds[key]
             length = self.lengths[key]
             label = self.labels[key]
-            data = xr.DataArray(data=self.sound.data[..., start_ind : start_ind + length].squeeze(0))
+            data = xr.DataArray(data=self.sound.data[..., start_ind : start_ind + length].squeeze(0))  # noqa: E203
             return Segment(start_ind=start_ind, length=length, label=label, data=data)
         elif isinstance(key, slice):
             start_inds = self.start_inds[key]
