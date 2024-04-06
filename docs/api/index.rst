@@ -36,6 +36,7 @@ Classes for common steps in your pipelines and workflows
    Segmenter
    SpectrogramMaker
    SpectrogramParameters
+   Params
 
 Signal processing
 -----------------

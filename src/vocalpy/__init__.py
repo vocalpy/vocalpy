@@ -18,6 +18,7 @@ from .audio_file import AudioFile
 from .dataset_file import DatasetFile, DatasetFileType, DatasetFileTypeEnum
 from .examples import example
 from .feature_file import FeatureFile
+from .params import Params
 from .segmenter import Segmenter
 from .segments import Segment, Segments
 from .sequence import Sequence
@@ -52,6 +53,7 @@ __all__ = [
     "feature",
     "paths",
     "plot",
+    "Params",
     "Segment",
     "Segmenter",
     "Segments",
