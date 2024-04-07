@@ -53,6 +53,7 @@ doc = [
     "jupytext >=1.13.8",
     "myst-nb >=0.15.0",
     "numpydoc >=1.6.0",
+    "seaborn >=0.13.2",
     "Sphinx >=3.4.3",
     "sphinx-autobuild >= 2021.3.14",
     "sphinx-book-theme >=0.3.2",
