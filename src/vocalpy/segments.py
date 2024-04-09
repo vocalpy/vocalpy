@@ -52,9 +52,13 @@ class Segment:
         label: str = "",
     ) -> None:
         if not isinstance(start_ind, numbers.Integral):
-            raise TypeError(f"Type of `start_ind` for `Segment` must be int but was: {type(start_ind)}")
+            raise TypeError(
+                f"`start_ind` for `Segment` must be instance of `numbers.Integral` but type was: {type(start_ind)}"
+            )
         if not isinstance(length, numbers.Integral):
-            raise TypeError(f"Type of `length` for `Segment` must be int but was: {type(start_ind)}")
+            raise TypeError(
+                f"`length` for `Segment` must be instance of `numbers.Integral` but type was: {type(start_ind)}"
+            )
         if not isinstance(label, str):
             raise TypeError(f"`label` for `Segment` should be an instance of `str`, but type was: {type(label)}")
         # explicitly convert type numpy.str_ to a str instance so we can save as an attribute
@@ -77,9 +81,14 @@ class Segment:
                 f"and `length` was {length}."
             )
 
-        if not isinstance(samplerate, int):
+        if not isinstance(samplerate, numbers.Integral):
             raise TypeError(
-                f"`samplerate` should be `int` but type was: {type(samplerate)}"
+                f"`samplerate` must be `instance` of `numbers.Integral` but type was: {type(samplerate)}"
+            )
+
+        if not samplerate > 0:
+            raise ValueError(
+                f"`samplerate` must be a positive integer but was: {samplerate}"
             )
 
         self.start_ind = start_ind
@@ -154,6 +163,7 @@ class Segment:
             and (self.length == other.length)
             and (self.label == other.label)
             and (self.data.equals(other.data))
+            and (self.samplerate == other.samplerate)
         )
 
 
