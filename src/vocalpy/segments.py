@@ -20,17 +20,45 @@ if TYPE_CHECKING:
 
 
 class Segment:
+    """Class that represents a line segment,
+    one of a set of such :class:`Segments`,
+    returned by an algorithm for segmenting audio.
+
+    Attributes
+    ----------
+    start_ind : int
+        The index of the start of the segment
+        in the audio signal, i.e. the sample number.
+    length: int
+        The length of the segment, in number of samples.
+    label: string
+        The label for the segment.
+        Default is an empty string.
+    data : xarray.DataArray
+        The audio signal of the segment,
+        taking from the :class:`Sound`
+        associated with the set of :class:`Segments`
+        that this :class:`Segment` came from.
+    samplerate : int
+        The sampling rate of the :class:`Sound`
+        that this :class:`Segment` came from.
+    """
     def __init__(
         self,
         start_ind: int,
         length: int,
         data: xr.DataArray,
+        samplerate: int,
         label: str = "",
     ) -> None:
         if not isinstance(start_ind, numbers.Integral):
-            raise TypeError(f"Type of `start_ind` for `Segment` must be int but was: {type(start_ind)}")
+            raise TypeError(
+                f"`start_ind` for `Segment` must be instance of `numbers.Integral` but type was: {type(start_ind)}"
+            )
         if not isinstance(length, numbers.Integral):
-            raise TypeError(f"Type of `length` for `Segment` must be int but was: {type(start_ind)}")
+            raise TypeError(
+                f"`length` for `Segment` must be instance of `numbers.Integral` but type was: {type(start_ind)}"
+            )
         if not isinstance(label, str):
             raise TypeError(f"`label` for `Segment` should be an instance of `str`, but type was: {type(label)}")
         # explicitly convert type numpy.str_ to a str instance so we can save as an attribute
@@ -53,18 +81,36 @@ class Segment:
                 f"and `length` was {length}."
             )
 
+        if not isinstance(samplerate, numbers.Integral):
+            raise TypeError(
+                f"`samplerate` must be `instance` of `numbers.Integral` but type was: {type(samplerate)}"
+            )
+
+        if not samplerate > 0:
+            raise ValueError(
+                f"`samplerate` must be a positive integer but was: {samplerate}"
+            )
+
         self.start_ind = start_ind
         self.length = length
         self.label = label
         self.data = data
+        self.samplerate = samplerate
 
     def __repr__(self):
         return (
             f"Segment(start_ind={self.start_ind!r}, length={self.length!r}, "
-            f"label={self.label!r}, data={self.data!r}"
+            f"label={self.label!r}, data={self.data!r}, samplerate={self.samplerate!r})"
         )
 
     def write(self, path: str | pathlib.Path) -> None:
+        """Write this :class:`Segment` to a file.
+
+        Parameters
+        ----------
+        path : str, pathlib.Path
+            Path where :class:`Segment` should be saved.
+        """
         path = pathlib.Path(path)
         # we make a new DataArray that points to the same underlying ``values``,
         # so we can mutate the new DataArray's ``attrs`` without affecting
@@ -74,24 +120,39 @@ class Segment:
             "start_ind": self.start_ind,
             "length": self.length,
             "label": self.label,
+            "samplerate": self.samplerate,
         }
         data.to_netcdf(path, engine="h5netcdf")
 
     @classmethod
     def read(cls, path: str | pathlib.Path) -> Segment:
+        """Read a :class:`Segment` from a file.
+
+        Parameters
+        ----------
+        path : str, pathlib.Path
+            Path to read the :class:`Segment` from.
+
+        Returns
+        -------
+        segment: Segment
+            A :class:`Segment` instance with data from ``path``
+            read into it.
+        """
         path = pathlib.Path(path)
         data = xr.load_dataarray(path)
         start_ind = data.attrs["start_ind"]
         length = data.attrs["length"]
         label = data.attrs["label"]
-        # throw away metadata; feels weird but want round-trip to give us back
-        # an instance that is __eq__ual
+        samplerate = data.attrs["samplerate"]
+        # throw away metadata; don't want to have "leftover" attrs
         data.attrs = {}
         return cls(
             start_ind=start_ind,
             length=length,
             label=label,
             data=data,
+            samplerate=samplerate,
         )
 
     def __eq__(self, other) -> bool:
@@ -102,6 +163,7 @@ class Segment:
             and (self.length == other.length)
             and (self.label == other.label)
             and (self.data.equals(other.data))
+            and (self.samplerate == other.samplerate)
         )
 
 
@@ -130,6 +192,8 @@ class Segments:
     labels: list, optional
         A :class:`list` of strings,
         where each string is the label for each segment.
+    sound : vocalpy.Sound
+        The sound that was segmented to produce this set of line segments.
 
     Examples
     --------
@@ -212,7 +276,6 @@ class Segments:
     See Also
     --------
     Boxes
-
     """
 
     def __init__(
@@ -404,11 +467,13 @@ class Segments:
         return cls(start_inds, lengths, sound, labels)
 
     def to_json(self, json_path: str | pathlib.Path) -> None:
-        """Save :class:`Segments` to a json file
+        """Save :class:`Segments` to a json file.
 
         Parameters
         ----------
         json_path : str, pathlib.Path
+            The path where the json file should be saved
+            with these :class:`Segments`.
         """
         json_path = pathlib.Path(json_path)
         df = self.to_df()
@@ -420,11 +485,12 @@ class Segments:
 
     @classmethod
     def from_json(cls, json_path: str | pathlib.Path) -> Segments:
-        """Load :class:`Segments` from a json file
+        """Load :class:`Segments` from a json file.
 
         Parameters
         ----------
-        json_path
+        json_path : str, pathlib.Path
+            The path to the json file to load the :class:`Segments` from.
 
         Returns
         -------
@@ -471,7 +537,9 @@ class Segments:
             )
         for start_ind, length, label in zip(self.start_inds, self.lengths, self.labels):
             data = xr.DataArray(data=self.sound.data[..., start_ind : start_ind + length].squeeze(0))  # noqa: E203
-            segment = Segment(start_ind=start_ind, length=length, label=label, data=data)
+            segment = Segment(
+                start_ind=start_ind, length=length, label=label, data=data, samplerate=self.sound.samplerate
+            )
             yield segment
 
     def __getitem__(self, key):
@@ -485,7 +553,9 @@ class Segments:
             length = self.lengths[key]
             label = self.labels[key]
             data = xr.DataArray(data=self.sound.data[..., start_ind : start_ind + length].squeeze(0))  # noqa: E203
-            return Segment(start_ind=start_ind, length=length, label=label, data=data)
+            return Segment(
+                start_ind=start_ind, length=length, label=label, data=data, samplerate=self.sound.samplerate
+            )
         elif isinstance(key, slice):
             start_inds = self.start_inds[key]
             lengths = self.lengths[key]
