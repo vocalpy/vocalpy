@@ -21,20 +21,21 @@ TEST_SOUND_DATA = xr.DataArray(TEST_SOUND.data.squeeze(0))
 class TestSegment:
 
     @pytest.mark.parametrize(
-        'start_ind, length, data, label',
+        'start_ind, length, data, samplerate, label',
         [
-            (0, 100, TEST_SOUND_DATA[:100], 'x'),
-            (1, 100, TEST_SOUND_DATA[:100], 'x'),
-            (0, 100, TEST_SOUND_DATA[:100], None),
-            (1, 100, TEST_SOUND_DATA[:100], None),
+            (0, 100, TEST_SOUND_DATA[:100], 32000, 'x'),
+            (1, 100, TEST_SOUND_DATA[:100], 32000, 'x'),
+            (0, 100, TEST_SOUND_DATA[:100], 32000, None),
+            (1, 100, TEST_SOUND_DATA[:100], 32000, None),
         ]
     )
-    def test_init(self, start_ind, length, data, label):
+    def test_init(self, start_ind, length, data, samplerate, label):
         if label is not None:
             segment = vocalpy.segments.Segment(
                 start_ind,
                 length,
                 data,
+                samplerate,
                 label
             )
         else:
@@ -42,11 +43,12 @@ class TestSegment:
                 start_ind,
                 length,
                 data,
+                samplerate
             )
         assert isinstance(segment, vocalpy.segments.Segment)
         for attr_name, attr_val in zip(
-                ['start_ind', 'length', 'data', 'label'],
-                [start_ind, length, data, label],
+                ['start_ind', 'length', 'data', 'samplerate', 'label'],
+                [start_ind, length, data, samplerate, label],
         ):
             if attr_name == 'label' and attr_val is None:
                 # we're testing default label is empty string
@@ -58,47 +60,55 @@ class TestSegment:
                 assert getattr(segment, attr_name) == attr_val
 
     @pytest.mark.parametrize(
-        'start_ind, length, data, label, expected_exception',
+        'start_ind, length, data, samplerate, label, expected_exception',
         [
             # start_ind is not an int
-            (1.0, 100, TEST_SOUND_DATA[:100], 'x', TypeError),
+            (1.0, 100, TEST_SOUND_DATA[:100], 32000, 'x', TypeError),
             # start_ind is not non-negative
-            (-1, 100, TEST_SOUND_DATA[:100], 'x', ValueError),
+            (-1, 100, TEST_SOUND_DATA[:100], 32000, 'x', ValueError),
             # length is not an int
-            (0, 100.0, TEST_SOUND_DATA[:100], 'x', TypeError),
+            (0, 100.0, TEST_SOUND_DATA[:100], 32000, 'x', TypeError),
             # length is not positive
-            (0, 0, TEST_SOUND_DATA[:100], 'x', ValueError),
+            (0, 0, TEST_SOUND_DATA[:100], 32000, 'x', ValueError),
             # length is not positive
-            (0, -100, TEST_SOUND_DATA[:100], 'x', ValueError),
+            (0, -100, TEST_SOUND_DATA[:100], 32000, 'x', ValueError),
             # data is not an xarray.DataArray
-            (0, 100, np.random.rand(100), 'x', TypeError),
+            (0, 100, np.random.rand(100), 32000, 'x', TypeError),
             # data.ndim != 1
-            (0, -100, TEST_SOUND_DATA[:100].expand_dims({'channel': 0}), 'x', ValueError),
+            (0, -100, TEST_SOUND_DATA[:100].expand_dims({'channel': 0}), 32000, 'x', ValueError),
             # data.size != length
-            (0, 100, TEST_SOUND_DATA[:500], 'x', ValueError),
+            (0, 100, TEST_SOUND_DATA[:500], 32000, 'x', ValueError),
+            # samplerate is not an int
+            (1, 100, TEST_SOUND_DATA[:100], 32000.0, 'x', TypeError),
+            # samplerate is not positive
+            (1, 100, TEST_SOUND_DATA[:100], -32000, 'x', ValueError),
+            # label is not a str
+            (1, 100, TEST_SOUND_DATA[:100], 32000, 1, TypeError),
         ],
     )
-    def test_init_raises(self, start_ind, length, data, label, expected_exception):
+    def test_init_raises(self, start_ind, length, data, samplerate, label, expected_exception):
         with pytest.raises(expected_exception):
             vocalpy.segments.Segment(
                 start_ind,
                 length,
                 data,
+                samplerate,
                 label
             )
 
     @pytest.mark.parametrize(
-        'start_ind, length, data, label',
+        'start_ind, length, data, samplerate, label',
         [
-            (0, 100, TEST_SOUND_DATA[:100], 'x'),
-            (1, 100, TEST_SOUND_DATA[:100], 'x'),
+            (0, 100, TEST_SOUND_DATA[:100], 32000, 'x'),
+            (1, 100, TEST_SOUND_DATA[:100], 32000, 'x'),
         ]
     )
-    def test_write(self, start_ind, length, data, label, tmp_path):
+    def test_write(self, start_ind, length, data, samplerate, label, tmp_path):
         segment = vocalpy.segments.Segment(
             start_ind,
             length,
             data,
+            samplerate,
             label
         )
         segment_path = tmp_path / 'segment.h5'
@@ -117,17 +127,18 @@ class TestSegment:
         )
 
     @pytest.mark.parametrize(
-        'start_ind, length, data, label',
+        'start_ind, length, data, samplerate, label',
         [
-            (0, 100, TEST_SOUND_DATA[:100], 'x'),
-            (1, 100, TEST_SOUND_DATA[:100], 'x'),
+            (0, 100, TEST_SOUND_DATA[:100], 32000, 'x'),
+            (1, 100, TEST_SOUND_DATA[:100], 32000, 'x'),
         ]
     )
-    def test_read(self, start_ind, length, data, label, tmp_path):
+    def test_read(self, start_ind, length, data, samplerate, label, tmp_path):
         segment = vocalpy.segments.Segment(
             start_ind,
             length,
             data,
+            samplerate,
             label
         )
         segment_path = tmp_path / 'segment.h5'
@@ -139,23 +150,28 @@ class TestSegment:
         'segment, other_segment, expected_result',
         [
             (
-                vocalpy.Segment(0, 100, TEST_SOUND_DATA[:100]),
-                vocalpy.Segment(0, 100, TEST_SOUND_DATA[:100]),
+                vocalpy.Segment(0, 100, TEST_SOUND_DATA[:100], 32000),
+                vocalpy.Segment(0, 100, TEST_SOUND_DATA[:100], 32000),
                 True,
             ),
             (
-                vocalpy.Segment(0, 100, TEST_SOUND_DATA[:100]),
-                vocalpy.Segment(1, 100, TEST_SOUND_DATA[:100]),
+                vocalpy.Segment(0, 100, TEST_SOUND_DATA[:100], 32000),
+                vocalpy.Segment(1, 100, TEST_SOUND_DATA[:100], 32000),
                 False,
             ),
             (
-                vocalpy.Segment(0, 100, TEST_SOUND_DATA[:100], 'x'),
-                vocalpy.Segment(0, 100, TEST_SOUND_DATA[:100], 'x'),
+                    vocalpy.Segment(0, 100, TEST_SOUND_DATA[:100], 32000),
+                    vocalpy.Segment(1, 100, TEST_SOUND_DATA[:100], 24000),
+                    False,
+            ),
+            (
+                vocalpy.Segment(0, 100, TEST_SOUND_DATA[:100], 32000, 'x'),
+                vocalpy.Segment(0, 100, TEST_SOUND_DATA[:100], 32000, 'x'),
                 True,
             ),
             (
-                vocalpy.Segment(0, 100, TEST_SOUND_DATA[:100], 'x'),
-                vocalpy.Segment(0, 100, TEST_SOUND_DATA[:100], 'y'),
+                vocalpy.Segment(0, 100, TEST_SOUND_DATA[:100], 32000, 'x'),
+                vocalpy.Segment(0, 100, TEST_SOUND_DATA[:100], 32000, 'y'),
                 False,
             ),
         ]
