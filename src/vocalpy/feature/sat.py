@@ -426,9 +426,39 @@ def similarity_features(
         An xarray.Dataset where the data variables are the features,
         and the coordinate is the time for each time bin.
     """
-    power_spectrogram, cepstrogram, quefrencies, max_freq, dSdt, dSdf = spectral.sat(
-        sound, n_fft, hop_length, freq_range
+    if not 0.0 < freq_range <= 1.0:
+        raise ValueError(
+            f"`freq_range` must be a float greater than zero and less than or equal to 1.0, but was: {freq_range}. "
+            f"Please specify a value between zero and one inclusive specifying the percentage of the frequencies "
+            f"to use when extracting features with a frequency range"
+        )
+
+    power_spectrogram, spectra1, spectra2 = spectral.sat._sat_multitaper(
+        sound, n_fft, hop_length
     )
+
+    # ---- make "cepstrogram" and quefrencies
+    spectra1_for_cepstrum = np.copy(spectra1)
+    # next line is a fancy way of adding eps to zero values
+    # so we don't get the enigmatic divide-by-zero error, and we don't get np.inf values
+    # see https://github.com/numpy/numpy/issues/21560
+    spectra1_for_cepstrum[spectra1_for_cepstrum == 0.0] += np.finfo(spectra1_for_cepstrum.dtype).eps
+    cepstrogram = np.fft.ifft(np.log(np.abs(spectra1_for_cepstrum)), n=n_fft, axis=1).real
+    quefrencies = np.array(np.arange(n_fft)) / sound.samplerate
+
+    # in SAT, freq_range means "use first `freq_range` percent of frequencies". Next line finds that range.
+    f = power_spectrogram.frequencies
+    max_freq_idx = int(np.floor(f.shape[0] * freq_range))
+    max_freq = f[max_freq_idx]
+
+    spectra1 = spectra1[:, :max_freq_idx, :]
+    spectra2 = spectra2[:, :max_freq_idx, :]
+    # time derivative of spectrum
+    dSdt = (-spectra1.real * spectra2.real) - (spectra1.imag * spectra2.imag)
+    # frequency derivative of spectrum
+    dSdf = (spectra1.imag * spectra2.real) - (spectra1.real * spectra2.imag)
+
+    # ---- now extract features
     amp_ = amplitude(power_spectrogram, min_freq, max_freq, amp_baseline)
     pitch_ = pitch(
         sound, min_freq, fmax_yin, frame_length=n_fft, hop_length=hop_length, trough_threshold=trough_threshold
