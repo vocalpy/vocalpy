@@ -36,6 +36,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   This means any workflow-step class boils down to doing the following: 
   `self.callback(input, **self.params)`
   [#133](https://github.com/vocalpy/vocalpy/pull/133).
+- Add `samplerate` attribute to `Segment` class, so feature extraction
+  functions can compute time-frequency representations from a `Segment`
+  if they need to
+  [#138](https://github.com/vocalpy/vocalpy/pull/138).
+  Fixes [#137](https://github.com/vocalpy/vocalpy/issues/137).
 
 ### Changed
 - Rename `vocalpy.Audio` to `vocalpy.Sound` 
