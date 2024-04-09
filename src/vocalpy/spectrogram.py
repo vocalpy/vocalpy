@@ -4,9 +4,15 @@ from __future__ import annotations
 import librosa
 import numpy as np
 
+from . import spectral
 from ._spectrogram.data_type import Spectrogram
 from .sound import Sound
 
+
+METHODS = [
+    'librosa-db',
+    'sat-multitaper',
+]
 
 # TODO: add 'SAT' method and 'biosound' method
 def spectrogram(sound: Sound, n_fft: int = 512, hop_length: int = 64, method="librosa-db", **kwargs) -> Spectrogram:
@@ -19,8 +25,11 @@ def spectrogram(sound: Sound, n_fft: int = 512, hop_length: int = 64, method="li
 
     Methods
     =======
-    * `'librosa-db`': equivalent to calling ``S = librosa.STFT(sound.data)``
-       and then ``S = librosa.amplitude_to_db(np.abs(S))``.
+    * `'librosa-db`': dB-scaled spectrogram
+        Equivalent to calling ``S = librosa.STFT(sound.data)``
+        and then ``S = librosa.amplitude_to_db(np.abs(S))``.
+    * ``'sat-multitaper``: multi-taper spectrogram computed the same way
+      that the Sound Analysis Toolbox for Matlab (SAT) does.
 
     Parameters
     ----------
@@ -46,6 +55,13 @@ def spectrogram(sound: Sound, n_fft: int = 512, hop_length: int = 64, method="li
     """
     if not isinstance(sound, Sound):
         raise TypeError(f"audio must be an instance of `vocalpy.Sound` but was: {type(sound)}")
+
+    if method not in METHODS:
+        raise ValueError(
+            f"Invalid `method`: {method}.\n"
+            f"Valid methods are: {METHODS}\n"
+        )
+
     if method == "librosa-db":
         S = librosa.stft(sound.data, n_fft=n_fft, hop_length=hop_length)
         S = librosa.amplitude_to_db(np.abs(S))
@@ -57,5 +73,8 @@ def spectrogram(sound: Sound, n_fft: int = 512, hop_length: int = 64, method="li
             times=t,
             audio_path=sound.path,
         )
+    elif method == 'sat-multitaper':
+        spect: Spectrogram = spectral.sat_multitaper(sound, n_fft, hop_length)
+        return spect
     else:
         raise ValueError(f"Unknown method: {method}")
