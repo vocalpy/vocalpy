@@ -29,7 +29,7 @@ The goal of our evaluation is to get a measure of how close the segments from an
 
 ### Energy-based methods for segmenting audio
 
-Both of the algorithms we will look at here work in basically the same way: they start by computing some measure of the [*energy*](https://en.wikipedia.org/wiki/Energy_(signal_processing%29) of an audio signal, then they set a threshold on that energy, and finally they find all the periods above that threshold. The periods above the threshold become the segments returned by the algorithm. There are other methods for segmenting audio, for example those discussed in [^4] and [^5], but here we will just consider those that threshold energy.
+Both of the algorithms we will look at here work in basically the same way: they start by computing some measure of the [*energy*](https://en.wikipedia.org/wiki/Energy_(signal_processing%29)) of an audio signal, then they set a threshold on that energy, and finally they find all the periods above that threshold. The periods above the threshold become the segments returned by the algorithm. There are other methods for segmenting audio, for example those discussed in [^4] and [^5], but here we will just consider those that threshold energy.
 
 What we want to understand is the role that different parameters play in the algorithm. 
 To understand the role of these parameters, we will evaluate the output of {py:func}`vocalpy.segment.meansquared` with and without the clean-up parameters. We will also compare with another algorithm that simply sets the threshold to the average of the energy. That function uses a different method to compute the energy, but we're glossing over that detail here.
@@ -64,7 +64,7 @@ def average_envelope_threshold(sound: voc.Sound, cutoff=500, order=40) -> voc.Se
 
     This function (1) high-pass filters the audio to reduce noise,
     (2) extracts the Hilbert envelope, (3) smooths the envelope with a Hann window,
-    and then (4) thresholds the smooothed envelope to segment, 
+    and then (4) thresholds the smoothed envelope to segment, 
     setting the threshold to average of the envelope.
     
     Adapted from https://github.com/houtan-ghaffari/bird_syllable_segmentation
