@@ -25,6 +25,9 @@ class Features:
             )
         self.data = data
 
+    def __repr__(self):
+        return f"vocalpy.Features(data=\n{self.data!r}\n)"
+
     @classmethod
     def read(cls, path: str | pathlib.Path):
         """Read :class:`Features` from a file.
