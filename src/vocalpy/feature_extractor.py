@@ -3,7 +3,6 @@ from __future__ import annotations
 
 import collections.abc
 import inspect
-import pathlib
 from typing import Mapping, Union, TYPE_CHECKING
 
 import dask
@@ -78,12 +77,17 @@ class FeatureExtractor:
             )
 
         if isinstance(source, list):
-            if not all([isinstance(source_, Segment) for source_ in source]):
-                raise TypeError(
-                    f"A `list` passed to `FeatureExtract.extract` must be "
+            if not (
+                    all([isinstance(source_, Segment) for source_ in source]) or
+                    all([isinstance(source_, Segments) for source_ in source])
+            ):
+                types = set(
+                    type(el) for el in source
                 )
-
-
+                raise TypeError(
+                    "A `list` passed to `FeatureExtract.extract` must be either all `Segment` instances "
+                    f"or all `Segments` instances, but found the following types: {types}"
+                )
 
         # define nested function so vars are in scope and ``dask`` can call it
         def _to_features(source_: FeatureSource) -> Features:
@@ -93,18 +97,38 @@ class FeatureExtractor:
         if isinstance(source, (Sound, Segment)):
             return _to_features(source)
 
+        elif (
+                isinstance(source, Segments) or (
+                isinstance(source, list) and all([isinstance(source, Sound)]))
+                or (isinstance(source, list) and all([isinstance(source, Segment)]))
+        ):
+            features = []
+            for source_ in source:
+                if parallelize:
+                    features.append(dask.delayed(_to_features)(source_))
+                else:
+                    features.append(_to_features(source_))
 
-
-        features = []
-        for source_ in source:
             if parallelize:
-                features.append(dask.delayed(_to_features)(source_))
+                graph = dask.delayed()(features)
+                with dask.diagnostics.ProgressBar():
+                    return graph.compute()
             else:
-                features.append(_to_features(source_))
+                return features
 
-        if parallelize:
-            graph = dask.delayed()(features)
-            with dask.diagnostics.ProgressBar():
-                return graph.compute()
-        else:
-            return features
+        elif isinstance(source, list) and all([isinstance(source, Segments)]):
+            features_list = []
+            for segments in source:
+                features = []
+                for segment in segments:
+                    if parallelize:
+                        features.append(dask.delayed(_to_features)(segment))
+                    else:
+                        features.append(_to_features(segment))
+
+            if parallelize:
+                graph = dask.delayed()(features_list)
+                with dask.diagnostics.ProgressBar():
+                    return graph.compute()
+            else:
+                return features_list
