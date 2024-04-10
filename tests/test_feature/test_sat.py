@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-import xarray as xr
 
 import vocalpy
 
@@ -250,16 +249,16 @@ def test_similarity_features(
         trough_threshold
     )
 
-    assert isinstance(out, xr.Dataset)
-    assert len(out.data_vars) == 6
-    assert len(out.coords) == 2
+    assert isinstance(out, vocalpy.Features)
+    assert len(out.data.data_vars) == 6
+    assert len(out.data.coords) == 2
     for coord_name in ('channel', 'time'):
-        assert coord_name in out.coords
-    assert out.coords['channel'].shape[0] == sound_to_test_sat_features.data.shape[0]
-    assert out.coords['time'].shape[0] == power_spectrogram.data.shape[-1]
+        assert coord_name in out.data.coords
+    assert out.data.coords['channel'].shape[0] == sound_to_test_sat_features.data.shape[0]
+    assert out.data.coords['time'].shape[0] == power_spectrogram.data.shape[-1]
     for ftr_name in (
             'amplitude', 'pitch', 'goodness_of_pitch', 'frequency_modulation', 'amplitude_modulation', 'entropy'
     ):
-        assert ftr_name in out.data_vars
-        assert out.data_vars[ftr_name].shape[0] == sound_to_test_sat_features.data.shape[0]
-        assert out.data_vars[ftr_name].shape[1] == power_spectrogram.data.shape[-1]
+        assert ftr_name in out.data.data_vars
+        assert out.data.data_vars[ftr_name].shape[0] == sound_to_test_sat_features.data.shape[0]
+        assert out.data.data_vars[ftr_name].shape[1] == power_spectrogram.data.shape[-1]
