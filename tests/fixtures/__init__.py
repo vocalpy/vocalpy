@@ -4,6 +4,7 @@ from . import (
 
 from .annot import *
 from .audio import *
+from .dask import *
 from .datasets import *
 from .paths import *
 from .spect import *
