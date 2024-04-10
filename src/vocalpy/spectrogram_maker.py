@@ -170,7 +170,7 @@ class SpectrogramMaker:
         spects = []
         for sound_ in sound:
             if parallelize:
-                spects.append(dask.delayed(_to_spect(sound_)))
+                spects.append(dask.delayed(_to_spect)(sound_))
             else:
                 spects.append(_to_spect(sound_))
 
