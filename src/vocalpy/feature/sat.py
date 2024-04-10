@@ -17,7 +17,7 @@ import numpy.typing as npt
 import xarray as xr
 
 if TYPE_CHECKING:
-    from .. import Sound, Spectrogram
+    from .. import Features, Sound, Spectrogram
 
 from .. import spectral
 
@@ -439,7 +439,7 @@ def similarity_features(
     max_F0: float = 1830.0,
     fmax_yin: float = 8000.0,
     trough_threshold: float = 0.1,
-) -> xr.Dataset:
+) -> Features:
     """Extract all features used to compute similarity with
     the Sound Analysis Toolbox for Matlab (SAT).
 
@@ -517,7 +517,7 @@ def similarity_features(
     AM = amplitude_modulation(dSdt)
 
     channels = np.arange(sound.data.shape[0])
-    features = xr.Dataset(
+    data = xr.Dataset(
         {
             "amplitude": (["channel", "time"], amp_),
             "pitch": (["channel", "time"], pitch_),
@@ -528,4 +528,7 @@ def similarity_features(
         },
         coords={"channel": channels, "time": power_spectrogram.times},
     )
+
+    from .. import Features  # avoid circular import
+    features = Features(data=data)
     return features
