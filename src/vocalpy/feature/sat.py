@@ -371,6 +371,64 @@ def pitch(
     )
 
 
+def _get_cepstral(
+    spectra1: npt.NDArray, n_fft: int, samplerate: int
+) -> tuple[npt.NDArray, npt.NDArray]:
+    """Get cepstrogram and quefrencies from a spectrogram
+
+    Helper function used by :func:`similarity_features` to compute
+    :func:`goodness_of_pitch` feature.
+
+    Parameters
+    ----------
+    spectra1
+    n_fft : int
+    sound : Sound
+
+    Returns
+    -------
+    cepstrogram : numpy.ndarray
+    quefrencies : numpy.ndarray
+    """
+    # ---- make "cepstrogram" and quefrencies
+    spectra1_for_cepstrum = np.copy(spectra1)
+    # next line is a fancy way of adding eps to zero values
+    # so we don't get the enigmatic divide-by-zero error, and we don't get np.inf values
+    # see https://github.com/numpy/numpy/issues/21560
+    spectra1_for_cepstrum[spectra1_for_cepstrum == 0.0] += np.finfo(spectra1_for_cepstrum.dtype).eps
+    cepstrogram = np.fft.ifft(np.log(np.abs(spectra1_for_cepstrum)), n=n_fft, axis=1).real
+    quefrencies = np.array(np.arange(n_fft)) / samplerate
+    return cepstrogram, quefrencies
+
+
+def _get_spectral_derivatives(
+        spectra1: npt.NDArray, spectra2: npt.NDArray, max_freq_idx: int
+) -> tuple[npt.NDArray, npt.NDArray]:
+    """Get derivatives of spectrogram with respect to time and frequency.
+
+    Helper function used by :func:`similarity_features` to compute
+    :func:`amplitude_modulation` and :func:`frequency_modulation` feature
+
+    Parameters
+    ----------
+    spectra1
+    spectra2
+    max_freq_idx : int
+
+    Returns
+    -------
+    dSdt : numpy.ndarray
+    dSdf : numpy.ndarray
+    """
+    spectra1 = spectra1[:, :max_freq_idx, :]
+    spectra2 = spectra2[:, :max_freq_idx, :]
+    # time derivative of spectrum
+    dSdt = (-spectra1.real * spectra2.real) - (spectra1.imag * spectra2.imag)
+    # frequency derivative of spectrum
+    dSdf = (spectra1.imag * spectra2.real) - (spectra1.real * spectra2.imag)
+    return dSdt, dSdf
+
+
 def similarity_features(
     sound: Sound,
     n_fft=400,
@@ -378,15 +436,12 @@ def similarity_features(
     freq_range=0.5,
     min_freq: float = 380.0,
     amp_baseline: float = 70.0,
-    max_F0: int = 1830.0,
+    max_F0: float = 1830.0,
     fmax_yin: float = 8000.0,
     trough_threshold: float = 0.1,
-) -> xr.DataSet:
-    """Extract all features used to compute similarity with SAT.
-
-    Calls :func:`vocalpy.spectral.sat` to get spectral representations
-    of the :class:`vocalpy.Sound`, then extracts all features
-    from those spectral representations.
+) -> xr.Dataset:
+    """Extract all features used to compute similarity with
+    the Sound Analysis Toolbox for Matlab (SAT).
 
     Parameters
     ----------
@@ -437,40 +492,32 @@ def similarity_features(
         sound, n_fft, hop_length
     )
 
-    # ---- make "cepstrogram" and quefrencies
-    spectra1_for_cepstrum = np.copy(spectra1)
-    # next line is a fancy way of adding eps to zero values
-    # so we don't get the enigmatic divide-by-zero error, and we don't get np.inf values
-    # see https://github.com/numpy/numpy/issues/21560
-    spectra1_for_cepstrum[spectra1_for_cepstrum == 0.0] += np.finfo(spectra1_for_cepstrum.dtype).eps
-    cepstrogram = np.fft.ifft(np.log(np.abs(spectra1_for_cepstrum)), n=n_fft, axis=1).real
-    quefrencies = np.array(np.arange(n_fft)) / sound.samplerate
-
     # in SAT, freq_range means "use first `freq_range` percent of frequencies". Next line finds that range.
     f = power_spectrogram.frequencies
     max_freq_idx = int(np.floor(f.shape[0] * freq_range))
     max_freq = f[max_freq_idx]
 
-    spectra1 = spectra1[:, :max_freq_idx, :]
-    spectra2 = spectra2[:, :max_freq_idx, :]
-    # time derivative of spectrum
-    dSdt = (-spectra1.real * spectra2.real) - (spectra1.imag * spectra2.imag)
-    # frequency derivative of spectrum
-    dSdf = (spectra1.imag * spectra2.real) - (spectra1.real * spectra2.imag)
-
     # ---- now extract features
-    amp_ = amplitude(power_spectrogram, min_freq, max_freq, amp_baseline)
+    # -------- features that require sound
     pitch_ = pitch(
         sound, min_freq, fmax_yin, frame_length=n_fft, hop_length=hop_length, trough_threshold=trough_threshold
     )
-    goodness_ = goodness_of_pitch(cepstrogram, quefrencies, max_F0)
-    FM = frequency_modulation(dSdt, dSdf)
-    AM = amplitude_modulation(dSdt)
+
+    # -------- features that require power spectrogram and max_freq
+    amp_ = amplitude(power_spectrogram, min_freq, max_freq, amp_baseline)
     entropy_ = entropy(power_spectrogram, min_freq, max_freq)
 
-    channels = np.arange(sound.data.shape[0])
+    # -------- features that require cepstrogram
+    cepstrogram, quefrencies = _get_cepstral(spectra1, n_fft, sound.samplerate)
+    goodness_ = goodness_of_pitch(cepstrogram, quefrencies, max_F0)
 
-    return xr.Dataset(
+    # -------- features that spectral derivatives
+    dSdt, dSdf = _get_spectral_derivatives(spectra1, spectra2, max_freq_idx)
+    FM = frequency_modulation(dSdt, dSdf)
+    AM = amplitude_modulation(dSdt)
+
+    channels = np.arange(sound.data.shape[0])
+    features = xr.Dataset(
         {
             "amplitude": (["channel", "time"], amp_),
             "pitch": (["channel", "time"], pitch_),
@@ -481,3 +528,4 @@ def similarity_features(
         },
         coords={"channel": channels, "time": power_spectrogram.times},
     )
+    return features
