@@ -8,19 +8,18 @@ from typing import Mapping, Union, TYPE_CHECKING
 import dask
 import dask.diagnostics
 
+from . import Features, Params, Sound, Segment
 
-if TYPE_CHECKING:
-    from . import Features, Params, Sound, Segment
-    FeatureSource = Union[
-        Sound,
-        list[Sound],
-        Segment,
-        list[Segment]
-    ]
+FeatureSource = Union[
+    Sound,
+    list[Sound],
+    Segment,
+    list[Segment]
+]
 
 
 class FeatureExtractor:
-    def __init__(self, callback: callable, params: dict | Params | None = None):
+    def __init__(self, callback: callable, params: Mapping | Params | None = None):
         if not callable(callback):
             raise ValueError(
                 f"`callback` should be callable, but `callable({callback})` returns False"
@@ -51,24 +50,22 @@ class FeatureExtractor:
 
         self.params = params
 
-    def extract(self, source: FeatureSource, parallelize: bool = True) -> Features:
+    def extract(self, source: FeatureSource, parallelize: bool = True) -> Features | list[Features]:
 
         # define nested function so vars are in scope and ``dask`` can call it
         def _to_features(source_: FeatureSource) -> Features:
-            if isinstance(sound_, AudioFile):
-                source_ = Sound.read(sound_.path)
-            segments = self.callback(source_, **self.params)
-            return segments
+            features: Features = self.callback(source_, **self.params)
+            return features
 
-        if isinstance(source, (vocalpy.Sound, vocalpy.Segments):
+        if isinstance(source, (Sound, Segments)):
             return _to_features(source)
 
         features = []
         for source_ in source:
             if parallelize:
-                features.append(dask.delayed(_to_features(source)))
+                features.append(dask.delayed(_to_features(source_)))
             else:
-                features.append(_to_features(source))
+                features.append(_to_features(source_))
 
         if parallelize:
             graph = dask.delayed()(features)
