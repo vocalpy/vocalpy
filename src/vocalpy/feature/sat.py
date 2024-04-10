@@ -513,7 +513,7 @@ def similarity_features(
     entropy_ = entropy(power_spectrogram, min_freq, max_freq)
 
     # -------- features that require cepstrogram
-    cepstrogram, quefrencies = _get_cepstral(spectra1, n_fft, sound.samplerate)
+    cepstrogram, quefrencies = _get_cepstral(spectra1, n_fft, source.samplerate)
     goodness_ = goodness_of_pitch(cepstrogram, quefrencies, max_F0)
 
     # -------- features that spectral derivatives
