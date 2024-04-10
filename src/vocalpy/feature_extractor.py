@@ -69,20 +69,36 @@ class FeatureExtractor:
         self.params = params
 
     def extract(self, source: FeatureSource, parallelize: bool = True) -> Features | list[Features]:
+        from . import Sound, Segment
+        if not isinstance(source, (list, Segments)):
+            raise TypeError(
+                "`source` to extract features from must be an instance of a `Sound`, a `Segment`, "
+                f"a `list` of `Sound` or `Segment` instances, or a `Segments` instance, "
+                f"but type was: {type(source)}"
+            )
+
+        if isinstance(source, list):
+            if not all([isinstance(source_, Segment) for source_ in source]):
+                raise TypeError(
+                    f"A `list` passed to `FeatureExtract.extract` must be "
+                )
+
+
 
         # define nested function so vars are in scope and ``dask`` can call it
         def _to_features(source_: FeatureSource) -> Features:
             features: Features = self.callback(source_, **self.params)
             return features
 
-        from . import Sound, Segment
         if isinstance(source, (Sound, Segment)):
             return _to_features(source)
+
+
 
         features = []
         for source_ in source:
             if parallelize:
-                features.append(dask.delayed(_to_features(source_)))
+                features.append(dask.delayed(_to_features)(source_))
             else:
                 features.append(_to_features(source_))
 
