@@ -151,27 +151,12 @@ def have_same_dtype(arr1: npt.NDArray, arr2: npt.NDArray, name1: str | None = No
     return True
 
 
-def is_sound_or_segment(sound: Sound | None, segment: Segment | None) -> None:
+def is_sound_or_segment(source: Sound | Segment) -> bool:
     from vocalpy import Segment, Sound
 
-    if sound is None and segment is None:
-        raise ValueError(
-            f"Must provide either `sound` or `segment` argument but both were None."
+    if not isinstance(source, (Sound, Segment)):
+        raise TypeError(
+            f"`source` must be an instance of either a `Sound` or a `Segment`, but type was: {type(source)}"
         )
 
-    if sound is not None and segment is not None:
-        raise ValueError(
-            f"Must provide either `sound` or `segment` argument, not both."
-        )
-
-    if sound is not None:
-        if not isinstance(sound, Sound):
-            raise TypeError(
-                f"`sound` must be a `vocalpy.Sound` instance but type was: {type(sound)}"
-            )
-
-    if segment is not None:
-        if not isinstance(segment, Segment):
-            raise TypeError(
-                f"`segment` must be a `vocalpy.Segment` instance but type was: {type(segment)}"
-            )
+    return True
