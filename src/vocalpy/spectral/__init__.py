@@ -1,4 +1,4 @@
-"""Spectral representations"""
+"""Spectral representations."""
 from . import sat
 from .sat import sat_multitaper
 
