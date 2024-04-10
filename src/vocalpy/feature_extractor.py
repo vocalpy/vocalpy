@@ -1,3 +1,4 @@
+"""Class that represents the step in a pipeline that extracts features."""
 from __future__ import annotations
 
 import collections.abc
@@ -8,17 +9,33 @@ from typing import Mapping, Union, TYPE_CHECKING
 import dask
 import dask.diagnostics
 
-from . import Features, Params, Sound, Segment
+from . import Features
 
-FeatureSource = Union[
-    Sound,
-    list[Sound],
-    Segment,
-    list[Segment]
-]
+if TYPE_CHECKING:
+    import Params, Sound, Segment, Segments
+
+    FeatureSource = Union[
+        Sound,
+        list[Sound],
+        Segment,
+        list[Segment],
+        Segments
+    ]
 
 
 class FeatureExtractor:
+    """Class that represents the step in a pipeline
+    that extracts features.
+
+    Attributes
+    ----------
+    callback : Callable
+        Callable that takes a :class:`Sound` or :class:`Segment`
+        and returns :class:`Features`.
+    params : dict
+        Parameters for extracting :class:`Features`.
+        Passed as keyword arguments to ``callback``.
+    """
     def __init__(self, callback: callable, params: Mapping | Params | None = None):
         if not callable(callback):
             raise ValueError(
@@ -34,10 +51,11 @@ class FeatureExtractor:
                 if param.default is not inspect._empty:
                     params[name] = param.default
 
-        if not isinstance(params, (collections.abc.Mapping, vocalpy.Params)):
+        from . import Params  # avoid circular import
+        if not isinstance(params, (collections.abc.Mapping, Params)):
             raise TypeError(f"`params` should be a `Mapping` or `Params` but type was: {type(params)}")
 
-        if isinstance(params, vocalpy.Params):
+        if isinstance(params, Params):
             # coerce to dict
             params = {**params}
 
@@ -57,7 +75,8 @@ class FeatureExtractor:
             features: Features = self.callback(source_, **self.params)
             return features
 
-        if isinstance(source, (Sound, Segments)):
+        from . import Sound, Segment
+        if isinstance(source, (Sound, Segment)):
             return _to_features(source)
 
         features = []
