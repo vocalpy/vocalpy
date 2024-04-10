@@ -19,6 +19,7 @@ from .dataset_file import DatasetFile, DatasetFileType, DatasetFileTypeEnum
 from .examples import example
 from .features import Features
 from .feature_file import FeatureFile
+from .feature_extractor import FeatureExtractor
 from .params import Params
 from .segmenter import Segmenter
 from .segments import Segment, Segments
@@ -48,6 +49,7 @@ __all__ = [
     "DatasetFile",
     "DatasetFileType",
     "DatasetFileTypeEnum",
+    "FeatureExtractor",
     "FeatureFile",
     "Features",
     "example",
