@@ -32,7 +32,7 @@ def _sat_multitaper(
     Parameters
     ----------
     sound : vocalpy.Sound
-        Audio loaded from a file.
+        Sound loaded from a file. Multi-channel is supported.
     n_fft : int
         FFT window size.
     hop_length : int
@@ -112,7 +112,7 @@ def sat_multitaper(
     Parameters
     ----------
     sound : vocalpy.Sound
-        Audio loaded from a file.
+        Sound loaded from a file. Multi-channel is supported.
     n_fft : int
         FFT window size.
     hop_length : int
