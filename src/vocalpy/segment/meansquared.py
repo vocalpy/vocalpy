@@ -146,7 +146,7 @@ def meansquared(
         Numpy Dtype to cast ``sound.data`` to, after scaling.
         Default is ``np.int16``.
         Only used if ``scale`` is ``True``.
-        This is needed to replicate the behavior of ``ava``,
+        This is needed to replicate the behavior of ``evsonganaly``,
         which assumes the audio data is loaded as 16-bit integers.
 
     Returns
