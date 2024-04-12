@@ -3,11 +3,16 @@ Adapted under MIT license.
 
 .. [1] https://github.com/theunissenlab/soundsig
 """
+from __future__ import annotations
+
 import numpy as np
+import numpy.typing as npt
 import scipy.signal
 
 
-def lowpass_filter(data, samplerate, cutoff_freq, filter_order=5, rescale=False):
+def lowpass_filter(
+        data: npt.NDArray, samplerate: int, cutoff_freq: int, filter_order: int = 5, rescale: bool = False
+) -> npt.NDArray:
     """Apply a low-pass filter to a sound.
 
     Parameters
@@ -36,7 +41,7 @@ def lowpass_filter(data, samplerate, cutoff_freq, filter_order=5, rescale=False)
     return filtered_s
 
 
-def gaussian_window(N, nstd):
+def gaussian_window(N: int, nstd: int) -> tuple[npt.NDArray, npt.NDArray]:
     """Generate a Gaussian window.
 
     Generates a window of length N and standard deviation nstd.
@@ -60,7 +65,9 @@ def gaussian_window(N, nstd):
     return gauss_t, gauss_window
 
 
-def correlation_function(s1, s2, lags, mean_subtract=True, normalize=True):
+def correlation_function(
+        s1: npt.NDArray, s2: npt.NDArray, lags: npt.NDArray, mean_subtract: bool = True, normalize: bool = True
+) -> npt.NDArray:
     """ Computes the cross-correlation function between signals s1 and s2.
 
     Parameters
