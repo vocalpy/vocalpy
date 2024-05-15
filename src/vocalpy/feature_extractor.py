@@ -3,7 +3,7 @@ from __future__ import annotations
 
 import collections.abc
 import inspect
-from typing import Mapping, Union, TYPE_CHECKING
+from typing import TYPE_CHECKING, Mapping, Union
 
 import dask
 import dask.diagnostics
@@ -11,15 +11,12 @@ import dask.diagnostics
 from . import Features
 
 if TYPE_CHECKING:
-    import Params, Sound, Segment, Segments
+    import Params
+    import Segment
+    import Segments
+    import Sound
 
-    FeatureSource = Union[
-        Sound,
-        list[Sound],
-        Segment,
-        list[Segment],
-        Segments
-    ]
+    FeatureSource = Union[Sound, list[Sound], Segment, list[Segment], Segments]
 
 
 class FeatureExtractor:
@@ -35,11 +32,10 @@ class FeatureExtractor:
         Parameters for extracting :class:`Features`.
         Passed as keyword arguments to ``callback``.
     """
+
     def __init__(self, callback: callable, params: Mapping | Params | None = None):
         if not callable(callback):
-            raise ValueError(
-                f"`callback` should be callable, but `callable({callback})` returns False"
-            )
+            raise ValueError(f"`callback` should be callable, but `callable({callback})` returns False")
 
         self.callback = callback
 
@@ -51,6 +47,7 @@ class FeatureExtractor:
                     params[name] = param.default
 
         from . import Params  # avoid circular import
+
         if not isinstance(params, (collections.abc.Mapping, Params)):
             raise TypeError(f"`params` should be a `Mapping` or `Params` but type was: {type(params)}")
 
@@ -68,7 +65,8 @@ class FeatureExtractor:
         self.params = params
 
     def extract(self, source: FeatureSource, parallelize: bool = True) -> Features | list[Features]:
-        from . import Sound, Segment
+        from . import Segment, Sound
+
         if not isinstance(source, (list, Segments)):
             raise TypeError(
                 "`source` to extract features from must be an instance of a `Sound`, a `Segment`, "
@@ -78,12 +76,10 @@ class FeatureExtractor:
 
         if isinstance(source, list):
             if not (
-                    all([isinstance(source_, Segment) for source_ in source]) or
-                    all([isinstance(source_, Segments) for source_ in source])
+                all([isinstance(source_, Segment) for source_ in source])
+                or all([isinstance(source_, Segments) for source_ in source])
             ):
-                types = set(
-                    type(el) for el in source
-                )
+                types = set(type(el) for el in source)
                 raise TypeError(
                     "A `list` passed to `FeatureExtract.extract` must be either all `Segment` instances "
                     f"or all `Segments` instances, but found the following types: {types}"
@@ -98,9 +94,9 @@ class FeatureExtractor:
             return _to_features(source)
 
         elif (
-                isinstance(source, Segments) or (
-                isinstance(source, list) and all([isinstance(source, Sound)]))
-                or (isinstance(source, list) and all([isinstance(source, Segment)]))
+            isinstance(source, Segments)
+            or (isinstance(source, list) and all([isinstance(source, Sound)]))
+            or (isinstance(source, list) and all([isinstance(source, Segment)]))
         ):
             features = []
             for source_ in source:

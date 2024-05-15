@@ -7,15 +7,14 @@ from __future__ import annotations
 
 import numpy as np
 import numpy.typing as npt
-import scipy.signal
 import scipy.linalg
+import scipy.signal
 
 from .signal import lowpass_filter
 
 
 def temporal_envelope(
-        data: npt.NDArray, samplerate: int, cutoff_freq: int = 200, filter_order: int = 4, 
-        resample_rate: int | None = None
+    data: npt.NDArray, samplerate: int, cutoff_freq: int = 200, filter_order: int = 4, resample_rate: int | None = None
 ) -> npt.NDArray | tuple[npt.NDArray, npt.NDArray]:
     """Get the temporal envelope from the sound pressure waveform.
 

@@ -20,9 +20,7 @@ if TYPE_CHECKING:
     from .. import Sound, Spectrogram
 
 
-def _sat_multitaper(
-    sound: Sound, n_fft=400, hop_length=40
-) -> tuple[Spectrogram, npt.NDArray, npt.NDArray]:
+def _sat_multitaper(sound: Sound, n_fft=400, hop_length=40) -> tuple[Spectrogram, npt.NDArray, npt.NDArray]:
     """Compute multi-taper spectrogram in the same way as the
     Sound Analysis Toolbox for Matlab (SAT).
 
@@ -103,9 +101,7 @@ def _sat_multitaper(
     return power_spectrogram, spectra1, spectra2
 
 
-def sat_multitaper(
-    sound: Sound, n_fft=400, hop_length=40
-) -> Spectrogram:
+def sat_multitaper(sound: Sound, n_fft=400, hop_length=40) -> Spectrogram:
     """Compute multi-taper spectrogram in the same way as the
     Sound Analysis Toolbox for Matlab (SAT).
 

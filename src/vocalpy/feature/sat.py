@@ -371,9 +371,7 @@ def pitch(
     )
 
 
-def _get_cepstral(
-    spectra1: npt.NDArray, n_fft: int, samplerate: int
-) -> tuple[npt.NDArray, npt.NDArray]:
+def _get_cepstral(spectra1: npt.NDArray, n_fft: int, samplerate: int) -> tuple[npt.NDArray, npt.NDArray]:
     """Get cepstrogram and quefrencies from a spectrogram
 
     Helper function used by :func:`similarity_features` to compute
@@ -402,7 +400,7 @@ def _get_cepstral(
 
 
 def _get_spectral_derivatives(
-        spectra1: npt.NDArray, spectra2: npt.NDArray, max_freq_idx: int
+    spectra1: npt.NDArray, spectra2: npt.NDArray, max_freq_idx: int
 ) -> tuple[npt.NDArray, npt.NDArray]:
     """Get derivatives of spectrogram with respect to time and frequency.
 
@@ -493,9 +491,7 @@ def similarity_features(
             f"to use when extracting features with a frequency range"
         )
 
-    power_spectrogram, spectra1, spectra2 = spectral.sat._sat_multitaper(
-        source, n_fft, hop_length
-    )
+    power_spectrogram, spectra1, spectra2 = spectral.sat._sat_multitaper(source, n_fft, hop_length)
 
     # in SAT, freq_range means "use first `freq_range` percent of frequencies". Next line finds that range.
     f = power_spectrogram.frequencies
@@ -535,5 +531,6 @@ def similarity_features(
     )
 
     from .. import Features  # avoid circular import
+
     features = Features(data=data)
     return features

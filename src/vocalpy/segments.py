@@ -54,6 +54,7 @@ class Segment:
         The sampling rate of the :class:`Sound`
         that this :class:`Segment` came from.
     """
+
     def __init__(
         self,
         start_ind: int,
@@ -97,14 +98,10 @@ class Segment:
             )
 
         if not isinstance(samplerate, numbers.Integral):
-            raise TypeError(
-                f"`samplerate` must be `instance` of `numbers.Integral` but type was: {type(samplerate)}"
-            )
+            raise TypeError(f"`samplerate` must be `instance` of `numbers.Integral` but type was: {type(samplerate)}")
 
         if not samplerate > 0:
-            raise ValueError(
-                f"`samplerate` must be a positive integer but was: {samplerate}"
-            )
+            raise ValueError(f"`samplerate` must be a positive integer but was: {samplerate}")
 
         self.start_ind = start_ind
         self.length = length

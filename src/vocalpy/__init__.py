@@ -17,9 +17,9 @@ from .annotation_file import AnnotationFile
 from .audio_file import AudioFile
 from .dataset_file import DatasetFile, DatasetFileType, DatasetFileTypeEnum
 from .examples import example
-from .features import Features
-from .feature_file import FeatureFile
 from .feature_extractor import FeatureExtractor
+from .feature_file import FeatureFile
+from .features import Features
 from .params import Params
 from .segmenter import Segmenter
 from .segments import Segment, Segments

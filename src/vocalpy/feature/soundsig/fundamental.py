@@ -8,9 +8,9 @@ from math import ceil
 import numpy as np
 import numpy.typing as npt
 import scipy.linalg
-from scipy.fftpack import fft, dct
-from scipy.signal import firwin, filtfilt
+from scipy.fftpack import dct, fft
 from scipy.optimize import leastsq
+from scipy.signal import filtfilt, firwin
 
 from .detect_peaks import detect_peaks
 from .signal import correlation_function, gaussian_window
@@ -52,10 +52,10 @@ def lpc(signal: npt.NDArray, order: int) -> npt.NDArray:
         r = np.zeros(p, signal.dtype)
         # Number of non-zero values in autocorrelation one needs for p LPC coefficients
         nx = np.min([p, signal.size])
-        x = np.correlate(signal, signal, 'full')
-        r[:nx] = x[signal.size - 1:signal.size + order]
+        x = np.correlate(signal, signal, "full")
+        r[:nx] = x[signal.size - 1 : signal.size + order]
         phi = np.dot(scipy.linalg.inv(scipy.linalg.toeplitz(r[:-1])), -r[1:])
-        return np.concatenate(([1.], phi))
+        return np.concatenate(([1.0], phi))
     else:
         return np.ones(1, dtype=signal.dtype)
 
@@ -82,7 +82,7 @@ def syn_spect(b: npt.NDArray, x: npt.NDArray) -> npt.NDArray:
 
     for i in range(npeaks):
         a = b[i + 1]  # To enforce positive peaks only
-        syn_s = syn_s + a * np.exp(-(x - b[0] * (i + 1)) ** 2 / (2 * sdpk ** 2))
+        syn_s = syn_s + a * np.exp(-((x - b[0] * (i + 1)) ** 2) / (2 * sdpk**2))
 
     return syn_s
 
@@ -110,8 +110,18 @@ def residual_syn(b: npt.NDArray, x: npt.NDArray, real_s: npt.NDArray) -> npt.NDA
 
 
 def estimate_f0(
-        data, samplerate, dt=None, max_fund=1500, min_fund=300, low_fc=200, high_fc=6000, 
-        min_saliency=0.5, min_formant_freq=500, max_formant_bw=500, window_formant=0.1, method='Stack'
+    data,
+    samplerate,
+    dt=None,
+    max_fund=1500,
+    min_fund=300,
+    low_fc=200,
+    high_fc=6000,
+    min_saliency=0.5,
+    min_formant_freq=500,
+    max_formant_bw=500,
+    window_formant=0.1,
+    method="Stack",
 ) -> dict:
     """Estimate fundamental frequency.
 
@@ -155,7 +165,7 @@ def estimate_f0(
     sound_len = data.shape[-1]
     nfilt = 1024
     if sound_len < 1024:
-        print('Warning in fundEstimator: sound too short for bandpass filtering, len(soundIn)=%d' % sound_len)
+        print("Warning in fundEstimator: sound too short for bandpass filtering, len(soundIn)=%d" % sound_len)
     else:
         # high pass filter the signal
         highpass_filt = firwin(nfilt - 1, 2.0 * low_fc / samplerate, pass_zero=False)
@@ -186,13 +196,13 @@ def estimate_f0(
     #  Calculate the size of the window for the auto-correlation
     alpha = 5  # Number of sd in the Gaussian window
     win_len = int(np.fix((2.0 * alpha / min_fund) * samplerate))  # Length of Gaussian window based on min_fund
-    if (win_len % 2 == 0):
+    if win_len % 2 == 0:
         # Make a symmetric window
         win_len += 1
 
     # Use 200 ms for LPC Window - make this a parameter at some point
     win_len2 = int(np.fix(window_formant * samplerate))
-    if (win_len2 % 2 == 0):
+    if win_len2 % 2 == 0:
         # Make a symmetric window
         win_len2 += 1
 
@@ -210,7 +220,7 @@ def estimate_f0(
         tend = tind + (win_len - 1) // 2
 
         if tstart < 0:
-            winstart = - tstart
+            winstart = -tstart
             tstart = 0
         else:
             winstart = 0
@@ -235,14 +245,14 @@ def estimate_f0(
 
     soundlen = 0
     for it in range(nt):
-        fund[it] = float('nan')
-        sal[it] = float('nan')
-        fund2[it] = float('nan')
-        form1[it] = float('nan')
-        form2[it] = float('nan')
-        form3[it] = float('nan')
+        fund[it] = float("nan")
+        sal[it] = float("nan")
+        fund2[it] = float("nan")
+        form1[it] = float("nan")
+        form2[it] = float("nan")
+        form3[it] = float("nan")
 
-        if (soundRMS[it] < soundRMSMax * 0.1):
+        if soundRMS[it] < soundRMSMax * 0.1:
             continue
 
         soundlen += 1
@@ -269,7 +279,7 @@ def estimate_f0(
         tend2 = tind + (win_len2 - 1) // 2
 
         if tstart2 < 0:
-            winstart2 = - tstart2
+            winstart2 = -tstart2
             tstart2 = 0
         else:
             winstart2 = 0
@@ -295,11 +305,11 @@ def estimate_f0(
         indices = np.argsort(frqsFormants)
         bw = -0.5 * (samplerate / (2 * np.pi)) * np.log(np.abs(rts))
 
-        # Keep formants above 500 Hz and with bandwidth < 500 
+        # Keep formants above 500 Hz and with bandwidth < 500
         # This was 1000 for bird calls
         formants = []
         for kk in indices:
-            if (frqsFormants[kk] > min_formant_freq and bw[kk] < max_formant_bw):
+            if frqsFormants[kk] > min_formant_freq and bw[kk] < max_formant_bw:
                 formants.append(frqsFormants[kk])
         formants = np.array(formants)
 
@@ -357,7 +367,7 @@ def estimate_f0(
             else:
                 indEnvMax = locsEnvCorr[indIndEnvMax + 1]
                 if lags[indEnvMax] == 0:  # This should not happen
-                    print('Error: Max Peak in enveloppe auto-correlation found at zero delay')
+                    print("Error: Max Peak in enveloppe auto-correlation found at zero delay")
                     fund_corr_amp_guess = fund_corr_guess
                 else:
                     fund_corr_amp_guess = samplerate / lags[indEnvMax]
@@ -369,18 +379,18 @@ def estimate_f0(
         f = (samplerate / 2.0) * (np.array(range(int((win_len + 1) / 2 + 1)), dtype=float) / float((win_len + 1) // 2))
         fhigh = np.where(f >= high_fc)[0][0]
 
-        powSound = 20.0 * np.log10(np.abs(Y[0:(win_len + 1) // 2 + 1]))  # This is the power spectrum
+        powSound = 20.0 * np.log10(np.abs(Y[0 : (win_len + 1) // 2 + 1]))  # This is the power spectrum
         powSoundGood = powSound[0:fhigh]
         maxPow = max(powSoundGood)
         powSoundGood = powSoundGood - maxPow  # Set zero as the peak amplitude
-        powSoundGood[powSoundGood < - 60] = -60
+        powSoundGood[powSoundGood < -60] = -60
 
         # Calculate coarse spectral envelope
         p = np.polyfit(f[0:fhigh], powSoundGood, 3)
         powAmp = np.polyval(p, f[0:fhigh])
 
         # Cepstrum
-        CY = dct(powSoundGood - powAmp, norm='ortho')
+        CY = dct(powSoundGood - powAmp, norm="ortho")
 
         tCY = 1000.0 * np.array(range(len(CY))) / samplerate  # Units of Cepstrum in ms
         fCY = np.zeros(tCY.size)
@@ -400,7 +410,7 @@ def estimate_f0(
         fmass = 0
         mass = 0
         indTry = indPk
-        while (CY[indTry] > 0):
+        while CY[indTry] > 0:
             fmass = fmass + fCY[indTry] * CY[indTry]
             mass = mass + CY[indTry]
             indTry = indTry + 1
@@ -408,8 +418,8 @@ def estimate_f0(
                 break
 
         indTry = indPk - 1
-        if (indTry >= 0):
-            while (CY[indTry] > 0):
+        if indTry >= 0:
+            while CY[indTry] > 0:
                 fmass = fmass + fCY[indTry] * CY[indTry]
                 mass = mass + CY[indTry]
                 indTry = indTry - 1
@@ -418,21 +428,21 @@ def estimate_f0(
 
         fGuess = fmass / mass
 
-        if (fGuess == 0 or np.isnan(fGuess) or np.isinf(fGuess)):
+        if fGuess == 0 or np.isnan(fGuess) or np.isinf(fGuess):
             # Failure of cepstral method
             fGuess = fund_corr_guess
 
         fund_cep_guess = fGuess
 
         # Force fundamendal to be bounded
-        if (fund_cep_guess > max_fund):
+        if fund_cep_guess > max_fund:
             i = 2
-            while (fund_cep_guess > max_fund):
+            while fund_cep_guess > max_fund:
                 fund_cep_guess = fGuess / i
                 i += 1
-        elif (fund_cep_guess < min_fund):
+        elif fund_cep_guess < min_fund:
             i = 2
-            while (fund_cep_guess < min_fund):
+            while fund_cep_guess < min_fund:
                 fund_cep_guess = fGuess * i
                 i += 1
 
@@ -455,25 +465,25 @@ def estimate_f0(
 
         fund_stack_guess = bout[0][0]
         if (fund_stack_guess > max_fund) or (fund_stack_guess < min_fund):
-            fund_stack_guess = float('nan')
+            fund_stack_guess = float("nan")
 
         # Store the result depending on the method chosen
-        if method == 'AC':
+        if method == "AC":
             fund[it] = fund_corr_guess
-        elif method == 'ACA':
+        elif method == "ACA":
             fund[it] = fund_corr_amp_guess
-        elif method == 'Cep':
+        elif method == "Cep":
             fund[it] = fund_cep_guess
-        elif method == 'Stack':
+        elif method == "Stack":
             fund[it] = fund_stack_guess
 
         if not np.isnan(fund_stack_guess):
             powLeft = powSoundGood - powAmp - modelPowCep
             maxPow2 = max(powLeft)
-            if (maxPow2 > maxPow * 0.5):  # Possible second peak in central area as indicator of second voice.
+            if maxPow2 > maxPow * 0.5:  # Possible second peak in central area as indicator of second voice.
                 f2 = f[np.where(powLeft == maxPow2)[0][0]]
-                if (f2 > 1000 and f2 < 4000):
-                    if (pitchSaliency > min_saliency):
+                if f2 > 1000 and f2 < 4000:
+                    if pitchSaliency > min_saliency:
                         fund2[it] = f2
 
     # Fix formants.
@@ -483,7 +493,7 @@ def estimate_f0(
     # Decide whether there is formant 3
     n3 = np.sum(~np.isnan(form3))
 
-    if (n3 < 0.1 * nt):  # There are only two formants - fix formant 3 by merging...
+    if n3 < 0.1 * nt:  # There are only two formants - fix formant 3 by merging...
         meanf1 = np.mean(form1[~np.isnan(form2)])
         meanf2 = np.mean(form2[~np.isnan(form2)])
         for it in range(nt):
@@ -502,7 +512,7 @@ def estimate_f0(
                     if ~np.isnan(form1[it]):
                         df11 = np.abs(form1[it] - meanf1)
                         df12 = np.abs(form1[it] - meanf2)
-                        if (df12 < df11):
+                        if df12 < df11:
                             form2[it] = form1[it]
                             form1[it] = np.nan
     else:
@@ -516,20 +526,20 @@ def estimate_f0(
                         df11 = np.abs(form1[it] - meanf1)
                         df12 = np.abs(form1[it] - meanf2)
                         df13 = np.abs(form1[it] - meanf3)
-                        if (df13 < np.minimum(df11, df12)):
+                        if df13 < np.minimum(df11, df12):
                             form3[it] = form1[it]
                             form1[it] = np.nan
-                        elif (df12 < np.minimum(df11, df13)):
+                        elif df12 < np.minimum(df11, df13):
                             form2[it] = form1[it]
                             form1[it] = np.nan
                 else:  # two formants are found
                     df22 = np.abs(form2[it] - meanf2)
                     df23 = np.abs(form2[it] - meanf3)
-                    if (df23 < df22):
+                    if df23 < df22:
                         form3[it] = form2[it]
                         df11 = np.abs(form1[it] - meanf1)
                         df12 = np.abs(form1[it] - meanf2)
-                        if (df12 < df11):
+                        if df12 < df11:
                             form2[it] = form1[it]
                             form1[it] = np.nan
                         else:

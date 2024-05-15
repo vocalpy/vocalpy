@@ -10,12 +10,7 @@ if TYPE_CHECKING:
     from vocalpy import Segment, Sound
 
 
-__all__ = [
-    "have_same_dtype",
-    "is_1d_ndarray",
-    "is_valid_boundaries_array",
-    "is_sound_or_segment"
-]
+__all__ = ["have_same_dtype", "is_1d_ndarray", "is_valid_boundaries_array", "is_sound_or_segment"]
 
 
 def is_1d_ndarray(y: npt.NDArray, name: str | None = None) -> bool:

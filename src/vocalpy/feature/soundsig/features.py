@@ -9,22 +9,25 @@ Code is adapted from the ``soundsig`` library [2]_, under MIT license.
 from __future__ import annotations
 
 from collections import defaultdict
-from typing import Literal, Sequence, TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal, Sequence
 
+import matplotlib.mlab
 import numpy as np
 import numpy.typing as npt
-import matplotlib.mlab
 import xarray as xr
 
-from .sound import temporal_envelope
 from .fundamental import estimate_f0
+from .sound import temporal_envelope
 
 if TYPE_CHECKING:
     from vocalpy import Sound
 
 
 def temporal_envelope_features(
-        data: npt.NDArray, samplerate: int, cutoff_freq: int = 20, amp_sample_rate: int = 1000,
+    data: npt.NDArray,
+    samplerate: int,
+    cutoff_freq: int = 20,
+    amp_sample_rate: int = 1000,
 ) -> dict:
     """Extract pre-defined acoustic features from temporal envelope of a sound,
     as described in [1]_.
@@ -62,34 +65,33 @@ def temporal_envelope_features(
        Animal Cognition. 2016. 19(2) 285-315 DOI 10.1007/s10071-015-0933-6
     .. [2] https://github.com/theunissenlab/soundsig
     """
-    amp, tdata = temporal_envelope(
-        data, samplerate, cutoff_freq=cutoff_freq, resample_rate=amp_sample_rate
-    )
+    amp, tdata = temporal_envelope(data, samplerate, cutoff_freq=cutoff_freq, resample_rate=amp_sample_rate)
 
     ampdata = amp / np.sum(amp)
     meantime = np.sum(tdata * ampdata)
     stdtime = np.sqrt(np.sum(ampdata * ((tdata - meantime) ** 2)))
     skewtime = np.sum(ampdata * (tdata - meantime) ** 3)
-    skewtime = skewtime / (stdtime ** 3)
+    skewtime = skewtime / (stdtime**3)
     kurtosistime = np.sum(ampdata * (tdata - meantime) ** 4)
-    kurtosistime = kurtosistime / (stdtime ** 4)
+    kurtosistime = kurtosistime / (stdtime**4)
     indpos = np.where(ampdata > 0)[0]
     entropytime = -np.sum(ampdata[indpos] * np.log2(ampdata[indpos])) / np.log2(np.size(indpos))
 
     return {
-        'mean_t': meantime,
-        'std_t': stdtime,
-        'skew_t': skewtime,
-        'kurtosis_t': kurtosistime,
-        'entropy_t': entropytime,
-        't_amp': tdata,
-        'amp': amp,
-        'max_amp': max(amp),
+        "mean_t": meantime,
+        "std_t": stdtime,
+        "skew_t": skewtime,
+        "kurtosis_t": kurtosistime,
+        "entropy_t": entropytime,
+        "t_amp": tdata,
+        "amp": amp,
+        "max_amp": max(amp),
     }
 
 
-def spectral_envelope_features(data: npt.NDArray, samplerate: int, f_high: int= 10000,
-                               NFFT=1024, noverlap=512) -> dict:
+def spectral_envelope_features(
+    data: npt.NDArray, samplerate: int, f_high: int = 10000, NFFT=1024, noverlap=512
+) -> dict:
     """Extract pre-defined acoustic features from spectral envelope of a sound,
     as described in [1]_.
 
@@ -144,15 +146,15 @@ def spectral_envelope_features(data: npt.NDArray, samplerate: int, f_high: int= 
     # Find quartile power
     cum_power = np.cumsum(Pxx)
     tot_power = np.sum(Pxx)
-    quartile_freq = np.zeros(3, dtype='int')
+    quartile_freq = np.zeros(3, dtype="int")
     quartile_values = [0.25, 0.5, 0.75]
     nfreqs = np.size(cum_power)
     iq = 0
     for ifreq in range(nfreqs):
-        if (cum_power[ifreq] > quartile_values[iq] * tot_power):
+        if cum_power[ifreq] > quartile_values[iq] * tot_power:
             quartile_freq[iq] = ifreq
             iq = iq + 1
-            if (iq > 2):
+            if iq > 2:
                 break
 
     # Find skewness, kurtosis and entropy for power spectrum below f_high
@@ -165,22 +167,22 @@ def spectral_envelope_features(data: npt.NDArray, samplerate: int, f_high: int= 
     meanspect = np.sum(freqdata * spectdata)
     stdspect = np.sqrt(np.sum(spectdata * ((freqdata - meanspect) ** 2)))
     skewspect = np.sum(spectdata * (freqdata - meanspect) ** 3)
-    skewspect = skewspect / (stdspect ** 3)
+    skewspect = skewspect / (stdspect**3)
     kurtosisspect = np.sum(spectdata * (freqdata - meanspect) ** 4)
-    kurtosisspect = kurtosisspect / (stdspect ** 4)
+    kurtosisspect = kurtosisspect / (stdspect**4)
     entropyspect = -np.sum(spectdata * np.log2(spectdata)) / np.log2(ind_fmax)
 
     return {
-        'mean_s': meanspect,
-        'std_s': stdspect,
-        'skew_s': skewspect,
-        'kurtosis_s': kurtosisspect,
-        'entropy_s': entropyspect,
-        'q1': Freqs[quartile_freq[0]],
-        'q2': Freqs[quartile_freq[1]],
-        'q3': Freqs[quartile_freq[2]],
-        'fpsd': freqdata,
-        'psd': spectdata,
+        "mean_s": meanspect,
+        "std_s": stdspect,
+        "skew_s": skewspect,
+        "kurtosis_s": kurtosisspect,
+        "entropy_s": entropyspect,
+        "q1": Freqs[quartile_freq[0]],
+        "q2": Freqs[quartile_freq[1]],
+        "q3": Freqs[quartile_freq[2]],
+        "fpsd": freqdata,
+        "psd": spectdata,
     }
 
 
@@ -188,9 +190,18 @@ DEFAULT_DT = 0.000997732426303855
 
 
 def fundamental_features(
-    data, samplerate, dt=DEFAULT_DT, max_fund: int = 1500, min_fund: int = 300, low_fc: int = 200, high_fc: int = 6000,
-    min_saliency: float = 0.5, min_formant_freq: int = 500, max_formant_bw: int = 500, window_formant: float = 0.1,
-    method: str = 'Stack',
+    data,
+    samplerate,
+    dt=DEFAULT_DT,
+    max_fund: int = 1500,
+    min_fund: int = 300,
+    low_fc: int = 200,
+    high_fc: int = 6000,
+    min_saliency: float = 0.5,
+    min_formant_freq: int = 500,
+    max_formant_bw: int = 500,
+    window_formant: float = 0.1,
+    method: str = "Stack",
 ) -> dict:
     """Extract features from the time-varying fundamental frequency,
     as described in [1]_.
@@ -290,13 +301,23 @@ def fundamental_features(
     """
     # Calculate the fundamental, the formants and parameters related to these
     sal, fund, fund2, form1, form2, form3, lenfund = estimate_f0(
-        data, samplerate, dt, max_fund, min_fund, low_fc, high_fc,
-        min_saliency, min_formant_freq, max_formant_bw, window_formant, method=method
+        data,
+        samplerate,
+        dt,
+        max_fund,
+        min_fund,
+        low_fc,
+        high_fc,
+        min_saliency,
+        min_formant_freq,
+        max_formant_bw,
+        window_formant,
+        method=method,
     )
     goodFund = fund[~np.isnan(fund)]
     goodSal = sal[~np.isnan(sal)]
     goodFund2 = fund2[~np.isnan(fund2)]
-    if np.size(goodFund) > 0 :
+    if np.size(goodFund) > 0:
         meanfund = np.mean(goodFund)
     else:
         meanfund = np.nan
@@ -309,20 +330,17 @@ def fundamental_features(
     if np.size(goodFund) == 0 or np.size(goodFund2) == 0:
         second_v = 0.0
     else:
-        second_v = (
-                        float(np.size(goodFund2)) / float(np.size(goodFund))
-        ) * 100.0
+        second_v = (float(np.size(goodFund2)) / float(np.size(goodFund))) * 100.0
 
     fund_features = {}
     for name, value in zip(
-        ('f0', 'f0_2', 'F1', 'F2', 'F3', 'mean_f0', 'sal', 'mean_sal', 'pk2', 'second_v'),
-        (fund, fund2, form1, form2, form3, meanfund, sal, meansal, pk2, second_v)
+        ("f0", "f0_2", "F1", "F2", "F3", "mean_f0", "sal", "mean_sal", "pk2", "second_v"),
+        (fund, fund2, form1, form2, form3, meanfund, sal, meansal, pk2, second_v),
     ):
         fund_features[name] = value
-    if np.size(goodFund) > 0 :
+    if np.size(goodFund) > 0:
         for name, value in zip(
-            ('max_fund', 'min_fund', 'cv_fund'),
-            (np.max(goodFund), np.min(goodFund), np.std(goodFund) / meanfund)
+            ("max_fund", "min_fund", "cv_fund"), (np.max(goodFund), np.min(goodFund), np.std(goodFund) / meanfund)
         ):
             fund_features[name] = value
 
@@ -359,13 +377,16 @@ SCALAR_FEATURES = {
         "max_fund",
         "min_fund",
         "cv_fund",
-
     ],
 }
 
+
 def predefined_acoustic_features(
-        sound: Sound, scale: bool = True, scale_val: int | float = 2**15, scale_dtype: npt.DTypeLike = np.int16,
-        ftr_groups: SoundsigFeatureGroups | Sequence[SoundsigFeatureGroups] = ("temporal", "spectral", "fundamental"),
+    sound: Sound,
+    scale: bool = True,
+    scale_val: int | float = 2**15,
+    scale_dtype: npt.DTypeLike = np.int16,
+    ftr_groups: SoundsigFeatureGroups | Sequence[SoundsigFeatureGroups] = ("temporal", "spectral", "fundamental"),
 ) -> xr.Dataset:
     """Compute predefined acoustic features (PAFs)
     used to analyze the vocal repertoire of the domesticated zebra finch,
@@ -417,34 +438,29 @@ def predefined_acoustic_features(
     .. [2] https://github.com/theunissenlab/soundsig
     """
     if isinstance(ftr_groups, (list, tuple)):
-        if not all(
-            [isinstance(ftr_group, str) for ftr_group in ftr_groups]
-        ):
+        if not all([isinstance(ftr_group, str) for ftr_group in ftr_groups]):
             bad_types = set([type(ftr_group) for ftr_group in ftr_groups if not isinstance(ftr_groups, str)])
             raise TypeError(
                 f"`ftr_groups` must be a list or tuple of strings but some items in sequence were not: {bad_types}"
             )
-        if not all(
-            [ftr_group in ("temporal", "spectral", "fundamental") for ftr_group in ftr_groups]
-        ):
+        if not all([ftr_group in ("temporal", "spectral", "fundamental") for ftr_group in ftr_groups]):
             raise ValueError(
-                "All strings in `ftr_groups` must be one of: \"temporal\", \"spectral\", \"fundamental\", "
+                'All strings in `ftr_groups` must be one of: "temporal", "spectral", "fundamental", '
                 f"but got:\n{ftr_groups}"
             )
 
     elif isinstance(ftr_groups, str):
         if ftr_groups not in ("temporal", "spectral", "fundamental"):
             raise ValueError(
-                "Value for `ftr_groups` must be one of: \"temporal\", \"spectral\", \"fundamental\", "
+                'Value for `ftr_groups` must be one of: "temporal", "spectral", "fundamental", '
                 f"but got:\n{ftr_groups}"
             )
         ftr_groups = (ftr_groups,)  # so we can write ``if "string" in ftr_groups``
 
     if scale:
         from ... import Sound
-        sound = Sound(
-            data=(sound.data * scale_val).astype(scale_dtype), samplerate=sound.samplerate, path=sound.path
-        )
+
+        sound = Sound(data=(sound.data * scale_val).astype(scale_dtype), samplerate=sound.samplerate, path=sound.path)
 
     features = defaultdict(list)
     for channel_data in sound.data:
@@ -466,11 +482,8 @@ def predefined_acoustic_features(
 
     channels = np.arange(sound.data.shape[0])
     data = xr.Dataset(
-        {
-            feature_name: (["channel"], feature_val)
-            for feature_name, feature_val in features.items()
-        },
-        coords={"channel": channels}
+        {feature_name: (["channel"], feature_val) for feature_name, feature_val in features.items()},
+        coords={"channel": channels},
     )
 
     return data

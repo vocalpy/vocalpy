@@ -31,7 +31,7 @@ class GaussianSpectrumEstimator:
             hnwinlen = nwinlen // 2
             gauss_t = np.arange(-hnwinlen, hnwinlen + 1, 1.0)
             gauss_std = float(nwinlen) / float(self.nstd)
-            gauss_window = np.exp(-gauss_t**2 / (2.0*gauss_std**2)) / (gauss_std * np.sqrt(2*np.pi))
+            gauss_window = np.exp(-(gauss_t**2) / (2.0 * gauss_std**2)) / (gauss_std * np.sqrt(2 * np.pi))
             self._gauss_window_cache[nwinlen] = gauss_window
             return gauss_window
 
@@ -50,8 +50,15 @@ class GaussianSpectrumEstimator:
 
 
 def soundsig_spectro(
-        sound: Sound, spec_sample_rate: int = 1000, freq_spacing :int = 50, min_freq: int = 0, max_freq: int = 10000,
-        nstd: int = 6, scale: bool = True, scale_val: int | float = 2**15, scale_dtype: npt.DTypeLike = np.int16
+    sound: Sound,
+    spec_sample_rate: int = 1000,
+    freq_spacing: int = 50,
+    min_freq: int = 0,
+    max_freq: int = 10000,
+    nstd: int = 6,
+    scale: bool = True,
+    scale_val: int | float = 2**15,
+    scale_dtype: npt.DTypeLike = np.int16,
 ) -> Spectrogram:
     """Compute a dB-scaled spectrogram using a Gaussian window.
 
@@ -112,9 +119,7 @@ def soundsig_spectro(
     if scale:
         from .. import Sound
 
-        sound = Sound(
-            data=(sound.data * scale_val).astype(scale_dtype), samplerate=sound.samplerate, path=sound.path
-        )
+        sound = Sound(data=(sound.data * scale_val).astype(scale_dtype), samplerate=sound.samplerate, path=sound.path)
 
     # ---- soundsig.sound.spectrogram
     increment = 1.0 / spec_sample_rate
@@ -146,12 +151,12 @@ def soundsig_spectro(
     for channel_data in sound.data:
         # pad the signal with zeros
         zs = np.zeros([len(channel_data) + 2 * hnwinlen])
-        zs[hnwinlen : -hnwinlen] = channel_data
+        zs[hnwinlen:-hnwinlen] = channel_data
         windows = sliding_window_view(zs, nwinlen, axis=0)[::nincrement]
         nwindows = len(windows)
 
-        #take the FFT of each segment, padding with zeros when necessary to keep window length the same
-        tf = np.zeros([nfreq, nwindows], dtype='complex')
+        # take the FFT of each segment, padding with zeros when necessary to keep window length the same
+        tf = np.zeros([nfreq, nwindows], dtype="complex")
         for k, window in enumerate(windows):
             spec_freq, est = spectrum_estimator.estimate(window, sound.samplerate)
             findex = (spec_freq <= max_freq) & (spec_freq >= min_freq)
@@ -167,4 +172,5 @@ def soundsig_spectro(
     spec = 20 * np.log10(np.abs(spec))
 
     from vocalpy import Spectrogram  # avoid circular dependencies
+
     return Spectrogram(data=spec, times=t, frequencies=freq)
