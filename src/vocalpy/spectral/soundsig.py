@@ -60,7 +60,8 @@ def soundsig_spectro(
     scale_val: int | float = 2**15,
     scale_dtype: npt.DTypeLike = np.int16,
 ) -> Spectrogram:
-    """Compute a dB-scaled spectrogram using a Gaussian window.
+    # raw string to avoid flake8 complaining about math
+    r"""Compute a dB-scaled spectrogram using a Gaussian window.
 
     Replicates the result of the method :meth:`soundsig.BioSound.spectroCalc`.
 

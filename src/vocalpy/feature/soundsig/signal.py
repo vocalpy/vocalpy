@@ -127,7 +127,7 @@ def correlation_function(
         elif lag > 0:
             cf[k] = np.dot(s1_centered[:-lag], s2_centered[lag:]) / (N - lag)
         elif lag < 0:
-            cf[k] = np.dot(s1_centered[np.abs(lag) :], s2_centered[:lag]) / (N + lag)
+            cf[k] = np.dot(s1_centered[np.abs(lag) :], s2_centered[:lag]) / (N + lag)  # noqa : E203
 
     if normalize:
         cf /= s1_std * s2_std

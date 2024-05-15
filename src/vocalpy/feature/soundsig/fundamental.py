@@ -53,7 +53,7 @@ def lpc(signal: npt.NDArray, order: int) -> npt.NDArray:
         # Number of non-zero values in autocorrelation one needs for p LPC coefficients
         nx = np.min([p, signal.size])
         x = np.correlate(signal, signal, "full")
-        r[:nx] = x[signal.size - 1 : signal.size + order]
+        r[:nx] = x[signal.size - 1 : signal.size + order]  # noqa : E203
         phi = np.dot(scipy.linalg.inv(scipy.linalg.toeplitz(r[:-1])), -r[1:])
         return np.concatenate(([1.0], phi))
     else:
@@ -141,7 +141,8 @@ def estimate_f0(
     = 300        Minimum fundamental frequency
     low_fc = 200          Low frequency cut-off for band-passing the signal prior to auto-correlation.
     high_fc = 6000        High frequency cut-off
-    min_saliency = 0.5    Threshold in the auto-correlation for minimum saliency - returns NaN for pitch values is saliency is below this number
+    min_saliency = 0.5    Threshold in the auto-correlation for minimum saliency -
+                          returns NaN for pitch values is saliency is below this number
     min_formant_freq = 500  Minimum value of firt formant
     max_formant_bw = 500    Maxminum value of formants bandwith.
     window_formant = 0.1   Time window for Formant calculation.  Includes 5 std of normal window.
@@ -153,7 +154,8 @@ def estimate_f0(
     'Stack' - Fitting of harmonic stacks (default - works well for zebra finches)
 
     Returns
-           sal     - the time varying pitch saliency - a number between 0 and 1 corresponding to relative size of the first auto-correlation peak
+           sal     - the time varying pitch saliency - a number between 0 and 1
+                     corresponding to relative size of the first auto-correlation peak
            fund     - the time-varying fundamental in Hz at the same resolution as the spectrogram.
            fund2   - a second peak in the spectrum - not a multiple of the fundamental a sign of a second voice
            form1   - the first formant, if it exists
@@ -240,7 +242,8 @@ def estimate_f0(
     # fund_corr_guess - guess from the auto-correlation function
     # fund_corr_amp_guess - guess form the amplitude of the auto-correlation function
     # fund_cep_guess - guess from the cepstrum
-    # fund_stack_guess - guess taken from a fit of the power spectrum with a harmonic stack, using the fund_cep_guess as a starting point
+    # fund_stack_guess - guess taken from a fit of the power spectrum with a harmonic stack,
+    # using the fund_cep_guess as a starting point
     #  Current version use fund_stack_guess as the best estimate...
 
     soundlen = 0
@@ -376,10 +379,12 @@ def estimate_f0(
 
         # Calculate power spectrum and cepstrum
         Y = fft(sound_win, n=win_len + 1)
-        f = (samplerate / 2.0) * (np.array(range(int((win_len + 1) / 2 + 1)), dtype=float) / float((win_len + 1) // 2))
+        f = (samplerate / 2.0) * (
+            np.array(range(int((win_len + 1) / 2 + 1)), dtype=float) / float((win_len + 1) // 2)
+        )  # noqa : E203
         fhigh = np.where(f >= high_fc)[0][0]
 
-        powSound = 20.0 * np.log10(np.abs(Y[0 : (win_len + 1) // 2 + 1]))  # This is the power spectrum
+        powSound = 20.0 * np.log10(np.abs(Y[0 : (win_len + 1) // 2 + 1]))  # This is the power spectrum  # noqa : E203
         powSoundGood = powSound[0:fhigh]
         maxPow = max(powSoundGood)
         powSoundGood = powSoundGood - maxPow  # Set zero as the peak amplitude
