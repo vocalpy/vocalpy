@@ -68,7 +68,7 @@ class TestSegmenter:
             [vocalpy.AudioFile(path=path) for path in BIRDSONGREC_WAV_LIST[:3]],
         ],
     )
-    def test_segment(self, sound):
+    def test_segment(self, sound, parallel):
         # have to use different segment params from default for these .wav files
         params = {
             "threshold": 5e-05,
@@ -76,7 +76,9 @@ class TestSegmenter:
             "min_silent_dur": 0.002,
         }
         segmenter = vocalpy.Segmenter(params=params)
-        out = segmenter.segment(sound)
+
+        out = segmenter.segment(sound, parallelize=parallel)
+
         if isinstance(sound, (vocalpy.Sound, vocalpy.AudioFile)):
             assert_segments_is_expected(out, sound)
         elif isinstance(sound, list):

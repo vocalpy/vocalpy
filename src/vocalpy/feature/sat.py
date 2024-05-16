@@ -17,9 +17,9 @@ import numpy.typing as npt
 import xarray as xr
 
 if TYPE_CHECKING:
-    from .. import Sound, Spectrogram
+    from .. import Features, Segment, Sound, Spectrogram
 
-from .. import spectral
+from .. import spectral, validators
 
 # get small number to avoid potential divide by zero errors
 EPS = np.finfo(np.double).eps
@@ -371,27 +371,83 @@ def pitch(
     )
 
 
+def _get_cepstral(spectra1: npt.NDArray, n_fft: int, samplerate: int) -> tuple[npt.NDArray, npt.NDArray]:
+    """Get cepstrogram and quefrencies from a spectrogram
+
+    Helper function used by :func:`similarity_features` to compute
+    :func:`goodness_of_pitch` feature.
+
+    Parameters
+    ----------
+    spectra1
+    n_fft : int
+    sound : Sound
+
+    Returns
+    -------
+    cepstrogram : numpy.ndarray
+    quefrencies : numpy.ndarray
+    """
+    # ---- make "cepstrogram" and quefrencies
+    spectra1_for_cepstrum = np.copy(spectra1)
+    # next line is a fancy way of adding eps to zero values
+    # so we don't get the enigmatic divide-by-zero error, and we don't get np.inf values
+    # see https://github.com/numpy/numpy/issues/21560
+    spectra1_for_cepstrum[spectra1_for_cepstrum == 0.0] += np.finfo(spectra1_for_cepstrum.dtype).eps
+    cepstrogram = np.fft.ifft(np.log(np.abs(spectra1_for_cepstrum)), n=n_fft, axis=1).real
+    quefrencies = np.array(np.arange(n_fft)) / samplerate
+    return cepstrogram, quefrencies
+
+
+def _get_spectral_derivatives(
+    spectra1: npt.NDArray, spectra2: npt.NDArray, max_freq_idx: int
+) -> tuple[npt.NDArray, npt.NDArray]:
+    """Get derivatives of spectrogram with respect to time and frequency.
+
+    Helper function used by :func:`similarity_features` to compute
+    :func:`amplitude_modulation` and :func:`frequency_modulation` feature
+
+    Parameters
+    ----------
+    spectra1
+    spectra2
+    max_freq_idx : int
+
+    Returns
+    -------
+    dSdt : numpy.ndarray
+    dSdf : numpy.ndarray
+    """
+    spectra1 = spectra1[:, :max_freq_idx, :]
+    spectra2 = spectra2[:, :max_freq_idx, :]
+    # time derivative of spectrum
+    dSdt = (-spectra1.real * spectra2.real) - (spectra1.imag * spectra2.imag)
+    # frequency derivative of spectrum
+    dSdf = (spectra1.imag * spectra2.real) - (spectra1.real * spectra2.imag)
+    return dSdt, dSdf
+
+
 def similarity_features(
-    sound: Sound,
+    source: Sound | Segment,
     n_fft=400,
     hop_length=40,
     freq_range=0.5,
     min_freq: float = 380.0,
     amp_baseline: float = 70.0,
-    max_F0: int = 1830.0,
+    max_F0: float = 1830.0,
     fmax_yin: float = 8000.0,
     trough_threshold: float = 0.1,
-) -> xr.DataSet:
-    """Extract all features used to compute similarity with SAT.
-
-    Calls :func:`vocalpy.spectral.sat` to get spectral representations
-    of the :class:`vocalpy.Sound`, then extracts all features
-    from those spectral representations.
+) -> Features:
+    """Extract all features used to compute similarity with
+    the Sound Analysis Toolbox for Matlab (SAT).
 
     Parameters
     ----------
-    sound : vocalpy.Sound
-        Audio loaded from a file. Multi-channel is supported.
+    source : Sound or Segment
+        A :class:`Sound` loaded from a file,
+        or a :class:`Segment` produced by an algorithm
+        in :mod:`vocalpy.segment`.
+        Multi-channel sounds are supported.
     n_fft : int
         FFT window size.
     hop_length : int
@@ -426,21 +482,43 @@ def similarity_features(
         An xarray.Dataset where the data variables are the features,
         and the coordinate is the time for each time bin.
     """
-    power_spectrogram, cepstrogram, quefrencies, max_freq, dSdt, dSdf = spectral.sat(
-        sound, n_fft, hop_length, freq_range
-    )
-    amp_ = amplitude(power_spectrogram, min_freq, max_freq, amp_baseline)
+    validators.is_sound_or_segment(source)
+
+    if not 0.0 < freq_range <= 1.0:
+        raise ValueError(
+            f"`freq_range` must be a float greater than zero and less than or equal to 1.0, but was: {freq_range}. "
+            f"Please specify a value between zero and one inclusive specifying the percentage of the frequencies "
+            f"to use when extracting features with a frequency range"
+        )
+
+    power_spectrogram, spectra1, spectra2 = spectral.sat._sat_multitaper(source, n_fft, hop_length)
+
+    # in SAT, freq_range means "use first `freq_range` percent of frequencies". Next line finds that range.
+    f = power_spectrogram.frequencies
+    max_freq_idx = int(np.floor(f.shape[0] * freq_range))
+    max_freq = f[max_freq_idx]
+
+    # ---- now extract features
+    # -------- features that require sound
     pitch_ = pitch(
-        sound, min_freq, fmax_yin, frame_length=n_fft, hop_length=hop_length, trough_threshold=trough_threshold
+        source, min_freq, fmax_yin, frame_length=n_fft, hop_length=hop_length, trough_threshold=trough_threshold
     )
-    goodness_ = goodness_of_pitch(cepstrogram, quefrencies, max_F0)
-    FM = frequency_modulation(dSdt, dSdf)
-    AM = amplitude_modulation(dSdt)
+
+    # -------- features that require power spectrogram and max_freq
+    amp_ = amplitude(power_spectrogram, min_freq, max_freq, amp_baseline)
     entropy_ = entropy(power_spectrogram, min_freq, max_freq)
 
-    channels = np.arange(sound.data.shape[0])
+    # -------- features that require cepstrogram
+    cepstrogram, quefrencies = _get_cepstral(spectra1, n_fft, source.samplerate)
+    goodness_ = goodness_of_pitch(cepstrogram, quefrencies, max_F0)
 
-    return xr.Dataset(
+    # -------- features that spectral derivatives
+    dSdt, dSdf = _get_spectral_derivatives(spectra1, spectra2, max_freq_idx)
+    FM = frequency_modulation(dSdt, dSdf)
+    AM = amplitude_modulation(dSdt)
+
+    channels = np.arange(source.data.shape[0])
+    data = xr.Dataset(
         {
             "amplitude": (["channel", "time"], amp_),
             "pitch": (["channel", "time"], pitch_),
@@ -451,3 +529,8 @@ def similarity_features(
         },
         coords={"channel": channels, "time": power_spectrogram.times},
     )
+
+    from .. import Features  # avoid circular import
+
+    features = Features(data=data)
+    return features

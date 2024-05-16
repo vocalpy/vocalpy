@@ -81,9 +81,11 @@ class TestSpectrogramMaker:
             [vocalpy.AudioFile(path=path) for path in BIRDSONGREC_WAV_LIST[:3]],
         ],
     )
-    def test_make(self, sound):
+    def test_make(self, sound, parallel):
         spect_maker = vocalpy.SpectrogramMaker()
-        out = spect_maker.make(sound)
+
+        out = spect_maker.make(sound, parallelize=parallel)
+
         if isinstance(sound, (vocalpy.Sound, vocalpy.AudioFile)):
             assert isinstance(out, vocalpy.Spectrogram)
         elif isinstance(sound, list):

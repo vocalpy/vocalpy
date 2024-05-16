@@ -1,18 +1,16 @@
-"""Validation functions.
-
-.. autosummary::
-   :toctree: generated
-"""
+"""Validation functions."""
 from __future__ import annotations
+
+from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
 
-__all__ = [
-    "have_same_dtype",
-    "is_1d_ndarray",
-    "is_valid_boundaries_array",
-]
+if TYPE_CHECKING:
+    from vocalpy import Segment, Sound
+
+
+__all__ = ["have_same_dtype", "is_1d_ndarray", "is_valid_boundaries_array", "is_sound_or_segment"]
 
 
 def is_1d_ndarray(y: npt.NDArray, name: str | None = None) -> bool:
@@ -144,5 +142,16 @@ def have_same_dtype(arr1: npt.NDArray, arr2: npt.NDArray, name1: str | None = No
             names = ""
 
         raise ValueError(f"Two arrays {names}must have the same dtype, but dtypes were: {arr1.dtype} and {arr2.dtype}")
+
+    return True
+
+
+def is_sound_or_segment(source: Sound | Segment) -> bool:
+    from vocalpy import Segment, Sound
+
+    if not isinstance(source, (Sound, Segment)):
+        raise TypeError(
+            f"`source` must be an instance of either a `Sound` or a `Segment`, but type was: {type(source)}"
+        )
 
     return True

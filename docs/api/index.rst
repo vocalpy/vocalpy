@@ -22,12 +22,13 @@ Data types for acoustic communication data.
    Spectrogram
    Annotation
    Segments
+   Features
 
 
 Classes for Pipelines
 ---------------------
 
-Classes for common steps in your pipelines and workflows
+Classes for common steps in pipelines.
 
 .. autosummary::
    :toctree: generated
@@ -35,7 +36,7 @@ Classes for common steps in your pipelines and workflows
 
    Segmenter
    SpectrogramMaker
-   SpectrogramParameters
+   FeatureExtractor
    Params
 
 Signal processing

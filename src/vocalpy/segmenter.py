@@ -141,7 +141,7 @@ class Segmenter:
         segments = []
         for sound_ in sound:
             if parallelize:
-                segments.append(dask.delayed(_to_segments(sound_)))
+                segments.append(dask.delayed(_to_segments)(sound_))
             else:
                 segments.append(_to_segments(sound_))
 

@@ -24,6 +24,17 @@ class Segment:
     one of a set of such :class:`Segments`,
     returned by an algorithm for segmenting audio.
 
+    This class acts a lot like a :class:`Sound`,
+    but we provide a separate abstraction
+    to represent the product of a segmenting algorithm.
+    Like a :class:`Sound`, a :class:`Segment`
+    has ``data`` and a ``samplerate``,
+    that will be taken from the :class:`Sound` that was
+    segmented. But unlike a :class:`Sound`,
+    a :class:`Segment` has a ``start_index`` and a ``length``.
+
+
+
     Attributes
     ----------
     start_ind : int
@@ -43,11 +54,12 @@ class Segment:
         The sampling rate of the :class:`Sound`
         that this :class:`Segment` came from.
     """
+
     def __init__(
         self,
         start_ind: int,
         length: int,
-        data: xr.DataArray,
+        data_array: xr.DataArray,
         samplerate: int,
         label: str = "",
     ) -> None:
@@ -67,35 +79,39 @@ class Segment:
             raise ValueError(f"`start_ind` for `Segment` must be a non-negative number but was: {start_ind}")
         if not length >= 0:
             raise ValueError(f"`length` for `Segment` must be a non-negative number but was: {start_ind}")
-        if not isinstance(data, xr.DataArray):
+        if not isinstance(data_array, xr.DataArray):
             raise TypeError(
-                f"`data` for `Segment` should be an instance of xarray.DataArray, but type was: {type(data)}"
+                "`data_array` for `Segment` should be an instance of xarray.DataArray, "
+                f"but type was: {type(data_array)}"
             )
 
-        if not data.ndim == 1:
-            raise ValueError(f"`data` for `Segment` should be have one dimension but `data.ndim` was: {data.ndim}")
-
-        if not data.size == length:
+        if not data_array.ndim == 2:
             raise ValueError(
-                f"`data.size` for `Segment` should equal `length` but `data.size` was {data.size} "
-                f"and `length` was {length}."
+                "`data` for `Segment` should be have two dimensions (channels, samples) "
+                f"but `data.ndim` was: {data_array.ndim}"
+            )
+
+        if not data_array.shape[1] == length:
+            raise ValueError(
+                "`data_array.shape[1]` for `Segment` should equal `length` but `data_array.shape[1]` was "
+                f"{data_array.shape[1]} and `length` was {length}."
             )
 
         if not isinstance(samplerate, numbers.Integral):
-            raise TypeError(
-                f"`samplerate` must be `instance` of `numbers.Integral` but type was: {type(samplerate)}"
-            )
+            raise TypeError(f"`samplerate` must be `instance` of `numbers.Integral` but type was: {type(samplerate)}")
 
         if not samplerate > 0:
-            raise ValueError(
-                f"`samplerate` must be a positive integer but was: {samplerate}"
-            )
+            raise ValueError(f"`samplerate` must be a positive integer but was: {samplerate}")
 
         self.start_ind = start_ind
         self.length = length
         self.label = label
-        self.data = data
+        self._data_array = data_array
         self.samplerate = samplerate
+
+    @property
+    def data(self):
+        return self._data_array.values
 
     def __repr__(self):
         return (
@@ -115,14 +131,14 @@ class Segment:
         # we make a new DataArray that points to the same underlying ``values``,
         # so we can mutate the new DataArray's ``attrs`` without affecting
         # the ``attrs`` of this instance's ``data``
-        data = xr.DataArray(self.data)
-        data.attrs = {
+        data_array = xr.DataArray(self._data_array)
+        data_array.attrs = {
             "start_ind": self.start_ind,
             "length": self.length,
             "label": self.label,
             "samplerate": self.samplerate,
         }
-        data.to_netcdf(path, engine="h5netcdf")
+        data_array.to_netcdf(path, engine="h5netcdf")
 
     @classmethod
     def read(cls, path: str | pathlib.Path) -> Segment:
@@ -140,18 +156,18 @@ class Segment:
             read into it.
         """
         path = pathlib.Path(path)
-        data = xr.load_dataarray(path)
-        start_ind = data.attrs["start_ind"]
-        length = data.attrs["length"]
-        label = data.attrs["label"]
-        samplerate = data.attrs["samplerate"]
+        data_array = xr.load_dataarray(path)
+        start_ind = data_array.attrs["start_ind"]
+        length = data_array.attrs["length"]
+        label = data_array.attrs["label"]
+        samplerate = data_array.attrs["samplerate"]
         # throw away metadata; don't want to have "leftover" attrs
-        data.attrs = {}
+        data_array.attrs = {}
         return cls(
             start_ind=start_ind,
             length=length,
             label=label,
-            data=data,
+            data_array=data_array,
             samplerate=samplerate,
         )
 
@@ -162,7 +178,7 @@ class Segment:
             (self.start_ind == other.start_ind)
             and (self.length == other.length)
             and (self.label == other.label)
-            and (self.data.equals(other.data))
+            and np.array_equal(self.data, other.data)
             and (self.samplerate == other.samplerate)
         )
 
@@ -536,9 +552,9 @@ class Segments:
                 "This `Segments` instance does not have a `sound`, " "unable to iterate through each `Segment`."
             )
         for start_ind, length, label in zip(self.start_inds, self.lengths, self.labels):
-            data = xr.DataArray(data=self.sound.data[..., start_ind : start_ind + length].squeeze(0))  # noqa: E203
+            data_array = xr.DataArray(data=self.sound.data[..., start_ind : start_ind + length])  # noqa: E203
             segment = Segment(
-                start_ind=start_ind, length=length, label=label, data=data, samplerate=self.sound.samplerate
+                start_ind=start_ind, length=length, label=label, data_array=data_array, samplerate=self.sound.samplerate
             )
             yield segment
 
@@ -552,9 +568,9 @@ class Segments:
             start_ind = self.start_inds[key]
             length = self.lengths[key]
             label = self.labels[key]
-            data = xr.DataArray(data=self.sound.data[..., start_ind : start_ind + length].squeeze(0))  # noqa: E203
+            data_array = xr.DataArray(data=self.sound.data[..., start_ind : start_ind + length])  # noqa: E203
             return Segment(
-                start_ind=start_ind, length=length, label=label, data=data, samplerate=self.sound.samplerate
+                start_ind=start_ind, length=length, label=label, data_array=data_array, samplerate=self.sound.samplerate
             )
         elif isinstance(key, slice):
             start_inds = self.start_inds[key]

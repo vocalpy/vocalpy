@@ -80,7 +80,8 @@ class SpectrogramMaker:
     Attributes
     ----------
     callback : Callable
-        Callable that takes audio and returns spectrograms.
+        Callable that accepts a :class:`Sound`
+        and returns a :class:`Spectrogram`.
         Default is :func:`vocalpy.spectrogram`.
     params : dict
         Parameters for making spectrograms.
@@ -169,7 +170,7 @@ class SpectrogramMaker:
         spects = []
         for sound_ in sound:
             if parallelize:
-                spects.append(dask.delayed(_to_spect(sound_)))
+                spects.append(dask.delayed(_to_spect)(sound_))
             else:
                 spects.append(_to_spect(sound_))
 
