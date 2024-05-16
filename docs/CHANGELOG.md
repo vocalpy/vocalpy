@@ -41,6 +41,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   if they need to
   [#138](https://github.com/vocalpy/vocalpy/pull/138).
   Fixes [#137](https://github.com/vocalpy/vocalpy/issues/137).
+- Add `FeatureExtractor` class, that represents feature 
+  extraction step in a workflow
+  [#141](https://github.com/vocalpy/vocalpy/pull/141).
+  Fixes [#94](https://github.com/vocalpy/vocalpy/issues/94).
+- Add implementation of acoustic features from [soundsig](https://github.com/theunissenlab/soundsig)
+  [#141](https://github.com/vocalpy/vocalpy/pull/141).
+  Fixes [#27](https://github.com/vocalpy/vocalpy/issues/27).
 
 ### Changed
 - Rename `vocalpy.Audio` to `vocalpy.Sound` 
