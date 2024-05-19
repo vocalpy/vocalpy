@@ -102,6 +102,10 @@ class Segmenter:
 
         self.params = params
 
+
+    def __repr__(self):
+        return f"Segmenter(callback={self.callback}, params={self.params})"
+
     def segment(
         self,
         sound: Sound | AudioFile | list[Sound | AudioFile],

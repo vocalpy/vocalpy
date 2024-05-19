@@ -59,6 +59,9 @@ class FeatureExtractor:
 
         self.params = params
 
+    def __repr__(self):
+        return f"FeatureExtractor(callback={self.callback}, params={self.params})"
+
     def extract(self, source: FeatureSource, parallelize: bool = True) -> Features | list[Features]:
         from . import Segment, Segments, Sound, Features
 
