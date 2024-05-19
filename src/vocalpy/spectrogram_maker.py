@@ -127,6 +127,9 @@ class SpectrogramMaker:
 
         self.params = params
 
+    def __repr__(self):
+        return f"FeatureExtractor(callback={self.callback}, params={self.params})"
+
     def make(
         self,
         sound: Sound | AudioFile | Sequence[Sound | AudioFile],
