@@ -126,6 +126,7 @@ Let's use one of those classes, `SpectrogramMaker`, to make a spectrogram from e
 We'll write a brief snippet to do so, and then we'll explain what we did.
 
 ```{code-cell} ipython3
+:tags: [hide-output]
 params = {'n_fft': 512, 'hop_length': 64}
 callback = voc.spectrogram
 spect_maker = voc.SpectrogramMaker(callback=callback, params=params)

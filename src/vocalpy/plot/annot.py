@@ -110,7 +110,7 @@ def segments(
     if label_color_map is None:
         if lbl is not None:
             labelset = set(lbl)
-            cmap = plt.cm.get_cmap("tab20")
+            cmap = plt.get_cmap("tab20")
             colors = [cmap(ind) for ind in range(len(labelset))]
             label_color_map = {label: color for label, color in zip(labelset, colors)}
 
