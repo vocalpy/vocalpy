@@ -10,6 +10,7 @@ from dataclasses import dataclass, field
 from typing import TYPE_CHECKING, Union
 
 import pooch
+import requests.exceptions
 
 if TYPE_CHECKING:
     import vocalpy
@@ -132,17 +133,13 @@ tests/scripts/generate_ava_segment_test_data/generate_test_audio_for_ava_segment
 
 REGISTRY = {example.name: example for example in EXAMPLE_METADATA}
 
-
 VOCALPY_DATA_DIR = "VOCALPY_DATA_DIR"
 
-
 ZENODO_DATASET_BASE_URL = "doi:10.5281/zenodo.10688472"
-
 
 POOCH = pooch.create(
     path=pooch.os_cache("vocalpy"), base_url=ZENODO_DATASET_BASE_URL, registry=None, env=VOCALPY_DATA_DIR
 )
-POOCH.load_registry_from_doi()
 
 
 def get_cache_dir() -> pathlib.Path:
@@ -220,6 +217,13 @@ def example(name: str, return_type: str | None = None) -> ExampleType:
 
     example_: ExampleMeta = REGISTRY[name]
     if example_.requires_download:
+        try:
+            POOCH.load_registry_from_doi()
+        except requests.exceptions.ConnectionError as e:
+            raise ConnectionError(
+                "Unable to connect to registry to download example dataset. "
+                "This may be due to an issue with an internet connection."
+            ) from e
         if example_.fname.endswith(".tar.gz"):
             path = POOCH.fetch(example_.fname, processor=pooch.Untar())
         else:
