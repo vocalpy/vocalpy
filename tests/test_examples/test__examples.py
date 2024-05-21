@@ -1,3 +1,6 @@
+import socket
+import unittest.mock
+
 import pytest
 
 import vocalpy.examples._examples
@@ -31,3 +34,20 @@ def test_show(capsys):
     for example in vocalpy.examples._examples.EXAMPLE_METADATA:
         assert example.name in captured.out
         assert example.metadata in captured.out
+
+
+@pytest.mark.parametrize(
+    'example_name',
+    [
+        metadata.name
+        for metadata in vocalpy.examples._examples.EXAMPLE_METADATA
+        if metadata.requires_download
+    ]
+)
+def test_example_raises(example_name):
+    with unittest.mock.patch(
+        'urllib3.connection.connection.create_connection',
+        side_effect=socket.gaierror
+    ):
+        with pytest.raises(ConnectionError):
+            vocalpy.example(example_name)
