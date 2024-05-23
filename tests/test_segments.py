@@ -230,7 +230,6 @@ def a_segments(request):
     sound_copy = vocalpy.Sound(
         data=segments.sound.data,
         samplerate=segments.sound.samplerate,
-        path=segments.sound.path
     )
     segments.sound = sound_copy
     return segments
