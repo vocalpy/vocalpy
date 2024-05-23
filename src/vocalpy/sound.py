@@ -4,6 +4,7 @@ from __future__ import annotations
 import pathlib
 import reprlib
 import warnings
+from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
@@ -11,6 +12,9 @@ import soundfile
 
 from ._vendor import evfuncs
 from .audio_file import AudioFile
+
+if TYPE_CHECKING:
+    from .segments import Segments
 
 
 class Sound:
@@ -203,3 +207,31 @@ class Sound:
                 raise IndexError(f"Invalid integer or slice for Sound with {self.data.shape[0]} channels: {key}") from e
         else:
             raise TypeError(f"Sound can be indexed with integer or slice, but type was: {type(key)}")
+
+    def segment(self, segments: Segments) -> list[Sound]:
+        from .segments import Segments
+        if not isinstance(segments, Segments):
+            raise TypeError(
+                f"`segments` argument should be an instance of `vocalpy.Segments`, but type is: {type(segments)}"
+            )
+        if segments.samplerate != self.samplerate:
+            warnings.warn(
+                f"The `samplerate` attribute of `segments, {segments.samplerate}, "
+                f"does not equal the `samplerate` of this `Sound`, {self.samplerate}. "
+                "You may want to check the source of the segments."
+            )
+        if segments.start_inds[-1] + segments.lengths[-1] > self.data.shape[-1]:
+            raise ValueError(
+                f"The offset of the last segment in `segments`, {segments.start_inds[-1] + segments.lengths[-1]}, "
+                f"is greater than the last sample of this `Sound`, {self.data.shape[-1]}"
+            )
+
+        sounds_out = []
+        for start_ind, length in zip(segments.start_inds, segments.lengths):
+            sounds_out.append(
+                Sound(
+                    data=self.data[:, start_ind: start_ind + length],
+                    samplerate=self.samplerate
+                )
+            )
+        return sounds_out
