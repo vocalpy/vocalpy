@@ -3,48 +3,15 @@ from __future__ import annotations
 
 import collections.abc
 import inspect
-import pathlib
-from typing import Callable, List, Mapping, Sequence, Union
+from typing import Callable, List, Mapping, Sequence
 
 import dask
 import dask.diagnostics
-
-import vocalpy.constants
 
 from ._spectrogram.data_type import Spectrogram
 from .audio_file import AudioFile
 from .params import Params
 from .sound import Sound
-from .spectrogram_file import SpectrogramFile
-
-
-def default_spect_fname_func(audio_path: Union[str, pathlib.Path]):
-    """Default function for naming spectrogram files.
-    Adds the extension `.spect.npz` to an audio path.
-
-    Parameters
-    ----------
-    audio_path : str, pathlib.Path
-        A path to an audio file.
-
-    Returns
-    -------
-    spect_fname : pathlib.Path
-        Sound filename with extension added.
-        Default extension is :data:`vocalpy.constants.SPECT_FILE_EXT`.
-
-    Notes
-    -----
-    Adding an extension to the audio path
-    (instead of changing it)
-    makes it possible to recover the audio path
-    from the spectrogram path.
-    Adding a longer extension `.spect.npz`
-    makes it less likely that the spectrogram file
-    will overwrite an existing `.npz` file.
-    """
-    audio_path = pathlib.Path(audio_path)
-    return audio_path.name + vocalpy.constants.SPECT_FILE_EXT
 
 
 def validate_sound(sound: Sound | AudioFile | Sequence[Sound | AudioFile]) -> None:
