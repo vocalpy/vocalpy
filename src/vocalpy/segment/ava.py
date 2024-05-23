@@ -519,4 +519,4 @@ def ava(
     if onsets_sample[-1] + lengths[-1] > sound.samples:
         # set length to be "until the end of the sound"
         lengths[-1] = sound.samples - onsets_sample[-1]
-    return Segments(start_inds=onsets_sample, lengths=lengths, sound=sound)
+    return Segments(start_inds=onsets_sample, lengths=lengths, samplerate=sound.samplerate)
