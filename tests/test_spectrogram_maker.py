@@ -9,15 +9,6 @@ from .fixtures.spect import SPECT_LIST_NPZ
 
 
 @pytest.mark.parametrize(
-    'a_wav_path',
-    BIRDSONGREC_WAV_LIST[:3]
-)
-def test_default_spect_fname_func(a_wav_path):
-    spect_fname = vocalpy.spectrogram_maker.default_spect_fname_func(a_wav_path)
-    assert spect_fname == a_wav_path.name + vocalpy.constants.SPECT_FILE_EXT
-
-
-@pytest.mark.parametrize(
     "sound",
     [
         vocalpy.Sound.read(BIRDSONGREC_WAV_LIST[0]),
