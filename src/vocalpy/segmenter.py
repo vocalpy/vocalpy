@@ -104,7 +104,7 @@ class Segmenter:
 
 
     def __repr__(self):
-        return f"Segmenter(callback={self.callback}, params={self.params})"
+        return f"Segmenter(callback={self.callback.__qualname__}, params={self.params})"
 
     def segment(
         self,
