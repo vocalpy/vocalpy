@@ -223,4 +223,4 @@ def meansquared(
     offsets_sample = offsets_sample[keep_these]
     lengths = offsets_sample - onsets_sample
 
-    return Segments(start_inds=onsets_sample, lengths=lengths, sound=sound)
+    return Segments(start_inds=onsets_sample, lengths=lengths, samplerate=sound.samplerate)
