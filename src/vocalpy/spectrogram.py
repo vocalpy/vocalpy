@@ -76,7 +76,7 @@ def spectrogram(
         S = librosa.amplitude_to_db(np.abs(S))
         t = librosa.frames_to_time(frames=np.arange(S.shape[-1]), sr=sound.samplerate, hop_length=hop_length)
         f = librosa.fft_frequencies(sr=sound.samplerate, n_fft=n_fft)
-        spect = Spectrogram(data=S, frequencies=f, times=t, audio_path=sound.path)
+        spect = Spectrogram(data=S, frequencies=f, times=t)
     elif method == "sat-multitaper":
         spect: Spectrogram = spectral.sat_multitaper(sound, n_fft, hop_length)
     elif method == "soundsig-spectro":
