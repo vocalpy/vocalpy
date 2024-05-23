@@ -164,7 +164,6 @@ class SpectrogramMaker:
             if isinstance(sound_, AudioFile):
                 sound_ = Sound.read(sound_.path)
             spect = self.callback(sound_, **self.params)
-            spect.audio_path = sound_.path
             return spect
 
         if isinstance(sound, (Sound, AudioFile)):
@@ -183,74 +182,3 @@ class SpectrogramMaker:
                 return graph.compute()
         else:
             return spects
-
-    def write(
-        self,
-        sound: Sound | AudioFile | Sequence[Sound | AudioFile],
-        dir_path: str | pathlib.Path,
-        parallelize: bool = True,
-        namer: Callable = default_spect_fname_func,
-    ) -> SpectrogramFile | List[SpectrogramFile]:
-        """Make spectrogram(s) from audio, and write to file.
-        Writes directly to file without returning the spectrograms,
-        so that datasets can be generated that are too big
-        to fit in memory.
-
-        Makes the spectrograms with `self.callback`
-        using the parameters `self.params`.
-
-        Takes as input :class:`vocalpy.Sound` or :class:`vocalpy.AudioFile`,
-        or a sequence of either,
-        and returns either a :class:`vocalpy.SpectrogramFile`
-        (given a single :class:`vocalpy.Sound` or :class:`vocalpy.AudioFile` instance)
-        or a list of :class:`vocalpy.Spectrogram` instances (given a sequence).
-
-        Parameters
-        ----------
-        sound: vocalpy.Sound, vocalpy.AudioFile, a sequence of either, or a Dataset
-            Source of audio used to make spectrograms.
-        dir_path : string, pathlib.Path
-            The directory where the spectrogram files should be saved.
-        namer : callable
-            Function or class that determines spectrogram file name
-            from audio file name. Default is
-            :func:`vocalpy.domain_model.services.spectrogram_maker.default_spect_name_func`.
-
-        Returns
-        -------
-        spectrogram_file : SpectrogramFile, list of SpectrogramFile
-            The file(s) containing the spectrogram(s).
-        """
-        validate_sound(sound)
-        dir_path = pathlib.Path(dir_path)
-        if not dir_path.exists() or not dir_path.is_dir():
-            raise NotADirectoryError(f"`dir_path` not found or not recognized as a directory:\n{dir_path}")
-
-        # define nested function so vars are in scope and ``dask`` can call it
-        def _to_spect_file(sound_):
-            """Compute a `Spectrogram` from an `Sound` instance,
-            using self.callback"""
-            if isinstance(sound_, AudioFile):
-                sound_ = Sound.read(sound_.path)
-            spect = self.callback(sound_, **self.params)
-            spect_fname = namer(sound_.path)
-            spect_path = dir_path / spect_fname
-            spect_file = spect.write(spect_path)
-            return spect_file
-
-        if isinstance(sound, (Sound, AudioFile)):
-            return _to_spect_file(sound)
-
-        spect_files = []
-        for sound_ in sound:
-            if parallelize:
-                spect_files.append(dask.delayed(_to_spect_file(sound_)))
-            else:
-                spect_files.append(_to_spect_file(sound_))
-
-        if parallelize:
-            graph = dask.delayed()(spect_files)
-            with dask.diagnostics.ProgressBar():
-                return graph.compute()
-        else:
-            return spect_files
