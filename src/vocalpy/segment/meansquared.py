@@ -182,9 +182,7 @@ def meansquared(
         # (and probably externally)
         from .. import Sound
 
-        sound_copy = Sound(
-            data=(sound.data * scale_val).astype(scale_dtype), samplerate=sound.samplerate
-        )
+        sound_copy = Sound(data=(sound.data * scale_val).astype(scale_dtype), samplerate=sound.samplerate)
         meansquared_ = signal.audio.meansquared(sound_copy, freq_cutoffs, smooth_win)
     else:
         meansquared_ = signal.audio.meansquared(sound, freq_cutoffs, smooth_win)
