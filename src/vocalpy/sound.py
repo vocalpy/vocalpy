@@ -33,9 +33,6 @@ class Sound:
         Duration of the sound in seconds.
         Determined from the last dimension of ``data``
         and the ``samplerate``.
-    path : pathlib.Path
-        The path to the audio file that this
-        :class:`vocalpy.Sound` was read from.
 
     Examples
     --------
@@ -52,7 +49,6 @@ class Sound:
         self,
         data: npt.NDArray,
         samplerate: int,
-        path: str | pathlib.Path | None = None,
     ):
         if not isinstance(data, np.ndarray):
             raise TypeError(f"Sound array `data` should be a numpy array, " f"but type was {type(data)}.")
@@ -80,10 +76,6 @@ class Sound:
             raise ValueError(f"Value of ``samplerate`` must be a positive integer, but was {samplerate}.")
         self.samplerate = samplerate
 
-        if path is not None:
-            path = pathlib.Path(path)
-        self.path = path
-
     @property
     def channels(self):
         return self.data.shape[0]
@@ -100,8 +92,7 @@ class Sound:
         return (
             f"vocalpy.{self.__class__.__name__}("
             f"data={reprlib.repr(self.data)}, "
-            f"samplerate={reprlib.repr(self.samplerate)}, "
-            f"path={self.path})"
+            f"samplerate={reprlib.repr(self.samplerate)})"
         )
 
     def __eq__(self, other):
@@ -111,7 +102,6 @@ class Sound:
             [
                 np.array_equal(self.data, other.data),
                 self.samplerate == other.samplerate,
-                self.path == other.path,
             ]
         )
 
@@ -166,7 +156,7 @@ class Sound:
             data, samplerate = soundfile.read(path, always_2d=True, dtype=dtype, **kwargs)
             data = data.transpose((1, 0))  # dimensions (samples, channels) -> (channels, samples)
 
-        return cls(data=data, samplerate=samplerate, path=path)
+        return cls(data=data, samplerate=samplerate)
 
     def write(self, path: str | pathlib.Path, **kwargs) -> AudioFile:
         """Write audio data to a file.
@@ -200,7 +190,6 @@ class Sound:
             yield Sound(
                 data=channel[np.newaxis, ...],
                 samplerate=self.samplerate,
-                path=self.path,
             )
 
     def __getitem__(self, key):
@@ -209,7 +198,6 @@ class Sound:
                 return Sound(
                     data=self.data[key],
                     samplerate=self.samplerate,
-                    path=self.path,
                 )
             except IndexError as e:
                 raise IndexError(f"Invalid integer or slice for Sound with {self.data.shape[0]} channels: {key}") from e
