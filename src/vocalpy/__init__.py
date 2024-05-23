@@ -22,7 +22,7 @@ from .feature_file import FeatureFile
 from .features import Features
 from .params import Params
 from .segmenter import Segmenter
-from .segments import Segment, Segments
+from .segments import Segments
 from .sequence import Sequence
 from .sound import Sound
 from .spectrogram import spectrogram
