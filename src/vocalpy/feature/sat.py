@@ -476,8 +476,11 @@ def similarity_features(
 
     Returns
     -------
-    features : xarray.Dataset
-        An xarray.Dataset where the data variables are the features,
+    features : vocalpy.Features
+        :class:`vocalpy.Features` instance with
+        :attr:`~vocalpy.Features.data` attribute that is
+        an :class:`xarray.Dataset`,
+        where the data variables are the features,
         and the coordinate is the time for each time bin.
     """
     if not 0.0 < freq_range <= 1.0:
