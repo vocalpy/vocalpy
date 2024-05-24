@@ -494,7 +494,7 @@ def ava(
         return Segments(
             np.array([]).astype(int),
             np.array([]).astype(int),
-            sound,
+            sound.samplerate,
         )
 
     # Throw away inter-segment intervals that are too short, as is done in Jourjine et al., 2023
