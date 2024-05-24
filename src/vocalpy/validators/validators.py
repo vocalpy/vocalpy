@@ -144,14 +144,3 @@ def have_same_dtype(arr1: npt.NDArray, arr2: npt.NDArray, name1: str | None = No
         raise ValueError(f"Two arrays {names}must have the same dtype, but dtypes were: {arr1.dtype} and {arr2.dtype}")
 
     return True
-
-
-def is_sound_or_segment(source: Sound | Segment) -> bool:
-    from vocalpy import Segment, Sound
-
-    if not isinstance(source, (Sound, Segment)):
-        raise TypeError(
-            f"`source` must be an instance of either a `Sound` or a `Segment`, but type was: {type(source)}"
-        )
-
-    return True
