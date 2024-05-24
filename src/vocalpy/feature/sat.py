@@ -17,9 +17,9 @@ import numpy.typing as npt
 import xarray as xr
 
 if TYPE_CHECKING:
-    from .. import Features, Segment, Sound, Spectrogram
+    from .. import Features, Sound, Spectrogram
 
-from .. import spectral, validators
+from .. import spectral
 
 # get small number to avoid potential divide by zero errors
 EPS = np.finfo(np.double).eps
@@ -428,7 +428,7 @@ def _get_spectral_derivatives(
 
 
 def similarity_features(
-    source: Sound | Segment,
+    sound: Sound,
     n_fft=400,
     hop_length=40,
     freq_range=0.5,
@@ -443,10 +443,8 @@ def similarity_features(
 
     Parameters
     ----------
-    source : Sound or Segment
-        A :class:`Sound` loaded from a file,
-        or a :class:`Segment` produced by an algorithm
-        in :mod:`vocalpy.segment`.
+    sound : Sound
+        A :class:`Sound`.
         Multi-channel sounds are supported.
     n_fft : int
         FFT window size.
@@ -482,8 +480,6 @@ def similarity_features(
         An xarray.Dataset where the data variables are the features,
         and the coordinate is the time for each time bin.
     """
-    validators.is_sound_or_segment(source)
-
     if not 0.0 < freq_range <= 1.0:
         raise ValueError(
             f"`freq_range` must be a float greater than zero and less than or equal to 1.0, but was: {freq_range}. "
@@ -491,7 +487,7 @@ def similarity_features(
             f"to use when extracting features with a frequency range"
         )
 
-    power_spectrogram, spectra1, spectra2 = spectral.sat._sat_multitaper(source, n_fft, hop_length)
+    power_spectrogram, spectra1, spectra2 = spectral.sat._sat_multitaper(sound, n_fft, hop_length)
 
     # in SAT, freq_range means "use first `freq_range` percent of frequencies". Next line finds that range.
     f = power_spectrogram.frequencies
@@ -501,7 +497,7 @@ def similarity_features(
     # ---- now extract features
     # -------- features that require sound
     pitch_ = pitch(
-        source, min_freq, fmax_yin, frame_length=n_fft, hop_length=hop_length, trough_threshold=trough_threshold
+        sound, min_freq, fmax_yin, frame_length=n_fft, hop_length=hop_length, trough_threshold=trough_threshold
     )
 
     # -------- features that require power spectrogram and max_freq
@@ -509,7 +505,7 @@ def similarity_features(
     entropy_ = entropy(power_spectrogram, min_freq, max_freq)
 
     # -------- features that require cepstrogram
-    cepstrogram, quefrencies = _get_cepstral(spectra1, n_fft, source.samplerate)
+    cepstrogram, quefrencies = _get_cepstral(spectra1, n_fft, sound.samplerate)
     goodness_ = goodness_of_pitch(cepstrogram, quefrencies, max_F0)
 
     # -------- features that spectral derivatives
@@ -517,7 +513,7 @@ def similarity_features(
     FM = frequency_modulation(dSdt, dSdf)
     AM = amplitude_modulation(dSdt)
 
-    channels = np.arange(source.data.shape[0])
+    channels = np.arange(sound.data.shape[0])
     data = xr.Dataset(
         {
             "amplitude": (["channel", "time"], amp_),
