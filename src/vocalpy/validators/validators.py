@@ -1,16 +1,11 @@
 """Validation functions."""
 from __future__ import annotations
 
-from typing import TYPE_CHECKING
-
 import numpy as np
 import numpy.typing as npt
 
-if TYPE_CHECKING:
-    from vocalpy import Segment, Sound
 
-
-__all__ = ["have_same_dtype", "is_1d_ndarray", "is_valid_boundaries_array", "is_sound_or_segment"]
+__all__ = ["have_same_dtype", "is_1d_ndarray", "is_valid_boundaries_array"]
 
 
 def is_1d_ndarray(y: npt.NDArray, name: str | None = None) -> bool:
