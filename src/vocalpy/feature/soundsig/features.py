@@ -20,7 +20,7 @@ from .fundamental import estimate_f0
 from .sound import temporal_envelope
 
 if TYPE_CHECKING:
-    from vocalpy import Sound
+    from vocalpy import Features, Sound
 
 
 def temporal_envelope_features(
@@ -387,7 +387,7 @@ def predefined_acoustic_features(
     scale_val: int | float = 2**15,
     scale_dtype: npt.DTypeLike = np.int16,
     ftr_groups: SoundsigFeatureGroups | Sequence[SoundsigFeatureGroups] = ("temporal", "spectral", "fundamental"),
-) -> xr.Dataset:
+) -> Features:
     """Compute predefined acoustic features (PAFs)
     used to analyze the vocal repertoire of the domesticated zebra finch,
     as described in [1]_.
@@ -424,7 +424,12 @@ def predefined_acoustic_features(
 
     Returns
     -------
-    features : Features
+    features : vocalpy.Features
+        A :class:`vocalpy.Features` instance with
+        :attr:`~vocalpy.Features.data` attribute that is
+        an :class:`xarray.Dataset`,
+        where the data variables are the features,
+        and the coordinate is the channel.
 
     Notes
     -----
@@ -486,4 +491,7 @@ def predefined_acoustic_features(
         coords={"channel": channels},
     )
 
-    return data
+    from ... import Features  # avoid circular import
+
+    features = Features(data=data)
+    return features
