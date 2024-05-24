@@ -1,7 +1,6 @@
 """Classes that represent line segments returned by segmenting algorithms."""
 from __future__ import annotations
 
-import io
 import json
 import numbers
 import pathlib
@@ -10,10 +9,6 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
-import pandas as pd
-import xarray as xr
-
-from .sound import Sound
 
 if TYPE_CHECKING:
     import vocalpy
@@ -54,11 +49,68 @@ class Segments:
     (as opposed to segmenting algorithms that return a set of boxes).
 
     >>> sounds = voc.example('bfsongrepo', return_type='sound')
-    >>> segments = voc.segment.meansquared(sounds[0], threshold=1500, min_dur=0.2, min_silent_dur=0.02)
+    >>> sound = sounds[0]
+    >>> segments = voc.segment.meansquared(sound, threshold=1500, min_dur=0.2, min_silent_dur=0.02)
     >>> segments
-    Segments(start_inds=array([ 13050...3127, 225700]), lengths=array([1032, ..., 2074, 2640]), labels=array(['', ''..., dtype='<U1'))  # noqa
+    Segments(start_inds=array([ 22293...4425, 220495]), lengths=array([ 8012,... 6935,  7896]), samplerate=32000, labels=['', '', '', '', '', '', ...])  # noqa
 
-    :class:`~vocalpy.Segments` can be used to compute metrics for segmentation
+    Because audio data is a digital signal with discrete samples,
+    segments are defined in terms of start indices and lengths.
+    Thus, the start index of each segment is the index of the sample
+    where it starts--also known as a "boundary"--and the length
+    is given in number of samples.
+
+    However, we often want to think of segments times in terms of seconds.
+    We can get the start times of segments in seconds with the :attr:`~Segments.start_times`
+    property, and we can get the duration of segments in seconds with the
+    :attr:`~Segments.durations` property.
+
+    >>> segments.start_times
+    array([0.69665625, 1.801375  , 2.26390625, 2.7535625 , 3.5885    ,
+           6.38828125, 6.89046875])
+    >>> segments.durations
+    array([0.250375  , 0.33278125, 0.31      , 0.23625   , 0.308625  ,
+           0.21671875, 0.24675   ])
+
+    This is possible because each set of :class:`Segments` has a
+    :attr:`~Segments.samplerate` attribute, that can be used to convert
+    from sample numbers to seconds.
+    This attribute is taken from the :class:`vocalpy.Sound` that
+    was segmented to produce the :class:`Segments` in the first place.
+
+    Depending on the segmenting algorithm,
+    the start of one segment may not be the same as the end of
+    the segment that precedes it.
+    In this case we may want to find where the segments stop.
+    We can do so with the :attr:`~Segments.stop_ind`
+    and :attr:`~Segments.stop_ind` properties.
+
+    To actually get a :class:`Sound` for every segment in a set of :class:`Segments`,
+    we can pass the :class:`Segments` into to the :meth:`vocalpy.Sound.segment` method.
+
+    >>> segment_sounds = sound.segment(segments)
+
+    This might seem verbose, but it has a couple of advantages.
+    The first is that the :class:`Segments` can be saved in a json file,
+    so they can be loaded again and used to segment a sound
+    without needed to re-run the segmentation.
+    You can use a naming convention so that each sound file
+    has a segments file paired with it: e.g., if the
+    sound file is named ``"mouse1-day1-bout1.wav"``,
+    then the json file could be named
+    ``"mouse1-day1-bout1.segments.json"``.
+
+    >>> segments.to_json(path='mouse1-day1-bout1.segments.json')
+
+    A set of :class:`Segments` is then loaded with the
+    :meth:`~Segments.from_json` method.
+
+    >>> segments = voc.Segments.from_json(path='mouse1-day1-bout1.segments.json')
+
+    The second advantage of representing :class:`Segments` separately
+    is that they can then be used to compute metrics for segmentation.
+    Note that here we are using the :attr:`~Segments.all_times` property,
+    that gives us all the boundary times in seconds.
 
     >>> sounds = voc.example('bfsongrepo', return_type='sound')
     >>> segments = voc.segment.meansquared(sound, threshold=1500, min_dur=0.2, min_silent_dur=0.02)
@@ -66,8 +118,6 @@ class Segments:
     >>> ref = np.sorted(np.concatenate(annots[0].seq.onsets, annot[0].seq.offsets))
     >>> hyp = segments.all_times
     >>> prec, _ = voc.metrics.segmentation.ir.precision(reference=ref, hypothesis=hyp)
-
-    The segments can be saved to a json file.
 
 
     See Also
@@ -119,7 +169,9 @@ class Segments:
                 raise ValueError("Values of `lengths` for `Segments` must all be positive.")
 
         if not isinstance(samplerate, int):
-            raise TypeError
+            raise TypeError(f"Type of ``samplerate`` must be int but was: {type(samplerate)}")
+        if not samplerate > 0:
+            raise ValueError(f"Value of ``samplerate`` must be a positive integer, but was {samplerate}.")
 
         if labels is not None:
             if not isinstance(labels, list):
