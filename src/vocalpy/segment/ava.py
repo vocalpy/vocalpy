@@ -513,4 +513,10 @@ def ava(
     onsets_sample = (onsets * sound.samplerate).astype(int)
     offsets_sample = (offsets * sound.samplerate).astype(int)
     lengths = offsets_sample - onsets_sample
+    # Handle edge case where we decide last time bin is offset,
+    # and the time of the last time bin in `t` (as computed from `dt`) is greater than duration of sound.
+    # Fixes https://github.com/vocalpy/vocalpy/issues/167
+    if onsets_sample[-1] + lengths[-1] > sound.samples:
+        # set length to be "until the end of the sound"
+        lengths[-1] = sound.samples - onsets_sample[-1]
     return Segments(start_inds=onsets_sample, lengths=lengths, sound=sound)
