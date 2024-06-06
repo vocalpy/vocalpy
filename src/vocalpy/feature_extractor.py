@@ -8,9 +8,9 @@ from typing import TYPE_CHECKING, Mapping, Union
 import dask
 import dask.diagnostics
 
-
 if TYPE_CHECKING:
     from . import Features, Params, Segment, Segments, Sound
+
     FeatureSource = Union[Sound, list[Sound], Segment, list[Segment], Segments]
 
 
@@ -63,7 +63,7 @@ class FeatureExtractor:
         return f"FeatureExtractor(callback={self.callback.__qualname__}, params={self.params})"
 
     def extract(self, source: FeatureSource, parallelize: bool = True) -> Features | list[Features]:
-        from . import Segment, Segments, Sound, Features
+        from . import Features, Segment, Segments, Sound
 
         if not isinstance(source, (list, Segment, Segments, Sound)):
             raise TypeError(
@@ -87,13 +87,9 @@ class FeatureExtractor:
         # define nested function so vars are in scope and ``dask`` can call it
         def _to_features(source_: FeatureSource) -> Features:
             if isinstance(source_, Segment):
-                features = Features(
-                    data=self.callback(source_.sound, **self.params)
-                )
+                features = Features(data=self.callback(source_.sound, **self.params))
             elif isinstance(source_, Sound):
-                features = Features(
-                    self.callback(source_, **self.params)
-                )
+                features = Features(self.callback(source_, **self.params))
             return features
 
         if isinstance(source, (Sound, Segment)):
