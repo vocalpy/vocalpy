@@ -304,6 +304,12 @@ def precision_recall_fscore(
     if metric not in {"precision", "recall", "fscore"}:
         raise ValueError(f'``metric`` must be one of: {{"precision", "recall", "fscore"}} but was: {metric}')
 
+    # edge case: if both reference and hypothesis have a length of zero, we have a score of 1.0
+    # but no hits. This is to avoid punishing the correct hypothesis that there are no boundaries.
+    # See https://github.com/vocalpy/vocalpy/issues/170
+    if len(reference) == 0 and len(hypothesis) == 0:
+        return 1.0, 0, IRMetricData(hits_ref=np.array([]), hits_hyp=np.array([]), diffs=np.array([]))
+
     # If we have no boundaries, we get no score.
     if len(reference) == 0 or len(hypothesis) == 0:
         return 0.0, 0, IRMetricData(hits_ref=np.array([]), hits_hyp=np.array([]), diffs=np.array([]))
