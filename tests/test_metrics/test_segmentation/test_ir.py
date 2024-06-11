@@ -499,19 +499,6 @@ IR_METRICS_SINGLE_BOUNDARY_ARRAY_PARAMS_VALS = [
         expected_fscore=0.5454545454545454,
     ),
     # # edge cases
-    # no boundaries in either
-    IRMetricSingleBoundaryArrayTestCase(
-        reference=np.array([]),
-        hypothesis=np.array([]),
-        tolerance=0.5,
-        decimals=3,
-        expected_hits_ref=np.array([]),
-        expected_hits_hyp=np.array([]),
-        expected_diffs=np.array([]),
-        expected_precision=0.0,
-        expected_recall=0.0,
-        expected_fscore=0.0,
-    ),
     # no boundaries in reference
     IRMetricSingleBoundaryArrayTestCase(
         reference=np.array([]),
@@ -564,6 +551,20 @@ IR_METRICS_SINGLE_BOUNDARY_ARRAY_PARAMS_VALS = [
         expected_precision=1.0,
         expected_recall=0.5,
         expected_fscore=(2 * 1.0 * 0.5) / (1 + 0.5),  # 0.6666666666666666 (repeating)
+    ),
+    # this is a regression test
+    # see https://github.com/vocalpy/vocalpy/issues/170
+    IRMetricSingleBoundaryArrayTestCase(
+        reference=np.array([]),
+        hypothesis=np.array([]),
+        tolerance=None,
+        decimals=None,
+        expected_hits_ref=np.array([]),
+        expected_hits_hyp=np.array([]),
+        expected_diffs=np.array([]),
+        expected_precision=1.0,
+        expected_recall=1.0,
+        expected_fscore=1.0,
     ),
 ]
 
