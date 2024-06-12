@@ -4,6 +4,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+### Fixed
+- Handle edge case in `vocalpy.metrics.segmentation.ir.precision_recall_fscore`, 
+  where we were returning a score of 0.0 if both `reference` and `hypothesis` had no
+  boundaries [#171](https://github.com/vocalpy/vocalpy/pull/171).
+  We now return a score of 1.0, but we do not report any "hits"
+  (since there are no boundaries to correctly detect).
+  This avoids punishing a correct hypothesis of "no boundaries".
+  Fixes [#170](https://github.com/vocalpy/vocalpy/issues/170).
+
 ## [0.9.2]
 ### Fixed
 - Handle edge case in `vocalpy.segment.ava`, that could sometimes 
