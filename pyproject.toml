@@ -14,25 +14,25 @@ classifiers = [
         'Development Status :: 5 - Production/Stable',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
-        'Programming Language :: Python :: 3.9',
         'Programming Language :: Python :: 3.10',
         'Programming Language :: Python :: 3.11',
+        'Programming Language :: Python :: 3.12',
         'Programming Language :: Python :: Implementation :: CPython'
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 readme = "README.md"
 license = {file = "LICENSE"}
 dependencies = [
     "attrs >=23.1.0",
-    "crowsetta >=5.0.2",
+    "crowsetta >=5.0.3",
     "dask[dataframe] >=2.10.1",
     "h5netcdf >= 1.3.0",
     "librosa >= 0.10.0.post2",
     "matplotlib >=3.7.1",
-    "numpy >=1.22.0",
+    "numpy >=1.24.0, <2.0",
     "pandas >= 1.4.0",
     "pooch >= 1.8.1",
-    "scipy >=1.8.0",
+    "scipy >=1.9.0",
     "SoundFile >=0.12.1",
     "xarray >= 2023.11.0",
 ]
