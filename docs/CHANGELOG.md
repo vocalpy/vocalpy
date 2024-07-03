@@ -4,6 +4,17 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+### Changed
+- Change range of Pythons that vocalpy works with to 3.10-3.12
+  [#108](https://github.com/vocalpy/vocalpy/pull/108).
+  Fixes [#102](https://github.com/vocalpy/vocalpy/issues/102).
+
+### Fixed
+- Put temporary upper bound on numpy version
+  [#108](https://github.com/vocalpy/vocalpy/pull/108).
+  Fixes [#173](https://github.com/vocalpy/vocalpy/issues/173).
+
 ## [0.9.3]
 ### Fixed
 - Handle edge case in `vocalpy.metrics.segmentation.ir.precision_recall_fscore`, 
