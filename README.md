@@ -64,11 +64,11 @@ and will be published in the proceedings.
   thanks to [evfuncs](https://github.com/NickleDave/evfuncs).
 
 ```python
->> > import vocalpy as voc
->> > data_dir = ('tests/data-for-tests/source/audio_wav_annot_birdsongrec/Bird0/Wave/')
->> > wav_paths = voc.paths.from_dir(data_dir, 'wav')
->> > audios = [voc.Sound.read(wav_path) for wav_path in wav_paths]
->> > print(audios[0])
+>>> import vocalpy as voc
+>>> data_dir = ('tests/data-for-tests/source/audio_wav_annot_birdsongrec/Bird0/Wave/')
+>>> wav_paths = voc.paths.from_dir(data_dir, 'wav')
+>>> audios = [voc.Sound.read(wav_path) for wav_path in wav_paths]
+>>> print(audios[0])
 vocalpy.Sound(data=array([3.0517...66210938e-04]), samplerate=32000, channels=1),
 path = tests / data -
 for -tests / source / audio_wav_annot_birdsongrec / Bird0 / Wave / 0.wav)
@@ -108,16 +108,16 @@ seq=<Sequence with 57 segments>), path=PosixPath('tests/data-for-tests/source/au
 #### A `Segmenter` for segmentation into sequences of units
 
 ```python
->> > import evfuncs
->> > import vocalpy as voc
->> > data_dir = ('tests/data-for-tests/source/audio_cbin_annot_notmat/gy6or6/032312/')
->> > cbin_paths = voc.paths.from_dir(data_dir, 'cbin')
->> > audios = [voc.Sound.read(cbin_path) for cbin_path in cbin_paths]
->> > segment_params = {'threshold': 1500, 'min_syl_dur': 0.01, 'min_silent_dur': 0.006}
->> > segmenter = voc.Segmenter(callback=evfuncs.segment_song, segment_params=segment_params)
->> > seqs = segmenter.segment(audios, parallelize=True)
+>>> import evfuncs
+>>> import vocalpy as voc
+>>> data_dir = ('tests/data-for-tests/source/audio_cbin_annot_notmat/gy6or6/032312/')
+>>> cbin_paths = voc.paths.from_dir(data_dir, 'cbin')
+>>> audios = [voc.Sound.read(cbin_path) for cbin_path in cbin_paths]
+>>> segment_params = {'threshold': 1500, 'min_syl_dur': 0.01, 'min_silent_dur': 0.006}
+>>> segmenter = voc.Segmenter(callback=evfuncs.segment_song, segment_params=segment_params)
+>>> seqs = segmenter.segment(audios, parallelize=True)
 [  ########################################] | 100% Completed | 122.91 ms
->> > print(seqs[1])
+>>> print(seqs[1])
 Sequence(units=[Unit(onset=2.19075, offset=2.20428125, label='-', audio=None, spectrogram=None),
                 Unit(onset=2.35478125, offset=2.38815625, label='-', audio=None, spectrogram=None),
                 Unit(onset=2.8410625, offset=2.86715625, label='-', audio=None, spectrogram=None),
@@ -148,12 +148,12 @@ for -tests / source / audio_cbin_annot_notmat / gy6or6 / 032312 / gy6or6_baselin
 #### A `SpectrogramMaker` for computing spectrograms
 
 ```python
->> > import vocalpy as voc
->> > wav_paths = voc.paths.from_dir('wav')
->> > audios = [voc.Sound(wav_path) for wav_path in wav_paths]
->> > spect_params = {'fft_size': 512, 'step_size': 64}
->> > spect_maker = voc.SpectrogramMaker(spect_params=spect_params)
->> > spects = spect_maker.make(audios, parallelize=True)
+>>> import vocalpy as voc
+>>> wav_paths = voc.paths.from_dir('wav')
+>>> audios = [voc.Sound(wav_path) for wav_path in wav_paths]
+>>> spect_params = {'fft_size': 512, 'step_size': 64}
+>>> spect_maker = voc.SpectrogramMaker(spect_params=spect_params)
+>>> spects = spect_maker.make(audios, parallelize=True)
 ```
 
 ### `Dataset`s you flexibly build from pipelines and convert to databases
@@ -175,24 +175,24 @@ for -tests / source / audio_cbin_annot_notmat / gy6or6 / 032312 / gy6or6_baselin
 #### A `SequenceDataset` for common analyses of sequences of units
 
 ```python
->> > import evfuncs
->> > import vocalpy as voc
->> > data_dir = 'tests/data-for-tests/source/audio_cbin_annot_notmat/gy6or6/032312/'
->> > cbin_paths = voc.paths.from_dir(data_dir, 'cbin')
->> > audios = [voc.Sound.read(cbin_path) for cbin_path in cbin_paths]
->> > segment_params = {
+>>> import evfuncs
+>>> import vocalpy as voc
+>>> data_dir = 'tests/data-for-tests/source/audio_cbin_annot_notmat/gy6or6/032312/'
+>>> cbin_paths = voc.paths.from_dir(data_dir, 'cbin')
+>>> audios = [voc.Sound.read(cbin_path) for cbin_path in cbin_paths]
+>>> segment_params = {
   'threshold': 1500,
   'min_syl_dur': 0.01,
   'min_silent_dur': 0.006,
 }
->> > segmenter = voc.Segmenter(
+>>> segmenter = voc.Segmenter(
   callback=evfuncs.segment_song,
   segment_params=segment_params
 )
->> > seqs = segmenter.segment(audios)
->> > seq_dataset = voc.dataset.SequenceDataset(sequences=seqs)
->> > seq_dataset.to_sqlite(db_name='gy6or6-032312.db', replace=True)
->> > print(seq_dataset)
+>>> seqs = segmenter.segment(audios)
+>>> seq_dataset = voc.dataset.SequenceDataset(sequences=seqs)
+>>> seq_dataset.to_sqlite(db_name='gy6or6-032312.db', replace=True)
+>>> print(seq_dataset)
 SequenceDataset(sequences=[Sequence(units=[Unit(onset=2.18934375, offset=2.21, label='-', audio=None, spectrogram=None),
                                            Unit(onset=2.346125, offset=2.373125, label='-', audio=None,
                                                 spectrogram=None), Unit(onset=2.50471875, offset=2.51546875,
@@ -200,10 +200,10 @@ SequenceDataset(sequences=[Sequence(units=[Unit(onset=2.18934375, offset=2.21, l
                                            Unit(onset=2.81909375, offset=2.84740625, label='-', audio=None,
                                                 spectrogram=None),
                                            ...
-                                           >> >  # test that we can load the dataset
-                                          >> > seq_dataset_loaded = voc.dataset.SequenceDataset.from_sqlite(
+                                          >>>  # test that we can load the dataset
+                                          >>> seq_dataset_loaded = voc.dataset.SequenceDataset.from_sqlite(
   db_name='gy6or6-032312.db')
-                                                                    >> > seq_dataset_loaded == seq_dataset
+                                                                    >>> seq_dataset_loaded == seq_dataset
 True
 ```
 
