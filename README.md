@@ -200,7 +200,7 @@ SequenceDataset(sequences=[Sequence(units=[Unit(onset=2.18934375, offset=2.21, l
                                            Unit(onset=2.81909375, offset=2.84740625, label='-', audio=None,
                                                 spectrogram=None),
                                            ...
-                                           >>>  # test that we can load the dataset
+                                          >>>  # test that we can load the dataset
                                           >>> seq_dataset_loaded = voc.dataset.SequenceDataset.from_sqlite(
   db_name='gy6or6-032312.db')
                                                                     >>> seq_dataset_loaded == seq_dataset
