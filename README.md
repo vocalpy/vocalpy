@@ -14,7 +14,7 @@
 [![PyPI Python versions](https://img.shields.io/pypi/pyversions/vocalpy)](https://img.shields.io/pypi/pyversions/vocalpy)
 [![codecov](https://codecov.io/gh/vocalpy/vocalpy/branch/main/graph/badge.svg?token=TXtNTxXKmb)](https://codecov.io/gh/vocalpy/vocalpy)
 <!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-1-orange.svg?style=flat-square)](#contributors-)
+[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
 <!-- ALL-CONTRIBUTORS-BADGE:END -->
 
 There are many great software tools for researchers studying acoustic communication in animals[^1].
@@ -280,6 +280,7 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
   <tbody>
     <tr>
       <td align="center" valign="top" width="14.28%"><a href="https://github.com/ralphpeterson"><img src="https://avatars.githubusercontent.com/u/4031329?v=4?s=100" width="100px;" alt="Ralph Emilio Peterson"/><br /><sub><b>Ralph Emilio Peterson</b></sub></a><br /><a href="#ideas-ralphpeterson" title="Ideas, Planning, & Feedback">🤔</a> <a href="#userTesting-ralphpeterson" title="User Testing">📓</a> <a href="https://github.com/vocalpy/vocalpy/commits?author=ralphpeterson" title="Documentation">📖</a> <a href="https://github.com/vocalpy/vocalpy/issues?q=author%3Aralphpeterson" title="Bug reports">🐛</a> <a href="https://github.com/vocalpy/vocalpy/commits?author=ralphpeterson" title="Code">💻</a></td>
+      <td align="center" valign="top" width="14.28%"><a href="https://github.com/tkoyama010"><img src="https://avatars.githubusercontent.com/u/7513610?v=4?s=100" width="100px;" alt="Tetsuo Koyama"/><br /><sub><b>Tetsuo Koyama</b></sub></a><br /><a href="https://github.com/vocalpy/vocalpy/commits?author=tkoyama010" title="Documentation">📖</a></td>
     </tr>
   </tbody>
 </table>
