@@ -88,7 +88,7 @@ path=PosixPath('tests/data-for-tests/generated/spect_npz/0.wav.npz'), audio_path
 
 #### The `vocalpy.Annotation` data type
 
-- Load many different annotation formats using the vocalpy package [crowsetta](https://crowsetta.readthedocs.io/en/latest/)
+- Load many different annotation formats using the pyOpenSci package [crowsetta](https://crowsetta.readthedocs.io/en/latest/)
 
 ```python
 >>> import vocalpy as voc
