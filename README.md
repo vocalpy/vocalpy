@@ -13,9 +13,7 @@
 [![PyPI version](https://badge.fury.io/py/vocalpy.svg)](https://badge.fury.io/py/vocalpy)
 [![PyPI Python versions](https://img.shields.io/pypi/pyversions/vocalpy)](https://img.shields.io/pypi/pyversions/vocalpy)
 [![codecov](https://codecov.io/gh/vocalpy/vocalpy/branch/main/graph/badge.svg?token=TXtNTxXKmb)](https://codecov.io/gh/vocalpy/vocalpy)
-<!-- ALL-CONTRIBUTORS-BADGE:START - Do not remove or modify this section -->
-[![All Contributors](https://img.shields.io/badge/all_contributors-2-orange.svg?style=flat-square)](#contributors-)
-<!-- ALL-CONTRIBUTORS-BADGE:END -->
+[![All Contributors](https://img.shields.io/github/all-contributors/vocalpy/vocalpy?color=ee8449)](#contributors-)
 
 There are many great software tools for researchers studying acoustic communication in animals[^1].
 But our research groups work with a wide range of different data formats: for audio, for array data, for annotations. 
