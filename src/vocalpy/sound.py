@@ -145,7 +145,6 @@ class Sound:
                 # for consistency with soundfile,
                 # we scale the cbin int16 data to range [-1.0, 1.0] when we cast to float
                 # Next line is from https://stackoverflow.com/a/42544738/4906855, see comments there
-                # Fixes
                 data = data.astype(dtype) / 32768.0
             elif dtype == np.int16:
                 pass
@@ -164,8 +163,6 @@ class Sound:
 
     def write(self, path: str | pathlib.Path, **kwargs) -> AudioFile:
         """Write audio data to a file.
-
-        Uses the :func:`audiofile.write` function.
 
         Parameters
         ----------
