@@ -235,25 +235,47 @@ class TestSound:
     @pytest.mark.parametrize(
         'segfunc, kwargs, sound',
         [
-            (vocalpy.segment.meansquared, {}, vocalpy.example("bl26lb16.wav")),
-            # (vocalpy.segment.ava, {**vocalpy.segment.JOURJINEETAL2023}, vocalpy.example("jourjine-")),
+            (
+                vocalpy.segment.meansquared,
+                dict(threshold=5000, min_dur=0.02, min_silent_dur=0.004),
+                vocalpy.example("bl26lb16.wav", return_type="sound")
+            ),
+            (
+                vocalpy.segment.ava, 
+                {**vocalpy.segment.JOURJINEETAL2023}, 
+                vocalpy.example("deermouse-go.wav", return_type="sound")
+            ),
         ]
     )
-    def test_segment(self, segfunc, kwargs, sound,):
-        # sound = vocalpy.Sound.read(all_wav_paths)
+    def test_segment(self, segfunc, kwargs, sound):
         segments = segfunc(sound, **kwargs)
-        sounds = sound.segment(segments)
+        segsounds = sound.segment(segments)
         assert all([
             isinstance(sound, vocalpy.Sound)
-            for sound in sounds
+            for sound in segsounds
         ])
-        assert len(sounds) == len(segments)
+        assert len(segsounds) == len(segments)
+
+    @pytest.mark.parametrize(
+        'sound, wrong_segments, expected_exception',
+        [
+            (
+                vocalpy.example("bl26lb16.wav", return_type="sound"),
+                # a list is not a Segments instance, should raise a TypeError
+                [],
+                TypeError,
+            )
+        ]
+    )
+    def test_segment_raises(self, sound, wrong_segments, expected_exception):
+        with pytest.raises(expected_exception):
+            sound.segment(wrong_segments)
 
     @pytest.mark.parametrize(
         'start, stop, expected_clip_duration',
         [
-            (1.0, 2.0, 1.0),
-            (None, 1.0, 1.0),
+            (0.5, 0.75, 0.25),
+            (None, 0.75, 0.75),
             # if we just use these defaults we should get the same sound back
             (0., None, "sound_duration"),
         ]
@@ -277,12 +299,23 @@ class TestSound:
     @pytest.mark.parametrize(
         'start, stop, expected_exception',
         [
+            # start can't be int
             (1, None, TypeError),
+            # start can be negative
             (-1.0, None, ValueError),
+            # start can't be greater than duration of sound
+            (10000.0, None, ValueError),
+            # stop can't be int
             (0.0, 1, TypeError),
+            # stop can't be less than start
             (1.0, 0.5, ValueError),
+            # stop can't be negative (still because it's less than start)
             (0.0, -1.0, ValueError),
+            # stop can't be greater than duration of sound
+            (0., 10000.0, ValueError),
+            # stop can't be int -- make sure we check for this when start is None
             (None, 1, TypeError),
+            # stop can't be negative -- make sure we check for this when start is None
             (None, -1.0, ValueError),
         ]
     )
