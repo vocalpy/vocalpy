@@ -52,7 +52,7 @@ def birdsongrec_wav_list():
 
 
 @pytest.fixture(params=BIRDSONGREC_WAV_LIST)
-def a_birdsongrec_wav_path(request):
+def all_birdsongrec_wav_paths(request):
     return request.param
 
 
@@ -61,7 +61,7 @@ ALL_ZEBRA_FINCH_WAVS = sorted(ZEBRA_FINCH_WAV_DIR.glob('*.wav'))
 
 
 @pytest.fixture(params=ALL_ZEBRA_FINCH_WAVS)
-def a_zebra_finch_wav(request):
+def all_zebra_finch_wav_paths(request):
     """Parametrized fixture that returns
 
     Used for testing :func:`vocalpy.spectral.sat`
