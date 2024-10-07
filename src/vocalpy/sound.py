@@ -79,11 +79,29 @@ class Sound:
     >>> print(sound_clip.duration)
     1.4
 
-    If instead we want to segment an audio file 
+    If we want to clip from a start time to the end of the sound, 
+    we can just specify a time for `start`
+
+    >>> sound = voc.example("bl26lb16.wav", return_type="sound")
+    >>> sound_clip = sound.clip(0.5)
+    >>> print(sound_clip.duration)
+    1.4
+
+    Likewise, if we want to clip from the start of the sound
+    we can just specify a time for `stop`.
+    Notice that we need to use a keyword argument here,
+    since `start` is the first argument to.
+
+    >>> sound = voc.example("bl26lb16.wav", return_type="sound")
+    >>> sound_clip = sound.clip(stop=0.5)
+    >>> print(sound_clip.duration)
+    0.5
+
+    If we want to segment an audio file 
     into periods of animal sounds and periods of background,
     we can do that with one of the algorithms in 
-    :mod:`vocalpy.segment`. This will give us a set of 
-    line :class:`~vocalpy.Segments` that we can then pass into 
+    :mod:`vocalpy.segment`. This will give us a  
+    :class:`~vocalpy.Segments` instance that we can then pass into 
     the :meth:`~vocalpy.Sound.segment` method to get back 
     a :class:`list` of :class:`~vocalpy.Sound` instances,
     one for each segment.
