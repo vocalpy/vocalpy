@@ -102,6 +102,17 @@ Adapted under Creative Commons License 1.0: https://creativecommons.org/publicdo
 File name in dataset: BM003_day9_air_20s_sparse_chunk007_0297.wav""",
     ),
     ExampleMeta(
+        name="bl26lb16.wav",
+        metadata="""Bengalese finch song from:
+        Sample of song from Bengalese Finch Song Repository.
+        Nicholson, David; Queen, Jonah E.; J. Sober, Samuel (2017). Bengalese Finch song repository. figshare.
+        Dataset. https://doi.org/10.6084/m9.figshare.4805749.v9
+        https://nickledave.github.io/bfsongrepo
+
+        In the dataset, this audio file is bl2616lb16/041912/bl26lb16_190412_0834.20350.wav
+        """
+    )
+    ExampleMeta(
         name="bfsongrepo",
         metadata="""Sample of song from Bengalese Finch Song Repository.
 Nicholson, David; Queen, Jonah E.; J. Sober, Samuel (2017). Bengalese Finch song repository. figshare.
