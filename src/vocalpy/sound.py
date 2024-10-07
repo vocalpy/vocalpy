@@ -382,6 +382,10 @@ class Sound:
             raise ValueError(
                 f"Value for `start` time must be a non-negative number, but was: {start}"
             )
+        if start > self.duration:
+            raise ValueError(
+                f"Value for `start` time, {start}, cannot be greater than this `Sound`'s duration, {self.duration}"
+            )
         start_ind = int(start * self.samplerate)
 
         if stop is None:
@@ -399,6 +403,10 @@ class Sound:
                 raise ValueError(
                     f"Value for `stop`, {stop}, is less than value for `start`, {start}. "
                     "Please specify a `stop` time for the clip greater than the `start` time."
+                )
+            if stop > self.duration:
+                raise ValueError(
+                    f"Value for `stop` time, {stop}, cannot be greater than this `Sound`'s duration, {self.duration}"
                 )
             stop_ind = int(stop * self.samplerate)
             return Sound(
