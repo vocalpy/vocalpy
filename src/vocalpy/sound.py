@@ -228,6 +228,19 @@ class Sound:
         >>> syllables = sound.segment(segments)
         >>> len(syllables)
         10
+
+        Notes
+        -----
+        The :meth`Sound.segment` method is used with the output 
+        of functions from :mod:`vocalpy.segment`, an instance of 
+        :class:`~vocalpy.Segments`. If you need to clip a 
+        :class:`~vocalpy.Sound` at arbitrary times, use the 
+        :meth:`~vocalpy.Sound.clip` method.
+
+        See Also
+        --------
+        vocalpy.segment
+        Sound.clip
         """
         from .segments import Segments
         if not isinstance(segments, Segments):
@@ -257,7 +270,7 @@ class Sound:
         return sounds_out
 
     def clip(self, start: float = 0., stop: float | None = None) -> Sound:
-        """Make a clip from this :class:`~vocalpy.Sound` that starts a time
+        """Make a clip from this :class:`~vocalpy.Sound` that starts at time
         ``start`` in seconds and ends at time ``stop``.
 
         Parameters
@@ -284,18 +297,49 @@ class Sound:
         >>> clip = sound.clip(1.5, 2.5)
         >>> clip.duration
         1.0
+
+        Notes
+        -----
+        The :meth:`~vocalpy.Sound.clip` method is used to clip a 
+        :class:`~vocalpy.Sound` at arbitrary times.
+        If you need to segment an audio file into periods of 
+        animal sounds and periods of background,
+        use one of the functions in :mod:`vocalpy.segment`
+        to get an instance of :class:`~vocalpy.Segments`, 
+        that you can then use with the :meth`Sound.segment` method. 
+
+        See Also
+        --------
+        Sound.segment
         """
+        if not isinstance(start, (float, np.floating)):
+            raise TypeError(
+                f"The `start` time for the clip must be a float type, but type was {type(start)}."
+            )
+        if start < 0.:
+            raise ValueError(
+                f"Value for `start` time must be a non-negative number, but was: {start}"
+            )
+        start_ind = int(start * self.samplerate)
+
         if stop is None:
-            stop_ind = -1
+            return Sound(
+                # don't use stop ind, instead go all the way to the end
+                data=self.data[:, start_ind:],
+                samplerate=self.samplerate
+            )  
         else:
+            if not isinstance(stop, (float, np.floating)):
+                raise TypeError(
+                    f"The `stop` time for the clip must be a float type, but type was {type(start)}."
+                )
             if stop < start:
                 raise ValueError(
                     f"Value for `stop`, {stop}, is less than value for `start`, {start}. "
                     "Please specify a `stop` time for the clip greater than the `start` time."
                 )
             stop_ind = int(stop * self.samplerate)
-        start_ind = int(start * self.samplerate)
-        return Sound(
-            data=self.data[:, start_ind: stop_ind],
-            samplerate=self.samplerate
-        )  
+            return Sound(
+                data=self.data[:, start_ind: stop_ind],
+                samplerate=self.samplerate
+            )
