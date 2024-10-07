@@ -113,7 +113,7 @@ ALL_AUDIO_PATHS = (
 
 
 @pytest.fixture(params=ALL_AUDIO_PATHS)
-def an_audio_path(request):
+def all_soundfile_paths(request):
     """Parametrized fixture that returns one audio path
     from all the audio paths in :mod:`tests.fixtures.audio`.
 

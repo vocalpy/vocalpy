@@ -109,39 +109,39 @@ class TestSound:
         assert sound != other
 
     @staticmethod
-    def load_an_audio_path(an_audio_path):
-        if an_audio_path.name.endswith("cbin"):
-            data, samplerate = vocalpy._vendor.evfuncs.load_cbin(an_audio_path)
+    def load_all_soundfile_paths(all_soundfile_paths):
+        if all_soundfile_paths.name.endswith("cbin"):
+            data, samplerate = vocalpy._vendor.evfuncs.load_cbin(all_soundfile_paths)
             channels = 1
             audio_format = "cbin"
-        elif an_audio_path.name.endswith("wav"):
-            data, samplerate = soundfile.read(an_audio_path, always_2d=True)
+        elif all_soundfile_paths.name.endswith("wav"):
+            data, samplerate = soundfile.read(all_soundfile_paths, always_2d=True)
             channels = data.shape[1]
             data = np.transpose(data, (1, 0))
             audio_format = "wav"
         else:
             raise ValueError(
-                f"Unrecognized format: {an_audio_path.suffix}"
+                f"Unrecognized format: {all_soundfile_paths.suffix}"
             )
         return data, samplerate, channels, audio_format
 
-    def test_read(self, an_audio_path):
+    def test_read(self, all_soundfile_paths):
         """Test that :meth:`vocalpy.Sound.read` works as expected."""
-        data, samplerate, channels, audio_format = self.load_an_audio_path(an_audio_path)
+        data, samplerate, channels, audio_format = self.load_all_soundfile_paths(all_soundfile_paths)
 
-        sound = vocalpy.Sound.read(an_audio_path)
+        sound = vocalpy.Sound.read(all_soundfile_paths)
         assert_sound_is_instance_with_expected_attrs(
             sound, data, samplerate, channels, audio_format
         )
 
-    def test_write(self, an_audio_path, tmp_path):
+    def test_write(self, all_soundfile_paths, tmp_path):
         """Test that :meth:`vocalpy.Sound.write` works as expected.
 
         To do this we instantiate a Sound instance directly,
         write it to a file, read it, and then test that the loaded
         data is what we expect.
         """
-        data, samplerate, channels, audio_format = self.load_an_audio_path(an_audio_path)
+        data, samplerate, channels, audio_format = self.load_all_soundfile_paths(all_soundfile_paths)
 
         if audio_format == "cbin":
             # we have to normalize cbin
@@ -150,7 +150,7 @@ class TestSound:
             sound = vocalpy.Sound(data=data_float_normal, samplerate=samplerate)
         else:
             sound = vocalpy.Sound(data=data, samplerate=samplerate)
-        tmp_wav_path = tmp_path / (an_audio_path.stem + ".wav")
+        tmp_wav_path = tmp_path / (all_soundfile_paths.stem + ".wav")
         assert not tmp_wav_path.exists()
 
         sound.write(tmp_wav_path)
