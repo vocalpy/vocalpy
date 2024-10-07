@@ -231,3 +231,65 @@ class TestSound:
         sound = vocalpy.Sound.read(a_wav_path)
         with pytest.raises(IndexError):
             _ = sound[key]
+
+    @pytest.mark.parametrize(
+        'segfunc, kwargs, sound',
+        [
+            (vocalpy.segment.meansquared, {}, vocalpy.example("bl26lb16.wav")),
+            # (vocalpy.segment.ava, {**vocalpy.segment.JOURJINEETAL2023}, vocalpy.example("jourjine-")),
+        ]
+    )
+    def test_segment(self, segfunc, kwargs, sound,):
+        # sound = vocalpy.Sound.read(a_wav_path)
+        segments = segfunc(sound, **kwargs)
+        sounds = sound.segment(segments)
+        assert all([
+            isinstance(sound, vocalpy.Sound)
+            for sound in sounds
+        ])
+        assert len(sounds) == len(segments)
+
+    @pytest.mark.parametrize(
+        'start, stop, expected_clip_duration',
+        [
+            (1.0, 2.0, 1.0),
+            (None, 1.0, 1.0),
+            # if we just use these defaults we should get the same sound back
+            (0., None, "sound_duration"),
+        ]
+    )
+    def test_clip(self, start, stop, expected_clip_duration, a_wav_path):
+        sound = vocalpy.Sound.read(a_wav_path)
+
+        if stop is None:
+            clip = sound.clip(start)  # test default stop of None
+        elif start is None:
+            clip = sound.clip(stop=stop)  # test default start of 0.
+        else:
+            clip = sound.clip(start, stop)
+
+        # FIXME: test we get data we expect at sample level
+        assert isinstance(clip, vocalpy.Sound)
+        if expected_clip_duration == "sound_duration":
+            expected_clip_duration = sound.duration
+        assert np.allclose(clip.duration, expected_clip_duration)
+
+    @pytest.mark.parametrize(
+        'start, stop, expected_exception',
+        [
+            (1, None, TypeError),
+            (-1.0, None, ValueError),
+            (0.0, 1, TypeError),
+            (1.0, 0.5, ValueError),
+            (0.0, -1.0, ValueError),
+            (None, 1, TypeError),
+            (None, -1.0, ValueError),
+        ]
+    )
+    def test_clip_raises(self, start, stop, expected_exception, a_wav_path):
+        sound = vocalpy.Sound.read(a_wav_path)
+        with pytest.raises(expected_exception):
+            if start is None:
+                sound.clip(stop=stop)
+            else:
+                sound.clip(start, stop)
