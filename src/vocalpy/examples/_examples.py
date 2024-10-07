@@ -114,13 +114,10 @@ In the dataset, this audio file is bl2616lb16/041912/bl26lb16_190412_0834.20350.
     ),
     ExampleMeta(
         name="deermouse-go.wav",
-        metadata="""Deer mouse pup call from:
+        metadata="""Deer mouse pup calls from:
 Jourjine, Nicholas et al. (2023). Data from:
 Two pup vocalization types are genetically and functionally separable in deer mice [Dataset].
 Dryad. https://doi.org/10.5061/dryad.g79cnp5ts
-Audio files are 20-second clips from approximately 10 files in the developmentLL data,
-(https://datadryad.org/stash/downloads/file_stream/2143657), generated with the script:
-tests/scripts/generate_ava_segment_test_data/generate_test_audio_for_ava_segment_from_jourjine_etal_2023.py
 
 In the dataset, this audio file is GO_24860x23748_ltr2_pup3_ch4_4800_m_337_295_fr1_p9_2021-10-02_12-35-01.wav
         """
