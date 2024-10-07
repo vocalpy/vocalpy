@@ -111,7 +111,7 @@ File name in dataset: BM003_day9_air_20s_sparse_chunk007_0297.wav""",
 
         In the dataset, this audio file is bl2616lb16/041912/bl26lb16_190412_0834.20350.wav
         """
-    )
+    ),
     ExampleMeta(
         name="bfsongrepo",
         metadata="""Sample of song from Bengalese Finch Song Repository.
