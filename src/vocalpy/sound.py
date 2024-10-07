@@ -206,6 +206,29 @@ class Sound:
             raise TypeError(f"Sound can be indexed with integer or slice, but type was: {type(key)}")
 
     def segment(self, segments: Segments) -> list[Sound]:
+        """Segment a sound, using a set of line :class:`~vocalpy.Segments`.
+        
+        Parameters
+        ----------
+        segments : vocalpy.Segments.
+            A :class:`~vocalpy.Segments` instance, 
+            the output of a segmenting function 
+            in :mod:`vocalpy.segment`.
+        
+        Returns
+        -------
+        sounds : list
+            A list of :class:`~vocalpy.Sound` instances, 
+            one for every segment in :class:`~vocalpy.Segments`.
+
+        Examples
+        --------
+        >>> sound = voc.example("bells.wav")
+        >>> segments = voc.segment.meansquared(sound)
+        >>> syllables = sound.segment(segments)
+        >>> len(syllables)
+        10
+        """
         from .segments import Segments
         if not isinstance(segments, Segments):
             raise TypeError(
