@@ -95,7 +95,7 @@ ALL_WAV_PATHS = (
 
 
 @pytest.fixture(params=ALL_WAV_PATHS)
-def a_wav_path(request):
+def all_wav_paths(request):
     return request.param
 
 

@@ -170,7 +170,7 @@ class TestSound:
             sound.write(tmp_cbin_path)
 
     @pytest.mark.parametrize(
-        'a_wav_path',
+        'all_wav_paths',
         [
             # audio with one channel
             BIRDSONGREC_WAV_LIST[0],
@@ -178,8 +178,8 @@ class TestSound:
             MULTICHANNEL_FLY_WAV,
         ]
     )
-    def test___iter__(self, a_wav_path):
-        sound = vocalpy.Sound.read(a_wav_path)
+    def test___iter__(self, all_wav_paths):
+        sound = vocalpy.Sound.read(all_wav_paths)
         sound_channels = [
             sound_ for sound_ in sound
         ]
@@ -194,7 +194,7 @@ class TestSound:
         assert len(sound_channels) == sound.data.shape[0]
 
     @pytest.mark.parametrize(
-        'a_wav_path, key',
+        'all_wav_paths, key',
         [
             # audio with one channel
             (BIRDSONGREC_WAV_LIST[0], 0),
@@ -202,8 +202,8 @@ class TestSound:
             (MULTICHANNEL_FLY_WAV, slice(None, 2)),
         ]
     )
-    def test___getitem__(self, a_wav_path, key):
-        sound = vocalpy.Sound.read(a_wav_path)
+    def test___getitem__(self, all_wav_paths, key):
+        sound = vocalpy.Sound.read(all_wav_paths)
         sound_channel = sound[key]
         assert isinstance(sound_channel, vocalpy.Sound)
         if isinstance(key, int):
@@ -219,7 +219,7 @@ class TestSound:
             )
 
     @pytest.mark.parametrize(
-        'a_wav_path, key',
+        'all_wav_paths, key',
         [
             # audio with one channel
             (BIRDSONGREC_WAV_LIST[0], 1),
@@ -227,8 +227,8 @@ class TestSound:
             (MULTICHANNEL_FLY_WAV, 5),
         ]
     )
-    def test___getitem__raises(self, a_wav_path, key):
-        sound = vocalpy.Sound.read(a_wav_path)
+    def test___getitem__raises(self, all_wav_paths, key):
+        sound = vocalpy.Sound.read(all_wav_paths)
         with pytest.raises(IndexError):
             _ = sound[key]
 
@@ -240,7 +240,7 @@ class TestSound:
         ]
     )
     def test_segment(self, segfunc, kwargs, sound,):
-        # sound = vocalpy.Sound.read(a_wav_path)
+        # sound = vocalpy.Sound.read(all_wav_paths)
         segments = segfunc(sound, **kwargs)
         sounds = sound.segment(segments)
         assert all([
@@ -258,8 +258,8 @@ class TestSound:
             (0., None, "sound_duration"),
         ]
     )
-    def test_clip(self, start, stop, expected_clip_duration, a_wav_path):
-        sound = vocalpy.Sound.read(a_wav_path)
+    def test_clip(self, start, stop, expected_clip_duration, all_wav_paths):
+        sound = vocalpy.Sound.read(all_wav_paths)
 
         if stop is None:
             clip = sound.clip(start)  # test default stop of None
@@ -286,8 +286,8 @@ class TestSound:
             (None, -1.0, ValueError),
         ]
     )
-    def test_clip_raises(self, start, stop, expected_exception, a_wav_path):
-        sound = vocalpy.Sound.read(a_wav_path)
+    def test_clip_raises(self, start, stop, expected_exception, all_wav_paths):
+        sound = vocalpy.Sound.read(all_wav_paths)
         with pytest.raises(expected_exception):
             if start is None:
                 sound.clip(stop=stop)
