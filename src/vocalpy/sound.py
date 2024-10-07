@@ -41,12 +41,74 @@ class Sound:
     Examples
     --------
 
-    Reading audio from a file
+    A :class:`~vocalpy.Sound` is read from a file.
 
-    >>> import vocalpy as voc
-    >>> sound = voc.Sound.read("1291.WAV")
+    >>> sound_path = voc.example("bl26lb16.wav")
+    >>> sound = voc.Sound.read(sound_path)
     >>> sound
-    Sound(data=array([ 0.   ... -0.00115967]), samplerate=44100, channels=1)
+    vocalpy.Sound(data=array([[-0.00... 0.00912476]]), samplerate=32000)
+
+    The :class:`~vocalpy.Sound` is designed as a 
+    domain-specific container with attributes that
+    help us avoid cluttering up code with variables 
+    that track the sampling rate, number of channels, 
+    and duration of the file.
+
+    >>> sound_path = voc.example("bl26lb16.wav")
+    >>> sound = voc.Sound.read(sound_path)
+    >>> print(sound.samplerate)
+    32000
+    >>> print(sound.channels)
+    1
+    >>> print(sound.duration)
+    7.254
+
+    Sound can be written to a file as well, 
+    in any format supported by :mod:`soundfile`.
+
+    >>> sound = voc.example("bl26lb16.wav", return_type="sound")
+    >>> sound.write("bl26lb16-copy.wav")
+
+    We can clip a sound to an arbitrary duration 
+    using the :meth:`~vocalpy.Sound.clip` method.
+    This is useful if there are long, relatively silent periods 
+    before or after the animal sounds that we are interested in.
+
+    >>> sound = voc.example("bl26lb16.wav", return_type="sound")
+    >>> sound_clip = sound.clip(0.1, 1.5)
+    >>> print(sound_clip.duration)
+    1.4
+
+    If instead we want to segment an audio file 
+    into periods of animal sounds and periods of background,
+    we can do that with one of the algorithms in 
+    :mod:`vocalpy.segment`. This will give us a set of 
+    line :class:`~vocalpy.Segments` that we can then pass into 
+    the :meth:`~vocalpy.Sound.segment` method to get back 
+    a :class:`list` of :class:`~vocalpy.Sound` instances,
+    one for each segment.
+
+    >>> sound = voc.example("bl26lb16.wav", return_type="sound")
+    >>> segments = voc.segment.meansquared(sound, threshold=1000, min_dur=0.0002, min_silent_dur=0.004)
+    >>> syllables = sound.segment(segments)
+    >>> len(syllables)
+    26
+
+    If you need to work with the sound directly as a numpy array,
+    then you can access it through the :attr:`~vocalpy.Sound.data` 
+    attribute.
+
+    >>> sound = voc.example("bl26lb16.wav", return_type="sound")
+    >>> sound_arr = sound.data
+
+    You can also slice a :class:`~vocalpy.Sound` as you would a 
+    :class:`numpy.array` and this will give you back a new 
+    :class:`~vocalpy.Sound` -- note that we do not implement the 
+    full :class:`numpy.array` API.
+
+    >>> sound = voc.example("bl26lb16.wav", return_type="sound")
+    >>> print(sound.data.shape)
+    >>> decimated = sound[:, ::10]  # keep every 10th sample -- not true downsampling since we don't change the sampling rate
     """
 
     def __init__(
