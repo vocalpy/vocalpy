@@ -255,3 +255,47 @@ class Sound:
                 )
             )
         return sounds_out
+
+    def clip(self, start: float = 0., stop: float | None = None) -> Sound:
+        """Make a clip from this :class:`~vocalpy.Sound` that starts a time
+        ``start`` in seconds and ends at time ``stop``.
+
+        Parameters
+        ----------
+        start : float
+            Start time for clip, in seconds.
+            Default is 0.
+        stop : float, optional.
+            Stop time for clip, in seconds.
+            Default is None, in which case 
+            the value will be set to the 
+            :attr:`~vocalpy.Sound.duration` 
+            of this :class:`~vocalpy.Sound`.
+
+        Returns
+        -------
+        clip : vocalpy.Sound
+            A new :class:`~vocalpy.Sound` with 
+            duration ``stop - start``.
+
+        Examples
+        --------
+        >>> sound = voc.example('bl26lb16.wav')
+        >>> clip = sound.clip(1.5, 2.5)
+        >>> clip.duration
+        1.0
+        """
+        if stop is None:
+            stop_ind = -1
+        else:
+            if stop < start:
+                raise ValueError(
+                    f"Value for `stop`, {stop}, is less than value for `start`, {start}. "
+                    "Please specify a `stop` time for the clip greater than the `start` time."
+                )
+            stop_ind = int(stop * self.samplerate)
+        start_ind = int(start * self.samplerate)
+        return Sound(
+            data=self.data[:, start_ind: stop_ind],
+            samplerate=self.samplerate
+        )  
