@@ -65,11 +65,9 @@ and will be published in the proceedings.
 >>> import vocalpy as voc
 >>> data_dir = ('tests/data-for-tests/source/audio_wav_annot_birdsongrec/Bird0/Wave/')
 >>> wav_paths = voc.paths.from_dir(data_dir, 'wav')
->>> audios = [voc.Sound.read(wav_path) for wav_path in wav_paths]
->>> print(audios[0])
-vocalpy.Sound(data=array([3.0517...66210938e-04]), samplerate=32000, channels=1),
-path = tests / data -
-for -tests / source / audio_wav_annot_birdsongrec / Bird0 / Wave / 0.wav)
+>>> sounds = [voc.Sound.read(wav_path) for wav_path in wav_paths]
+>>> print(sounds[0])
+vocalpy.Sound(data=array([3.0517...66210938e-04]), samplerate=32000, channels=1))
 ```
 
 #### The `vocalpy.Spectrogram` data type
@@ -82,8 +80,7 @@ for -tests / source / audio_wav_annot_birdsongrec / Bird0 / Wave / 0.wav)
 >>> spect_paths = voc.paths.from_dir(data_dir, 'wav.npz')
 >>> spects = [voc.Spectrogram.read(spect_path) for spect_path in spect_paths]
 >>> print(spects[0])
-vocalpy.Spectrogram(data=array([[3.463...7970774e-14]]), frequencies=array([    0....7.5, 16000. ]), times=array([0.008,...7.648, 7.65 ]), 
-path=PosixPath('tests/data-for-tests/generated/spect_npz/0.wav.npz'), audio_path=None)
+vocalpy.Spectrogram(data=array([[3.463...7970774e-14]]), frequencies=array([    0....7.5, 16000. ]), times=array([0.008,...7.648, 7.65 ]))
 ```
 
 #### The `vocalpy.Annotation` data type
