@@ -256,7 +256,7 @@ class Sound:
             )
 
     def __getitem__(self, key):
-        if isinstance(key, (int, slice)):
+        if isinstance(key, (int, tuple, slice)):
             try:
                 return Sound(
                     data=self.data[key],
