@@ -20,7 +20,7 @@ def audio_list_cbin():
 
 
 @pytest.fixture(params=AUDIO_LIST_CBIN)
-def a_cbin_path(request):
+def all_cbin_paths(request):
     return request.param
 
 

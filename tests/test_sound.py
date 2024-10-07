@@ -163,9 +163,9 @@ class TestSound:
             sound_loaded, data, samplerate, channels, audio_format
         )
 
-    def test_write_raises(self, a_cbin_path, tmp_path):
-        sound = vocalpy.Sound.read(a_cbin_path)
-        tmp_cbin_path = tmp_path / a_cbin_path.name
+    def test_write_raises(self, all_cbin_paths, tmp_path):
+        sound = vocalpy.Sound.read(all_cbin_paths)
+        tmp_cbin_path = tmp_path / all_cbin_paths.name
         with pytest.raises(ValueError):
             sound.write(tmp_cbin_path)
 
