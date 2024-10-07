@@ -31,7 +31,7 @@ RECFILE_LIST = sorted(AUDIO_DIR_CBIN.glob('*.rec'))
 
 
 @pytest.fixture(params=RECFILE_LIST)
-def a_rec_path(request):
+def all_rec_paths(request):
     return request.param
 
 

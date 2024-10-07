@@ -6,8 +6,8 @@ import numpy as np
 import vocalpy._vendor.evfuncs
 
 
-def test_readrecf(a_rec_path):
-    rec_dict = vocalpy._vendor.evfuncs.readrecf(a_rec_path)
+def test_readrecf(all_rec_paths):
+    rec_dict = vocalpy._vendor.evfuncs.readrecf(all_rec_paths)
     assert 'header' in rec_dict
     assert isinstance(rec_dict['header'], list)
     assert 'sample_freq' in rec_dict
