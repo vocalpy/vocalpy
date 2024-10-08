@@ -43,19 +43,18 @@ class Sound:
 
     A :class:`~vocalpy.Sound` is read from a file.
 
-    >>> sound_path = voc.example("bl26lb16.wav")
+    >>> sound_path = voc.example("bl26lb16.wav", return_path=True)
     >>> sound = voc.Sound.read(sound_path)
     >>> sound
     vocalpy.Sound(data=array([[-0.00... 0.00912476]]), samplerate=32000)
 
-    The :class:`~vocalpy.Sound` is designed as a 
-    domain-specific container with attributes that
+    The :class:`~vocalpy.Sound` class is designed as a 
+    domain-specific data container with attributes that
     help us avoid cluttering up code with variables 
     that track the sampling rate, number of channels, 
     and duration of the file.
 
-    >>> sound_path = voc.example("bl26lb16.wav")
-    >>> sound = voc.Sound.read(sound_path)
+    >>> sound = voc.example("bl26lb16.wav")
     >>> print(sound.samplerate)
     32000
     >>> print(sound.channels)
@@ -63,10 +62,20 @@ class Sound:
     >>> print(sound.duration)
     7.254
 
+    You can :func:`print` a :class:`~vocalpy.Sound` 
+    to see all the properties that are derived from 
+    the sampling rate and the shape of the 
+    underlying data array: the number of channels, 
+    the number of samples, and the duration in seconds.
+
+    >>> sound = voc.example("bl26lb16.wav")
+    >>> print(sound)
+    vocalpy.Sound(data=array([[-0.00... 0.00912476]]), samplerate=32000), channels=1, samples=184463, duration=5.764)
+
     Sound can be written to a file as well, 
     in any format supported by :mod:`soundfile`.
 
-    >>> sound = voc.example("bl26lb16.wav", return_type="sound")
+    >>> sound = voc.example("bl26lb16.wav")
     >>> sound.write("bl26lb16-copy.wav")
 
     We can clip a sound to an arbitrary duration 
@@ -74,15 +83,15 @@ class Sound:
     This is useful if there are long, relatively silent periods 
     before or after the animal sounds that we are interested in.
 
-    >>> sound = voc.example("bl26lb16.wav", return_type="sound")
+    >>> sound = voc.example("bl26lb16.wav")
     >>> sound_clip = sound.clip(0.1, 1.5)
     >>> print(sound_clip.duration)
     1.4
 
     If we want to clip from a start time to the end of the sound, 
-    we can just specify a time for `start`
+    we can just specify a time for `start`.
 
-    >>> sound = voc.example("bl26lb16.wav", return_type="sound")
+    >>> sound = voc.example("bl26lb16.wav")
     >>> sound_clip = sound.clip(0.5)
     >>> print(sound_clip.duration)
     1.4
@@ -90,9 +99,9 @@ class Sound:
     Likewise, if we want to clip from the start of the sound
     we can just specify a time for `stop`.
     Notice that we need to use a keyword argument here,
-    since `start` is the first argument to.
+    since `start` is the first argument to :meth:`~vocalpy.Sound.clip`.
 
-    >>> sound = voc.example("bl26lb16.wav", return_type="sound")
+    >>> sound = voc.example("bl26lb16.wav")
     >>> sound_clip = sound.clip(stop=0.5)
     >>> print(sound_clip.duration)
     0.5
@@ -106,7 +115,7 @@ class Sound:
     a :class:`list` of :class:`~vocalpy.Sound` instances,
     one for each segment.
 
-    >>> sound = voc.example("bl26lb16.wav", return_type="sound")
+    >>> sound = voc.example("bl26lb16.wav")
     >>> segments = voc.segment.meansquared(sound, threshold=1000, min_dur=0.0002, min_silent_dur=0.004)
     >>> syllables = sound.segment(segments)
     >>> len(syllables)
@@ -116,7 +125,7 @@ class Sound:
     then you can access it through the :attr:`~vocalpy.Sound.data` 
     attribute.
 
-    >>> sound = voc.example("bl26lb16.wav", return_type="sound")
+    >>> sound = voc.example("bl26lb16.wav")
     >>> sound_arr = sound.data
 
     You can also slice a :class:`~vocalpy.Sound` as you would a 
@@ -124,7 +133,7 @@ class Sound:
     :class:`~vocalpy.Sound` -- note that we do not implement the 
     full :class:`numpy.array` API.
 
-    >>> sound = voc.example("bl26lb16.wav", return_type="sound")
+    >>> sound = voc.example("bl26lb16.wav")
     >>> print(sound.data.shape)
     >>> decimated = sound[:, ::10]  # keep every 10th sample -- not true downsampling since we don't change the sampling rate
     """
@@ -185,8 +194,8 @@ class Sound:
             f"data={reprlib.repr(self.data)}, "
             f"samplerate={self.samplerate}), "
             f"channels={self.channels}, "
-            f"samples={self.samples}",
-            f"duration={self.duration})"
+            f"samples={self.samples}, "
+            f"duration={self.duration:.3f})"
         )
 
     def __eq__(self, other):
