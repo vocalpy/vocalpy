@@ -176,7 +176,17 @@ class Sound:
         return (
             f"vocalpy.{self.__class__.__name__}("
             f"data={reprlib.repr(self.data)}, "
-            f"samplerate={reprlib.repr(self.samplerate)})"
+            f"samplerate={self.samplerate})"
+        )
+
+    def __str__(self):
+        return (
+            f"vocalpy.{self.__class__.__name__}("
+            f"data={reprlib.repr(self.data)}, "
+            f"samplerate={self.samplerate}), "
+            f"channels={self.channels}, "
+            f"samples={self.samples}",
+            f"duration={self.duration})"
         )
 
     def __eq__(self, other):
