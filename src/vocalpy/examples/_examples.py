@@ -1,31 +1,26 @@
 """Functions for working with example data."""
 from __future__ import annotations
 
-import copy
 import importlib.resources
 import os
 import pathlib
 import shutil
-from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Union
+from dataclasses import dataclass
+from enum import Enum
+from typing import Literal
 
 import pooch
 import requests.exceptions
 
-if TYPE_CHECKING:
-    import vocalpy
-
-    ExampleType = Union[
-        pathlib.Path,
-        list[pathlib.Path],
-        vocalpy.Sound,
-        list[vocalpy.Sound],
-        vocalpy.Spectrogram | list[vocalpy.Spectrogram],
-        vocalpy.Annotation,
-        list[vocalpy.Annotation],
-    ]
+from .example_data import ExampleData
 
 
+# ---- define this at the top since we use it for ExampleMeta
+ExampleTypes = Enum("Exampletypes", "Sound Spectrogram Annotation ExampleData")
+
+
+# ---- define this before `makefuncs` that return ExampleData,
+# since it is the return type
 @dataclass
 class ExampleMeta:
     """Dataclass that represents example data,
@@ -36,25 +31,21 @@ class ExampleMeta:
     Attributes
     ----------
     name : str
-        Name of example. Displayed by :func:`vocalpy.examples.list`.
+        Name of example. Displayed by :func:`vocalpy.examples.show`.
         By default, this should be the filename.
         If the filename is not easy enough to type,
         this can be a simple human-readable name,
         and a separate ``fname`` attribute can specify the filename.
     metadata : str
         Metadata for example, that links to source for data.
-        Displayed by :func:`vocalpy.examples.list`.
-    type: list[str]
-        List of types of data.
-        Default is ``["sound"]``.
+        Displayed by :func:`vocalpy.examples.show`.
+    type: ExampleType
+        Type of data. Default is :class:`vocalpy.Sound`.
     fname: str, optional
         Filename. By default, the name should be the filename,
         but if a filename is too verbose (e.g. a .tar.gz file),
         this attribute allows ``name`` to be something human-readable.
         Default is None.
-    ext: dict
-        A ``dict`` mapping ``type`` to file extensions.
-        Default is ``{"sound": ".wav"}``.
     requires_download: bool
         If True, this example requires download, and we use
         :module:`pooch` to "fetch" it.
@@ -63,18 +54,57 @@ class ExampleMeta:
         the annotation format.
         String that is recognized by :module:`crowsetta`
         as a valid annotation format.
+    makefunc: callable
+        For examples that return :class:`ExampleData`,
+        a callable function that returns an :class`ExampleData` 
+        instance with the example data.
     """
-
     name: str
     metadata: str
-    type: list[str] = field(default_factory=lambda: copy.copy(["sound"]))
+    type: Literal[
+        ExampleTypes.Sound, ExampleTypes.Spectrogram, ExampleTypes.Annotation, ExampleTypes.ExampleData
+    ] = ExampleTypes.Sound
     fname: str | None = None
     # next line: lambda returns a new dict that maps 'sound' to 'wav' extension
-    ext: dict = field(default_factory=lambda: copy.copy({"sound": ".wav"}))
     requires_download: bool = False
     annot_format: str | None = None
+    makefunc: callable | None = None
+
+    def __post_init__(self):
+        if not any([
+            self.type is example_type
+            for example_type in ExampleTypes
+        ]):
+            raise ValueError(
+                f"example type '{self.type}' is not one of the ExampleTypes: {ExampleTypes}"
+            )
 
 
+# ---- all `makefunc`s that return ExampleData for larger example datasets go here
+def bfsongrepo_makefunc(
+        path: pathlib.Path | list[pathlib.Path], 
+        metadata: ExampleMeta,
+        return_path: bool = False
+) -> ExampleData:
+    import vocalpy  # avoid circular import
+
+    wav_paths = [
+        path for path in path if path.suffix == ".wav"
+    ]
+    csv_paths = [
+        path for path in path if path.suffix == ".csv"
+    ]
+    if return_path:
+        return ExampleData(sound=wav_paths, annotation=csv_paths)
+    else:
+        return ExampleData(
+            sound=[vocalpy.Sound.read(wav_path) for wav_path in wav_paths],
+            annotation=[vocalpy.Annotation.read(csv_path, format=metadata.annot_format)
+                        for csv_path in csv_paths]
+        )
+
+
+# ---- now that we've declared all the `makefunc`s we can actually describe all the example data
 EXAMPLE_METADATA = [
     ExampleMeta(
         name="bells.wav",
@@ -109,7 +139,8 @@ Nicholson, David; Queen, Jonah E.; J. Sober, Samuel (2017). Bengalese Finch song
 Dataset. https://doi.org/10.6084/m9.figshare.4805749.v9
 https://nickledave.github.io/bfsongrepo
 
-In the dataset, this audio file is bl2616lb16/041912/bl26lb16_190412_0834.20350.wav
+In the source dataset, this audio file is named 
+``bl2616lb16/041912/bl26lb16_190412_0834.20350.wav``.
         """
     ),
     ExampleMeta(
@@ -119,8 +150,27 @@ Jourjine, Nicholas et al. (2023). Data from:
 Two pup vocalization types are genetically and functionally separable in deer mice [Dataset].
 Dryad. https://doi.org/10.5061/dryad.g79cnp5ts
 
-In the dataset, this audio file is GO_24860x23748_ltr2_pup3_ch4_4800_m_337_295_fr1_p9_2021-10-02_12-35-01.wav
-        """
+This is a short clip from the start of the file named
+``GO_24860x23748_ltr2_pup3_ch4_4800_m_337_295_fr1_p9_2021-10-02_12-35-01.wav``
+in the source dataset.
+"""
+    ),
+    ExampleMeta(
+        name="fruitfly-song-multichannel.wav",
+        metadata="""courtship song (pulse and sine) of male Drosophila melanogaster. Data from:
+Clemens, Jan, 2021, "Drosophila melanogaster - train and test data (multi channel)", https://doi.org/10.25625/8KAKHJ, GRO.data, V1 
+Contains recordings (on 9 microphone channels) and manual annotations of the courtship song (pulse and sine) of male Drosophila melanogaster.
+
+The recordings were previously unpublished and were first used in:
+Clemens J, Coen P, Roemschied FA, Pereira TD, Mazumder D, Aldarondo DE, Pacheco DA, Murthy M. 2018.
+Discovery of a New Song Mode in Drosophila Reveals Hidden Structure in the Sensory and Neural Drivers of Behavior.
+Current biology 28:2400–2412.e6.
+
+This is a short clip from the file named 
+``160420_1746_manual.wav`` in the source dataset,
+that was clipped using the tsv annotations created with the DAS gui.
+To minimize file size, only three of the channels from the original nine are kept.
+"""
     ),
     ExampleMeta(
         name="bfsongrepo",
@@ -130,10 +180,10 @@ Dataset. https://doi.org/10.6084/m9.figshare.4805749.v9
 https://nickledave.github.io/bfsongrepo
 Files are approximately 20 songs from bird with ID "gy6or6", from the day "032312"
 """,
-        type=["sound", "annotation"],
+        type=ExampleTypes.ExampleData,
         fname="bfsongrepo.tar.gz",
         requires_download=True,
-        ext={"sound": ".wav", "annotation": ".csv"},
+        makefunc=bfsongrepo_makefunc,
         annot_format="simple-seq",
     ),
     ExampleMeta(
@@ -146,6 +196,7 @@ Audio files are 20-second clips from approximately 10 files in the developmentLL
 (https://datadryad.org/stash/downloads/file_stream/2143657), generated with the script:
 tests/scripts/generate_ava_segment_test_data/generate_test_audio_for_ava_segment_from_jourjine_etal_2023.py
 """,
+        type=ExampleTypes.ExampleData,
         fname="jourjine-et-al-2023.tar.gz",
         requires_download=True,
     ),
@@ -177,32 +228,20 @@ def clear_cache() -> None:
     shutil.rmtree(cache_dir)
 
 
-VALID_RETURN_TYPE = ("path", "sound", "annotation", "spectrogram")
-
-
-def example(name: str, return_type: str | None = None) -> ExampleType:
+def example(name: str, return_path: bool = False) -> ExampleType:
     """Get an example from :mod:`vocalpy.examples`.
 
     To see all available example data, call :func:`vocalpy.examples.show`.
-
-    By default, local files will be cached in the directory given by
-    :func:`vocalpy.example.get_cache_dir`.  You can override this by setting
-    an environment variable ``VOCALPY_DATA_DIR`` prior to importing VocalPy:
-
-    >>> import os
-    >>> os.environ['VOCALPY_DATA_DIR'] = '/path/to/store/data'
-    >>> import vocalpy as voc
 
     Parameters
     ----------
     name : str
         Name of the example.
         To see names of examples and the associated metadata,
-        call :func:`vocalpy.examples.list`.
-    return_type : str
-        The type to return.
-        One of ('path', 'sound', 'annotation', 'spectrogram').
-        The default is to return the path to the data.
+        call :func:`vocalpy.examples.show`.
+    return_path : bool
+        If True, return the path to the example data.
+        Default is False.
 
     Returns
     -------
@@ -214,26 +253,41 @@ def example(name: str, return_type: str | None = None) -> ExampleType:
         a :class:`vocalpy.Sound` instance with the example data
         read into it.
 
+    Examples
+    --------
+    
+    >>> sound = voc.example('bells.wav')
+    >>> spect = voc.spectrogram(sound)
+    >>> voc.plot.spect(spect)
+
+    If you want the path(s) to where the data 
+    is on your local machine, 
+    set `return_path` to `True`.
+    This is useful for :mod:`vocalpy: functionality 
+    that loads files, or to work with the data 
+    in the files in some other way.
+
+    >>> sound_path = voc.example('bells.wav', return_path=True)
+    >>> sound = voc.Sound.read(sound_path)
+
+    Notes
+    -----
+    By default, local files will be cached in the directory given by
+    :func:`vocalpy.example.get_cache_dir`.  You can override this by setting
+    an environment variable ``VOCALPY_DATA_DIR`` prior to importing VocalPy:
+
+    >>> import os
+    >>> os.environ['VOCALPY_DATA_DIR'] = '/path/to/store/data'
+    >>> import vocalpy as voc
+
     See Also
     --------
     vocalpy.examples.show
-
-    Examples
-    --------
-    >>> sound = voc.example('bells.wav', return_type='sound')
-    >>> spect = voc.spectrogram(sound)
-    >>> voc.plot.spect(spect)
     """
     if name not in REGISTRY:
-        raise ValueError(f"No example found with name: {name}. " f"For a list of examples, call ")
-    if return_type is not None:
-        if not isinstance(return_type, str) or return_type not in VALID_RETURN_TYPE:
-            raise ValueError(
-                f"``return_type`` must be a string, one of: {VALID_RETURN_TYPE}. "
-                "The default is 'path', that returns a pathlib.Path or list of pathlib.Path instances."
-            )
-    else:
-        return_type = "path"
+        raise ValueError(
+            f"No example data found with name: {name}. "
+            "To see the names of all example data, call `vocalpy.examples.show()`")
     import vocalpy  # avoid circular import
 
     example_: ExampleMeta = REGISTRY[name]
@@ -258,37 +312,19 @@ def example(name: str, return_type: str | None = None) -> ExampleType:
     if isinstance(path, list):
         # enforce consisting sorting across platforms
         path = sorted(path)
-    if return_type == "path":
+    if return_path:
         return path
     else:
-        if return_type not in example_.type:
-            raise ValueError(
-                f"The ``return_type`` was {return_type}, "
-                f"but example '{name}' only has the following return types: {example_.type}"
+        if example_.type == ExampleTypes.Sound:
+            return vocalpy.Sound.read(path)
+        elif example_.type == ExampleTypes.Spectrogram:
+            return vocalpy.Spectrogram.read(path)
+        elif example_.type == ExampleTypes.Annotation:
+            return vocalpy.Annotation.read(path, format=example_.annot_format)
+        elif example_.type == ExampleTypes.ExampleData:
+            return example_.makefunc(
+                path, metadata=example_, return_path=return_path
             )
-        if return_type == "sound":
-            if isinstance(path, pathlib.Path):
-                return vocalpy.Sound.read(path)
-            elif isinstance(path, list):
-                return [vocalpy.Sound.read(path_) for path_ in path if path_.name.endswith(example_.ext["sound"])]
-        elif return_type == "spectrogram":
-            if isinstance(path, pathlib.Path):
-                return vocalpy.Spectrogram.read(path)
-            elif isinstance(path, list):
-                return [
-                    vocalpy.Spectrogram.read(path_)
-                    for path_ in path
-                    if path_.name.endswith(example_.ext["spectrogram"])
-                ]
-        elif return_type == "annotation":
-            if isinstance(path, pathlib.Path):
-                return vocalpy.Annotation.read(path)
-            elif isinstance(path, list):
-                return [
-                    vocalpy.Annotation.read(path_, format=example_.annot_format)
-                    for path_ in path
-                    if path_.name.endswith(example_.ext["annotation"])
-                ]
 
 
 def show() -> None:
