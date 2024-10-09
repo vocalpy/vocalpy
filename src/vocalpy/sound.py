@@ -72,6 +72,19 @@ class Sound:
     >>> print(sound)
     vocalpy.Sound(data=array([[-0.00... 0.00912476]]), samplerate=32000), channels=1, samples=184463, duration=5.764)
 
+    The :mod:`vocalpy` package tries to provide 
+    functions that take :class:`~vocalpy.Sound` instances as inputs,
+    and return other domain-specific types as outputs, 
+    such as :class:`~vocalpy.Segments`, :class:`~vocalpy.Spectrogram`, 
+    and :class:`~vocalpy.Features`.
+    If instead you need to work with the 
+    digital audio signal directly as a numpy array,
+    you can access it through the :attr:`~vocalpy.Sound.data` 
+    attribute.
+
+    >>> sound = voc.example("bl26lb16.wav")
+    >>> sound_arr = sound.data
+
     Sound can be written to a file as well, 
     in any format supported by :mod:`soundfile`.
 
@@ -121,21 +134,33 @@ class Sound:
     >>> len(syllables)
     26
 
-    If you need to work with the sound directly as a numpy array,
-    then you can access it through the :attr:`~vocalpy.Sound.data` 
-    attribute.
-
-    >>> sound = voc.example("bl26lb16.wav")
-    >>> sound_arr = sound.data
-
-    You can also slice a :class:`~vocalpy.Sound` as you would a 
+    You can also index a :class:`~vocalpy.Sound` as you would a 
     :class:`numpy.array` and this will give you back a new 
-    :class:`~vocalpy.Sound` -- note that we do not implement the 
-    full :class:`numpy.array` API.
+    :class:`~vocalpy.Sound`.
+    One place where this is useful is when you have multi-channel 
+    audio, and you only want one channel, or you want to iterate
+    over the channels.
+
+    >>> sound = voc.example("fruitfly-song-multichannel.wav")
+    >>> a_channel = sound[0, :]
+    >>> print(a_channel)
+    vocalpy.Sound(data=array([[-0.00...-0.00723267]]), samplerate=10000), channels=1, samples=15000, duration=1.500)
+    >>> for channel in sound:
+    ...     print(channel)
+    vocalpy.Sound(data=array([[-0.00...-0.00723267]]), samplerate=10000), channels=1, samples=15000, duration=1.500)
+    vocalpy.Sound(data=array([[ 0.01... 0.00268555]]), samplerate=10000), channels=1, samples=15000, duration=1.500)
+    vocalpy.Sound(data=array([[ 0.00...-0.00100708]]), samplerate=10000), channels=1, samples=15000, duration=1.500)
+
+    This works with other methods of indexing,
+    as shown below.
 
     >>> sound = voc.example("bl26lb16.wav")
     >>> print(sound.data.shape)
     >>> decimated = sound[:, ::10]  # keep every 10th sample -- not true downsampling since we don't change the sampling rate
+
+    Note that we are just passing indexing directly 
+    to the underlying :class:`numpy.array`, 
+    not re-implementing the API.
     """
 
     def __init__(
