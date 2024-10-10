@@ -133,7 +133,15 @@ def make_example_data(session: nox.Session) -> None:
     Runs scripts in
     """
     clean_dir("./src/scripts/example_data/")
-    session.run("python", "./src/scripts/make_example_data.py")
+    if session.posargs:
+        session.run(
+            "python", 
+            "./src/scripts/make_example_data.py",
+            "--example-names",
+            *session.posargs
+        )
+    else:
+        session.run("python", "./src/scripts/make_example_data.py")
 
 # ---- sessions that have to do with data for tests --------------------------------------------------------------------
 # either generating, downloading, or archiving
