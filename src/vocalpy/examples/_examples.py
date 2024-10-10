@@ -104,6 +104,31 @@ def bfsongrepo_makefunc(
         )
 
 
+def jourjine_et_al_2023_makefunc(
+        path: pathlib.Path | list[pathlib.Path], 
+        metadata: ExampleMeta,
+        return_path: bool = False
+) -> ExampleData:
+    import vocalpy  # avoid circular import
+
+    wav_paths = [
+        path for path in path if path.suffix == ".wav"
+    ]
+    csv_paths = [
+        path for path in path if path.suffix == ".csv"
+    ]
+    if return_path:
+        return ExampleData(sound=wav_paths, annotation=csv_paths)
+    else:
+        return ExampleData(
+            sound=[vocalpy.Sound.read(wav_path) for wav_path in wav_paths],
+            annotation=[vocalpy.Annotation.read(
+                csv_path, 
+                format=metadata.annot_format)
+                for csv_path in csv_paths
+            ]
+        )
+
 # ---- now that we've declared all the `makefunc`s we can actually describe all the example data
 EXAMPLE_METADATA = [
     ExampleMeta(
@@ -192,13 +217,12 @@ Files are approximately 20 songs from bird with ID "gy6or6", from the day "03231
 Jourjine, Nicholas et al. (2023). Data from:
 Two pup vocalization types are genetically and functionally separable in deer mice [Dataset].
 Dryad. https://doi.org/10.5061/dryad.g79cnp5ts
-Audio files are 20-second clips from approximately 10 files in the developmentLL data,
-(https://datadryad.org/stash/downloads/file_stream/2143657), generated with the script:
-tests/scripts/generate_ava_segment_test_data/generate_test_audio_for_ava_segment_from_jourjine_etal_2023.py
 """,
         type=ExampleTypes.ExampleData,
         fname="jourjine-et-al-2023.tar.gz",
         requires_download=True,
+        makefunc=jourjine_et_al_2023_makefunc,
+        annot_format="simple-seq",
     ),
 ]
 
@@ -207,7 +231,7 @@ REGISTRY = {example.name: example for example in EXAMPLE_METADATA}
 
 VOCALPY_DATA_DIR = "VOCALPY_DATA_DIR"
 
-ZENODO_DATASET_BASE_URL = "doi:10.5281/zenodo.10688472"
+ZENODO_DATASET_BASE_URL = "doi:10.5281/zenodo.10685639"
 
 POOCH = pooch.create(
     path=pooch.os_cache("vocalpy"), base_url=ZENODO_DATASET_BASE_URL, registry=None, env=VOCALPY_DATA_DIR
