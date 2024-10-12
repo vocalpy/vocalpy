@@ -130,3 +130,11 @@ AUDIO_LIST_WAV_WITH_SUBDIRS = sorted(AUDIO_DIR_WAV_WITH_SUBDIRS.glob('**/*wav'))
 AUDIO_DIR_CBIN_WITH_SUBDIRS = DATA_ROOTS_WITH_SUBDIRS / 'cbin'
 
 AUDIO_LIST_CBIN_WITH_SUBDIRS = sorted(AUDIO_DIR_CBIN_WITH_SUBDIRS.glob('**/*cbin'))
+
+
+# ---- additional audio files added for tests
+# short clip from single file Nick picked out for workshop; we use this in examples
+# but I want to use it in tests too
+JOURJINE_ET_AL_GO_WAV_PATH = SOURCE_TEST_DATA_ROOT / 'jourjine-et-al-2023/GO/deermouse-go.wav'
+
+BFSONGREPO_BL26LB16_WAV_PATH = SOURCE_TEST_DATA_ROOT / "bfsongrepo_wav/bl26lb16.wav"

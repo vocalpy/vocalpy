@@ -4,7 +4,12 @@ import soundfile
 
 import vocalpy
 
-from .fixtures.audio import MULTICHANNEL_FLY_WAV, BIRDSONGREC_WAV_LIST
+from .fixtures.audio import (
+    MULTICHANNEL_FLY_WAV,
+    BIRDSONGREC_WAV_LIST,
+    JOURJINE_ET_AL_GO_WAV_PATH,
+    BFSONGREPO_BL26LB16_WAV_PATH,
+)
 
 
 RNG = np.random.default_rng()
@@ -238,12 +243,12 @@ class TestSound:
             (
                 vocalpy.segment.meansquared,
                 dict(threshold=5000, min_dur=0.02, min_silent_dur=0.004),
-                vocalpy.example("bl26lb16.wav", return_type="sound")
+                vocalpy.Sound.read(BFSONGREPO_BL26LB16_WAV_PATH)
             ),
             (
                 vocalpy.segment.ava, 
                 {**vocalpy.segment.JOURJINEETAL2023}, 
-                vocalpy.example("deermouse-go.wav", return_type="sound")
+                vocalpy.Sound.read(JOURJINE_ET_AL_GO_WAV_PATH)
             ),
         ]
     )
@@ -260,7 +265,7 @@ class TestSound:
         'sound, wrong_segments, expected_exception',
         [
             (
-                vocalpy.example("bl26lb16.wav", return_type="sound"),
+                vocalpy.Sound.read(BFSONGREPO_BL26LB16_WAV_PATH),
                 # a list is not a Segments instance, should raise a TypeError
                 [],
                 TypeError,
