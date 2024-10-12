@@ -18,19 +18,18 @@ class Segments:
     """Class that represents a set of line segments
     returned by a segmenting algorithm.
 
-    A set of segments returned by a segmenting algorithm,
-    where each segment is defined by a start index and length.
-
-    More precisely, this class represents the result of algorithms that segment
+    This class represents the result of algorithms that segment
     a signal into a series of consecutive, non-overlapping 2-D line segments :math:`S`.
-    For a list of such algorithms, call :func:`vocalpy.segment.line.list`.
-    For algorithms that segment spectrograms into boxes, see :class:`Boxes`.
-
     Each segment :math:`s_i` in a :class:`Segments` instance
     has an integer start index and length.
     The start index is computed by the segmenting algorithm.
-    a segmenting algorithm. For algorithms that find segments by thresholding energy,
-    the length will be equal to
+    For algorithms that find segments by thresholding energy,
+    the length will be equal to the stop index computed by the algorithm 
+    minus the start index, plus one (to account for how Python indexes).
+    The stop index is the last index above threshold 
+    for a segment.
+    For a list of such algorithms, call :func:`vocalpy.segment.line.list`.
+    For algorithms that segment spectrograms into boxes, see :class:`Boxes`.
 
     Attributes
     ----------
@@ -48,8 +47,8 @@ class Segments:
     :class:`Segments` are returned by the segmenting algorithms that return a set of line segments
     (as opposed to segmenting algorithms that return a set of boxes).
 
-    >>> sounds = voc.example('bfsongrepo', return_type='sound')
-    >>> sound = sounds[0]
+    >>> bfsongrep = voc.example('bfsongrepo')
+    >>> sound = bfsongrepo.sounds[0]
     >>> segments = voc.segment.meansquared(sound, threshold=1500, min_dur=0.2, min_silent_dur=0.02)
     >>> segments
     Segments(start_inds=array([ 22293...4425, 220495]), lengths=array([ 8012,... 6935,  7896]), samplerate=32000, labels=['', '', '', '', '', '', ...])  # noqa
@@ -118,7 +117,6 @@ class Segments:
     >>> ref = np.sorted(np.concatenate(annots[0].seq.onsets, annot[0].seq.offsets))
     >>> hyp = segments.all_times
     >>> prec, _ = voc.metrics.segmentation.ir.precision(reference=ref, hypothesis=hyp)
-
 
     See Also
     --------
