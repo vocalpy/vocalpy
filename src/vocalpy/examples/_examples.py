@@ -124,7 +124,9 @@ def jourjine_et_al_2023_makefunc(
             sound=[vocalpy.Sound.read(wav_path) for wav_path in wav_paths],
             annotation=[vocalpy.Annotation.read(
                 csv_path, 
-                format=metadata.annot_format)
+                format=metadata.annot_format,
+                columns_map={"start_seconds": "onset_s", "stop_seconds": "offset_s"},
+                )
                 for csv_path in csv_paths
             ]
         )
