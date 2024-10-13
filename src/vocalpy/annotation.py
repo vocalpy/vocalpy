@@ -1,4 +1,5 @@
 """Class that represents annotation data."""
+
 from __future__ import annotations
 
 import pathlib
@@ -23,7 +24,7 @@ class Annotation:
     @classmethod
     def read(cls, path: str | pathlib.Path, format: str, **kwargs) -> Annotation:
         """Read an annotation from a file
-        
+
         Parameters
         ----------
         path : str, pathlib.Path
@@ -33,14 +34,14 @@ class Annotation:
             Must be a valid format recognized by :mod:`crowsetta`.
         kwargs : keyword arguments
             Optional keyword arguments.
-            If specified, these are 
+            If specified, these are
             passed to :meth:`crowsetta.Transcriber.from_file`.
 
         Returns
         -------
         annot : Annotation
-            An :class:`~vocalpy.Annotation` instance 
-            that contains the annotations read 
+            An :class:`~vocalpy.Annotation` instance
+            that contains the annotations read
             from ``path``.
         """
         path = pathlib.Path(path)

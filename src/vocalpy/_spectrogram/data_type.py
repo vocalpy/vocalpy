@@ -1,4 +1,5 @@
 """Class that represents a spectrogram."""
+
 from __future__ import annotations
 
 import pathlib
@@ -52,6 +53,7 @@ class Spectrogram:
     >>> spect
     Spectrogram(data=array([[0.561... 0.        ]]), fequencies=array([[    0...50.        ]]), times=array([[0.000...6053968e+01]]))
     """
+
     data: npt.NDArray = attrs.field()
 
     @data.validator

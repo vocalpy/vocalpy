@@ -1,4 +1,5 @@
 """Functions for working with example data."""
+
 from __future__ import annotations
 
 import importlib.resources
@@ -13,7 +14,6 @@ import pooch
 import requests.exceptions
 
 from .example_data import ExampleData
-
 
 # ---- define this at the top since we use it for ExampleMeta
 ExampleTypes = Enum("Exampletypes", "Sound Spectrogram Annotation ExampleData")
@@ -56,14 +56,15 @@ class ExampleMeta:
         as a valid annotation format.
     makefunc: callable
         For examples that return :class:`ExampleData`,
-        a callable function that returns an :class`ExampleData` 
+        a callable function that returns an :class`ExampleData`
         instance with the example data.
     """
+
     name: str
     metadata: str
-    type: Literal[
-        ExampleTypes.Sound, ExampleTypes.Spectrogram, ExampleTypes.Annotation, ExampleTypes.ExampleData
-    ] = ExampleTypes.Sound
+    type: Literal[ExampleTypes.Sound, ExampleTypes.Spectrogram, ExampleTypes.Annotation, ExampleTypes.ExampleData] = (
+        ExampleTypes.Sound
+    )
     fname: str | None = None
     # next line: lambda returns a new dict that maps 'sound' to 'wav' extension
     requires_download: bool = False
@@ -71,65 +72,49 @@ class ExampleMeta:
     makefunc: callable | None = None
 
     def __post_init__(self):
-        if not any([
-            self.type is example_type
-            for example_type in ExampleTypes
-        ]):
-            raise ValueError(
-                f"example type '{self.type}' is not one of the ExampleTypes: {ExampleTypes}"
-            )
+        if not any([self.type is example_type for example_type in ExampleTypes]):
+            raise ValueError(f"example type '{self.type}' is not one of the ExampleTypes: {ExampleTypes}")
 
 
 # ---- all `makefunc`s that return ExampleData for larger example datasets go here
 def bfsongrepo_makefunc(
-        path: pathlib.Path | list[pathlib.Path], 
-        metadata: ExampleMeta,
-        return_path: bool = False
+    path: pathlib.Path | list[pathlib.Path], metadata: ExampleMeta, return_path: bool = False
 ) -> ExampleData:
     import vocalpy  # avoid circular import
 
-    wav_paths = [
-        path for path in path if path.suffix == ".wav"
-    ]
-    csv_paths = [
-        path for path in path if path.suffix == ".csv"
-    ]
+    wav_paths = [path for path in path if path.suffix == ".wav"]
+    csv_paths = [path for path in path if path.suffix == ".csv"]
     if return_path:
         return ExampleData(sound=wav_paths, annotation=csv_paths)
     else:
         return ExampleData(
             sound=[vocalpy.Sound.read(wav_path) for wav_path in wav_paths],
-            annotation=[vocalpy.Annotation.read(csv_path, format=metadata.annot_format)
-                        for csv_path in csv_paths]
+            annotation=[vocalpy.Annotation.read(csv_path, format=metadata.annot_format) for csv_path in csv_paths],
         )
 
 
 def jourjine_et_al_2023_makefunc(
-        path: pathlib.Path | list[pathlib.Path], 
-        metadata: ExampleMeta,
-        return_path: bool = False
+    path: pathlib.Path | list[pathlib.Path], metadata: ExampleMeta, return_path: bool = False
 ) -> ExampleData:
     import vocalpy  # avoid circular import
 
-    wav_paths = [
-        path for path in path if path.suffix == ".wav"
-    ]
-    csv_paths = [
-        path for path in path if path.suffix == ".csv"
-    ]
+    wav_paths = [path for path in path if path.suffix == ".wav"]
+    csv_paths = [path for path in path if path.suffix == ".csv"]
     if return_path:
         return ExampleData(sound=wav_paths, annotation=csv_paths)
     else:
         return ExampleData(
             sound=[vocalpy.Sound.read(wav_path) for wav_path in wav_paths],
-            annotation=[vocalpy.Annotation.read(
-                csv_path, 
-                format=metadata.annot_format,
-                columns_map={"start_seconds": "onset_s", "stop_seconds": "offset_s"},
+            annotation=[
+                vocalpy.Annotation.read(
+                    csv_path,
+                    format=metadata.annot_format,
+                    columns_map={"start_seconds": "onset_s", "stop_seconds": "offset_s"},
                 )
                 for csv_path in csv_paths
-            ]
+            ],
         )
+
 
 # ---- now that we've declared all the `makefunc`s we can actually describe all the example data
 EXAMPLE_METADATA = [
@@ -166,9 +151,9 @@ Nicholson, David; Queen, Jonah E.; J. Sober, Samuel (2017). Bengalese Finch song
 Dataset. https://doi.org/10.6084/m9.figshare.4805749.v9
 https://nickledave.github.io/bfsongrepo
 
-In the source dataset, this audio file is named 
+In the source dataset, this audio file is named
 ``bl2616lb16/041912/bl26lb16_190412_0834.20350.wav``.
-        """
+        """,
     ),
     ExampleMeta(
         name="deermouse-go.wav",
@@ -180,12 +165,12 @@ Dryad. https://doi.org/10.5061/dryad.g79cnp5ts
 This is a short clip from the start of the file named
 ``GO_24860x23748_ltr2_pup3_ch4_4800_m_337_295_fr1_p9_2021-10-02_12-35-01.wav``
 in the source dataset.
-"""
+""",
     ),
     ExampleMeta(
         name="fruitfly-song-multichannel.wav",
         metadata="""courtship song (pulse and sine) of male Drosophila melanogaster. Data from:
-Clemens, Jan, 2021, "Drosophila melanogaster - train and test data (multi channel)", https://doi.org/10.25625/8KAKHJ, GRO.data, V1 
+Clemens, Jan, 2021, "Drosophila melanogaster - train and test data (multi channel)", https://doi.org/10.25625/8KAKHJ, GRO.data, V1
 Contains recordings (on 9 microphone channels) and manual annotations of the courtship song (pulse and sine) of male Drosophila melanogaster.
 
 The recordings were previously unpublished and were first used in:
@@ -193,11 +178,11 @@ Clemens J, Coen P, Roemschied FA, Pereira TD, Mazumder D, Aldarondo DE, Pacheco 
 Discovery of a New Song Mode in Drosophila Reveals Hidden Structure in the Sensory and Neural Drivers of Behavior.
 Current biology 28:2400–2412.e6.
 
-This is a short clip from the file named 
+This is a short clip from the file named
 ``160420_1746_manual.wav`` in the source dataset,
 that was clipped using the tsv annotations created with the DAS gui.
 To minimize file size, only three of the channels from the original nine are kept.
-"""
+""",
     ),
     ExampleMeta(
         name="bfsongrepo",
@@ -281,16 +266,16 @@ def example(name: str, return_path: bool = False) -> ExampleType:
 
     Examples
     --------
-    
+
     >>> sound = voc.example('bells.wav')
     >>> spect = voc.spectrogram(sound)
     >>> voc.plot.spect(spect)
 
-    If you want the path(s) to where the data 
-    is on your local machine, 
+    If you want the path(s) to where the data
+    is on your local machine,
     set `return_path` to `True`.
-    This is useful for :mod:`vocalpy: functionality 
-    that loads files, or to work with the data 
+    This is useful for :mod:`vocalpy: functionality
+    that loads files, or to work with the data
     in the files in some other way.
 
     >>> sound_path = voc.example('bells.wav', return_path=True)
@@ -313,7 +298,8 @@ def example(name: str, return_path: bool = False) -> ExampleType:
     if name not in REGISTRY:
         raise ValueError(
             f"No example data found with name: {name}. "
-            "To see the names of all example data, call `vocalpy.examples.show()`")
+            "To see the names of all example data, call `vocalpy.examples.show()`"
+        )
     import vocalpy  # avoid circular import
 
     example_: ExampleMeta = REGISTRY[name]
@@ -348,9 +334,7 @@ def example(name: str, return_path: bool = False) -> ExampleType:
         elif example_.type == ExampleTypes.Annotation:
             return vocalpy.Annotation.read(path, format=example_.annot_format)
         elif example_.type == ExampleTypes.ExampleData:
-            return example_.makefunc(
-                path, metadata=example_, return_path=return_path
-            )
+            return example_.makefunc(path, metadata=example_, return_path=return_path)
 
 
 def show() -> None:

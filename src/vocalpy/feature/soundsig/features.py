@@ -6,6 +6,7 @@ Code is adapted from the ``soundsig`` library [2]_, under MIT license.
    Animal Cognition. 2016. 19(2) 285-315 DOI 10.1007/s10071-015-0933-6
 .. [2] https://github.com/theunissenlab/soundsig
 """
+
 from __future__ import annotations
 
 from collections import defaultdict

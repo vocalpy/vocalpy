@@ -9,6 +9,7 @@ and is used under CC-B-4.0 license.
 .. [1] https://github.com/theunissenlab/soundsig
 .. [2] https://github.com/BMClab/BMC
 """
+
 from __future__ import division, print_function
 
 import numpy as np

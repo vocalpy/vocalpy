@@ -1,4 +1,5 @@
 """Class that represents the parameters used to compute a spectrogram."""
+
 from __future__ import annotations
 
 import attrs

@@ -1,12 +1,14 @@
 """A :class:`dict`-like container for example data."""
+
 import reprlib
+
 
 class ExampleData(dict):
     """A :class:`dict`-like container for example data.
 
-    Returned by :func:`voc.example` for any example 
+    Returned by :func:`voc.example` for any example
     that is more than a single file.
-    The :class:`ExampleData` class extends :class:`dict` 
+    The :class:`ExampleData` class extends :class:`dict`
     by enabling values to be accessed by key, `example["data"]`,
     or by attribute with dot notation, `example.data`.
 
@@ -29,6 +31,7 @@ class ExampleData(dict):
     Adapted from scikit-learn
     https://github.com/scikit-learn/scikit-learn/blob/d5082d32d/sklearn/utils/_bunch.py
     """
+
     def __init__(self, **kwargs):
         super().__init__(kwargs)
 

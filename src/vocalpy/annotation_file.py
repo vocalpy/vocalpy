@@ -1,6 +1,7 @@
 """Class that represents an annotation file,
 as part of a dataset used to study
 animal acoustic communication."""
+
 from __future__ import annotations
 
 import pathlib

@@ -9,6 +9,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
+import pandas as pd
 
 if TYPE_CHECKING:
     import vocalpy
@@ -24,9 +25,9 @@ class Segments:
     has an integer start index and length.
     The start index is computed by the segmenting algorithm.
     For algorithms that find segments by thresholding energy,
-    the length will be equal to the stop index computed by the algorithm 
+    the length will be equal to the stop index computed by the algorithm
     minus the start index, plus one (to account for how Python indexes).
-    The stop index is the last index above threshold 
+    The stop index is the last index above threshold
     for a segment.
     For a list of such algorithms, call :func:`vocalpy.segment.line.list`.
     For algorithms that segment spectrograms into boxes, see :class:`Boxes`.
@@ -287,6 +288,27 @@ class Segments:
         samplerate = json_dict["samplerate"]
         labels = json_dict["labels"]
         return cls(start_inds, lengths, samplerate, labels)
+
+    def from_csv(
+            self,
+            csv_path: pathlib.Path,
+            samplerate: int,
+            columns_map: dict | None = None,
+            default_label: str | None = None,
+            read_csv_kwargs: dict | None = None,
+    ):
+        if read_csv_kwargs is not None:
+            if not isinstance(read_csv_kwargs, dict):
+                raise TypeError(
+                    f"The `read_csv_kwargs`"
+                )
+        df = pd.read_csv(csv_path, **read_csv_kwargs)
+        if columns_map is not None:
+            df.columns = [
+                columns_map[column_name] if column_name in columns_map else column_name
+                for column_name in df.columns
+            ]
+            if 'start_ind' in columns_map.values() and 'length' in columns_map.values()
 
     def __len__(self):
         return len(self.start_times)

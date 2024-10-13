@@ -3,6 +3,7 @@ Adapted under MIT license.
 
 .. [1] https://github.com/theunissenlab/soundsig
 """
+
 from math import ceil
 
 import numpy as np

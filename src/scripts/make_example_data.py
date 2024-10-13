@@ -30,6 +30,7 @@ to make a new version of the dataset.
 https://github.com/NickleDave/bfsongrepo/blob/main/src/scripts/download_dataset.py
 2. We take the first ten .wav and .csv files from the directory 022212
 """
+
 from __future__ import annotations
 
 import argparse
@@ -125,14 +126,7 @@ def download_and_extract_bfsongrepo_tar(dst: str | pathlib.Path) -> None:
     extract_bfsongrepo_tars(bfsongrepo_dir)
 
 
-def tar_source_data_subdir(
-        dataset_root, 
-        tar_dst,
-        archive_name,
-        ext=None,
-        dry_run=False,
-        skip_exists=False
-    ):
+def tar_source_data_subdir(dataset_root, tar_dst, archive_name, ext=None, dry_run=False, skip_exists=False):
     if ext is None:
         ext = ["wav"]
     dataset_root = pathlib.Path(dataset_root).expanduser().resolve()
@@ -193,16 +187,12 @@ JOURJINE_ET_AL_2023_SUBSET_DST = EXAMPLE_DATA_DST / "jourjine-et-al-2023"
 
 
 def make_jourjine_et_al_2023(
-        dst=JOURJINE_ET_AL_2023_SUBSET_DST,
+    dst=JOURJINE_ET_AL_2023_SUBSET_DST,
 ):
-    print(
-        f"Making directory for jourjine-et-al-2023 data:\n{JOURJINE_ET_AL_2023_SUBSET_DST}"
-    )
+    print(f"Making directory for jourjine-et-al-2023 data:\n{JOURJINE_ET_AL_2023_SUBSET_DST}")
     JOURJINE_ET_AL_2023_SUBSET_DST.mkdir(exist_ok=True)
     for filename, url in JOURJINE_ET_AL_2023_SUBSET_URLS.items():
-        print(
-            f"Downloading file:\n{filename}\nFrom url:\n{url}"
-        )
+        print(f"Downloading file:\n{filename}\nFrom url:\n{url}")
         response = urllib.request.urlopen(url)
         with (dst / filename).open("wb") as fp:
             fp.write(response.read())
@@ -215,7 +205,7 @@ SOURCE_TEST_DATA_ROOT = REPO_ROOT / "tests/data-for-tests/source"
 @dataclasses.dataclass
 class ExampleData:
     """Dataclass that represents example dataset that this script will make
-    
+
     Attributes
     ----------
     name : str
@@ -223,16 +213,17 @@ class ExampleData:
         Becomes the name of the .tar.gz archive.
     dir_ : str or pathlib.Path
         Path to directory to put into .tar.gz archive.
-        This is the archive that gets downloaded by 
-        `pooch` when a user calls `vocalpy.example` 
+        This is the archive that gets downloaded by
+        `pooch` when a user calls `vocalpy.example`
         with the name of the dataset.
     ext : list
         List of string, the extensions of the files
         that should go into the .tar.gz file.
     makefunc : callable
-        A callable that makes the the directory 
+        A callable that makes the the directory
         specified by `dir_`, if it doesn't exist already.
     """
+
     name: str
     dir_: str | pathlib.Path
     ext: list[str]
@@ -240,37 +231,26 @@ class ExampleData:
 
 
 EXAMPLE_DATA = [
+    ExampleData(name="bfsongrepo", dir_=BFSONGREPO_ROOT, ext=[".wav", ".csv"], makefunc=make_bfsongrepo_data_dir),
     ExampleData(
-        name="bfsongrepo",
-        dir_=BFSONGREPO_ROOT,
-        ext=[".wav", ".csv"],
-        makefunc=make_bfsongrepo_data_dir
-    ),
-    ExampleData(
-        name= "jourjine-et-al-2023",
+        name="jourjine-et-al-2023",
         dir_=JOURJINE_ET_AL_2023_SUBSET_DST,
         ext=[".wav", ".csv"],
-        makefunc=make_jourjine_et_al_2023
+        makefunc=make_jourjine_et_al_2023,
     ),
 ]
 
 
-EXAMPLE_DATA_NAME_MAP = {
-    example_data.name: example_data
-    for example_data in EXAMPLE_DATA
-}
+EXAMPLE_DATA_NAME_MAP = {example_data.name: example_data for example_data in EXAMPLE_DATA}
 EXAMPLE_DATA_NAMES = list(EXAMPLE_DATA_NAME_MAP.keys())
 
 
-def main(
-    example_names: list[str]
-) -> None:
+def main(example_names: list[str]) -> None:
     # -- validate args
     for example_name in example_names:
         if example_name not in EXAMPLE_DATA_NAMES:
             raise ValueError(
-                f"Invalid name for example dataset: {example_name}.\n"
-                f"Valid names are: {EXAMPLE_DATA_NAMES}"
+                f"Invalid name for example dataset: {example_name}.\n" f"Valid names are: {EXAMPLE_DATA_NAMES}"
             )
 
     # -- make .tar.gz files
@@ -299,6 +279,4 @@ def get_args():
 
 
 args = get_args()
-main(
-    args.example_names
-)
+main(args.example_names)

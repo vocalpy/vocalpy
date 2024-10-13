@@ -1,4 +1,5 @@
 """functions for plotting annotations for vocalizations"""
+
 from __future__ import annotations
 
 import matplotlib.pyplot as plt

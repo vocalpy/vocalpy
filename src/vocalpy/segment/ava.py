@@ -1,4 +1,5 @@
 """Find segments in audio, using algorithm from ``ava`` package."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass

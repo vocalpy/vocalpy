@@ -1,4 +1,5 @@
 """Class that represents the segmenting step in a pipeline."""
+
 from __future__ import annotations
 
 import collections.abc

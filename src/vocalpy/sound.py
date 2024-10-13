@@ -1,4 +1,5 @@
 """Class that represents a sound."""
+
 from __future__ import annotations
 
 import pathlib
@@ -48,10 +49,10 @@ class Sound:
     >>> sound
     vocalpy.Sound(data=array([[-0.00... 0.00912476]]), samplerate=32000)
 
-    The :class:`~vocalpy.Sound` class is designed as a 
+    The :class:`~vocalpy.Sound` class is designed as a
     domain-specific data container with attributes that
-    help us avoid cluttering up code with variables 
-    that track the sampling rate, number of channels, 
+    help us avoid cluttering up code with variables
+    that track the sampling rate, number of channels,
     and duration of the file.
 
     >>> sound = voc.example("bl26lb16.wav")
@@ -62,38 +63,38 @@ class Sound:
     >>> print(sound.duration)
     7.254
 
-    You can :func:`print` a :class:`~vocalpy.Sound` 
-    to see all the properties that are derived from 
-    the sampling rate and the shape of the 
-    underlying data array: the number of channels, 
+    You can :func:`print` a :class:`~vocalpy.Sound`
+    to see all the properties that are derived from
+    the sampling rate and the shape of the
+    underlying data array: the number of channels,
     the number of samples, and the duration in seconds.
 
     >>> sound = voc.example("bl26lb16.wav")
     >>> print(sound)
     vocalpy.Sound(data=array([[-0.00... 0.00912476]]), samplerate=32000), channels=1, samples=184463, duration=5.764)
 
-    The :mod:`vocalpy` package tries to provide 
+    The :mod:`vocalpy` package tries to provide
     functions that take :class:`~vocalpy.Sound` instances as inputs,
-    and return other domain-specific types as outputs, 
-    such as :class:`~vocalpy.Segments`, :class:`~vocalpy.Spectrogram`, 
+    and return other domain-specific types as outputs,
+    such as :class:`~vocalpy.Segments`, :class:`~vocalpy.Spectrogram`,
     and :class:`~vocalpy.Features`.
-    If instead you need to work with the 
+    If instead you need to work with the
     digital audio signal directly as a numpy array,
-    you can access it through the :attr:`~vocalpy.Sound.data` 
+    you can access it through the :attr:`~vocalpy.Sound.data`
     attribute.
 
     >>> sound = voc.example("bl26lb16.wav")
     >>> sound_arr = sound.data
 
-    Sound can be written to a file as well, 
+    Sound can be written to a file as well,
     in any format supported by :mod:`soundfile`.
 
     >>> sound = voc.example("bl26lb16.wav")
     >>> sound.write("bl26lb16-copy.wav")
 
-    We can clip a sound to an arbitrary duration 
+    We can clip a sound to an arbitrary duration
     using the :meth:`~vocalpy.Sound.clip` method.
-    This is useful if there are long, relatively silent periods 
+    This is useful if there are long, relatively silent periods
     before or after the animal sounds that we are interested in.
 
     >>> sound = voc.example("bl26lb16.wav")
@@ -101,7 +102,7 @@ class Sound:
     >>> print(sound_clip.duration)
     1.4
 
-    If we want to clip from a start time to the end of the sound, 
+    If we want to clip from a start time to the end of the sound,
     we can just specify a time for `start`.
 
     >>> sound = voc.example("bl26lb16.wav")
@@ -119,12 +120,12 @@ class Sound:
     >>> print(sound_clip.duration)
     0.5
 
-    If we want to segment an audio file 
+    If we want to segment an audio file
     into periods of animal sounds and periods of background,
-    we can do that with one of the algorithms in 
-    :mod:`vocalpy.segment`. This will give us a  
-    :class:`~vocalpy.Segments` instance that we can then pass into 
-    the :meth:`~vocalpy.Sound.segment` method to get back 
+    we can do that with one of the algorithms in
+    :mod:`vocalpy.segment`. This will give us a
+    :class:`~vocalpy.Segments` instance that we can then pass into
+    the :meth:`~vocalpy.Sound.segment` method to get back
     a :class:`list` of :class:`~vocalpy.Sound` instances,
     one for each segment.
 
@@ -134,10 +135,10 @@ class Sound:
     >>> len(syllables)
     26
 
-    You can also index a :class:`~vocalpy.Sound` as you would a 
-    :class:`numpy.array` and this will give you back a new 
+    You can also index a :class:`~vocalpy.Sound` as you would a
+    :class:`numpy.array` and this will give you back a new
     :class:`~vocalpy.Sound`.
-    One place where this is useful is when you have multi-channel 
+    One place where this is useful is when you have multi-channel
     audio, and you only want one channel, or you want to iterate
     over the channels.
 
@@ -158,8 +159,8 @@ class Sound:
     >>> print(sound.data.shape)
     >>> decimated = sound[:, ::10]  # keep every 10th sample -- not true downsampling since we don't change the sampling rate
 
-    Note that we are just passing indexing directly 
-    to the underlying :class:`numpy.array`, 
+    Note that we are just passing indexing directly
+    to the underlying :class:`numpy.array`,
     not re-implementing the API.
     """
 
@@ -208,9 +209,7 @@ class Sound:
 
     def __repr__(self):
         return (
-            f"vocalpy.{self.__class__.__name__}("
-            f"data={reprlib.repr(self.data)}, "
-            f"samplerate={self.samplerate})"
+            f"vocalpy.{self.__class__.__name__}(" f"data={reprlib.repr(self.data)}, " f"samplerate={self.samplerate})"
         )
 
     def __str__(self):
@@ -331,18 +330,18 @@ class Sound:
 
     def segment(self, segments: Segments) -> list[Sound]:
         """Segment a sound, using a set of line :class:`~vocalpy.Segments`.
-        
+
         Parameters
         ----------
         segments : vocalpy.Segments.
-            A :class:`~vocalpy.Segments` instance, 
-            the output of a segmenting function 
+            A :class:`~vocalpy.Segments` instance,
+            the output of a segmenting function
             in :mod:`vocalpy.segment`.
-        
+
         Returns
         -------
         sounds : list
-            A list of :class:`~vocalpy.Sound` instances, 
+            A list of :class:`~vocalpy.Sound` instances,
             one for every segment in :class:`~vocalpy.Segments`.
 
         Examples
@@ -355,10 +354,10 @@ class Sound:
 
         Notes
         -----
-        The :meth`Sound.segment` method is used with the output 
-        of functions from :mod:`vocalpy.segment`, an instance of 
-        :class:`~vocalpy.Segments`. If you need to clip a 
-        :class:`~vocalpy.Sound` at arbitrary times, use the 
+        The :meth`Sound.segment` method is used with the output
+        of functions from :mod:`vocalpy.segment`, an instance of
+        :class:`~vocalpy.Segments`. If you need to clip a
+        :class:`~vocalpy.Sound` at arbitrary times, use the
         :meth:`~vocalpy.Sound.clip` method.
 
         See Also
@@ -367,6 +366,7 @@ class Sound:
         Sound.clip
         """
         from .segments import Segments
+
         if not isinstance(segments, Segments):
             raise TypeError(
                 f"`segments` argument should be an instance of `vocalpy.Segments`, but type is: {type(segments)}"
@@ -385,15 +385,10 @@ class Sound:
 
         sounds_out = []
         for start_ind, length in zip(segments.start_inds, segments.lengths):
-            sounds_out.append(
-                Sound(
-                    data=self.data[:, start_ind: start_ind + length],
-                    samplerate=self.samplerate
-                )
-            )
+            sounds_out.append(Sound(data=self.data[:, start_ind : start_ind + length], samplerate=self.samplerate))
         return sounds_out
 
-    def clip(self, start: float = 0., stop: float | None = None) -> Sound:
+    def clip(self, start: float = 0.0, stop: float | None = None) -> Sound:
         """Make a clip from this :class:`~vocalpy.Sound` that starts at time
         ``start`` in seconds and ends at time ``stop``.
 
@@ -404,15 +399,15 @@ class Sound:
             Default is 0.
         stop : float, optional.
             Stop time for clip, in seconds.
-            Default is None, in which case 
-            the value will be set to the 
-            :attr:`~vocalpy.Sound.duration` 
+            Default is None, in which case
+            the value will be set to the
+            :attr:`~vocalpy.Sound.duration`
             of this :class:`~vocalpy.Sound`.
 
         Returns
         -------
         clip : vocalpy.Sound
-            A new :class:`~vocalpy.Sound` with 
+            A new :class:`~vocalpy.Sound` with
             duration ``stop - start``.
 
         Examples
@@ -424,26 +419,22 @@ class Sound:
 
         Notes
         -----
-        The :meth:`~vocalpy.Sound.clip` method is used to clip a 
+        The :meth:`~vocalpy.Sound.clip` method is used to clip a
         :class:`~vocalpy.Sound` at arbitrary times.
-        If you need to segment an audio file into periods of 
+        If you need to segment an audio file into periods of
         animal sounds and periods of background,
         use one of the functions in :mod:`vocalpy.segment`
-        to get an instance of :class:`~vocalpy.Segments`, 
-        that you can then use with the :meth`Sound.segment` method. 
+        to get an instance of :class:`~vocalpy.Segments`,
+        that you can then use with the :meth`Sound.segment` method.
 
         See Also
         --------
         Sound.segment
         """
         if not isinstance(start, (float, np.floating)):
-            raise TypeError(
-                f"The `start` time for the clip must be a float type, but type was {type(start)}."
-            )
-        if start < 0.:
-            raise ValueError(
-                f"Value for `start` time must be a non-negative number, but was: {start}"
-            )
+            raise TypeError(f"The `start` time for the clip must be a float type, but type was {type(start)}.")
+        if start < 0.0:
+            raise ValueError(f"Value for `start` time must be a non-negative number, but was: {start}")
         if start > self.duration:
             raise ValueError(
                 f"Value for `start` time, {start}, cannot be greater than this `Sound`'s duration, {self.duration}"
@@ -454,13 +445,11 @@ class Sound:
             return Sound(
                 # don't use stop ind, instead go all the way to the end
                 data=self.data[:, start_ind:],
-                samplerate=self.samplerate
-            )  
+                samplerate=self.samplerate,
+            )
         else:
             if not isinstance(stop, (float, np.floating)):
-                raise TypeError(
-                    f"The `stop` time for the clip must be a float type, but type was {type(start)}."
-                )
+                raise TypeError(f"The `stop` time for the clip must be a float type, but type was {type(start)}.")
             if stop < start:
                 raise ValueError(
                     f"Value for `stop`, {stop}, is less than value for `start`, {start}. "
@@ -471,7 +460,4 @@ class Sound:
                     f"Value for `stop` time, {stop}, cannot be greater than this `Sound`'s duration, {self.duration}"
                 )
             stop_ind = int(stop * self.samplerate)
-            return Sound(
-                data=self.data[:, start_ind: stop_ind],
-                samplerate=self.samplerate
-            )
+            return Sound(data=self.data[:, start_ind:stop_ind], samplerate=self.samplerate)

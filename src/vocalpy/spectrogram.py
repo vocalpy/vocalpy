@@ -1,4 +1,5 @@
 """Convenience function that generates a spectrogram."""
+
 from __future__ import annotations
 
 from typing import Mapping

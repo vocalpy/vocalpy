@@ -1,4 +1,5 @@
 """Class that represents the step in a pipeline that makes spectrograms from audio."""
+
 from __future__ import annotations
 
 import collections.abc

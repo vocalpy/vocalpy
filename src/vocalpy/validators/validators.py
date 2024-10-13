@@ -1,9 +1,9 @@
 """Validation functions."""
+
 from __future__ import annotations
 
 import numpy as np
 import numpy.typing as npt
-
 
 __all__ = ["have_same_dtype", "is_1d_ndarray", "is_valid_boundaries_array"]
 
