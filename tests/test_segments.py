@@ -1,6 +1,4 @@
-import io
 import json
-import pathlib
 
 import numpy as np
 import pandas as pd
@@ -8,6 +6,21 @@ import pytest
 import xarray as xr
 
 import vocalpy.segments
+
+from .fixtures.audio import AUDIO_LIST_CBIN, JOURJINE_ET_AL_GO_WAV_PATH
+from .fixtures.segments import JOURJINE_ET_AL_2023_GO_SEGMENT_CSV_PATH
+
+
+@pytest.fixture
+def bfsongrepo_segments_csv_path(tmp_path):
+    sound = vocalpy.Sound.read(AUDIO_LIST_CBIN[0])
+    segments = vocalpy.segment.meansquared(sound, threshold=5000, min_dur=0.02, min_silent_dur=0.004)
+    segments_df = pd.DataFrame.from_records(
+        dict(start_ind=segments.start_inds, length=segments.lengths)
+    )
+    bfsongrepo_segments_csv_path = tmp_path / f"{AUDIO_LIST_CBIN[0].name}.segments.csv"
+    segments_df.to_csv(bfsongrepo_segments_csv_path, index=False)
+    return bfsongrepo_segments_csv_path
 
 
 TEST_SOUND = vocalpy.Sound(
@@ -303,7 +316,7 @@ class TestSegments:
         a_segments_from_json = vocalpy.segments.Segments.from_json(
             json_path
         )
-        # we check attributes are equally "manually", so as to not
+        # we check attributes are equal "manually", so as to not
         # assume that Segments.__eq__ works
         assert np.array_equal(a_segments.start_inds, a_segments_from_json.start_inds)
         assert np.array_equal(a_segments.lengths, a_segments_from_json.lengths)
@@ -437,4 +450,95 @@ class TestSegments:
     def test___eq__(self, segments, other, expected_eq):
         assert (
             (segments == other) is expected_eq
+        )
+
+    @pytest.mark.parametrize(
+            'segments_csv_path, samplerate, columns_map, default_label',
+            [
+                (
+                    "bfsongrepo_segments_csv_path",
+                    vocalpy.Sound.read(AUDIO_LIST_CBIN[0]).samplerate,
+                    None, 
+                    None
+                ),
+                (
+                    JOURJINE_ET_AL_2023_GO_SEGMENT_CSV_PATH,
+                    vocalpy.Sound.read(JOURJINE_ET_AL_GO_WAV_PATH).samplerate,
+                    {"start_seconds": "start_s", "stop_seconds": "stop_s"},
+                    None,
+                ),
+                (
+                    JOURJINE_ET_AL_2023_GO_SEGMENT_CSV_PATH,
+                    vocalpy.Sound.read(JOURJINE_ET_AL_GO_WAV_PATH).samplerate,
+                    {"start_seconds": "start_s", "stop_seconds": "stop_s"},
+                    '-',
+                ),
+            ]
+    )
+    def test_from_csv(self, segments_csv_path, samplerate, columns_map, default_label, request):
+        if isinstance(segments_csv_path, str):
+            segments_csv_path = request.getfixturevalue(segments_csv_path)
+
+        segments = vocalpy.Segments.from_csv(
+            segments_csv_path, samplerate, columns_map=columns_map, default_label=default_label
+        )
+        assert isinstance(segments, vocalpy.Segments)
+        
+    @pytest.mark.parametrize(
+            'segments_csv_path, samplerate, columns_map, default_label, expected_exception',
+            [
+                # `samplerate` is not an int
+                (
+                    JOURJINE_ET_AL_2023_GO_SEGMENT_CSV_PATH,
+                    32000.0,
+                    None,
+                    None,
+                    TypeError
+                ),
+                # `samplerate` is negative
+                (
+                    JOURJINE_ET_AL_2023_GO_SEGMENT_CSV_PATH,
+                    -32000,
+                    None,
+                    None,
+                    ValueError
+                ),
+                # `columns_map` not a dict, throws a TypeError
+                (
+                    JOURJINE_ET_AL_2023_GO_SEGMENT_CSV_PATH,
+                    vocalpy.Sound.read(JOURJINE_ET_AL_GO_WAV_PATH).samplerate,
+                    [],
+                    None,
+                    TypeError
+                ),
+                # not all key-value pairs in `columns_map` are string to string
+                (
+                    JOURJINE_ET_AL_2023_GO_SEGMENT_CSV_PATH,
+                    vocalpy.Sound.read(JOURJINE_ET_AL_GO_WAV_PATH).samplerate,
+                    {"start_seconds": "onset_s", "stop_seconds": 0},
+                    None,
+                    ValueError
+                ),
+                # invalid values for `columns_map`, not in `Segments.COLUMNS_MAP_VALID_VALUES`
+                (
+                    JOURJINE_ET_AL_2023_GO_SEGMENT_CSV_PATH,
+                    vocalpy.Sound.read(JOURJINE_ET_AL_GO_WAV_PATH).samplerate,
+                    {"start_seconds": "start_sec", "stop_seconds": "stop_sec"},
+                    None,
+                    ValueError
+                ),
+                # `default_label` is not a string
+                (
+                    JOURJINE_ET_AL_2023_GO_SEGMENT_CSV_PATH,
+                    -32000,
+                    None,
+                    1,
+                    ValueError
+                ),
+            ]
+    )
+    def test_from_csv_raises(self, segments_csv_path, samplerate, columns_map, default_label, expected_exception):
+        with pytest.raises(expected_exception):
+            vocalpy.Segments.from_csv(
+            segments_csv_path, samplerate, columns_map=columns_map, default_label=default_label
         )
