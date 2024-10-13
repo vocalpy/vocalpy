@@ -423,7 +423,7 @@ class Segments:
             return cls(
                 start_inds=df["start_ind"].values,
                 lengths=df["length"].values,
-                labels=df["label"].values if "label" in df.columns else None,
+                labels=df["label"].values.tolist() if "label" in df.columns else None,
                 samplerate=samplerate
             )
         elif "start_s" in df.columns and "stop_s" in df.columns:
@@ -432,7 +432,7 @@ class Segments:
             return cls(
                 start_inds=start_inds,
                 lengths=lengths,
-                labels=df["label"].values if "label" in df.columns else None,
+                labels=df["label"].values.tolist() if "label" in df.columns else None,
                 samplerate=samplerate
             )
         else:
