@@ -96,23 +96,23 @@ def bfsongrepo_makefunc(
 def jourjine_et_al_2023_makefunc(
     path: pathlib.Path | list[pathlib.Path], metadata: ExampleMeta, return_path: bool = False
 ) -> ExampleData:
+    """Make ``'jourjine-et-al-2023'`` example data"""
     import vocalpy  # avoid circular import
 
-    wav_paths = [path for path in path if path.suffix == ".wav"]
-    csv_paths = [path for path in path if path.suffix == ".csv"]
+    wav_path = [path for path in path if path.suffix == ".wav"]
+    wav_path = wav_path[0]
+    csv_path = [path for path in path if path.suffix == ".csv"]
+    csv_path = csv_path[0]
+
     if return_path:
-        return ExampleData(sound=wav_paths, annotation=csv_paths)
+        return ExampleData(sound=wav_path, segments=csv_path)
     else:
         return ExampleData(
-            sound=[vocalpy.Sound.read(wav_path) for wav_path in wav_paths],
-            annotation=[
-                vocalpy.Annotation.read(
-                    csv_path,
-                    format=metadata.annot_format,
-                    columns_map={"start_seconds": "onset_s", "stop_seconds": "offset_s"},
-                )
-                for csv_path in csv_paths
-            ],
+            sound=vocalpy.Sound.read(wav_path),
+            segments=vocalpy.Segments.from_csv(
+                csv_path,
+                columns_map={"start_seconds": "start_s", "stop_seconds": "stop_s"}
+            ),
         )
 
 
