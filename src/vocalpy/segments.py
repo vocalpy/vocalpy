@@ -287,25 +287,163 @@ class Segments:
         labels = json_dict["labels"]
         return cls(start_inds, lengths, samplerate, labels)
 
+    VALID_COLUMNS_MAP_VALUES = [
+        "start_s", "stop_s",
+        "start_ind", "length"
+    ]
+
+    @classmethod
     def from_csv(
-        self,
-        csv_path: pathlib.Path,
+        cls,
+        csv_path: str | pathlib.Path,
         samplerate: int,
         columns_map: dict | None = None,
         default_label: str | None = None,
         read_csv_kwargs: dict | None = None,
     ):
+        """Create a :class:`~vocalpy.Segments` instance from a csv file.
+
+        The csv file can either have the column names 
+        ``{"start_ind", "length", "label"}``, that will be used directly 
+        as the :class:`~vocalpy.Segment` attributes 
+        ``start_inds``, ``lengths``, and ``labels``, respectively,
+        or it can have the column names 
+        ``{"start_s", "stop_s", "label"}``,
+        where ``"start_s"`` and ``"stop_s""`` refer to times in seconds.
+        The ``label`` column is not required, and if it is not found,
+        the ``labels`` will default to empty strings.
+        You can change this behavior by specifying a ``default_label`` 
+        that will be used for all the segments if no ``labels`` column 
+        is found, instead of an empty string.
+        If one of these sets of columns (``{"start_ind", "length"``}`` 
+        or ``{"start_s", "stop_s"}``) is not found in the csv, 
+        then an error will be raised.
+        You can have the :meth:`vocalpy.Segments.from_csv` method 
+        rename columns for you after it loads the csv file into a 
+        :class:`pandas.DataFrame` using the ``columns_map`` argument; 
+        see example below. All other columns are ignored; 
+        you do not need to somehow remove them to load the file.
+
+        Parameters
+        ----------
+        csv_path : string or pathlib.Path
+            Path to csv file.
+        samplerate : int
+            The sampling rate of the audio signal that was segmented 
+            to produce these segments.
+        columns_map : dict, optional
+            Mapping that will be used to rename columns in the csv
+        default_label : str, optional
+            String, a default that is assigned as the label to all segments.
+        read_csv_kwargs, dict, optional
+            Keyword arguments to pass to :func:`pandas.read_csv` function.
+
+        Returns
+        -------
+        segments : vocalpy.Segments
+
+        Examples
+        --------
+
+        The main use of this method is to load a set of line segments 
+        from a csv file created by another library or a script.
+
+        If the column names in the csv do not match the column names 
+        that `vocalpy.Segments` expects, you can have the 
+        `vocalpy.Segments.from_csv` method rename the columns for you 
+        after loading the csv, using the `columns_map` argument.
+
+        Here is an example of renaming columns to the expected names 
+        "start_s" and "stop_s". After renaming, the values in these columns 
+        are then converted to the starting indices and lengths of segments 
+        using the `samplerate`.
+
+        >>> jourjine = voc.example("jourjine-et-al-2023", return_path=True)
+        >>> sound = voc.Sound.read(jourjine.sound)
+        >>> csv_path = jourjine.segments
+        >>> columns_map = {"start_seconds": "start_s", "stop_seconds": "stop_s"}
+        >>> segments = voc.Segments.from_csv(csv_path, samplerate=sound.samplerate, columns_map=columns_map)
+        >>> print(segments)
+        Segments(start_inds=array([   131...   149767168]), lengths=array([40447,...29696, 25087]), samplerate=250000, labels=['', '', '', '', '', '', ...])
+
+        Notes
+        -----
+        This method is provided as a convenience for the case where 
+        you have a segmentation saved in a csv file,
+        e.g., from a :class:`pandas.DataFrame`,
+        that was created by another library or script.
+        If you are working mainly with :mod:`vocalpy`, you should 
+        prefer to load a set of segments with :meth:`~vocalpy.Segments.from_json`,
+        and to save the set of segments with :meth:`~vocalpy.Segments.to_json`,
+        since this avoids needing to keep track of the `samplerate` value separately.
+        """
+        if not isinstance(samplerate, int):
+            raise TypeError(
+                f"The `samplerate` argument must be an int but type was: {type(samplerate)}"
+            )
+        if samplerate < 1:
+            raise ValueError(
+                f"The `samplerate` argument must be a positve number but value was: {samplerate}"
+            )
+
         if read_csv_kwargs is not None:
-            assert False
             if not isinstance(read_csv_kwargs, dict):
-                raise TypeError(f"The `read_csv_kwargs`")
+                raise TypeError(f"The `read_csv_kwargs` must be a `dict` but type was: {type(read_csv_kwargs)}")
+        else:
+            read_csv_kwargs = {}
         df = pd.read_csv(csv_path, **read_csv_kwargs)
+
         if columns_map is not None:
+            if not isinstance(columns_map, dict):
+                raise TypeError(f"The `columns_map` argument must be a `dict` but type was: {type(dict)}")
+            if not all((isinstance(k, str) and isinstance(v, str) for k, v in columns_map.items())):
+                raise ValueError(
+                    "The `columns_map` argument must be a dict that maps string keys to string values, "
+                    "but not all keys and values were strings."
+                )
+            if not all(v in cls.VALID_COLUMNS_MAP_VALUES for v in columns_map.values()):
+                invalid_values = [v for v in columns_map.values() if v not in cls.VALID_COLUMNS_MAP_VALUES]
+                raise ValueError(
+                    f"The `columns_map` argument must map keys (column names in the csv) "
+                    'to either {"start_seconds", "stop_seconds"} or {"start_ind", "length"}. '
+                    f"The following values are invalid: {invalid_values}"
+                )
             df.columns = [
                 columns_map[column_name] if column_name in columns_map else column_name for column_name in df.columns
             ]
-            if "start_ind" in columns_map.values() and "length" in columns_map.values():
-                assert False
+
+        if "label" not in df.columns and default_label is not None:
+            if not isinstance(default_label, str):
+                raise TypeError(
+                    f'The `default_label` argument must be a string but type was: {type(default_label)}'
+                )
+            df["label"] = default_label
+
+        if "start_ind" in df.columns and "length" in df.columns:
+            return cls(
+                start_inds=df["start_ind"].values,
+                lengths=df["length"].values,
+                labels=df["label"].values if "label" in df.columns else None,
+                samplerate=samplerate
+            )
+        elif "start_s" in df.columns and "stop_s" in df.columns:
+            start_inds = (df["start_s"].values * samplerate).astype(int)
+            lengths = ((df["stop_s"].values - df["start_s"].values) * samplerate).astype(int)
+            return cls(
+                start_inds=start_inds,
+                lengths=lengths,
+                labels=df["label"].values if "label" in df.columns else None,
+                samplerate=samplerate
+            )
+        else:
+            raise ValueError(
+                "The csv file loaded from `csv_path must either have columns {'start_ind', 'length'} "
+                "or {'start_s', 'stop_s'}, but neither pair was found. "
+                f"Columns in the `pandas.DataFrame` loaded from the csv file are: {df.columns}\n"
+                "To have the `vocalpy.Segments.from_csv` method rename the columns for you, "
+                "use the `columns_map` argument. Type `help(voc.Segments)` or, in iPython, `voc.Segments?`, "
+                "to see examples of using this and other arguments."
+            )
 
     def __len__(self):
         return len(self.start_times)
