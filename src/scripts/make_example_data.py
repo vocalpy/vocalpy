@@ -179,8 +179,8 @@ def make_bfsongrepo_data_dir():
 
 
 JOURJINE_ET_AL_2023_SUBSET_URLS = {
-    "GO_24860x23748_ltr2_pup3_ch4_4800_m_337_295_fr1_p9_2021-10-02_12-35-01.wav": "https://www.dropbox.com/scl/fi/ysfo9scult6rtiilof07z/GO_24860x23748_ltr2_pup3_ch4_4800_m_337_295_fr1_p9_2021-10-02_12-35-01.wav?rlkey=wnyz3mczz94sn38r534q5e26e&st=tvh2nyu0&dl=1",
-    "GO_24860x23748_ltr2_pup3_ch4_4800_m_337_295_fr1_p9_2021-10-02_12-35-01.csv": "https://drive.google.com/uc?export=download&id=1T_PqiaWZrIIxmu7mtq_BiUfgPEj9Z2kj",
+    "GO_24860x23748_ltr2_pup3_ch4_4800_m_337_295_fr1_p9_2021-10-02_12-35-01.wav": "https://www.dropbox.com/scl/fi/ysfo9scult6rtiilof07z/GO_24860x23748_ltr2_pup3_ch4_4800_m_337_295_fr1_p9_2021-10-02_12-35-01.wav?rlkey=wnyz3mczz94sn38r534q5e26e&st=tvh2nyu0&dl=1",  # noqa: E501
+    "GO_24860x23748_ltr2_pup3_ch4_4800_m_337_295_fr1_p9_2021-10-02_12-35-01.csv": "https://drive.google.com/uc?export=download&id=1T_PqiaWZrIIxmu7mtq_BiUfgPEj9Z2kj",  # noqa: E501
 }
 
 JOURJINE_ET_AL_2023_SUBSET_DST = EXAMPLE_DATA_DST / "jourjine-et-al-2023"

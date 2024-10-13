@@ -1,18 +1,15 @@
 """Classes that represent line segments returned by segmenting algorithms."""
+
 from __future__ import annotations
 
 import json
 import numbers
 import pathlib
 import reprlib
-from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-
-if TYPE_CHECKING:
-    import vocalpy
 
 
 class Segments:
@@ -123,6 +120,7 @@ class Segments:
     --------
     Boxes
     """
+
     def __init__(
         self,
         start_inds: npt.NDArray,
@@ -290,25 +288,24 @@ class Segments:
         return cls(start_inds, lengths, samplerate, labels)
 
     def from_csv(
-            self,
-            csv_path: pathlib.Path,
-            samplerate: int,
-            columns_map: dict | None = None,
-            default_label: str | None = None,
-            read_csv_kwargs: dict | None = None,
+        self,
+        csv_path: pathlib.Path,
+        samplerate: int,
+        columns_map: dict | None = None,
+        default_label: str | None = None,
+        read_csv_kwargs: dict | None = None,
     ):
         if read_csv_kwargs is not None:
+            assert False
             if not isinstance(read_csv_kwargs, dict):
-                raise TypeError(
-                    f"The `read_csv_kwargs`"
-                )
+                raise TypeError(f"The `read_csv_kwargs`")
         df = pd.read_csv(csv_path, **read_csv_kwargs)
         if columns_map is not None:
             df.columns = [
-                columns_map[column_name] if column_name in columns_map else column_name
-                for column_name in df.columns
+                columns_map[column_name] if column_name in columns_map else column_name for column_name in df.columns
             ]
-            if 'start_ind' in columns_map.values() and 'length' in columns_map.values()
+            if "start_ind" in columns_map.values() and "length" in columns_map.values():
+                assert False
 
     def __len__(self):
         return len(self.start_times)

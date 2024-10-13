@@ -157,7 +157,7 @@ class Sound:
 
     >>> sound = voc.example("bl26lb16.wav")
     >>> print(sound.data.shape)
-    >>> decimated = sound[:, ::10]  # keep every 10th sample -- not true downsampling since we don't change the sampling rate
+    >>> decimated = sound[:, ::10]  # keep every 10th sample -- not true downsampling, we don't change the sampling rate
 
     Note that we are just passing indexing directly
     to the underlying :class:`numpy.array`,
@@ -375,7 +375,8 @@ class Sound:
             warnings.warn(
                 f"The `samplerate` attribute of `segments, {segments.samplerate}, "
                 f"does not equal the `samplerate` of this `Sound`, {self.samplerate}. "
-                "You may want to check the source of the segments."
+                "You may want to check the source of the segments.",
+                stacklevel=2,
             )
         if segments.start_inds[-1] + segments.lengths[-1] > self.data.shape[-1]:
             raise ValueError(
@@ -385,7 +386,9 @@ class Sound:
 
         sounds_out = []
         for start_ind, length in zip(segments.start_inds, segments.lengths):
-            sounds_out.append(Sound(data=self.data[:, start_ind : start_ind + length], samplerate=self.samplerate))
+            sounds_out.append(
+                Sound(data=self.data[:, start_ind : start_ind + length], samplerate=self.samplerate)
+            )  # noqa: E203
         return sounds_out
 
     def clip(self, start: float = 0.0, stop: float | None = None) -> Sound:
