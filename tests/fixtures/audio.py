@@ -39,7 +39,7 @@ BIRDSONGREC_WAV_DIR =  SOURCE_TEST_DATA_ROOT / 'audio_wav_annot_birdsongrec' / '
 
 
 @pytest.fixture
-def birdsongrec_wav_dir(source_test_data_root):
+def birdsongrec_wav_dir():
     return BIRDSONGREC_WAV_DIR
 
 
