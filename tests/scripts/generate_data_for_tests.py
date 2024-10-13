@@ -33,9 +33,10 @@ AUDIO_LIST_CBIN = sorted(AUDIO_DIR_CBIN.glob('*.cbin'))
 BIRDSONGREC_WAV_DIR =  SOURCE_TEST_DATA_ROOT / 'audio_wav_annot_birdsongrec' / 'Bird0' / 'Wave'
 BIRDSONGREC_WAV_LIST = sorted(BIRDSONGREC_WAV_DIR.glob('*.wav'))
 
-# ---- segments
+# ---- "oracle" segments for 'vocalpy.segment.meansquared'
 SEGMENT_MAT_DIR = SOURCE_TEST_DATA_ROOT / 'segment' / 'evsonganaly'
 GENERATED_SEGMENT_ROOT = GENERATED_TEST_DATA_ROOT / 'segment'
+# ---- "oracle" segments for 'vocalpy.segment.ava'
 AVA_SEGMENT_TXT_DIR = GENERATED_SEGMENT_ROOT / 'ava-segment-txt'
 AVA_SEGMENT_TXT_LIST = sorted(AVA_SEGMENT_TXT_DIR.glob('*.txt'))
 
