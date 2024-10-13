@@ -325,7 +325,10 @@ def example(name: str, return_path: bool = False) -> ExampleType:
         # enforce consisting sorting across platforms
         path = sorted(path)
     if return_path:
-        return path
+        if example_.type == ExampleTypes.ExampleData:
+            return example_.makefunc(path, metadata=example_, return_path=return_path)
+        else:
+            return path
     else:
         if example_.type == ExampleTypes.Sound:
             return vocalpy.Sound.read(path)
