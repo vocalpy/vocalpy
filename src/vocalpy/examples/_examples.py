@@ -226,10 +226,7 @@ POOCH = pooch.create(
 
 
 def get_cache_dir() -> pathlib.Path:
-    """Returns path to directory where example data is cached.
-
-    By
-    """
+    """Returns path to directory where example data is cached."""
     return os.environ.get(VOCALPY_DATA_DIR, POOCH.abspath)
 
 
