@@ -61,13 +61,16 @@ def jourjine_et_al_2023_makefunc(
     if return_path:
         return ExampleData(sound=wav_path, segments=csv_path)
     else:
+        sound = vocalpy.Sound.read(wav_path)
         return ExampleData(
-            sound=vocalpy.Sound.read(wav_path),
+            sound=sound,
             segments=vocalpy.Segments.from_csv(
                 csv_path,
+                samplerate=sound.samplerate,
                 columns_map={"start_seconds": "start_s", "stop_seconds": "stop_s"}
             ),
         )
+
 
 MAKEFUNCS = [
     bfsongrepo_makefunc,
@@ -101,6 +104,12 @@ class Example:
     requires_download: bool
         If ``True``, this example data requires a download.
         The :meth:`Example.load` method will call :mod:`pooch`.
+    filename : str
+        For examples that are a single file, 
+        this is the name of the file.
+        For examples that are multiple files,
+        this is the name of the archive 
+        downloaded from Zenodo with :mod:`pooch`. 
     path : pathlib.Path, optional
         For examples that are a single file,
         this is the path to the file.
@@ -123,6 +132,7 @@ class Example:
     description: str
     type: ExampleTypes
     requires_download: bool
+    filename: str | None
     path: pathlib.Path | None = None
     makefunc: callable | None = None
     makefunc_kwargs: dict | None = None
@@ -199,6 +209,7 @@ class Example:
             description,
             type_,
             requires_download,
+            filename,
             path,
             makefunc,
             makefunc_kwargs
@@ -224,10 +235,10 @@ class Example:
                     "Unable to connect to registry to download example dataset. "
                     "This may be due to an issue with an internet connection."
                 ) from e
-            if self.fname.endswith(".tar.gz"):
-                path = POOCH.fetch(self.fname, processor=pooch.Untar())
+            if self.filename.endswith(".tar.gz"):
+                path = POOCH.fetch(self.filename, processor=pooch.Untar())
             else:
-                path = POOCH.fetch(self.fname)
+                path = POOCH.fetch(self.filename)
             if isinstance(path, list):
                 path = [pathlib.Path(path_) for path_ in path]
             else:
@@ -241,7 +252,7 @@ class Example:
 
         if return_path:
             if self.type == ExampleTypes.ExampleData:
-                return self.makefunc(path, metadata=self, return_path=return_path)
+                return self.makefunc(path, return_path=return_path)
             else:
                 return path
         else:
@@ -252,7 +263,7 @@ class Example:
             elif self.type == ExampleTypes.Annotation:
                 return vocalpy.Annotation.read(path, format=self.annot_format)
             elif self.type == ExampleTypes.ExampleData:
-                return self.makefunc(path, metadata=self, return_path=return_path)
+                return self.makefunc(path, return_path=return_path)
 
 
 EXAMPLE_METADATA_JSON_PATH = pathlib.Path(
