@@ -281,8 +281,8 @@ class Segments:
         path = pathlib.Path(path)
         with path.open("r") as fp:
             json_dict = json.load(fp)
-        start_inds = np.array(json_dict["start_inds"], type=int)
-        lengths = np.array(json_dict["lengths"], type=int)
+        start_inds = np.array(json_dict["start_inds"], dtype=int)
+        lengths = np.array(json_dict["lengths"], dtype=int)
         samplerate = json_dict["samplerate"]
         labels = json_dict["labels"]
         return cls(start_inds, lengths, samplerate, labels)
