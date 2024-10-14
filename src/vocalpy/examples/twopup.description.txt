@@ -1,0 +1,18 @@
+Sample of deer mouse vocalizations from:
+Jourjine, Nicholas et al. (2023). Data from:
+Two pup vocalization types are genetically and functionally separable in deer mice [Dataset].
+Dryad. https://doi.org/10.5061/dryad.g79cnp5ts
+
+The dataset accompanied the paper:
+Jourjine, Nicholas, et al. 
+"Two pup vocalization types are genetically and functionally 
+separable in deer mice." 
+Current Biology 33.7 (2023): 1237-1248.
+https://doi.org/10.1016/j.cub.2023.02.045
+
+This audio file and csv with segmentation 
+were kindly provided by Nick Jourjine for a bootcamp 
+(https://github.com/vocalpy/acoustic-communication-and-bioacoustics-bootcamp)
+at the 2024 Neural Mechanisms of Acoustic Communication 
+Gordon Research Seminar:
+https://www.grc.org/neural-mechanisms-of-acoustic-communication-grs-conference/2024/

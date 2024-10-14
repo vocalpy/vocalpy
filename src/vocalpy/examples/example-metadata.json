@@ -1,0 +1,69 @@
+[
+    {
+        "description_filename": "zebra-finch-SAP.description.txt",
+        "example_type": "Sound",
+        "requires_download": false,
+        "filename": "bells.wav"
+    },
+    {
+        "description_filename": "zebra-finch-SAP.description.txt",
+        "example_type": "Sound",
+        "requires_download": false,
+        "filename": "flashcam.wav"
+    },
+    {
+        "description_filename": "zebra-finch-SAP.description.txt",
+        "example_type": "Sound",
+        "requires_download": false,
+        "filename": "samba.wav"
+    },
+    {
+        "description_filename": "zebra-finch-SAP.description.txt",
+        "example_type": "Sound",
+        "requires_download": false,
+        "filename": "simple.wav"
+    },
+    {
+        "description_filename": "BM003.wav.description.txt",
+        "example_type": "Sound",
+        "requires_download": false,
+        "filename": "BM003.wav"
+    },
+    {
+        "description_filename": "bl26lb16.wav.description.txt",
+        "example_type": "Sound",
+        "requires_download": false,
+        "filename": "bl26lb16.wav"
+    },
+    {
+        "description_filename": "deermouse-go.wav.description.txt",
+        "example_type": "Sound",
+        "requires_download": false,
+        "filename": "deermouse-go.wav"
+    },
+    {
+        "description_filename": "fruitfly-song-multichannel.wav.description.txt",
+        "example_type": "Sound",
+        "requires_download": false,
+        "filename": "fruitfly-song-multichannel.wav"
+    },
+    {
+        "name": "bfsongrepo",
+        "description_filename": "bfsongrepo.description.txt",
+        "example_type": "ExampleData",
+        "requires_download": true,
+        "filename": "bfsongrepo.tar.gz",
+        "makefunc_name": "bfsongrepo_makefunc",
+        "makefunc_kwargs": {
+            "annot_format": "simple-seq"
+        }
+    },
+    {
+        "name": "twopup",
+        "description_filename": "twopup.description.txt",
+        "example_type": "ExampleData",
+        "requires_download": true,
+        "filename": "jourjine-et-al-2023.tar.gz",
+        "makefunc_name": "jourjine_et_al_2023_makefunc"
+    }
+]
