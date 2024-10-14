@@ -361,7 +361,7 @@ class Segments:
         >>> columns_map = {"start_seconds": "start_s", "stop_seconds": "stop_s"}
         >>> segments = voc.Segments.from_csv(csv_path, samplerate=sound.samplerate, columns_map=columns_map)
         >>> print(segments)
-        Segments(start_inds=array([   131...   149767168]), lengths=array([40447,...29696, 25087]), 
+        Segments(start_inds=array([   131...   149767168]), lengths=array([40447,...29696, 25087]),
         samplerate=250000, labels=['', '', '', '', '', '', ...])
 
         Notes
