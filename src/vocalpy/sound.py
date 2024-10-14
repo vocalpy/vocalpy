@@ -387,7 +387,7 @@ class Sound:
         sounds_out = []
         for start_ind, length in zip(segments.start_inds, segments.lengths):
             sounds_out.append(
-                Sound(data=self.data[:, start_ind : start_ind + length], samplerate=self.samplerate)
+                Sound(data=self.data[:, start_ind : start_ind + length], samplerate=self.samplerate)  # noqa : E203
             )  # noqa: E203
         return sounds_out
 

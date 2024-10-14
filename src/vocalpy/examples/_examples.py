@@ -7,16 +7,14 @@ import json
 import os
 import pathlib
 import shutil
-from dataclasses import dataclass
 from enum import Enum
 from typing import TYPE_CHECKING, Union
 
-from attr import define
 import pooch
 import requests.exceptions
+from attr import define
 
 from .example_data import ExampleData
-
 
 if TYPE_CHECKING:
     import vocalpy
@@ -47,9 +45,7 @@ def bfsongrepo_makefunc(
         )
 
 
-def jourjine_et_al_2023_makefunc(
-    path: pathlib.Path | list[pathlib.Path], return_path: bool = False
-) -> ExampleData:
+def jourjine_et_al_2023_makefunc(path: pathlib.Path | list[pathlib.Path], return_path: bool = False) -> ExampleData:
     """Make ``'jourjine-et-al-2023'`` example data"""
     import vocalpy  # avoid circular import
 
@@ -67,7 +63,7 @@ def jourjine_et_al_2023_makefunc(
             segments=vocalpy.Segments.from_csv(
                 csv_path,
                 samplerate=sound.samplerate,
-                columns_map={"start_seconds": "start_s", "stop_seconds": "stop_s"}
+                columns_map={"start_seconds": "start_s", "stop_seconds": "stop_s"},
             ),
         )
 
@@ -77,10 +73,7 @@ MAKEFUNCS = [
     jourjine_et_al_2023_makefunc,
 ]
 
-MAKEFUNCS_MAP = {
-    makefunc.__name__: makefunc
-    for makefunc in MAKEFUNCS
-}
+MAKEFUNCS_MAP = {makefunc.__name__: makefunc for makefunc in MAKEFUNCS}
 
 ExampleTypes = Enum("Exampletypes", "Sound Spectrogram Annotation ExampleData")
 
@@ -94,30 +87,30 @@ class Example:
     name : str
         Human-readable name of example data
     description : str
-        Description of example data, 
+        Description of example data,
         including any relevant citations.
     type : ExampleTypes
         Type of data.
         A :class:`Enum` member that is used
-        in the :meth:`Example.load` method 
+        in the :meth:`Example.load` method
         to determine how to load the data.
     requires_download: bool
         If ``True``, this example data requires a download.
         The :meth:`Example.load` method will call :mod:`pooch`.
     filename : str
-        For examples that are a single file, 
+        For examples that are a single file,
         this is the name of the file.
         For examples that are multiple files,
-        this is the name of the archive 
-        downloaded from Zenodo with :mod:`pooch`. 
+        this is the name of the archive
+        downloaded from Zenodo with :mod:`pooch`.
     path : pathlib.Path, optional
         For examples that are a single file,
         this is the path to the file.
     makefunc : callable, optional
         For examples that are multiple files,
-        this is a function that returns an 
-        :class:`ExampleData` instance 
-        with attributes containing the 
+        this is a function that returns an
+        :class:`ExampleData` instance
+        with attributes containing the
         multiple files.
     makefunc_kwargs : dict, optional
         A :class:`dict` of keyword arguments
@@ -128,6 +121,7 @@ class Example:
     This dataclass is used to load metadata from
     `vocalpy/examples/example-metadata.json`.
     """
+
     name: str
     description: str
     type: ExampleTypes
@@ -139,7 +133,7 @@ class Example:
 
     @classmethod
     def from_metadata(
-        cls, 
+        cls,
         description_filename: str,
         example_type: str,
         name: str | None = None,
@@ -159,7 +153,7 @@ class Example:
             String name of example type,
             that should match one member of the :class:`Enum`
             ``ExampleTypes``.
-            The :meth:`Example.load` method uses this 
+            The :meth:`Example.load` method uses this
             to determine how to load the example.
         name: str, optional
             A human-readable name for the example.
@@ -169,12 +163,12 @@ class Example:
             the name of the file.
         makefunc_name : string, optional
             For examples that are multiple files,
-            the name of the function that 
+            the name of the function that
             returns an instance of :class:`ExampleData`
-            with attributes that contain data loaded 
+            with attributes that contain data loaded
             from the files.
         makefunc_kwargs : dict, optional
-            A :class:`dict` of keyword arguments to 
+            A :class:`dict` of keyword arguments to
             pass into the ``makefunc``.
             Optional, default is None.
 
@@ -184,9 +178,7 @@ class Example:
             Instance of :class:`Example` dataclass
         """
         if filename is None and name is None:
-                raise ValueError(
-                    "`name` and `filename` for example can't both be None"
-                )
+            raise ValueError("`name` and `filename` for example can't both be None")
 
         if name is None:
             name = filename
@@ -204,22 +196,11 @@ class Example:
         else:
             makefunc = None
 
-        return cls(
-            name,
-            description,
-            type_,
-            requires_download,
-            filename,
-            path,
-            makefunc,
-            makefunc_kwargs
-        )
+        return cls(name, description, type_, requires_download, filename, path, makefunc, makefunc_kwargs)
 
     def __attrs_post_init__(self):
         if self.name is None:
-            raise ValueError(
-                "`name` can't be None"
-            )
+            raise ValueError("`name` can't be None")
 
         if not any([self.type is example_type for example_type in ExampleTypes]):
             raise ValueError(f"example type '{self.type}' is not one of the ExampleTypes: {ExampleTypes}")
@@ -358,7 +339,6 @@ def example(name: str, return_path: bool = False) -> ExampleType:
             f"No example data found with name: {name}. "
             "To see the names of all example data, call `vocalpy.examples.show()`"
         )
-    import vocalpy  # avoid circular import
 
     example_: Example = REGISTRY[name]
     return example_.load(return_path=return_path)
