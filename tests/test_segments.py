@@ -263,13 +263,13 @@ class TestSegments:
     def test_start_times_property(self, a_segments):
         assert np.array_equal(
             a_segments.start_times,
-            a_segments.start_inds / a_segments.sound.samplerate
+            a_segments.start_inds / a_segments.samplerate
         )
 
     def test_durations_property(self, a_segments):
         assert np.array_equal(
             a_segments.durations,
-            a_segments.lengths / a_segments.sound.samplerate
+            a_segments.lengths / a_segments.samplerate
         )
 
     def test_stop_times_property(self, a_segments):
@@ -288,7 +288,7 @@ class TestSegments:
             )
         )
 
-    def test_to_json(self, test_sound_has_path, a_segments, tmp_path):
+    def test_to_json(self, a_segments, tmp_path):
         json_path = tmp_path / 'a_segments.json'
         a_segments.to_json(json_path)
         assert json_path.exists
@@ -301,14 +301,14 @@ class TestSegments:
 
         assert np.array_equal(
             a_segments.start_inds,
-            np.array(json_dict['start_ind'])
+            np.array(json_dict['start_inds'])
         )
         assert np.array_equal(
             a_segments.lengths,
-            np.array(json_dict['length'])
+            np.array(json_dict['lengths'])
         )
         assert json_dict['samplerate'] == a_segments.samplerate
-        assert json_dict['label'] == a_segments.labels
+        assert json_dict['labels'] == a_segments.labels
 
     def test_from_json(self, a_segments, tmp_path):
         json_path = tmp_path / 'a_segments.json'
@@ -359,7 +359,7 @@ class TestSegments:
     )
     def test___len__(self, start_inds, lengths, sound, labels, expected_len):
         segments = vocalpy.Segments(
-            start_inds, lengths, sound, labels
+            start_inds, lengths, sound.samplerate, labels
         )
         assert len(segments) == expected_len
 
