@@ -400,13 +400,13 @@ def predefined_acoustic_features(
     scale : bool
         If True, scale the ``sound.data``.
         Default is True.
-        This is needed to replicate the behavior of ``evsonganaly``,
+        This is needed to replicate the behavior of ``soundsig``,
         which assumes the audio data is loaded as 16-bit integers.
         Since the default for :class:`vocalpy.Sound` is to load sounds
         with a numpy dtype of float64, this function defaults to
         multiplying the ``sound.data`` by 2**15,
         and then casting to the int16 dtype.
-        This replicates the behavior of the ``evsonganaly`` function,
+        This replicates the behavior of the ``soundsig`` function,
         given data with dtype float64.
         If you have loaded a sound with a dtype of int16,
         then set this to False.
@@ -414,13 +414,13 @@ def predefined_acoustic_features(
         Value to multiply the ``sound.data`` by, to scale the data.
         Default is 2**15.
         Only used if ``scale`` is ``True``.
-        This is needed to replicate the behavior of ``evsonganaly``,
+        This is needed to replicate the behavior of ``soundsig``,
         which assumes the audio data is loaded as 16-bit integers.
     scale_dtype : numpy.dtype
         Numpy Dtype to cast ``sound.data`` to, after scaling.
         Default is ``np.int16``.
         Only used if ``scale`` is ``True``.
-        This is needed to replicate the behavior of ``evsonganaly``,
+        This is needed to replicate the behavior of ``soundsig``,
         which assumes the audio data is loaded as 16-bit integers.
 
     Returns
