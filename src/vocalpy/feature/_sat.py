@@ -428,7 +428,7 @@ def _get_spectral_derivatives(
     return dSdt, dSdf
 
 
-def similarity_features(
+def sat(
     sound: Sound,
     n_fft=400,
     hop_length=40,

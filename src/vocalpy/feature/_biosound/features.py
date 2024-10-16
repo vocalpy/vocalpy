@@ -382,7 +382,7 @@ SCALAR_FEATURES = {
 }
 
 
-def predefined_acoustic_features(
+def biosound(
     sound: Sound,
     scale: bool = True,
     scale_val: int | float = 2**15,
