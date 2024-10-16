@@ -65,5 +65,13 @@
         "requires_download": true,
         "filename": "jourjine-et-al-2023.tar.gz",
         "makefunc_name": "jourjine_et_al_2023_makefunc"
+    },
+    {
+        "name": "zblib",
+        "description_filename": "zblib.description.txt",
+        "example_type": "ExampleData",
+        "requires_download": true,
+        "filename": "Elie-Theunissen-2016-vocalization-library-zebra-finch-subset.zip",
+        "makefunc_name": "zblib_makefunc"
     }
 ]

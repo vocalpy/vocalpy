@@ -68,9 +68,22 @@ def jourjine_et_al_2023_makefunc(path: pathlib.Path | list[pathlib.Path], return
         )
 
 
+def zblib_makefunc(path: pathlib.Path | list[pathlib.Path], return_path: bool = False) -> ExampleData:
+    import vocalpy  # avoid circular import
+
+    wav_paths = [path for path in path if path.suffix == ".wav"]
+    if return_path:
+        return ExampleData(sound=wav_paths)
+    else:
+        return ExampleData(
+            sound=[vocalpy.Sound.read(wav_path) for wav_path in wav_paths]
+        )
+
+
 MAKEFUNCS = [
     bfsongrepo_makefunc,
     jourjine_et_al_2023_makefunc,
+    zblib_makefunc,
 ]
 
 MAKEFUNCS_MAP = {makefunc.__name__: makefunc for makefunc in MAKEFUNCS}
@@ -218,6 +231,8 @@ class Example:
                 ) from e
             if self.filename.endswith(".tar.gz"):
                 path = POOCH.fetch(self.filename, processor=pooch.Untar())
+            elif self.filename.endswith(".zip"):
+                path = POOCH.fetch(self.filename, processor=pooch.Unzip())
             else:
                 path = POOCH.fetch(self.filename)
             if isinstance(path, list):
