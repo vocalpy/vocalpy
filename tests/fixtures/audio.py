@@ -138,3 +138,11 @@ AUDIO_LIST_CBIN_WITH_SUBDIRS = sorted(AUDIO_DIR_CBIN_WITH_SUBDIRS.glob('**/*cbin
 JOURJINE_ET_AL_GO_WAV_PATH = SOURCE_TEST_DATA_ROOT / 'jourjine-et-al-2023/GO/deermouse-go.wav'
 
 BFSONGREPO_BL26LB16_WAV_PATH = SOURCE_TEST_DATA_ROOT / "bfsongrepo_wav/bl26lb16.wav"
+
+ELIE_THEUNISSEN_2016_WAV_DIR = BIRDSONGREC_WAV_DIR =  SOURCE_TEST_DATA_ROOT / 'elie-theunissen-2016'
+ELIE_THEUNISSEN_2016_WAV_LIST = sorted(
+    ELIE_THEUNISSEN_2016_WAV_DIR.glob("*wav")
+)
+@pytest.fixture(params=ELIE_THEUNISSEN_2016_WAV_LIST)
+def all_elie_theunissen_2016_wav_paths(request):
+    return request.param
