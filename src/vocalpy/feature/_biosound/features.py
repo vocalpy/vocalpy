@@ -466,7 +466,7 @@ def biosound(
     if scale:
         from ... import Sound
 
-        sound = Sound(data=(sound.data * scale_val).astype(scale_dtype), samplerate=sound.samplerate, path=sound.path)
+        sound = Sound(data=(sound.data * scale_val).astype(scale_dtype), samplerate=sound.samplerate)
 
     features = defaultdict(list)
     for channel_data in sound.data:
