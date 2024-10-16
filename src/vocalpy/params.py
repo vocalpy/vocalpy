@@ -6,6 +6,7 @@ should inherit from this class,
 so that instances of those dataclasses can be passed
 into the classes that represent steps in workflows.
 """
+
 from dataclasses import asdict
 
 

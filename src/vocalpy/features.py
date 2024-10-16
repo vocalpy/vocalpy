@@ -1,4 +1,5 @@
 """Class that represents features extracted from sound."""
+
 from __future__ import annotations
 
 import pathlib

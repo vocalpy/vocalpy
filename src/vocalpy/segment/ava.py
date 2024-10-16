@@ -1,4 +1,5 @@
 """Find segments in audio, using algorithm from ``ava`` package."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -494,7 +495,7 @@ def ava(
         return Segments(
             np.array([]).astype(int),
             np.array([]).astype(int),
-            sound,
+            sound.samplerate,
         )
 
     # Throw away inter-segment intervals that are too short, as is done in Jourjine et al., 2023
@@ -519,4 +520,4 @@ def ava(
     if onsets_sample[-1] + lengths[-1] > sound.samples:
         # set length to be "until the end of the sound"
         lengths[-1] = sound.samples - onsets_sample[-1]
-    return Segments(start_inds=onsets_sample, lengths=lengths, sound=sound)
+    return Segments(start_inds=onsets_sample, lengths=lengths, samplerate=sound.samplerate)

@@ -5,6 +5,7 @@ Notes
 Adapted from SciPy cookbook:
 https://scipy-cookbook.readthedocs.io/items/ButterworthBandpass.html
 """
+
 from __future__ import annotations
 
 import scipy.signal

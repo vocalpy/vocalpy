@@ -1,4 +1,5 @@
 """Feature extraction"""
+
 from . import sat, soundsig
 
 __all__ = [
