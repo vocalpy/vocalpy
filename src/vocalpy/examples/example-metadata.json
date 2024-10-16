@@ -48,6 +48,13 @@
         "filename": "fruitfly-song-multichannel.wav"
     },
     {
+        "name": "WhiLbl0010",
+        "description_filename": "WhiLbl0010.description.txt",
+        "example_type": "Sound",
+        "requires_download": false,
+        "filename": "WhiLbl0010_110411-DC-01.wav"
+    },
+    {
         "name": "bfsongrepo",
         "description_filename": "bfsongrepo.description.txt",
         "example_type": "ExampleData",
