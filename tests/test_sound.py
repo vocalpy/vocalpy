@@ -1,3 +1,4 @@
+import librosa
 import numpy as np
 import pytest
 import soundfile
@@ -331,3 +332,11 @@ class TestSound:
                 sound.clip(stop=stop)
             else:
                 sound.clip(start, stop)
+
+    def test_to_mono(self, all_elie_theunissen_2016_wav_paths):
+        sound = vocalpy.Sound.read(all_elie_theunissen_2016_wav_paths)
+        sound_mono = sound.to_mono()
+        assert np.array_equal(
+            sound_mono.data,
+            librosa.to_mono(sound.data)[np.newaxis, :]
+        )

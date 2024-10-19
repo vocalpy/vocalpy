@@ -464,3 +464,42 @@ class Sound:
                 )
             stop_ind = int(stop * self.samplerate)
             return Sound(data=self.data[:, start_ind:stop_ind], samplerate=self.samplerate)
+
+    def to_mono(self):
+        """Convert a :class:`~vocalpy.Sound` to mono by averaging samples across channels.
+
+        Examples
+        --------
+
+        >>> sound = voc.examples("WhiLbl0010")
+        >>> print(sound.channels)
+        2
+        >>> sound_mono = sound.to_mono()
+        >>> print(sound.channels)
+        1
+
+        Note that feature extraction functions operate on channels independently, 
+        so it may speed up your analysis to convert multi-channel audio to mono, 
+        if you do not need to consider channels indepedently.
+
+        >>> import timeit
+        >>> import numpy as np
+        >>> sound = voc.examples("WhiLbl0010")
+        >>> sound_mono = sound.to_mono()
+        >>> np.mean(timeit.repeat("voc.feature.biosound(sound)", number=5, globals=globals()))
+        np.float64(19.713963174959645)
+        >>> np.mean(timeit.repeat("voc.feature.biosound(sound_mono)", number=5, globals=globals()))
+        np.float64(9.917085491772742)
+
+        Notes
+        -----
+        This method uses the :func:`librosa.to_mono` function.
+        """
+        if self.data.shape[0] == 1:
+            return self
+        else:
+            import librosa
+
+            return Sound(
+                data=librosa.to_mono(self.data), samplerate=self.samplerate
+            )
