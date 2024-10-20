@@ -1,4 +1,5 @@
 """Metrics for segmentation adapted from information retrieval."""
+
 from __future__ import annotations
 
 import attr

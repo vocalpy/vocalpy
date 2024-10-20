@@ -4,6 +4,8 @@ import pathlib
 from .test_data import GENERATED_TEST_DATA_ROOT, SOURCE_TEST_DATA_ROOT
 
 
+# ---- copied from evfuncs: oracle data for testing the evsonganaly segmenting method
+# that we now call 'meansquared'
 SOURCE_SEGMENT_ROOT = SOURCE_TEST_DATA_ROOT / 'segment'
 EVSONGANALY_SEGMENT_DIR = SOURCE_SEGMENT_ROOT / 'evsonganaly'
 EVSONGANALY_SEGMENT_MAT_LIST = sorted(EVSONGANALY_SEGMENT_DIR.glob('*.mat'))
@@ -20,3 +22,6 @@ EVSONGANALY_SEGMENT_JSON = [
     {k: pathlib.Path(v) for k,v in dict_.items()}
     for dict_ in EVSONGANALY_SEGMENT_JSON
 ]
+
+# ---- ava segmentation from Jourjine et al. 2023
+JOURJINE_ET_AL_2023_GO_SEGMENT_CSV_PATH = SOURCE_TEST_DATA_ROOT /  "jourjine-et-al-2023/GO/GO_24860x23748_ltr2_pup3_ch4_4800_m_337_295_fr1_p9_2021-10-02_12-35-01.csv"

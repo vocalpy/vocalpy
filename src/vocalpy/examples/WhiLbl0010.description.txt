@@ -1,0 +1,5 @@
+Zebra finch calls, single wav file from:
+Elie, Julie; Theunissen, Frédéric E. (2020). 
+Vocal repertoires from adult and chick, male and female zebra finches (Taeniopygia guttata). 
+figshare. Dataset. https://doi.org/10.6084/m9.figshare.11905533.v1
+Please cite relevant literature listed on figshare if using this data.

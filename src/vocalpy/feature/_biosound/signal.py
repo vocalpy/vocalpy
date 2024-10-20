@@ -3,6 +3,7 @@ Adapted under MIT license.
 
 .. [1] https://github.com/theunissenlab/soundsig
 """
+
 from __future__ import annotations
 
 import numpy as np

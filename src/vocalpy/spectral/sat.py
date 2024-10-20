@@ -7,6 +7,7 @@ Code adapted from [1]_, [2]_, and [3]_.
 .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_
    by Therese Koch, specifically the acoustics module
 """
+
 from __future__ import annotations
 
 from typing import TYPE_CHECKING

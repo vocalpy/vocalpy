@@ -17,6 +17,7 @@ The list created by :class:`vocalpy.dataset.Dataset`
 becomes the central table in a relational database
 representing the dataset.
 """
+
 from __future__ import annotations
 
 import enum
