@@ -60,6 +60,20 @@ ZEBRA_FINCH_WAV_DIR = SOURCE_TEST_DATA_ROOT / 'zebra-finch-wav'
 ALL_ZEBRA_FINCH_WAVS = sorted(ZEBRA_FINCH_WAV_DIR.glob('*.wav'))
 
 
+@pytest.fixture
+def a_zebra_finch_song_sound():
+    import vocalpy
+    return vocalpy.Sound.read(ALL_ZEBRA_FINCH_WAVS[0])
+
+
+@pytest.fixture
+def a_list_of_zebra_finch_song_sounds():
+    import vocalpy
+    return [
+        vocalpy.Sound.read(path)
+        for path in ALL_ZEBRA_FINCH_WAVS
+    ]
+
 @pytest.fixture(params=ALL_ZEBRA_FINCH_WAVS)
 def all_zebra_finch_wav_paths(request):
     """Parametrized fixture that returns
@@ -143,6 +157,28 @@ ELIE_THEUNISSEN_2016_WAV_DIR = SOURCE_TEST_DATA_ROOT / 'elie-theunissen-2016'
 ELIE_THEUNISSEN_2016_WAV_LIST = sorted(
     ELIE_THEUNISSEN_2016_WAV_DIR.glob("*wav")
 )
+
+@pytest.fixture
+def single_elie_theunissen_2016_wav_path():
+    return ELIE_THEUNISSEN_2016_WAV_LIST[0]
+
+
+@pytest.fixture
+def a_elie_theunissen_2016_sound(single_elie_theunissen_2016_wav_path):
+    import vocalpy
+    # N.B. we call `to_mono` to speed up feature extraction
+    return vocalpy.Sound.read(single_elie_theunissen_2016_wav_path).to_mono()
+
 @pytest.fixture(params=ELIE_THEUNISSEN_2016_WAV_LIST)
 def all_elie_theunissen_2016_wav_paths(request):
     return request.param
+
+@pytest.fixture
+def a_list_of_elie_theunissen_2016_sounds():
+    """list of Sound for all wav files from Elie Theunissen 2016 subset in source test data"""
+    import vocalpy
+    return [
+        # N.B. we call `to_mono` to speed up feature extraction
+        vocalpy.Sound.read(path).to_mono()
+        for path in ELIE_THEUNISSEN_2016_WAV_LIST
+    ]
