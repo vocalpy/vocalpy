@@ -1,0 +1,23 @@
+[project]
+authors = [{name = "David Nicholson", email = "NickleDave@users.noreply.github.com"}]
+dependencies = ["soundsig>=2.1,<3"]
+description = "Add a short description here"
+name = "soundsig-test-data"
+requires-python = ">= 3.8"
+version = "0.1.0"
+
+[build-system]
+build-backend = "hatchling.build"
+requires = ["hatchling"]
+
+[tool.pixi.project]
+channels = ["conda-forge"]
+platforms = ["osx-arm64"]
+
+[tool.pixi.pypi-dependencies]
+soundsig_test_data = { path = ".", editable = true }
+
+[tool.pixi.tasks]
+
+[tool.pixi.dependencies]
+
