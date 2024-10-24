@@ -8,10 +8,10 @@ import vocalpy.segment.meansquared
 from ..fixtures.segments import EVSONGANALY_SEGMENT_JSON
 
 
-def test_meansquared(a_cbin_path):
-    sound = vocalpy.Sound.read(a_cbin_path)
+def test_meansquared(all_cbin_paths):
+    sound = vocalpy.Sound.read(all_cbin_paths)
 
-    notmat = str(a_cbin_path) + '.not.mat'
+    notmat = str(all_cbin_paths) + '.not.mat'
     nmd = crowsetta.formats.seq.notmat.load_notmat(notmat)
     min_syl_dur = nmd['min_dur'] / 1000
     min_silent_dur = nmd['min_int'] / 1000

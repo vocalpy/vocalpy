@@ -1,0 +1,13 @@
+Courtship song (pulse and sine) of male Drosophila melanogaster. Data from:
+Clemens, Jan, 2021, "Drosophila melanogaster - train and test data (multi channel)", https://doi.org/10.25625/8KAKHJ, GRO.data, V1
+Contains recordings (on 9 microphone channels) and manual annotations of the courtship song (pulse and sine) of male Drosophila melanogaster.
+
+The recordings were previously unpublished and were first used in:
+Clemens J, Coen P, Roemschied FA, Pereira TD, Mazumder D, Aldarondo DE, Pacheco DA, Murthy M. 2018.
+Discovery of a New Song Mode in Drosophila Reveals Hidden Structure in the Sensory and Neural Drivers of Behavior.
+Current biology 28:2400–2412.e6.
+
+This is a short clip from the file named
+``160420_1746_manual.wav`` in the source dataset,
+that was clipped using the tsv annotations created with the DAS gui.
+To minimize file size, only three of the channels from the original nine are kept.

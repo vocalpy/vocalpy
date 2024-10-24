@@ -1,0 +1,8 @@
+Deer mouse pup calls from:
+Jourjine, Nicholas et al. (2023). Data from:
+Two pup vocalization types are genetically and functionally separable in deer mice [Dataset].
+Dryad. https://doi.org/10.5061/dryad.g79cnp5ts
+
+This is a short clip from the start of the file named
+``GO_24860x23748_ltr2_pup3_ch4_4800_m_337_295_fr1_p9_2021-10-02_12-35-01.wav``
+in the source dataset.

@@ -6,6 +6,7 @@ Code is adapted from the ``soundsig`` library [2]_, under MIT license.
    Animal Cognition. 2016. 19(2) 285-315 DOI 10.1007/s10071-015-0933-6
 .. [2] https://github.com/theunissenlab/soundsig
 """
+
 from __future__ import annotations
 
 from collections import defaultdict
@@ -20,7 +21,7 @@ from .fundamental import estimate_f0
 from .sound import temporal_envelope
 
 if TYPE_CHECKING:
-    from vocalpy import Sound
+    from vocalpy import Features, Sound
 
 
 def temporal_envelope_features(
@@ -381,13 +382,13 @@ SCALAR_FEATURES = {
 }
 
 
-def predefined_acoustic_features(
+def biosound(
     sound: Sound,
     scale: bool = True,
     scale_val: int | float = 2**15,
     scale_dtype: npt.DTypeLike = np.int16,
     ftr_groups: SoundsigFeatureGroups | Sequence[SoundsigFeatureGroups] = ("temporal", "spectral", "fundamental"),
-) -> xr.Dataset:
+) -> Features:
     """Compute predefined acoustic features (PAFs)
     used to analyze the vocal repertoire of the domesticated zebra finch,
     as described in [1]_.
@@ -399,13 +400,13 @@ def predefined_acoustic_features(
     scale : bool
         If True, scale the ``sound.data``.
         Default is True.
-        This is needed to replicate the behavior of ``evsonganaly``,
+        This is needed to replicate the behavior of ``soundsig``,
         which assumes the audio data is loaded as 16-bit integers.
         Since the default for :class:`vocalpy.Sound` is to load sounds
         with a numpy dtype of float64, this function defaults to
         multiplying the ``sound.data`` by 2**15,
         and then casting to the int16 dtype.
-        This replicates the behavior of the ``evsonganaly`` function,
+        This replicates the behavior of the ``soundsig`` function,
         given data with dtype float64.
         If you have loaded a sound with a dtype of int16,
         then set this to False.
@@ -413,18 +414,23 @@ def predefined_acoustic_features(
         Value to multiply the ``sound.data`` by, to scale the data.
         Default is 2**15.
         Only used if ``scale`` is ``True``.
-        This is needed to replicate the behavior of ``evsonganaly``,
+        This is needed to replicate the behavior of ``soundsig``,
         which assumes the audio data is loaded as 16-bit integers.
     scale_dtype : numpy.dtype
         Numpy Dtype to cast ``sound.data`` to, after scaling.
         Default is ``np.int16``.
         Only used if ``scale`` is ``True``.
-        This is needed to replicate the behavior of ``evsonganaly``,
+        This is needed to replicate the behavior of ``soundsig``,
         which assumes the audio data is loaded as 16-bit integers.
 
     Returns
     -------
-    features : Features
+    features : vocalpy.Features
+        A :class:`vocalpy.Features` instance with
+        :attr:`~vocalpy.Features.data` attribute that is
+        an :class:`xarray.Dataset`,
+        where the data variables are the features,
+        and the coordinate is the channel.
 
     Notes
     -----
@@ -460,7 +466,7 @@ def predefined_acoustic_features(
     if scale:
         from ... import Sound
 
-        sound = Sound(data=(sound.data * scale_val).astype(scale_dtype), samplerate=sound.samplerate, path=sound.path)
+        sound = Sound(data=(sound.data * scale_val).astype(scale_dtype), samplerate=sound.samplerate)
 
     features = defaultdict(list)
     for channel_data in sound.data:
@@ -486,4 +492,7 @@ def predefined_acoustic_features(
         coords={"channel": channels},
     )
 
-    return data
+    from ... import Features  # avoid circular import
+
+    features = Features(data=data)
+    return features
