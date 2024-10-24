@@ -34,7 +34,7 @@ def temporal_envelope_features(
     as described in [1]_.
 
     This is a helper function called by
-    :func:`vocalpy.feature.soundsig.predefined_acoustic_features`.
+    :func:`vocalpy.feature.biosound`.
     It replicates the result of calling the ``soundsig.BioSound``
     method ``ampenv``.
 
@@ -97,7 +97,7 @@ def spectral_envelope_features(
     as described in [1]_.
 
     This is a helper function called by
-    :func:`vocalpy.feature.soundsig.predefined_acoustic_features`.
+    :func:`vocalpy.feature.biosound`.
     It replicates the result of calling the ``soundsig.BioSound``
     method ``spectrum``.
 
@@ -208,7 +208,7 @@ def fundamental_features(
     as described in [1]_.
 
     This is a helper function called by
-    :func:`vocalpy.feature.soundsig.predefined_acoustic_features`.
+    :func:`vocalpy.feature.biosound`.
     It replicates the result of calling the ``soundsig.BioSound``
     method ``fundest``.
 
