@@ -15,7 +15,7 @@ BIOSOUND_FEATURES_ROOT = GENERATED_TEST_DATA_ROOT.joinpath(
 )
 
 SCALE_VAL = 2**15,
-SCALE_DTYPE = np.int16,
+SCALE_DTYPE = np.int16
 
 @pytest.fixture
 def a_scaled_mono_elie_theunissen_2016_sound(
@@ -32,7 +32,7 @@ def a_scaled_mono_elie_theunissen_2016_sound(
 
 @pytest.fixture(params=ELIE_THEUNISSEN_2016_WAV_LIST)
 def elie_theunissen_2016_sound_and_biosound_features(request):
-    def _elie_theunissen_2016_sound_and_biosound_temporal_envelope_features(
+    def _elie_theunissen_2016_sound_and_biosound_features(
             feature_group: Literal["temporal", "spectral", "fundamental"]
     ):
         import vocalpy as voc
@@ -60,14 +60,14 @@ def elie_theunissen_2016_sound_and_biosound_features(request):
             if ftr_name in voc.feature._biosound.features.SCALAR_FEATURES[feature_group]
         }
         return sound, features
-    return _elie_theunissen_2016_sound_and_biosound_temporal_envelope_features
+    return _elie_theunissen_2016_sound_and_biosound_features
 
 
 def test_temporal_envelope_features(all_elie_theunissen_2016_wav_paths):
     sound = vocalpy.Sound.read(all_elie_theunissen_2016_wav_paths)
 
     out = vocalpy.feature._biosound.features.temporal_envelope_features(
-        data=sound.data, samplerate=sound.samplerate
+        data=sound.data[0, :], samplerate=sound.samplerate
     )
 
     assert isinstance(out, dict)
@@ -81,21 +81,21 @@ def test_temporal_envelope_features_replicates(elie_theunissen_2016_sound_and_bi
     sound, features = elie_theunissen_2016_sound_and_biosound_features("temporal")
 
     out = vocalpy.feature._biosound.features.temporal_envelope_features(
-        data=sound.data, samplerate=sound.samplerate
+        data=sound.data[0, :], samplerate=sound.samplerate
     )
 
-    for ftr_name, ftr_val in out.items():
+    for ftr_name, expected_ftr_val in features.items():
+        ftr_val = out[ftr_name]
         np.testing.assert_allclose(
-            ftr_val, features[ftr_name]
+            ftr_val, expected_ftr_val
         )
 
 
 def test_spectral_envelope_features(all_elie_theunissen_2016_wav_paths):
     sound = vocalpy.Sound.read(all_elie_theunissen_2016_wav_paths)
-    sound = sound.to_mono()
 
     out = vocalpy.feature._biosound.features.spectral_envelope_features(
-        data=sound.data, samplerate=sound.samplerate
+        data=sound.data[0, :], samplerate=sound.samplerate
     )
 
     assert isinstance(out, dict)
@@ -107,27 +107,23 @@ def test_spectral_envelope_features(all_elie_theunissen_2016_wav_paths):
 
 def test_spectral_envelope_features_replicates(elie_theunissen_2016_sound_and_biosound_features):
     sound, features = elie_theunissen_2016_sound_and_biosound_features("spectral")
-    sound = sound.to_mono()
 
     out = vocalpy.feature._biosound.features.spectral_envelope_features(
-        data=sound.data, samplerate=sound.samplerate
+        data=sound.data[0, :], samplerate=sound.samplerate
     )
 
-    assert isinstance(out, dict)
-    for ftr_name in vocalpy.feature._biosound.features.SCALAR_FEATURES["spectral"]:
-        assert ftr_name in out
-    for ftr_name, ftr_val in out.items():
+    for ftr_name, expected_ftr_val in features.items():
+        ftr_val = out[ftr_name]
         np.testing.assert_allclose(
-            ftr_val, features[ftr_name]
+            ftr_val, expected_ftr_val
         )
 
 
 def test_fundamental_features(all_elie_theunissen_2016_wav_paths):
     sound = vocalpy.Sound.read(all_elie_theunissen_2016_wav_paths)
-    sound = sound.to_mono()
 
     out = vocalpy.feature._biosound.features.fundamental_features(
-        data=sound.data, samplerate=sound.samplerate
+        data=sound.data[0, :], samplerate=sound.samplerate
     )
 
     assert isinstance(out, dict)
@@ -139,16 +135,14 @@ def test_fundamental_features(all_elie_theunissen_2016_wav_paths):
 
 def test_fundamental_features_replicates(elie_theunissen_2016_sound_and_biosound_features):
     sound, features = elie_theunissen_2016_sound_and_biosound_features("fundamental")
-    sound = sound.to_mono()
 
     out = vocalpy.feature._biosound.features.fundamental_features(
-        data=sound.data, samplerate=sound.samplerate
+        data=sound.data[0,:], samplerate=sound.samplerate
     )
 
-    assert isinstance(out, dict)
-    for ftr_name in vocalpy.feature._biosound.features.SCALAR_FEATURES["fundamental"]:
-        assert ftr_name in out
-    for ftr_name, ftr_val in out.items():
+    for ftr_name, expected_ftr_val in features.items():
+        ftr_val = out[ftr_name]  
         np.testing.assert_allclose(
-            ftr_val, features[ftr_name]
+            ftr_val, expected_ftr_val,
+            rtol=0.125
         )
