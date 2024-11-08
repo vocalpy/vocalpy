@@ -3,7 +3,6 @@ Adapted under MIT license.
 
 .. [1] https://github.com/theunissenlab/soundsig
 """
-
 from math import ceil
 
 import numpy as np
@@ -13,6 +12,7 @@ from scipy.fftpack import dct, fft
 from scipy.optimize import leastsq
 from scipy.signal import filtfilt, firwin
 
+from .constants import DEFAULT_DT
 from .detect_peaks import detect_peaks
 from .signal import correlation_function, gaussian_window
 from .sound import temporal_envelope
@@ -111,58 +111,76 @@ def residual_syn(b: npt.NDArray, x: npt.NDArray, real_s: npt.NDArray) -> npt.NDA
 
 
 def estimate_f0(
-    data,
-    samplerate,
-    dt=None,
-    max_fund=1500,
-    min_fund=300,
-    low_fc=200,
-    high_fc=6000,
-    min_saliency=0.5,
-    min_formant_freq=500,
-    max_formant_bw=500,
-    window_formant=0.1,
-    method="Stack",
+    data: npt.NDArray,
+    samplerate: int,
+    dt: float = DEFAULT_DT,
+    max_fund: int = 1500,
+    min_fund: int = 300,
+    low_fc: int = 200,
+    high_fc: int = 6000,
+    min_saliency: float = 0.5,
+    min_formant_freq: int = 500,
+    max_formant_bw: int = 500,
+    window_formant: float = 0.1,
+    method: str = "Stack",
 ) -> dict:
-    """Estimate fundamental frequency.
-
-    Estimates the fundamental frequency of a complex sound.
-    soundIn is the sound pressure waveformlog spectrogram.
-    samplerate is the sampling rate
-    t is a vector of time values in s at which the fundamental will be estimated.
-    The sound must include at least 1024 sample points
+    """Estimate the fundamental frequency of a complex sound.
 
     Parameters
     ----------
     data : npt.ndarray
-        1-d array of sound data.
+        1-d array of sound data. Must have a length of at least 1024.
+    samplerate: int
+        Sampling rate.
+    dt : numpy.ndarray, optional.
+        A vector of time values at which the fundamental will be estimated.
     max_fund : int
-        = 1500       Maximum fundamental frequency
+        Maximum fundamental frequency. Default is 1500.
     min_fund: int
-    = 300        Minimum fundamental frequency
-    low_fc = 200          Low frequency cut-off for band-passing the signal prior to auto-correlation.
-    high_fc = 6000        High frequency cut-off
-    min_saliency = 0.5    Threshold in the auto-correlation for minimum saliency -
-                          returns NaN for pitch values is saliency is below this number
-    min_formant_freq = 500  Minimum value of firt formant
-    max_formant_bw = 500    Maxminum value of formants bandwith.
-    window_formant = 0.1   Time window for Formant calculation.  Includes 5 std of normal window.
-
-    Four methods are available:
-    'AC' - Peak of the auto-correlation function
-    'ACA' - Peak of envelope of auto-correlation function
-    'Cep' - First peak in cepstrum
-    'Stack' - Fitting of harmonic stacks (default - works well for zebra finches)
+        Minimum fundamental frequency. Default is 300.
+    low_fc : int
+        Low frequency cut-off for band-passing the signal prior to auto-correlation.
+        Default is 200.
+    high_fc : int
+        High frequency cut-off for band-passing the signal prior to auto-correlation.
+        Default is 6000,
+    min_saliency : float
+        Threshold in the auto-correlation for minimum saliency -
+        Returns NaN for pitch values is saliency is below this number.
+        Default is 0.5.
+    min_formant_freq: int
+        Minimum value of first formant. Default is 500.
+    max_formant_bw: int
+        Maxminum value of formants bandwith. Default is 500.
+    window_formant : float
+        Duration of time window for formant calculation, in seconds.
+        Includes 5 std of normal window. Default is 0.1,
+    method : str
+        Method to use to estimate.
+        One of ``{"AC", "ACA", "Cep", "Stack"}``.
+        ``'AC'``: Peak of the auto-correlation function.
+        ``'ACA``: Peak of envelope of auto-correlation function.
+        ``'Cep'``: First peak in cepstrum.
+        ``'Stack'``: Fitting of harmonic stacks (works well for zebra finches).
+        Default is ``'Stack'``.
 
     Returns
-           sal     - the time varying pitch saliency - a number between 0 and 1
-                     corresponding to relative size of the first auto-correlation peak
-           fund     - the time-varying fundamental in Hz at the same resolution as the spectrogram.
-           fund2   - a second peak in the spectrum - not a multiple of the fundamental a sign of a second voice
-           form1   - the first formant, if it exists
-           form2   - the second formant, if it exists
-           form3   - the third formant, if it exists
-           sound_len - length of sal, fund, fund2, form1, form2, form3
+    -------
+    sal : numpy.ndarray
+        The time varying pitch saliency - a number between 0 and 1
+        corresponding to relative size of the first auto-correlation peak
+    fund : numpy.ndarray
+        The time-varying fundamental in Hz at the same resolution as the spectrogram.
+    fund2 : numpy.ndarray
+        A second peak in the spectrum - not a multiple of the fundamental a sign of a second voice
+    form1 : numpy.ndarray
+        The first formant, if it exists
+    form2 : numpy.ndarray
+        The second formant, if it exists
+    form3 : numpy.ndarray
+        The third formant, if it exists
+    sound_len : int
+        Length of sal, fund, fund2, form1, form2, form3
     """
     # Band-pass filtering signal prior to auto-correlation
     sound_len = data.shape[-1]
@@ -209,8 +227,8 @@ def estimate_f0(
         # Make a symmetric window
         win_len2 += 1
 
-    gt, w = gaussian_window(win_len, alpha)
-    gt2, w2 = gaussian_window(win_len2, alpha)
+    _, w = gaussian_window(win_len, alpha)
+    _, w2 = gaussian_window(win_len2, alpha)
     maxlags = int(2 * ceil((float(samplerate) / min_fund)))
 
     # First calculate the rms in each window
