@@ -17,6 +17,7 @@ import numpy as np
 import numpy.typing as npt
 import xarray as xr
 
+from .constants import DEFAULT_DT
 from .fundamental import estimate_f0
 from .sound import temporal_envelope
 
@@ -185,9 +186,6 @@ def spectral_envelope_features(
         "fpsd": freqdata,
         "psd": spectdata,
     }
-
-
-DEFAULT_DT = 0.000997732426303855
 
 
 def fundamental_features(
