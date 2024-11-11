@@ -169,16 +169,25 @@ def a_elie_theunissen_2016_sound(single_elie_theunissen_2016_wav_path):
     # N.B. we call `to_mono` to speed up feature extraction
     return vocalpy.Sound.read(single_elie_theunissen_2016_wav_path).to_mono()
 
-@pytest.fixture(params=ELIE_THEUNISSEN_2016_WAV_LIST)
+
+#@pytest.fixture(params=ELIE_THEUNISSEN_2016_WAV_LIST)
 def all_elie_theunissen_2016_wav_paths(request):
     return request.param
 
+
 @pytest.fixture
-def a_list_of_elie_theunissen_2016_sounds():
+def a_list_of_elie_theunissen_2016_sounds(pytestconfig):
     """list of Sound for all wav files from Elie Theunissen 2016 subset in source test data"""
     import vocalpy
-    return [
-        # N.B. we call `to_mono` to speed up feature extraction
-        vocalpy.Sound.read(path).to_mono()
-        for path in ELIE_THEUNISSEN_2016_WAV_LIST
-    ]
+    if pytestconfig.getoption("--biosound-fast"):
+        return [
+            # N.B. we call `to_mono` to speed up feature extraction
+            vocalpy.Sound.read(path).to_mono()
+            for path in ELIE_THEUNISSEN_2016_WAV_LIST[:2]
+        ]
+    else:
+        return [
+            # N.B. we call `to_mono` to speed up feature extraction
+            vocalpy.Sound.read(path).to_mono()
+            for path in ELIE_THEUNISSEN_2016_WAV_LIST
+        ]

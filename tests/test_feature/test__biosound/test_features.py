@@ -30,8 +30,8 @@ def a_scaled_mono_elie_theunissen_2016_sound(
         return sound
 
 
-@pytest.fixture(params=ELIE_THEUNISSEN_2016_WAV_LIST)
-def elie_theunissen_2016_sound_and_biosound_features(request):
+@pytest.fixture()
+def elie_theunissen_2016_sound_and_biosound_features(all_elie_theunissen_2016_wav_paths):
     def _elie_theunissen_2016_sound_and_biosound_features(
             feature_group: Literal["temporal", "spectral", "fundamental", None] = None, scale: bool = True, features_as_dict: bool = True
     ):
@@ -42,8 +42,7 @@ def elie_theunissen_2016_sound_and_biosound_features(request):
                 f"must be one of the keys in `voc.feature._biosound.features.SCALAR_FEATURES`: {voc.feature._biosound.features.SCALAR_FEATURES.keys()}\n"
                 f"But `feature_group` argument was: {feature_group}"
             )
-        wav_path = request.param
-        sound = voc.Sound.read(wav_path)
+        sound = voc.Sound.read(all_elie_theunissen_2016_wav_paths)
         if scale:
             # we need to scale float values since soundsig loads wav as int16
             sound = voc.Sound(data=(sound.data * SCALE_VAL).astype(SCALE_DTYPE), samplerate=sound.samplerate)
@@ -52,7 +51,7 @@ def elie_theunissen_2016_sound_and_biosound_features(request):
         sound = sound[0]
 
         expected_feature_file_path = BIOSOUND_FEATURES_ROOT.joinpath(
-            f"{wav_path.stem}.nc"
+            f"{all_elie_theunissen_2016_wav_paths.stem}.nc"
         )
         features = xr.load_dataset(expected_feature_file_path)
         if feature_group is not None:
