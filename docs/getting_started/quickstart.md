@@ -43,7 +43,7 @@ sounds = voc.example('bfsongrepo', return_type='sound')
 
 +++
 
-Let's look at the data types that VocalPy provides for acoustic comunication.
+Let's look at the data types that VocalPy provides for acoustic communication.
 
 +++
 
@@ -179,7 +179,7 @@ Now that we know what we're working with, let's actually inspect the attributes 
 
 There are five attributes we care about here.
 
-1. `data`: this is the spectrogram itself -- as with the other data types,like `vocalpy.Sound`, the attribute name `data` indiciates this main data we care about
+1. `data`: this is the spectrogram itself -- as with the other data types,like `vocalpy.Sound`, the attribute name `data` indicates this main data we care about
 
 ```{code-cell} ipython3
 print(a_spect.data)
@@ -235,7 +235,7 @@ for spect in spects:
     )
 ```
 
-Notice that the extension is `'npz'`; this is a file format that NumPy uses to save mulitple arrays in a single file. By convention we include the file extension of the source audio, and another "extension" that incidicates this is a spectrogram, so that the file name ends with `'.wav.spect.npz'`.
+Notice that the extension is `'npz'`; this is a file format that NumPy uses to save multiple arrays in a single file. By convention we include the file extension of the source audio, and another "extension" that incidicates this is a spectrogram, so that the file name ends with `'.wav.spect.npz'`.
 
 +++
 

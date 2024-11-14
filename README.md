@@ -36,7 +36,7 @@ The goals of VocalPy are to:
   extracting features
 - make it easier for scientist-coders to flexibly and iteratively build datasets, 
   without needing to deal directly with a database if they don't want to
-- make it possible to re-use code you have already written for your own research group
+- make it possible to reuse code you have already written for your own research group
 - and finally: 
   - make code easier to share and read across research groups, by providing these classes, and *idiomiatic* ways 
     of coding with them; think of VocalPy as an interoperability layer and a common language

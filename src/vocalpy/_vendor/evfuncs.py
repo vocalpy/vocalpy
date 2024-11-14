@@ -35,7 +35,7 @@ def readrecf(filename):
                 was a 'catch trial' (where feedback would have been triggered but
                 was withheld so behavior on that trial could be measured)
             num_channels : int
-                number of channels from DAQ board recored by EvTAF
+                number of channels from DAQ board recorded by EvTAF
             sample_freq : int
                 sampling frequency of audio file associated with this .rec file, in Hertz
             num_samples : int

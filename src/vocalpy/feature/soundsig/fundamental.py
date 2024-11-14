@@ -144,7 +144,7 @@ def estimate_f0(
     min_saliency = 0.5    Threshold in the auto-correlation for minimum saliency -
                           returns NaN for pitch values is saliency is below this number
     min_formant_freq = 500  Minimum value of firt formant
-    max_formant_bw = 500    Maxminum value of formants bandwith.
+    max_formant_bw = 500    Maxminum value of formants bandwidth.
     window_formant = 0.1   Time window for Formant calculation.  Includes 5 std of normal window.
 
     Four methods are available:
@@ -370,7 +370,7 @@ def estimate_f0(
             else:
                 indEnvMax = locsEnvCorr[indIndEnvMax + 1]
                 if lags[indEnvMax] == 0:  # This should not happen
-                    print("Error: Max Peak in enveloppe auto-correlation found at zero delay")
+                    print("Error: Max Peak in envelope auto-correlation found at zero delay")
                     fund_corr_amp_guess = fund_corr_guess
                 else:
                     fund_corr_amp_guess = samplerate / lags[indEnvMax]

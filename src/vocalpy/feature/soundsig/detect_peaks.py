@@ -48,7 +48,7 @@ def detect_peaks(x, mph=None, mpd=1, threshold=0, edge="rising", kpsh=False, val
     Returns
     -------
     ind : 1D array_like
-        indeces of the peaks in `x`.
+        indices of the peaks in `x`.
 
     Notes
     -----
