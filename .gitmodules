@@ -1,0 +1,5 @@
+[submodule "tests/data-for-tests"]
+	path = tests/data-for-tests
+	url = https://github.com/NickleDave/vocalpy-test-data
+	datalad-id = 5312e12b-d1bf-49fe-b2c7-b83063e7ed9c
+	datalad-url = https://github.com/NickleDave/vocalpy-test-data
