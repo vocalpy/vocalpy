@@ -95,5 +95,5 @@ omit = [
 # Ref: https://github.com/codespell-project/codespell#using-a-config-file
 skip = '.git*,*.pdf'
 check-hidden = true
-# ignore-regex = ''
-# ignore-words-list = ''
+ignore-regex = '\b(soundIn|Sade McFadden)\b|textsuperscript{nd}'
+ignore-words-list = 'dael,idel,spects'
