@@ -58,7 +58,7 @@ class Spectrogram:
 
     >>> spect = voc.Spectrogram.read("llb3_0066_2018_04_23_17_31_55.wav.npz")
     >>> spect
-    Spectrogram(data=array([[0.561... 0.        ]]), fequencies=array([[    0...50.        ]]), times=array([[0.000...6053968e+01]]),
+    Spectrogram(data=array([[0.561... 0.        ]]), frequencies=array([[    0...50.        ]]), times=array([[0.000...6053968e+01]]),
     spect_path=PosixPath('llb3_0066_2018_04_23_17_31_55.wav.mat'), audio_path=None)
     """
     data: npt.NDArray = attrs.field()

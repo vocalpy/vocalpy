@@ -108,7 +108,7 @@ def get_onsets_offsets(audio, p, return_traces=False):
 	spec, dt, _ = get_spec(audio, p)
 	min_syll_len = int(np.floor(p['min_dur'] / dt))
 	max_syll_len = int(np.ceil(p['max_dur'] / dt))
-	th_1, th_2, th_3 = p['th_1'], p['th_2'], p['th_3'] # tresholds
+	th_1, th_2, th_3 = p['th_1'], p['th_2'], p['th_3'] # thresholds
 	onsets, offsets = [], []
 	too_short, too_long = 0, 0
 

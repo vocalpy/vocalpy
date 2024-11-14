@@ -57,7 +57,7 @@ class TestSpectrogram:
             (DATA, TIMES, FREQS.tolist(), TypeError),
             # ``frequencies`` is not 1 dimensional
             (DATA, TIMES, FREQS[:, np.newaxis], ValueError),
-            # ``data.shape[0]`` and ``freqencies.shape[0]`` don't match
+            # ``data.shape[0]`` and ``frequencies.shape[0]`` don't match
             (DATA, TIMES, FREQS[:-5], ValueError),
             # ``data.shape[1]`` and ``times.shape[0]`` don't match
             (DATA, TIMES[:-5], FREQS, ValueError),

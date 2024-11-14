@@ -14,7 +14,7 @@ kernelspec:
 
 # How do I evaluate segmentation methods with information retrieval metrics?
 
-The first step in many analyses of acoustic communication is to segment audio into units of analyis, as discussed in [^1] and [^2].
+The first step in many analyses of acoustic communication is to segment audio into units of analysis, as discussed in [^1] and [^2].
 This how-to walks through using metrics from information retrieval to evaluate methods for segmenting audio.
 
 We will compare two algorithms that take as input a {py:class}`vocalpy.Sound`, and return as output {py:class}`vocalpy.Segments`. The {py:class}`vocalpy.Segments` class represents a set of line segments, with each segment having a starting index and length (or, equivalently, a start time and a stop time). One of the goals of this how-to is to show you the ways that using the {py:class}`vocalpy.Segments` class makes it easier for you to evaluate segmentation algorithms.
