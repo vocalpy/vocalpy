@@ -143,7 +143,7 @@ def estimate_f0(
     high_fc = 6000        High frequency cut-off
     min_saliency = 0.5    Threshold in the auto-correlation for minimum saliency -
                           returns NaN for pitch values is saliency is below this number
-    min_formant_freq = 500  Minimum value of firt formant
+    min_formant_freq = 500  Minimum value of first formant
     max_formant_bw = 500    Maxminum value of formants bandwidth.
     window_formant = 0.1   Time window for Formant calculation.  Includes 5 std of normal window.
 

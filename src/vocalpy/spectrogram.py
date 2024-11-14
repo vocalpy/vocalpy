@@ -49,7 +49,7 @@ def spectrogram(
         in number of audio samples. Default is 512.
     hop_length : int
         Number of audio samples to "hop" for each frame
-        whe computing the Fast Fourier Transform.
+        when computing the Fast Fourier Transform.
         Smaller values increase the number of columns in the spectrogram,
         without affecting the frequency resolution of the STFT.
     method : str
