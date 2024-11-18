@@ -14,36 +14,7 @@ DIR = pathlib.Path(__file__).parent.resolve()
 VENV_DIR = pathlib.Path('./.venv').resolve()
 
 
-# ---- the top half of this noxfile are more standard sessions: dev, lint, tests, docs, build --------------------------
-
-@nox.session(python="3.10")
-def dev(session: nox.Session) -> None:
-    """
-    Sets up a python development environment for the project.
-
-    This session will:
-    - Create a python virtualenv for the session
-    - Install the `virtualenv` cli tool into this environment
-    - Use `virtualenv` to create a global project virtual environment
-    - Invoke the python interpreter from the global project environment to install
-      the project and all it's development dependencies.
-    """
-
-    session.install("virtualenv")
-    # VENV_DIR here is a pathlib.Path location of the project virtualenv
-    # e.g. .venv
-    session.run("virtualenv", os.fsdecode(VENV_DIR), silent=True)
-
-    if sys.platform.startswith("linux") or sys.platform == "darwin":
-        python = os.fsdecode(VENV_DIR.joinpath("bin/python"))
-    elif sys.platform.startswith("win"):
-        python = os.fsdecode(VENV_DIR.joinpath("Scripts/python.exe"))
-
-    # Use the venv's interpreter to install the project along with
-    # all it's dev dependencies, this ensures it's installed in the right way
-    session.run(python, "-m", "pip", "install", "-e", ".[dev]", external=True)
-
-
+# ---- the top half of this noxfile are more standard sessions: lint, tests, docs, build --------------------------
 TEST_PYTHONS = [
     "3.10",
     "3.11",
@@ -195,16 +166,26 @@ def is_test_data_subdir_empty(test_data_subdir):
     return listdir == [".gitkeep"] or len(listdir) < 1
 
 
-@nox.session(name='test-data-download-source')
-def test_data_download_source(session) -> None:
+def _test_data_download_source(session) -> None:
     """
     Download and extract a .tar.gz file of 'source' test data, used by TEST_DATA_GENERATE_SCRIPT.
+
+    Helper function used by :func:`test_data_download_source` as well as 
+    :func:`dev`.
     """
     session.log(f'Downloading: {SOURCE_TEST_DATA_URL}')
     copy_url(url=SOURCE_TEST_DATA_URL, path=SOURCE_TEST_DATA_TAR)
     session.log(f'Extracting downloaded tar: {SOURCE_TEST_DATA_TAR}')
     with tarfile.open(SOURCE_TEST_DATA_TAR, "r:gz") as tf:
         tf.extractall(path='.')
+
+
+@nox.session(name='test-data-download-source')
+def test_data_download_source(session) -> None:
+    """
+    Download and extract a .tar.gz file of 'source' test data, used by TEST_DATA_GENERATE_SCRIPT.
+    """
+    _test_data_download_source(session)
 
 
 TEST_DATA_GENERATE_AVA_SEGMENTS_SCRIPT = './tests/scripts/generate_ava_segment_test_data/generate_ava_segment_text_files_from_jourjine_et_al_2023.py'
@@ -247,8 +228,11 @@ def test_data_clean_generated(session) -> None:
     """
     Clean (remove) 'generated' test data.
     """
-    for dir_ in GENERATED_TEST_DATA_SUBDIRS:
-        clean_dir(dir_)
+    for dir_path in GENERATED_TEST_DATA_SUBDIRS:
+        clean_dir(dir_path)
+    
+    if GENERATED_TEST_DATA_TAR.exists():
+        GENERATED_TEST_DATA_TAR.unlink()
 
 
 @nox.session(name='test-data-tar-generated')
@@ -263,13 +247,65 @@ def test_data_tar_generated(session) -> None:
 GENERATED_TEST_DATA_URL = 'https://osf.io/3fzye/download'
 
 
-@nox.session(name='test-data-download-generated')
-def test_data_download_generated(session) -> None:
+def _test_data_download_generated(session) -> None:
     """
     Download and extract a .tar.gz file of all 'generated' test data
+
+    Helper function used by :func:`test_data_download_generated` 
+    as well as :func:`dev`.
     """
     session.log(f'Downloading: {GENERATED_TEST_DATA_URL}')
     copy_url(url=GENERATED_TEST_DATA_URL, path=GENERATED_TEST_DATA_TAR)
     session.log(f'Extracting downloaded tar: {GENERATED_TEST_DATA_TAR}')
     with tarfile.open(GENERATED_TEST_DATA_TAR, "r:gz") as tf:
         tf.extractall(path='.')
+
+
+@nox.session(name='test-data-download-generated')
+def test_data_download_generated(session) -> None:
+    """
+    Download and extract a .tar.gz file of all 'generated' test data
+    """
+    _test_data_download_generated(session)
+
+
+@nox.session(python="3.10")
+def dev(session: nox.Session) -> None:
+    """
+    Sets up a python development environment for the project.
+
+    This session will:
+    - Create a python virtualenv for the session
+    - Install the `virtualenv` cli tool into this environment
+    - Use `virtualenv` to create a global project virtual environment
+    - Invoke the python interpreter from the global project environment to install
+      the project and all it's development dependencies.
+    """
+
+    session.install("virtualenv")
+    # VENV_DIR here is a pathlib.Path location of the project virtualenv
+    # e.g. .venv
+    session.run("virtualenv", os.fsdecode(VENV_DIR), silent=True)
+
+    if sys.platform.startswith("linux") or sys.platform == "darwin":
+        python = os.fsdecode(VENV_DIR.joinpath("bin/python"))
+    elif sys.platform.startswith("win"):
+        python = os.fsdecode(VENV_DIR.joinpath("Scripts/python.exe"))
+
+    # Use the venv's interpreter to install the project along with
+    # all it's dev dependencies, this ensures it's installed in the right way
+    session.run(python, "-m", "pip", "install", "-e", ".[dev]", external=True)
+
+    # ---- if data for tests is not downloaded, then download it
+    source_dir_contents = os.listdir(SOURCE_TEST_DATA_DIR)
+    if len(source_dir_contents) == 1 and source_dir_contents[0] == ".gitkeep":
+        _test_data_download_source(session)
+    
+    if all(
+        [(el == GENERATED_TEST_DATA_DIR / ".gitkeep" or el in GENERATED_TEST_DATA_SUBDIRS)
+         for el in GENERATED_TEST_DATA_DIR.iterdir()]
+    ) and all(
+        [os.listdir(subdir) == [".gitkeep"]
+         for subdir in GENERATED_TEST_DATA_SUBDIRS]
+    ):
+        _test_data_download_generated(session)
