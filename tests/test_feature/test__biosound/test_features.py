@@ -92,7 +92,7 @@ def test_temporal_envelope_features_replicates(elie_theunissen_2016_sound_and_bi
 
     for ftr_name, expected_ftr_val in features.items():
         ftr_val = out[ftr_name]
-        np.testing.assert_allclose(
+        assert np.allclose(
             ftr_val, expected_ftr_val
         )
 
@@ -122,7 +122,7 @@ def test_spectral_envelope_features_replicates(elie_theunissen_2016_sound_and_bi
 
     for ftr_name, expected_ftr_val in features.items():
         ftr_val = out[ftr_name]
-        np.testing.assert_allclose(
+        assert np.allclose(
             ftr_val, expected_ftr_val
         )
 
