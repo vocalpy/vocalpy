@@ -48,11 +48,15 @@ test = [
     "pytest-xdist >=3.2.0",
 ]
 doc = [
+    # for UMAP/HDBSCAN how-to
+    "hdbscan>=0.8.40",
     "ipython != 8.7.0",
     "jupyterlab >=3.0.3",
     "jupytext >=1.13.8",
     "myst-nb >=0.15.0",
     "numpydoc >=1.6.0",
+    # for scikit-learn how-to -- I think some other dependency installs this, not sure which though
+    "scikit-learn>=1.5.2",
     "seaborn >=0.13.2",
     "Sphinx >=3.4.3",
     "sphinx-autobuild >= 2021.3.14",
@@ -61,6 +65,8 @@ doc = [
     "sphinx-design >=0.2.0",
     "sphinxext-opengraph  >=0.5.1",
     "sphinx-tabs >= 3.3.1",
+    # for UMAP/HDBSCAN how-to
+    "umap-learn>=0.5.7",
 ]
 dev = [
     "twine >=3.7.1",
