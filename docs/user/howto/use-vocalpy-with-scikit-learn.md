@@ -11,7 +11,7 @@ kernelspec:
   name: python3
 ---
 
-# How to use VocalPy with scikit-learn
+# How to use VocalPy with scikit-learn to fit supervised learning models to acoustic features
 
 Many analyses in bioacoustics and communication rely on machine learning models. For example, it is common to fit a classifier to acoustic features extracted from a set of sounds so that the classifier predicts the individual that emitted the sound. Many papers argue based on the accuracy of the fit classifier that information is present in the sound that tells other conspecifics the identity of the individual.
 
