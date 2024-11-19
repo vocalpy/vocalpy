@@ -36,8 +36,11 @@ def lint(session: nox.Session) -> None:
     """
     Run the linter.
     """
-    session.install("pre-commit")
-    session.run("pre-commit", "run", "--all-files", *session.posargs)
+    session.install("isort", "black", "flake8")
+    # run isort first since black disagrees with it
+    session.run("isort", "./src")
+    session.run("black", "./src", "--line-length=79")
+    session.run("flake8", "./src", "--max-line-length", "120")
 
 
 @nox.session
@@ -299,6 +302,7 @@ def dev(session: nox.Session) -> None:
     # ---- if data for tests is not downloaded, then download it
     source_dir_contents = os.listdir(SOURCE_TEST_DATA_DIR)
     if len(source_dir_contents) == 1 and source_dir_contents[0] == ".gitkeep":
+        session.log("Found only .gitkeep in ./tests/data-for-tests/source, downloading source data for tests")
         _test_data_download_source(session)
     
     if all(
@@ -308,4 +312,7 @@ def dev(session: nox.Session) -> None:
         [os.listdir(subdir) == [".gitkeep"]
          for subdir in GENERATED_TEST_DATA_SUBDIRS]
     ):
+        session.log(
+            "Found only .gitkeep in sub-directories of ./tests/data-for-tests/generated, downloading generated data for tests"
+        )
         _test_data_download_generated(session)
