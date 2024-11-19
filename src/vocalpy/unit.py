@@ -28,15 +28,32 @@ class Unit:
         Optional, default is None.
     """
 
-    onset = attrs.field(validator=attrs.validators.optional(attrs.validators.instance_of(float)))
-    offset = attrs.field(validator=attrs.validators.optional(attrs.validators.instance_of(float)))
+    onset = attrs.field(
+        validator=attrs.validators.optional(
+            attrs.validators.instance_of(float)
+        )
+    )
+    offset = attrs.field(
+        validator=attrs.validators.optional(
+            attrs.validators.instance_of(float)
+        )
+    )
 
     label: str = attrs.field(
-        validator=attrs.validators.optional(attrs.validators.instance_of(str)), default=DEFAULT_LABEL
+        validator=attrs.validators.optional(attrs.validators.instance_of(str)),
+        default=DEFAULT_LABEL,
     )
-    sound: Sound = attrs.field(validator=attrs.validators.optional(attrs.validators.instance_of(Sound)), default=None)
+    sound: Sound = attrs.field(
+        validator=attrs.validators.optional(
+            attrs.validators.instance_of(Sound)
+        ),
+        default=None,
+    )
     spectrogram: Spectrogram = attrs.field(
-        validator=attrs.validators.optional(attrs.validators.instance_of(Spectrogram)), default=None
+        validator=attrs.validators.optional(
+            attrs.validators.instance_of(Spectrogram)
+        ),
+        default=None,
     )
 
     def __attrs_post_init__(self):

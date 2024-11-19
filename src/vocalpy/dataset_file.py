@@ -38,7 +38,9 @@ class DatasetFileTypeEnum(enum.Enum):
     SPECTROGRAM = SpectrogramFile
 
 
-DatasetFileType = Union[AnnotationFile, AudioFile, FeatureFile, SpectrogramFile]
+DatasetFileType = Union[
+    AnnotationFile, AudioFile, FeatureFile, SpectrogramFile
+]
 
 
 @attrs.define
@@ -68,7 +70,9 @@ class DatasetFile:
     """
 
     file: DatasetFileType = attrs.field(
-        validator=attrs.validators.instance_of((AnnotationFile, AudioFile, FeatureFile, SpectrogramFile))
+        validator=attrs.validators.instance_of(
+            (AnnotationFile, AudioFile, FeatureFile, SpectrogramFile)
+        )
     )
 
     def __attrs_post_init__(self):

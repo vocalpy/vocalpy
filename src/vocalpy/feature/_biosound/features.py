@@ -67,7 +67,12 @@ def temporal_envelope_features(
        Animal Cognition. 2016. 19(2) 285-315 DOI 10.1007/s10071-015-0933-6
     .. [2] https://github.com/theunissenlab/soundsig
     """
-    amp, tdata = temporal_envelope(data, samplerate, cutoff_freq=cutoff_freq, resample_rate=amp_sample_rate)
+    amp, tdata = temporal_envelope(
+        data,
+        samplerate,
+        cutoff_freq=cutoff_freq,
+        resample_rate=amp_sample_rate,
+    )
 
     ampdata = amp / np.sum(amp)
     meantime = np.sum(tdata * ampdata)
@@ -77,7 +82,9 @@ def temporal_envelope_features(
     kurtosistime = np.sum(ampdata * (tdata - meantime) ** 4)
     kurtosistime = kurtosistime / (stdtime**4)
     indpos = np.where(ampdata > 0)[0]
-    entropytime = -np.sum(ampdata[indpos] * np.log2(ampdata[indpos])) / np.log2(np.size(indpos))
+    entropytime = -np.sum(
+        ampdata[indpos] * np.log2(ampdata[indpos])
+    ) / np.log2(np.size(indpos))
 
     return {
         "mean_t": meantime,
@@ -92,7 +99,11 @@ def temporal_envelope_features(
 
 
 def spectral_envelope_features(
-    data: npt.NDArray, samplerate: int, f_high: int = 10000, NFFT=1024, noverlap=512
+    data: npt.NDArray,
+    samplerate: int,
+    f_high: int = 10000,
+    NFFT=1024,
+    noverlap=512,
 ) -> dict:
     """Extract pre-defined acoustic features from spectral envelope of a sound,
     as described in [1]_.
@@ -143,7 +154,9 @@ def spectral_envelope_features(
     # f_high is the upper bound of the frequency for saving power spectrum
     # nwindow = (1000.0*np.size(soundIn)/samprate)/window_len
     #
-    Pxx, Freqs = matplotlib.mlab.psd(data, Fs=samplerate, NFFT=NFFT, noverlap=noverlap)
+    Pxx, Freqs = matplotlib.mlab.psd(
+        data, Fs=samplerate, NFFT=NFFT, noverlap=noverlap
+    )
 
     # Find quartile power
     cum_power = np.cumsum(Pxx)
@@ -329,17 +342,42 @@ def fundamental_features(
     if np.size(goodFund) == 0 or np.size(goodFund2) == 0:
         second_v = 0.0
     else:
-        second_v = (float(np.size(goodFund2)) / float(np.size(goodFund))) * 100.0
+        second_v = (
+            float(np.size(goodFund2)) / float(np.size(goodFund))
+        ) * 100.0
 
     fund_features = {}
     for name, value in zip(
-        ("f0", "f0_2", "F1", "F2", "F3", "mean_f0", "sal", "mean_sal", "pk2", "second_v"),
-        (fund, fund2, form1, form2, form3, meanfund, sal, meansal, pk2, second_v),
+        (
+            "f0",
+            "f0_2",
+            "F1",
+            "F2",
+            "F3",
+            "mean_f0",
+            "sal",
+            "mean_sal",
+            "pk2",
+            "second_v",
+        ),
+        (
+            fund,
+            fund2,
+            form1,
+            form2,
+            form3,
+            meanfund,
+            sal,
+            meansal,
+            pk2,
+            second_v,
+        ),
     ):
         fund_features[name] = value
     if np.size(goodFund) > 0:
         for name, value in zip(
-            ("max_fund", "min_fund", "cv_fund"), (np.max(goodFund), np.min(goodFund), np.std(goodFund) / meanfund)
+            ("max_fund", "min_fund", "cv_fund"),
+            (np.max(goodFund), np.min(goodFund), np.std(goodFund) / meanfund),
         ):
             fund_features[name] = value
 
@@ -385,7 +423,11 @@ def biosound(
     scale: bool = True,
     scale_val: int | float = 2**15,
     scale_dtype: npt.DTypeLike = np.int16,
-    ftr_groups: SoundsigFeatureGroups | Sequence[SoundsigFeatureGroups] = ("temporal", "spectral", "fundamental"),
+    ftr_groups: SoundsigFeatureGroups | Sequence[SoundsigFeatureGroups] = (
+        "temporal",
+        "spectral",
+        "fundamental",
+    ),
 ) -> Features:
     """Compute predefined acoustic features (PAFs)
     used to analyze the vocal repertoire of the domesticated zebra finch,
@@ -443,11 +485,22 @@ def biosound(
     """
     if isinstance(ftr_groups, (list, tuple)):
         if not all([isinstance(ftr_group, str) for ftr_group in ftr_groups]):
-            bad_types = set([type(ftr_group) for ftr_group in ftr_groups if not isinstance(ftr_groups, str)])
+            bad_types = set(
+                [
+                    type(ftr_group)
+                    for ftr_group in ftr_groups
+                    if not isinstance(ftr_groups, str)
+                ]
+            )
             raise TypeError(
                 f"`ftr_groups` must be a list or tuple of strings but some items in sequence were not: {bad_types}"
             )
-        if not all([ftr_group in ("temporal", "spectral", "fundamental") for ftr_group in ftr_groups]):
+        if not all(
+            [
+                ftr_group in ("temporal", "spectral", "fundamental")
+                for ftr_group in ftr_groups
+            ]
+        ):
             raise ValueError(
                 'All strings in `ftr_groups` must be one of: "temporal", "spectral", "fundamental", '
                 f"but got:\n{ftr_groups}"
@@ -459,12 +512,17 @@ def biosound(
                 'Value for `ftr_groups` must be one of: "temporal", "spectral", "fundamental", '
                 f"but got:\n{ftr_groups}"
             )
-        ftr_groups = (ftr_groups,)  # so we can write ``if "string" in ftr_groups``
+        ftr_groups = (
+            ftr_groups,
+        )  # so we can write ``if "string" in ftr_groups``
 
     if scale:
         from ... import Sound
 
-        sound = Sound(data=(sound.data * scale_val).astype(scale_dtype), samplerate=sound.samplerate)
+        sound = Sound(
+            data=(sound.data * scale_val).astype(scale_dtype),
+            samplerate=sound.samplerate,
+        )
 
     features = defaultdict(list)
     for channel_data in sound.data:
@@ -486,7 +544,10 @@ def biosound(
 
     channels = np.arange(sound.data.shape[0])
     data = xr.Dataset(
-        {feature_name: (["channel"], feature_val) for feature_name, feature_val in features.items()},
+        {
+            feature_name: (["channel"], feature_val)
+            for feature_name, feature_val in features.items()
+        },
         coords={"channel": channels},
     )
 

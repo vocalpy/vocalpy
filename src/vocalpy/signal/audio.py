@@ -13,7 +13,9 @@ import scipy.signal
 from ..sound import Sound
 
 
-def bandpass_filtfilt(sound: Sound, freq_cutoffs: Sequence[int] = (500, 10000)) -> Sound:
+def bandpass_filtfilt(
+    sound: Sound, freq_cutoffs: Sequence[int] = (500, 10000)
+) -> Sound:
     """Filter audio with band-pass filter, then perform zero-phase
     filtering with :func:`scipy.signal.filtfilt`.
 
@@ -31,7 +33,11 @@ def bandpass_filtfilt(sound: Sound, freq_cutoffs: Sequence[int] = (500, 10000)) 
         New audio instance
     """
     if freq_cutoffs[0] <= 0:
-        raise ValueError("Low frequency cutoff {} is invalid, must be greater than zero.".format(freq_cutoffs[0]))
+        raise ValueError(
+            "Low frequency cutoff {} is invalid, must be greater than zero.".format(
+                freq_cutoffs[0]
+            )
+        )
 
     nyquist_rate = sound.samplerate / 2
     if freq_cutoffs[1] >= nyquist_rate:
@@ -48,7 +54,9 @@ def bandpass_filtfilt(sound: Sound, freq_cutoffs: Sequence[int] = (500, 10000)) 
     else:
         numtaps = 512
 
-    cutoffs = np.asarray([freq_cutoffs[0] / nyquist_rate, freq_cutoffs[1] / nyquist_rate])
+    cutoffs = np.asarray(
+        [freq_cutoffs[0] / nyquist_rate, freq_cutoffs[1] / nyquist_rate]
+    )
     # code on which this is based, bandpass_filtfilt.m, says it uses Hann(ing)
     # window to design filter, but default for matlab's fir1
     # is actually Hamming
@@ -63,7 +71,9 @@ def bandpass_filtfilt(sound: Sound, freq_cutoffs: Sequence[int] = (500, 10000)) 
     return Sound(data=filtered, samplerate=sound.samplerate)
 
 
-def meansquared(sound: Sound, freq_cutoffs=(500, 10000), smooth_win: int = 2) -> npt.NDArray:
+def meansquared(
+    sound: Sound, freq_cutoffs=(500, 10000), smooth_win: int = 2
+) -> npt.NDArray:
     """Convert audio to a Root-Mean-Square-like trace.
 
     This function first applies a band-pass filter, and then
@@ -100,7 +110,9 @@ def meansquared(sound: Sound, freq_cutoffs=(500, 10000), smooth_win: int = 2) ->
                 stacklevel=2,
             )
             # make a new dtype string, endianness + type, plus the current itemsize squared
-            new_dtype_str = str(data.dtype)[:-1] + str(int(str(data.dtype)[-1]) ** 2)
+            new_dtype_str = str(data.dtype)[:-1] + str(
+                int(str(data.dtype)[-1]) ** 2
+            )
             data = data.astype(np.dtype(new_dtype_str))
     squared = np.power(data, 2)
     len = np.round(sound.samplerate * smooth_win / 1000).astype(int)

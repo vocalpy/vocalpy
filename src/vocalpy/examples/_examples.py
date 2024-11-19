@@ -30,7 +30,9 @@ if TYPE_CHECKING:
 
 # ---- all `makefunc`s that return ExampleData for larger example datasets go here
 def bfsongrepo_makefunc(
-    path: pathlib.Path | list[pathlib.Path], return_path: bool = False, annot_format: str = "simple-seq"
+    path: pathlib.Path | list[pathlib.Path],
+    return_path: bool = False,
+    annot_format: str = "simple-seq",
 ) -> ExampleData:
     import vocalpy  # avoid circular import
 
@@ -41,11 +43,16 @@ def bfsongrepo_makefunc(
     else:
         return ExampleData(
             sound=[vocalpy.Sound.read(wav_path) for wav_path in wav_paths],
-            annotation=[vocalpy.Annotation.read(csv_path, format=annot_format) for csv_path in csv_paths],
+            annotation=[
+                vocalpy.Annotation.read(csv_path, format=annot_format)
+                for csv_path in csv_paths
+            ],
         )
 
 
-def jourjine_et_al_2023_makefunc(path: pathlib.Path | list[pathlib.Path], return_path: bool = False) -> ExampleData:
+def jourjine_et_al_2023_makefunc(
+    path: pathlib.Path | list[pathlib.Path], return_path: bool = False
+) -> ExampleData:
     """Make ``'jourjine-et-al-2023'`` example data"""
     import vocalpy  # avoid circular import
 
@@ -63,12 +70,17 @@ def jourjine_et_al_2023_makefunc(path: pathlib.Path | list[pathlib.Path], return
             segments=vocalpy.Segments.from_csv(
                 csv_path,
                 samplerate=sound.samplerate,
-                columns_map={"start_seconds": "start_s", "stop_seconds": "stop_s"},
+                columns_map={
+                    "start_seconds": "start_s",
+                    "stop_seconds": "stop_s",
+                },
             ),
         )
 
 
-def zblib_makefunc(path: pathlib.Path | list[pathlib.Path], return_path: bool = False) -> ExampleData:
+def zblib_makefunc(
+    path: pathlib.Path | list[pathlib.Path], return_path: bool = False
+) -> ExampleData:
     import vocalpy  # avoid circular import
 
     wav_paths = [path for path in path if path.suffix == ".wav"]
@@ -191,32 +203,51 @@ class Example:
             Instance of :class:`Example` dataclass
         """
         if filename is None and name is None:
-            raise ValueError("`name` and `filename` for example can't both be None")
+            raise ValueError(
+                "`name` and `filename` for example can't both be None"
+            )
 
         if name is None:
             name = filename
 
-        description_path = importlib.resources.files("vocalpy.examples").joinpath(description_filename)
+        description_path = importlib.resources.files(
+            "vocalpy.examples"
+        ).joinpath(description_filename)
         description = description_path.read_text()
 
         type_ = ExampleTypes[example_type]
 
         if filename:
-            path = importlib.resources.files("vocalpy.examples").joinpath(filename)
+            path = importlib.resources.files("vocalpy.examples").joinpath(
+                filename
+            )
 
         if makefunc_name is not None:
             makefunc = MAKEFUNCS_MAP[makefunc_name]
         else:
             makefunc = None
 
-        return cls(name, description, type_, requires_download, filename, path, makefunc, makefunc_kwargs)
+        return cls(
+            name,
+            description,
+            type_,
+            requires_download,
+            filename,
+            path,
+            makefunc,
+            makefunc_kwargs,
+        )
 
     def __attrs_post_init__(self):
         if self.name is None:
             raise ValueError("`name` can't be None")
 
-        if not any([self.type is example_type for example_type in ExampleTypes]):
-            raise ValueError(f"example type '{self.type}' is not one of the ExampleTypes: {ExampleTypes}")
+        if not any(
+            [self.type is example_type for example_type in ExampleTypes]
+        ):
+            raise ValueError(
+                f"example type '{self.type}' is not one of the ExampleTypes: {ExampleTypes}"
+            )
 
     def load(self, return_path: bool):
         import vocalpy
@@ -263,12 +294,17 @@ class Example:
 
 
 EXAMPLE_METADATA_JSON_PATH = pathlib.Path(
-    importlib.resources.files("vocalpy.examples").joinpath("example-metadata.json")
+    importlib.resources.files("vocalpy.examples").joinpath(
+        "example-metadata.json"
+    )
 )
 with EXAMPLE_METADATA_JSON_PATH.open("r") as fp:
     ALL_EXAMPLE_METADATA = json.load(fp)
 
-EXAMPLES = [Example.from_metadata(**example_metadata) for example_metadata in ALL_EXAMPLE_METADATA]
+EXAMPLES = [
+    Example.from_metadata(**example_metadata)
+    for example_metadata in ALL_EXAMPLE_METADATA
+]
 
 REGISTRY = {example_.name: example_ for example_ in EXAMPLES}
 
@@ -278,7 +314,10 @@ VOCALPY_DATA_DIR = "VOCALPY_DATA_DIR"
 ZENODO_DATASET_BASE_URL = "doi:10.5281/zenodo.10685639"
 
 POOCH = pooch.create(
-    path=pooch.os_cache("vocalpy"), base_url=ZENODO_DATASET_BASE_URL, registry=None, env=VOCALPY_DATA_DIR
+    path=pooch.os_cache("vocalpy"),
+    base_url=ZENODO_DATASET_BASE_URL,
+    registry=None,
+    env=VOCALPY_DATA_DIR,
 )
 
 
@@ -380,4 +419,8 @@ def show() -> None:
     print("VocalPy example data")
     print("=" * 72)
     for example in EXAMPLES:
-        print(f"name: {example.name}\n" "description:\n" f"{example.description}\n")
+        print(
+            f"name: {example.name}\n"
+            "description:\n"
+            f"{example.description}\n"
+        )

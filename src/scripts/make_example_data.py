@@ -57,7 +57,8 @@ def reporthook(count: int, block_size: int, total_size: int) -> None:
     speed = int(progress_size / (1024 * duration))
     percent = int(count * block_size * 100 / total_size)
     sys.stdout.write(
-        "\r...%d%%, %d MB, %d KB/s, %d seconds passed" % (percent, progress_size / (1024 * 1024), speed, duration)
+        "\r...%d%%, %d MB, %d KB/s, %d seconds passed"
+        % (percent, progress_size / (1024 * 1024), speed, duration)
     )
     sys.stdout.flush()
 
@@ -72,7 +73,9 @@ BFSONGREPO_DATA_TO_DOWNLOAD = {
 }
 
 
-def download_bfsongrepo_data(download_urls_by_bird_ID: dict, dst: pathlib.Path) -> None:
+def download_bfsongrepo_data(
+    download_urls_by_bird_ID: dict, dst: pathlib.Path
+) -> None:
     """Download part of bfsgonrepo dataset, given a dict of download urls"""
     tar_dir = dst / "bfsongrepo-tars"
     tar_dir.mkdir()
@@ -90,19 +93,25 @@ def download_bfsongrepo_data(download_urls_by_bird_ID: dict, dst: pathlib.Path) 
 
 
 def extract_bfsongrepo_tars(bfsongrepo_dir: pathlib.Path) -> None:
-    tar_dir = bfsongrepo_dir / "bfsongrepo-tars"  # made by download_dataset function
+    tar_dir = (
+        bfsongrepo_dir / "bfsongrepo-tars"
+    )  # made by download_dataset function
     tars = sorted(tar_dir.glob("*.tar.gz"))
     for tar_path in tars:
         print(f"\nunpacking: {tar_path}")
 
-        shutil.unpack_archive(filename=tar_path, extract_dir=bfsongrepo_dir, format="gztar")
+        shutil.unpack_archive(
+            filename=tar_path, extract_dir=bfsongrepo_dir, format="gztar"
+        )
 
 
 def download_and_extract_bfsongrepo_tar(dst: str | pathlib.Path) -> None:
     """Downloads and extracts bfsongrepo tar"""
     dst = pathlib.Path(dst).expanduser().resolve()
     if not dst.is_dir():
-        raise NotADirectoryError(f"Value for 'dst' argument not recognized as a directory: {dst}")
+        raise NotADirectoryError(
+            f"Value for 'dst' argument not recognized as a directory: {dst}"
+        )
     bfsongrepo_dir = dst / "bfsongrepo"
     if bfsongrepo_dir.exists():
         warnings.warn(
@@ -120,13 +129,22 @@ def download_and_extract_bfsongrepo_tar(dst: str | pathlib.Path) -> None:
             "If that fails, please download files for tutorial manually from the 'download' links in tutorial page."
         ) from e
 
-    print(f"Downloading Bengalese Finch Song Repository data to: {bfsongrepo_dir}")
+    print(
+        f"Downloading Bengalese Finch Song Repository data to: {bfsongrepo_dir}"
+    )
 
     download_bfsongrepo_data(BFSONGREPO_DATA_TO_DOWNLOAD, bfsongrepo_dir)
     extract_bfsongrepo_tars(bfsongrepo_dir)
 
 
-def tar_source_data_subdir(dataset_root, tar_dst, archive_name, ext=None, dry_run=False, skip_exists=False):
+def tar_source_data_subdir(
+    dataset_root,
+    tar_dst,
+    archive_name,
+    ext=None,
+    dry_run=False,
+    skip_exists=False,
+):
     if ext is None:
         ext = ["wav"]
     dataset_root = pathlib.Path(dataset_root).expanduser().resolve()
@@ -189,7 +207,9 @@ JOURJINE_ET_AL_2023_SUBSET_DST = EXAMPLE_DATA_DST / "jourjine-et-al-2023"
 def make_jourjine_et_al_2023(
     dst=JOURJINE_ET_AL_2023_SUBSET_DST,
 ):
-    print(f"Making directory for jourjine-et-al-2023 data:\n{JOURJINE_ET_AL_2023_SUBSET_DST}")
+    print(
+        f"Making directory for jourjine-et-al-2023 data:\n{JOURJINE_ET_AL_2023_SUBSET_DST}"
+    )
     JOURJINE_ET_AL_2023_SUBSET_DST.mkdir(exist_ok=True)
     for filename, url in JOURJINE_ET_AL_2023_SUBSET_URLS.items():
         print(f"Downloading file:\n{filename}\nFrom url:\n{url}")
@@ -231,7 +251,12 @@ class ExampleData:
 
 
 EXAMPLE_DATA = [
-    ExampleData(name="bfsongrepo", dir_=BFSONGREPO_ROOT, ext=[".wav", ".csv"], makefunc=make_bfsongrepo_data_dir),
+    ExampleData(
+        name="bfsongrepo",
+        dir_=BFSONGREPO_ROOT,
+        ext=[".wav", ".csv"],
+        makefunc=make_bfsongrepo_data_dir,
+    ),
     ExampleData(
         name="jourjine-et-al-2023",
         dir_=JOURJINE_ET_AL_2023_SUBSET_DST,
@@ -241,7 +266,9 @@ EXAMPLE_DATA = [
 ]
 
 
-EXAMPLE_DATA_NAME_MAP = {example_data.name: example_data for example_data in EXAMPLE_DATA}
+EXAMPLE_DATA_NAME_MAP = {
+    example_data.name: example_data for example_data in EXAMPLE_DATA
+}
 EXAMPLE_DATA_NAMES = list(EXAMPLE_DATA_NAME_MAP.keys())
 
 
@@ -250,7 +277,8 @@ def main(example_names: list[str]) -> None:
     for example_name in example_names:
         if example_name not in EXAMPLE_DATA_NAMES:
             raise ValueError(
-                f"Invalid name for example dataset: {example_name}.\n" f"Valid names are: {EXAMPLE_DATA_NAMES}"
+                f"Invalid name for example dataset: {example_name}.\n"
+                f"Valid names are: {EXAMPLE_DATA_NAMES}"
             )
 
     # -- make .tar.gz files

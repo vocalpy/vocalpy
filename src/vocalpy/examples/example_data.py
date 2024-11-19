@@ -36,7 +36,9 @@ class ExampleData(dict):
         super().__init__(kwargs)
 
     def __repr__(self):
-        inside_parens = ", ".join([f"{k}={reprlib.repr(v)}" for k, v in self.items()])
+        inside_parens = ", ".join(
+            [f"{k}={reprlib.repr(v)}" for k, v in self.items()]
+        )
         return f"ExampleData({inside_parens})"
 
     def __getitem__(self, key):

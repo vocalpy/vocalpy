@@ -3,6 +3,7 @@ Adapted under MIT license.
 
 .. [1] https://github.com/theunissenlab/soundsig
 """
+
 from math import ceil
 
 import numpy as np
@@ -83,12 +84,16 @@ def syn_spect(b: npt.NDArray, x: npt.NDArray) -> npt.NDArray:
 
     for i in range(npeaks):
         a = b[i + 1]  # To enforce positive peaks only
-        syn_s = syn_s + a * np.exp(-((x - b[0] * (i + 1)) ** 2) / (2 * sdpk**2))
+        syn_s = syn_s + a * np.exp(
+            -((x - b[0] * (i + 1)) ** 2) / (2 * sdpk**2)
+        )
 
     return syn_s
 
 
-def residual_syn(b: npt.NDArray, x: npt.NDArray, real_s: npt.NDArray) -> npt.NDArray:
+def residual_syn(
+    b: npt.NDArray, x: npt.NDArray, real_s: npt.NDArray
+) -> npt.NDArray:
     """Compute residual between real and synthetic spectrum.
 
     Parameters
@@ -186,10 +191,15 @@ def estimate_f0(
     sound_len = data.shape[-1]
     nfilt = 1024
     if sound_len < 1024:
-        print("Warning in fundEstimator: sound too short for bandpass filtering, len(soundIn)=%d" % sound_len)
+        print(
+            "Warning in fundEstimator: sound too short for bandpass filtering, len(soundIn)=%d"
+            % sound_len
+        )
     else:
         # high pass filter the signal
-        highpass_filt = firwin(nfilt - 1, 2.0 * low_fc / samplerate, pass_zero=False)
+        highpass_filt = firwin(
+            nfilt - 1, 2.0 * low_fc / samplerate, pass_zero=False
+        )
         padlen = min(sound_len - 10, 3 * len(highpass_filt))
         data = filtfilt(highpass_filt, [1.0], data, padlen=padlen)
 
@@ -216,7 +226,9 @@ def estimate_f0(
 
     #  Calculate the size of the window for the auto-correlation
     alpha = 5  # Number of sd in the Gaussian window
-    win_len = int(np.fix((2.0 * alpha / min_fund) * samplerate))  # Length of Gaussian window based on min_fund
+    win_len = int(
+        np.fix((2.0 * alpha / min_fund) * samplerate)
+    )  # Length of Gaussian window based on min_fund
     if win_len % 2 == 0:
         # Make a symmetric window
         win_len += 1
@@ -279,7 +291,9 @@ def estimate_f0(
 
         soundlen += 1
         tval = t[it]  # Center of window in time
-        if tval >= sound_dur:  # This should not happen here because the RMS should be zero
+        if (
+            tval >= sound_dur
+        ):  # This should not happen here because the RMS should be zero
             continue
         tind = int(np.fix(tval * samplerate))  # Center of window in ind
         tstart = tind - (win_len - 1) // 2
@@ -351,12 +365,17 @@ def estimate_f0(
         indPeaksCorr = detect_peaks(autoCorr, mph=autoCorr.max() / 10.0)
 
         # Eliminate center peak and all peaks too close to middle
-        indPeaksCorr = np.delete(indPeaksCorr, np.where((indPeaksCorr - ind0) < samplerate / max_fund)[0])
+        indPeaksCorr = np.delete(
+            indPeaksCorr,
+            np.where((indPeaksCorr - ind0) < samplerate / max_fund)[0],
+        )
         pksCorr = autoCorr[indPeaksCorr]
 
         # Find max peak
         if len(pksCorr) == 0:
-            pitchSaliency = 0.1  # 0.1 goes with the detection of peaks greater than max/10
+            pitchSaliency = (
+                0.1  # 0.1 goes with the detection of peaks greater than max/10
+            )
         else:
             indIndMax = np.where(pksCorr == max(pksCorr))[0][0]
             indMax = indPeaksCorr[indIndMax]
@@ -369,7 +388,9 @@ def estimate_f0(
             continue
 
         # Calculate the envelope of the auto-correlation after rectification
-        envCorr = temporal_envelope(autoCorr, samplerate, cutoff_freq=max_fund, resample_rate=None)
+        envCorr = temporal_envelope(
+            autoCorr, samplerate, cutoff_freq=max_fund, resample_rate=None
+        )
         locsEnvCorr = detect_peaks(envCorr, mph=envCorr.max() / 10.0)
 
         # Find the peak closest to zero
@@ -384,12 +405,16 @@ def estimate_f0(
                     indIndEnvMax = indtest
 
             # Take the first peak after the one closest to zero
-            if indIndEnvMax + 2 > len(locsEnvCorr):  # No such peak - use data for correlation function
+            if indIndEnvMax + 2 > len(
+                locsEnvCorr
+            ):  # No such peak - use data for correlation function
                 fund_corr_amp_guess = fund_corr_guess
             else:
                 indEnvMax = locsEnvCorr[indIndEnvMax + 1]
                 if lags[indEnvMax] == 0:  # This should not happen
-                    print("Error: Max Peak in enveloppe auto-correlation found at zero delay")
+                    print(
+                        "Error: Max Peak in enveloppe auto-correlation found at zero delay"
+                    )
                     fund_corr_amp_guess = fund_corr_guess
                 else:
                     fund_corr_amp_guess = samplerate / lags[indEnvMax]
@@ -399,11 +424,14 @@ def estimate_f0(
         # Calculate power spectrum and cepstrum
         Y = fft(sound_win, n=win_len + 1)
         f = (samplerate / 2.0) * (
-            np.array(range(int((win_len + 1) / 2 + 1)), dtype=float) / float((win_len + 1) // 2)
+            np.array(range(int((win_len + 1) / 2 + 1)), dtype=float)
+            / float((win_len + 1) // 2)
         )  # noqa : E203
         fhigh = np.where(f >= high_fc)[0][0]
 
-        powSound = 20.0 * np.log10(np.abs(Y[0 : (win_len + 1) // 2 + 1]))  # This is the power spectrum  # noqa : E203
+        powSound = 20.0 * np.log10(
+            np.abs(Y[0 : (win_len + 1) // 2 + 1])
+        )  # This is the power spectrum  # noqa : E203
         powSoundGood = powSound[0:fhigh]
         maxPow = max(powSoundGood)
         powSoundGood = powSoundGood - maxPow  # Set zero as the peak amplitude
@@ -416,9 +444,13 @@ def estimate_f0(
         # Cepstrum
         CY = dct(powSoundGood - powAmp, norm="ortho")
 
-        tCY = 1000.0 * np.array(range(len(CY))) / samplerate  # Units of Cepstrum in ms
+        tCY = (
+            1000.0 * np.array(range(len(CY))) / samplerate
+        )  # Units of Cepstrum in ms
         fCY = np.zeros(tCY.size)
-        fCY[1:] = 1000.0 / tCY[1:]  # Corresponding fundamental frequency in Hz.
+        fCY[1:] = (
+            1000.0 / tCY[1:]
+        )  # Corresponding fundamental frequency in Hz.
         fCY[0] = samplerate * 2.0  # Nyquist limit not infinity
         lowInd = np.where(fCY < low_fc)[0]
         if lowInd.size > 0:
@@ -474,12 +506,18 @@ def estimate_f0(
         maxPow = max(powSoundGood - powAmp)
 
         vars = np.concatenate(([fund_corr_guess], np.ones(9) * np.log(maxPow)))
-        bout = leastsq(residual_syn, vars, args=(f[0:fhigh], powSoundGood - powAmp))
+        bout = leastsq(
+            residual_syn, vars, args=(f[0:fhigh], powSoundGood - powAmp)
+        )
         modelPowCep = syn_spect(bout[0], f[0:fhigh])
         errCep = sum((powSoundGood - powAmp - modelPowCep) ** 2)
 
-        vars = np.concatenate(([fund_corr_guess * 2], np.ones(9) * np.log(maxPow)))
-        bout2 = leastsq(residual_syn, vars, args=(f[0:fhigh], powSoundGood - powAmp))
+        vars = np.concatenate(
+            ([fund_corr_guess * 2], np.ones(9) * np.log(maxPow))
+        )
+        bout2 = leastsq(
+            residual_syn, vars, args=(f[0:fhigh], powSoundGood - powAmp)
+        )
         modelPowCep2 = syn_spect(bout2[0], f[0:fhigh])
         errCep2 = sum((powSoundGood - powAmp - modelPowCep2) ** 2)
 
@@ -504,7 +542,9 @@ def estimate_f0(
         if not np.isnan(fund_stack_guess):
             powLeft = powSoundGood - powAmp - modelPowCep
             maxPow2 = max(powLeft)
-            if maxPow2 > maxPow * 0.5:  # Possible second peak in central area as indicator of second voice.
+            if (
+                maxPow2 > maxPow * 0.5
+            ):  # Possible second peak in central area as indicator of second voice.
                 f2 = f[np.where(powLeft == maxPow2)[0][0]]
                 if f2 > 1000 and f2 < 4000:
                     if pitchSaliency > min_saliency:
@@ -517,7 +557,9 @@ def estimate_f0(
     # Decide whether there is formant 3
     n3 = np.sum(~np.isnan(form3))
 
-    if n3 < 0.1 * nt:  # There are only two formants - fix formant 3 by merging...
+    if (
+        n3 < 0.1 * nt
+    ):  # There are only two formants - fix formant 3 by merging...
         meanf1 = np.mean(form1[~np.isnan(form2)])
         meanf2 = np.mean(form2[~np.isnan(form2)])
         for it in range(nt):

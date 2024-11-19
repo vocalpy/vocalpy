@@ -31,7 +31,9 @@ class GaussianSpectrumEstimator:
             hnwinlen = nwinlen // 2
             gauss_t = np.arange(-hnwinlen, hnwinlen + 1, 1.0)
             gauss_std = float(nwinlen) / float(self.nstd)
-            gauss_window = np.exp(-(gauss_t**2) / (2.0 * gauss_std**2)) / (gauss_std * np.sqrt(2 * np.pi))
+            gauss_window = np.exp(-(gauss_t**2) / (2.0 * gauss_std**2)) / (
+                gauss_std * np.sqrt(2 * np.pi)
+            )
             self._gauss_window_cache[nwinlen] = gauss_window
             return gauss_window
 
@@ -120,7 +122,11 @@ def soundsig_spectro(
     if scale:
         from .. import Sound
 
-        sound = Sound(data=(sound.data * scale_val).astype(scale_dtype), samplerate=sound.samplerate, path=sound.path)
+        sound = Sound(
+            data=(sound.data * scale_val).astype(scale_dtype),
+            samplerate=sound.samplerate,
+            path=sound.path,
+        )
 
     # ---- soundsig.sound.spectrogram
     increment = 1.0 / spec_sample_rate
@@ -159,7 +165,9 @@ def soundsig_spectro(
         # take the FFT of each segment, padding with zeros when necessary to keep window length the same
         tf = np.zeros([nfreq, nwindows], dtype="complex")
         for k, window in enumerate(windows):
-            spec_freq, est = spectrum_estimator.estimate(window, sound.samplerate)
+            spec_freq, est = spectrum_estimator.estimate(
+                window, sound.samplerate
+            )
             findex = (spec_freq <= max_freq) & (spec_freq >= min_freq)
             tf[:, k] = est[findex]
 

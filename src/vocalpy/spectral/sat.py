@@ -21,7 +21,9 @@ if TYPE_CHECKING:
     from .. import Sound, Spectrogram
 
 
-def _sat_multitaper(sound: Sound, n_fft=400, hop_length=40) -> tuple[Spectrogram, npt.NDArray, npt.NDArray]:
+def _sat_multitaper(
+    sound: Sound, n_fft=400, hop_length=40
+) -> tuple[Spectrogram, npt.NDArray, npt.NDArray]:
     """Compute multi-taper spectrogram in the same way as the
     Sound Analysis Toolbox for Matlab (SAT).
 
@@ -81,9 +83,13 @@ def _sat_multitaper(sound: Sound, n_fft=400, hop_length=40) -> tuple[Spectrogram
            specifically the ``acoustics`` module.
     """
     # ---- make power spec
-    audio_pad = np.pad(sound.data, pad_width=((0, 0), (n_fft // 2, n_fft // 2)))
+    audio_pad = np.pad(
+        sound.data, pad_width=((0, 0), (n_fft // 2, n_fft // 2))
+    )
     # calling util.frame with default axis=-1 gives us dimensions (channels, window size, number of windows)
-    windows = librosa.util.frame(audio_pad, frame_length=n_fft, hop_length=hop_length)
+    windows = librosa.util.frame(
+        audio_pad, frame_length=n_fft, hop_length=hop_length
+    )
     tapers = scipy.signal.windows.dpss(n_fft, 1.5, Kmax=2)
     # we apply tapers to windows by array broadcasting
     windows1 = windows * tapers[0, :][:, np.newaxis]
@@ -95,10 +101,17 @@ def _sat_multitaper(sound: Sound, n_fft=400, hop_length=40) -> tuple[Spectrogram
     f = librosa.fft_frequencies(sr=sound.samplerate, n_fft=n_fft)
     power_spectrogram = power_spectrogram[:, : f.shape[-1], :]
     # make power spectrum into Spectrogram
-    t = librosa.frames_to_time(np.arange(windows.shape[-1]), sr=sound.samplerate, hop_length=hop_length, n_fft=n_fft)
+    t = librosa.frames_to_time(
+        np.arange(windows.shape[-1]),
+        sr=sound.samplerate,
+        hop_length=hop_length,
+        n_fft=n_fft,
+    )
     from .. import Spectrogram
 
-    power_spectrogram = Spectrogram(data=power_spectrogram, frequencies=f, times=t)
+    power_spectrogram = Spectrogram(
+        data=power_spectrogram, frequencies=f, times=t
+    )
     return power_spectrogram, spectra1, spectra2
 
 

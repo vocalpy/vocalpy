@@ -170,7 +170,10 @@ class Sound:
         samplerate: int,
     ):
         if not isinstance(data, np.ndarray):
-            raise TypeError(f"Sound array `data` should be a numpy array, " f"but type was {type(data)}.")
+            raise TypeError(
+                f"Sound array `data` should be a numpy array, "
+                f"but type was {type(data)}."
+            )
         if not (data.ndim == 1 or data.ndim == 2):
             raise ValueError(
                 f"Sound array `data` should have either 1 or 2 dimensions, "
@@ -190,9 +193,13 @@ class Sound:
         self.data = data
 
         if not isinstance(samplerate, int):
-            raise TypeError(f"Type of ``samplerate`` must be int but was: {type(samplerate)}")
+            raise TypeError(
+                f"Type of ``samplerate`` must be int but was: {type(samplerate)}"
+            )
         if not samplerate > 0:
-            raise ValueError(f"Value of ``samplerate`` must be a positive integer, but was {samplerate}.")
+            raise ValueError(
+                f"Value of ``samplerate`` must be a positive integer, but was {samplerate}."
+            )
         self.samplerate = samplerate
 
     @property
@@ -209,7 +216,9 @@ class Sound:
 
     def __repr__(self):
         return (
-            f"vocalpy.{self.__class__.__name__}(" f"data={reprlib.repr(self.data)}, " f"samplerate={self.samplerate})"
+            f"vocalpy.{self.__class__.__name__}("
+            f"data={reprlib.repr(self.data)}, "
+            f"samplerate={self.samplerate})"
         )
 
     def __str__(self):
@@ -238,7 +247,12 @@ class Sound:
         return not self.__eq__(other)
 
     @classmethod
-    def read(cls, path: str | pathlib.Path, dtype: npt.DTypeLike = np.float64, **kwargs) -> "Self":  # noqa: F821
+    def read(
+        cls,
+        path: str | pathlib.Path,
+        dtype: npt.DTypeLike = np.float64,
+        **kwargs,
+    ) -> "Self":  # noqa: F821
         """Read audio from ``path``.
 
         Parameters
@@ -279,8 +293,12 @@ class Sound:
             # evfuncs always gives us 1-dim, so we add channel dimension
             data = data[np.newaxis, :]
         else:
-            data, samplerate = soundfile.read(path, always_2d=True, dtype=dtype, **kwargs)
-            data = data.transpose((1, 0))  # dimensions (samples, channels) -> (channels, samples)
+            data, samplerate = soundfile.read(
+                path, always_2d=True, dtype=dtype, **kwargs
+            )
+            data = data.transpose(
+                (1, 0)
+            )  # dimensions (samples, channels) -> (channels, samples)
 
         return cls(data=data, samplerate=samplerate)
 
@@ -306,7 +324,12 @@ class Sound:
                 ">>> sound.write('path.wav')\n"
             )
         # next line: swap axes because soundfile expects dimensions to be (samples, channels)
-        soundfile.write(file=path, data=self.data.transpose((1, 0)), samplerate=self.samplerate, **kwargs)
+        soundfile.write(
+            file=path,
+            data=self.data.transpose((1, 0)),
+            samplerate=self.samplerate,
+            **kwargs,
+        )
         return AudioFile(path=path)
 
     def __iter__(self):
@@ -324,9 +347,13 @@ class Sound:
                     samplerate=self.samplerate,
                 )
             except IndexError as e:
-                raise IndexError(f"Invalid integer or slice for Sound with {self.data.shape[0]} channels: {key}") from e
+                raise IndexError(
+                    f"Invalid integer or slice for Sound with {self.data.shape[0]} channels: {key}"
+                ) from e
         else:
-            raise TypeError(f"Sound can be indexed with integer or slice, but type was: {type(key)}")
+            raise TypeError(
+                f"Sound can be indexed with integer or slice, but type was: {type(key)}"
+            )
 
     def segment(self, segments: Segments) -> list[Sound]:
         """Segment a sound, using a set of line :class:`~vocalpy.Segments`.
@@ -378,7 +405,10 @@ class Sound:
                 "You may want to check the source of the segments.",
                 stacklevel=2,
             )
-        if segments.start_inds[-1] + segments.lengths[-1] > self.data.shape[-1]:
+        if (
+            segments.start_inds[-1] + segments.lengths[-1]
+            > self.data.shape[-1]
+        ):
             raise ValueError(
                 f"The offset of the last segment in `segments`, {segments.start_inds[-1] + segments.lengths[-1]}, "
                 f"is greater than the last sample of this `Sound`, {self.data.shape[-1]}"
@@ -387,7 +417,10 @@ class Sound:
         sounds_out = []
         for start_ind, length in zip(segments.start_inds, segments.lengths):
             sounds_out.append(
-                Sound(data=self.data[:, start_ind : start_ind + length], samplerate=self.samplerate)  # noqa : E203
+                Sound(
+                    data=self.data[:, start_ind : start_ind + length],
+                    samplerate=self.samplerate,
+                )  # noqa : E203
             )  # noqa: E203
         return sounds_out
 
@@ -435,9 +468,13 @@ class Sound:
         Sound.segment
         """
         if not isinstance(start, (float, np.floating)):
-            raise TypeError(f"The `start` time for the clip must be a float type, but type was {type(start)}.")
+            raise TypeError(
+                f"The `start` time for the clip must be a float type, but type was {type(start)}."
+            )
         if start < 0.0:
-            raise ValueError(f"Value for `start` time must be a non-negative number, but was: {start}")
+            raise ValueError(
+                f"Value for `start` time must be a non-negative number, but was: {start}"
+            )
         if start > self.duration:
             raise ValueError(
                 f"Value for `start` time, {start}, cannot be greater than this `Sound`'s duration, {self.duration}"
@@ -452,7 +489,9 @@ class Sound:
             )
         else:
             if not isinstance(stop, (float, np.floating)):
-                raise TypeError(f"The `stop` time for the clip must be a float type, but type was {type(start)}.")
+                raise TypeError(
+                    f"The `stop` time for the clip must be a float type, but type was {type(start)}."
+                )
             if stop < start:
                 raise ValueError(
                     f"Value for `stop`, {stop}, is less than value for `start`, {start}. "
@@ -463,7 +502,10 @@ class Sound:
                     f"Value for `stop` time, {stop}, cannot be greater than this `Sound`'s duration, {self.duration}"
                 )
             stop_ind = int(stop * self.samplerate)
-            return Sound(data=self.data[:, start_ind:stop_ind], samplerate=self.samplerate)
+            return Sound(
+                data=self.data[:, start_ind:stop_ind],
+                samplerate=self.samplerate,
+            )
 
     def to_mono(self):
         """Convert a :class:`~vocalpy.Sound` to mono by averaging samples across channels.
@@ -478,8 +520,8 @@ class Sound:
         >>> print(sound.channels)
         1
 
-        Note that feature extraction functions operate on channels independently, 
-        so it may speed up your analysis to convert multi-channel audio to mono, 
+        Note that feature extraction functions operate on channels independently,
+        so it may speed up your analysis to convert multi-channel audio to mono,
         if you do not need to consider channels indepedently.
 
         >>> import timeit

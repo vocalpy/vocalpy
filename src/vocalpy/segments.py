@@ -129,14 +129,22 @@ class Segments:
         labels: list[str] | None = None,
     ) -> None:
         if not isinstance(start_inds, np.ndarray):
-            raise TypeError(f"`start_inds` must be a numpy array but type was: {type(start_inds)}")
+            raise TypeError(
+                f"`start_inds` must be a numpy array but type was: {type(start_inds)}"
+            )
         if not isinstance(lengths, np.ndarray):
-            raise TypeError(f"`lengths` must be a numpy array but type was: {type(lengths)}")
+            raise TypeError(
+                f"`lengths` must be a numpy array but type was: {type(lengths)}"
+            )
 
         if not issubclass(start_inds.dtype.type, numbers.Integral):
-            raise ValueError(f"`start_inds` must have an integer dtype, but dtype was: {start_inds.dtype}")
+            raise ValueError(
+                f"`start_inds` must have an integer dtype, but dtype was: {start_inds.dtype}"
+            )
         if not issubclass(lengths.dtype.type, numbers.Integral):
-            raise ValueError(f"`lengths` must have an integer dtype, but dtype was: {lengths.dtype}")
+            raise ValueError(
+                f"`lengths` must have an integer dtype, but dtype was: {lengths.dtype}"
+            )
 
         if start_inds.size == lengths.size == 0:
             # no need to validate
@@ -157,22 +165,34 @@ class Segments:
                     f"`start_inds` has {start_inds.size} elements and `lengths` has {lengths.size} elements."
                 )
             if not np.all(start_inds >= 0):
-                raise ValueError("Values of `start_inds` for `Segments` must all be non-negative.")
+                raise ValueError(
+                    "Values of `start_inds` for `Segments` must all be non-negative."
+                )
 
             if not np.all(start_inds[1:] > start_inds[:-1]):
-                raise ValueError("Values of `start_inds` for `Segments` must be strictly increasing.")
+                raise ValueError(
+                    "Values of `start_inds` for `Segments` must be strictly increasing."
+                )
 
             if not np.all(lengths >= 1):
-                raise ValueError("Values of `lengths` for `Segments` must all be positive.")
+                raise ValueError(
+                    "Values of `lengths` for `Segments` must all be positive."
+                )
 
         if not isinstance(samplerate, int):
-            raise TypeError(f"Type of ``samplerate`` must be int but was: {type(samplerate)}")
+            raise TypeError(
+                f"Type of ``samplerate`` must be int but was: {type(samplerate)}"
+            )
         if not samplerate > 0:
-            raise ValueError(f"Value of ``samplerate`` must be a positive integer, but was {samplerate}.")
+            raise ValueError(
+                f"Value of ``samplerate`` must be a positive integer, but was {samplerate}."
+            )
 
         if labels is not None:
             if not isinstance(labels, list):
-                raise TypeError(f"`labels` must be a list but type was: {type(labels)}")
+                raise TypeError(
+                    f"`labels` must be a list but type was: {type(labels)}"
+                )
             if not all([isinstance(lbl, str) for lbl in labels]):
                 types = set([type(lbl) for lbl in labels])
                 raise ValueError(
@@ -376,55 +396,91 @@ class Segments:
         since this avoids needing to keep track of the `samplerate` value separately.
         """
         if not isinstance(samplerate, int):
-            raise TypeError(f"The `samplerate` argument must be an int but type was: {type(samplerate)}")
+            raise TypeError(
+                f"The `samplerate` argument must be an int but type was: {type(samplerate)}"
+            )
         if samplerate < 1:
-            raise ValueError(f"The `samplerate` argument must be a positve number but value was: {samplerate}")
+            raise ValueError(
+                f"The `samplerate` argument must be a positve number but value was: {samplerate}"
+            )
 
         if read_csv_kwargs is not None:
             if not isinstance(read_csv_kwargs, dict):
-                raise TypeError(f"The `read_csv_kwargs` must be a `dict` but type was: {type(read_csv_kwargs)}")
+                raise TypeError(
+                    f"The `read_csv_kwargs` must be a `dict` but type was: {type(read_csv_kwargs)}"
+                )
         else:
             read_csv_kwargs = {}
         df = pd.read_csv(csv_path, **read_csv_kwargs)
 
         if columns_map is not None:
             if not isinstance(columns_map, dict):
-                raise TypeError(f"The `columns_map` argument must be a `dict` but type was: {type(dict)}")
-            if not all((isinstance(k, str) and isinstance(v, str) for k, v in columns_map.items())):
+                raise TypeError(
+                    f"The `columns_map` argument must be a `dict` but type was: {type(dict)}"
+                )
+            if not all(
+                (
+                    isinstance(k, str) and isinstance(v, str)
+                    for k, v in columns_map.items()
+                )
+            ):
                 raise ValueError(
                     "The `columns_map` argument must be a dict that maps string keys to string values, "
                     "but not all keys and values were strings."
                 )
-            if not all(v in cls.VALID_COLUMNS_MAP_VALUES for v in columns_map.values()):
-                invalid_values = [v for v in columns_map.values() if v not in cls.VALID_COLUMNS_MAP_VALUES]
+            if not all(
+                v in cls.VALID_COLUMNS_MAP_VALUES for v in columns_map.values()
+            ):
+                invalid_values = [
+                    v
+                    for v in columns_map.values()
+                    if v not in cls.VALID_COLUMNS_MAP_VALUES
+                ]
                 raise ValueError(
                     f"The `columns_map` argument must map keys (column names in the csv) "
                     'to either {"start_seconds", "stop_seconds"} or {"start_ind", "length"}. '
                     f"The following values are invalid: {invalid_values}"
                 )
             df.columns = [
-                columns_map[column_name] if column_name in columns_map else column_name for column_name in df.columns
+                (
+                    columns_map[column_name]
+                    if column_name in columns_map
+                    else column_name
+                )
+                for column_name in df.columns
             ]
 
         if "label" not in df.columns and default_label is not None:
             if not isinstance(default_label, str):
-                raise TypeError(f"The `default_label` argument must be a string but type was: {type(default_label)}")
+                raise TypeError(
+                    f"The `default_label` argument must be a string but type was: {type(default_label)}"
+                )
             df["label"] = default_label
 
         if "start_ind" in df.columns and "length" in df.columns:
             return cls(
                 start_inds=df["start_ind"].values,
                 lengths=df["length"].values,
-                labels=df["label"].values.tolist() if "label" in df.columns else None,
+                labels=(
+                    df["label"].values.tolist()
+                    if "label" in df.columns
+                    else None
+                ),
                 samplerate=samplerate,
             )
         elif "start_s" in df.columns and "stop_s" in df.columns:
             start_inds = (df["start_s"].values * samplerate).astype(int)
-            lengths = ((df["stop_s"].values - df["start_s"].values) * samplerate).astype(int)
+            lengths = (
+                (df["stop_s"].values - df["start_s"].values) * samplerate
+            ).astype(int)
             return cls(
                 start_inds=start_inds,
                 lengths=lengths,
-                labels=df["label"].values.tolist() if "label" in df.columns else None,
+                labels=(
+                    df["label"].values.tolist()
+                    if "label" in df.columns
+                    else None
+                ),
                 samplerate=samplerate,
             )
         else:

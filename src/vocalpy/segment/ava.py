@@ -395,14 +395,18 @@ def ava(
             ">>> channel_segments = [vocalpy.segment.meansquared(sound_) for sound_ in sound_channels]\n"
         )
 
-    data = np.squeeze(sound.data, axis=0)  # get rid of channels dim so we operate on scalars in main loop
+    data = np.squeeze(
+        sound.data, axis=0
+    )  # get rid of channels dim so we operate on scalars in main loop
 
     if scale:
         data = (data * scale_val).astype(scale_dtype)
 
     # ---- compute spectrogram
     # TODO: return Spectrogram for each Segment when we return Segments
-    f, t, spect = stft(data, sound.samplerate, nperseg=nperseg, noverlap=noverlap)
+    f, t, spect = stft(
+        data, sound.samplerate, nperseg=nperseg, noverlap=noverlap
+    )
     i1 = np.searchsorted(f, min_freq)
     i2 = np.searchsorted(f, max_freq)
     f, spect = f[i1:i2], spect[i1:i2]
@@ -427,7 +431,9 @@ def ava(
     # Find local maxima greater than thresh_max.
     local_maxima = []
     for i in range(1, len(amps) - 1, 1):
-        if amps[i] > thresh_max and amps[i] == np.max(amps[i - 1 : i + 2]):  # noqa: E203
+        if amps[i] > thresh_max and amps[i] == np.max(
+            amps[i - 1 : i + 2]
+        ):  # noqa: E203
             local_maxima.append(i)
 
     # Then search to the left and right for onsets and offsets.
@@ -442,13 +448,17 @@ def ava(
 
         # first find onset
         i = local_max - 1
-        while i > 0:  # could we do ``while i > min(0, i - max_syl_length)`` to speed up?
+        while (
+            i > 0
+        ):  # could we do ``while i > min(0, i - max_syl_length)`` to speed up?
             # this if-else can be a single `if` with an `or`
             # and then I think we can remove the `if len(onsets)` blocks
             if amps[i] < thresh_lowest:
                 onsets.append(i)
                 break
-            elif amps[i] < thresh_min and amps[i] == np.min(amps[i - 1 : i + 2]):  # noqa: E203
+            elif amps[i] < thresh_min and amps[i] == np.min(
+                amps[i - 1 : i + 2]
+            ):  # noqa: E203
                 onsets.append(i)
                 break
             i -= 1
@@ -460,13 +470,17 @@ def ava(
 
         # then find offset
         i = local_max + 1
-        while i < len(amps):  # could we do ``while i > min(amps, i + max_syl_length)`` to speed up?
+        while i < len(
+            amps
+        ):  # could we do ``while i > min(amps, i + max_syl_length)`` to speed up?
             # this if-else can be a single `if` with an `or`
             # and then I think we can remove the `if len(onsets)` blocks
             if amps[i] < thresh_lowest:
                 offsets.append(i)
                 break
-            elif amps[i] < thresh_min and amps[i] == np.min(amps[i - 1 : i + 2]):  # noqa: E203
+            elif amps[i] < thresh_min and amps[i] == np.min(
+                amps[i - 1 : i + 2]
+            ):  # noqa: E203
                 offsets.append(i)
                 break
             i += 1
@@ -508,8 +522,12 @@ def ava(
         isi_durs = onsets[1:] - offsets[:-1]
         keep_these = isi_durs > min_isi_dur
         # we don't keep seconds anymore since we're returning samples
-        onsets = np.concatenate((onsets[0, np.newaxis], onsets[1:][keep_these]))
-        offsets = np.concatenate((offsets[:-1][keep_these], offsets[-1, np.newaxis]))
+        onsets = np.concatenate(
+            (onsets[0, np.newaxis], onsets[1:][keep_these])
+        )
+        offsets = np.concatenate(
+            (offsets[:-1][keep_these], offsets[-1, np.newaxis])
+        )
 
     onsets_sample = (onsets * sound.samplerate).astype(int)
     offsets_sample = (offsets * sound.samplerate).astype(int)
@@ -520,4 +538,6 @@ def ava(
     if onsets_sample[-1] + lengths[-1] > sound.samples:
         # set length to be "until the end of the sound"
         lengths[-1] = sound.samples - onsets_sample[-1]
-    return Segments(start_inds=onsets_sample, lengths=lengths, samplerate=sound.samplerate)
+    return Segments(
+        start_inds=onsets_sample, lengths=lengths, samplerate=sound.samplerate
+    )

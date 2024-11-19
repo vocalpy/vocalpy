@@ -10,7 +10,10 @@ from ... import validators
 
 
 def find_hits(
-    hypothesis: npt.NDArray, reference: npt.NDArray, tolerance: float | int | None = None, decimals: int | None = None
+    hypothesis: npt.NDArray,
+    reference: npt.NDArray,
+    tolerance: float | int | None = None,
+    decimals: int | None = None,
 ) -> tuple[npt.NDArray, npt.NDArray, npt.NDArray]:
     r"""Find hits in arrays of event times.
 
@@ -87,7 +90,9 @@ def find_hits(
         Absolute differences :math:`|hit^{ref}_i - hit^{hyp}_i|`,
         i.e., ``np.abs(reference[hits_ref] - hypothesis[hits_hyp])``.
     """
-    validators.is_valid_boundaries_array(hypothesis)  # 1-d, non-negative, strictly increasing
+    validators.is_valid_boundaries_array(
+        hypothesis
+    )  # 1-d, non-negative, strictly increasing
     validators.is_valid_boundaries_array(reference)
     validators.have_same_dtype(hypothesis, reference)
 
@@ -98,10 +103,14 @@ def find_hits(
             tolerance = 0
 
     if tolerance < 0:
-        raise ValueError(f"``tolerance`` must be a non-negative number but was: {tolerance}")
+        raise ValueError(
+            f"``tolerance`` must be a non-negative number but was: {tolerance}"
+        )
 
     if decimals and (decimals is not False and not isinstance(decimals, int)):
-        raise ValueError(f"``decimals`` must either be ``False`` or an integer but was: {decimals}")
+        raise ValueError(
+            f"``decimals`` must either be ``False`` or an integer but was: {decimals}"
+        )
 
     if issubclass(reference.dtype.type, np.floating):
         if not isinstance(tolerance, float):
@@ -113,7 +122,9 @@ def find_hits(
             decimals = 3
 
         if decimals < 0:
-            raise ValueError(f"``decimals`` must be a non-negative number but was: {decimals}")
+            raise ValueError(
+                f"``decimals`` must be a non-negative number but was: {decimals}"
+            )
 
         if decimals is not False:
             # we assume float values are in units of seconds and round to ``decimals``,
@@ -128,7 +139,9 @@ def find_hits(
                 f"but type was: {type(tolerance)}"
             )
         if decimals is not None:
-            raise ValueError("Cannot specify a ``decimals`` value when dtype of arrays is int")
+            raise ValueError(
+                "Cannot specify a ``decimals`` value when dtype of arrays is int"
+            )
 
     diffs = np.abs(np.subtract.outer(reference, hypothesis))
     in_window = diffs <= tolerance
@@ -137,7 +150,9 @@ def find_hits(
     # now force there to be only one hit in hyp for each hit in ref;
     # we do this by choosing the hit that has the smallest absolute difference
     diffs_in_window = diffs[hits_ref, hits_hyp]
-    hits_diffs = sorted(zip(hits_ref, hits_hyp, diffs_in_window), key=lambda x: x[2])
+    hits_diffs = sorted(
+        zip(hits_ref, hits_hyp, diffs_in_window), key=lambda x: x[2]
+    )
     hits_ref_out = []
     hits_hyp_out = []
     diffs_out = []
@@ -303,19 +318,39 @@ def precision_recall_fscore(
        Neurocomputing, 69(10-12), 1375-1379.
     """
     if metric not in {"precision", "recall", "fscore"}:
-        raise ValueError(f'``metric`` must be one of: {{"precision", "recall", "fscore"}} but was: {metric}')
+        raise ValueError(
+            f'``metric`` must be one of: {{"precision", "recall", "fscore"}} but was: {metric}'
+        )
 
     # edge case: if both reference and hypothesis have a length of zero, we have a score of 1.0
     # but no hits. This is to avoid punishing the correct hypothesis that there are no boundaries.
     # See https://github.com/vocalpy/vocalpy/issues/170
     if len(reference) == 0 and len(hypothesis) == 0:
-        return 1.0, 0, IRMetricData(hits_ref=np.array([]), hits_hyp=np.array([]), diffs=np.array([]))
+        return (
+            1.0,
+            0,
+            IRMetricData(
+                hits_ref=np.array([]),
+                hits_hyp=np.array([]),
+                diffs=np.array([]),
+            ),
+        )
 
     # If we have no boundaries, we get no score.
     if len(reference) == 0 or len(hypothesis) == 0:
-        return 0.0, 0, IRMetricData(hits_ref=np.array([]), hits_hyp=np.array([]), diffs=np.array([]))
+        return (
+            0.0,
+            0,
+            IRMetricData(
+                hits_ref=np.array([]),
+                hits_hyp=np.array([]),
+                diffs=np.array([]),
+            ),
+        )
 
-    hits_ref, hits_hyp, diffs = find_hits(hypothesis, reference, tolerance, decimals)
+    hits_ref, hits_hyp, diffs = find_hits(
+        hypothesis, reference, tolerance, decimals
+    )
     metric_data = IRMetricData(hits_ref, hits_hyp, diffs)
     n_tp = hits_hyp.size
     if metric == "precision":
@@ -458,7 +493,9 @@ def precision(
        A segmentation algorithm for zebra finch song at the note level.
        Neurocomputing, 69(10-12), 1375-1379.
     """
-    return precision_recall_fscore(hypothesis, reference, "precision", tolerance, decimals)
+    return precision_recall_fscore(
+        hypothesis, reference, "precision", tolerance, decimals
+    )
 
 
 def recall(
@@ -584,7 +621,9 @@ def recall(
        A segmentation algorithm for zebra finch song at the note level.
        Neurocomputing, 69(10-12), 1375-1379.
     """
-    return precision_recall_fscore(hypothesis, reference, "recall", tolerance, decimals)
+    return precision_recall_fscore(
+        hypothesis, reference, "recall", tolerance, decimals
+    )
 
 
 def fscore(
@@ -707,10 +746,14 @@ def fscore(
        A segmentation algorithm for zebra finch song at the note level.
        Neurocomputing, 69(10-12), 1375-1379.
     """
-    return precision_recall_fscore(hypothesis, reference, "fscore", tolerance, decimals)
+    return precision_recall_fscore(
+        hypothesis, reference, "fscore", tolerance, decimals
+    )
 
 
-def concat_starts_and_stops(starts: npt.NDArray, stops: npt.NDArray) -> npt.NDArray:
+def concat_starts_and_stops(
+    starts: npt.NDArray, stops: npt.NDArray
+) -> npt.NDArray:
     """Concatenate arrays of start and stop times
     into a single array of boundary times.
 
@@ -771,7 +814,9 @@ def concat_starts_and_stops(starts: npt.NDArray, stops: npt.NDArray) -> npt.NDAr
     >>> concat_starts_and_stops(starts, stops)
     np.array([0.000, 4.000, 8.000, 12.000, 16.000, 20.000, 24.000, 28.000])
     """
-    validators.is_valid_boundaries_array(starts)  # 1-d, non-negative, strictly increasing
+    validators.is_valid_boundaries_array(
+        starts
+    )  # 1-d, non-negative, strictly increasing
     validators.is_valid_boundaries_array(stops)
     validators.have_same_dtype(starts, stops)
     if not starts.size == stops.size:

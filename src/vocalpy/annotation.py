@@ -18,11 +18,15 @@ class Annotation:
     path : pathlib.Path
     """
 
-    data: crowsetta.Annotation = attrs.field(validator=attrs.validators.instance_of(crowsetta.Annotation))
+    data: crowsetta.Annotation = attrs.field(
+        validator=attrs.validators.instance_of(crowsetta.Annotation)
+    )
     path: pathlib.Path
 
     @classmethod
-    def read(cls, path: str | pathlib.Path, format: str, **kwargs) -> Annotation:
+    def read(
+        cls, path: str | pathlib.Path, format: str, **kwargs
+    ) -> Annotation:
         """Read an annotation from a file
 
         Parameters

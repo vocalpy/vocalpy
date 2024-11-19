@@ -22,7 +22,9 @@ class Features:
 
     def __init__(self, data: xr.Dataset):
         if not isinstance(data, xr.Dataset):
-            raise TypeError(f"Features `data` must be an instance of `xarray.Dataset`, but type was: {type(data)}")
+            raise TypeError(
+                f"Features `data` must be an instance of `xarray.Dataset`, but type was: {type(data)}"
+            )
         self.data = data
 
     def __repr__(self):

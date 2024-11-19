@@ -57,7 +57,12 @@ def spectrogram(
     if pcolormesh_kwargs is None:
         pcolormesh_kwargs = {}
 
-    ax.pcolormesh(spect.times, spect.frequencies, np.squeeze(spect.data, axis=0), **pcolormesh_kwargs)
+    ax.pcolormesh(
+        spect.times,
+        spect.frequencies,
+        np.squeeze(spect.data, axis=0),
+        **pcolormesh_kwargs,
+    )
 
     if tlim is not None:
         ax.set_xlim(tlim)
@@ -133,7 +138,9 @@ def annotated_spectrogram(
         sharex=True,
     )
 
-    spectrogram(spect, tlim, flim, ax=axs["spect"], pcolormesh_kwargs=pcolormesh_kwargs)
+    spectrogram(
+        spect, tlim, flim, ax=axs["spect"], pcolormesh_kwargs=pcolormesh_kwargs
+    )
 
     annotation(
         annot,

@@ -27,9 +27,13 @@ class FeatureExtractor:
         Passed as keyword arguments to ``callback``.
     """
 
-    def __init__(self, callback: callable, params: Mapping | Params | None = None):
+    def __init__(
+        self, callback: callable, params: Mapping | Params | None = None
+    ):
         if not callable(callback):
-            raise ValueError(f"`callback` should be callable, but `callable({callback})` returns False")
+            raise ValueError(
+                f"`callback` should be callable, but `callable({callback})` returns False"
+            )
 
         self.callback = callback
 
@@ -43,7 +47,9 @@ class FeatureExtractor:
         from . import Params  # avoid circular import
 
         if not isinstance(params, (collections.abc.Mapping, Params)):
-            raise TypeError(f"`params` should be a `Mapping` or `Params` but type was: {type(params)}")
+            raise TypeError(
+                f"`params` should be a `Mapping` or `Params` but type was: {type(params)}"
+            )
 
         if isinstance(params, Params):
             # coerce to dict
@@ -51,9 +57,12 @@ class FeatureExtractor:
 
         signature = inspect.signature(callback)
         if not all([param in signature.parameters for param in params]):
-            invalid_params = [param for param in params if param not in signature.parameters]
+            invalid_params = [
+                param for param in params if param not in signature.parameters
+            ]
             raise ValueError(
-                f"Invalid params for callback: {invalid_params}\n" f"Callback parameters are: {signature.parameters}"
+                f"Invalid params for callback: {invalid_params}\n"
+                f"Callback parameters are: {signature.parameters}"
             )
 
         self.params = params
@@ -61,7 +70,9 @@ class FeatureExtractor:
     def __repr__(self):
         return f"FeatureExtractor(callback={self.callback.__qualname__}, params={self.params})"
 
-    def extract(self, sound: Sound | list[Sound], parallelize: bool = True) -> Features | list[Features]:
+    def extract(
+        self, sound: Sound | list[Sound], parallelize: bool = True
+    ) -> Features | list[Features]:
         from . import Features, Sound
 
         if not isinstance(sound, (list, Sound)):
@@ -86,7 +97,9 @@ class FeatureExtractor:
         if isinstance(sound, Sound):
             return _to_features(sound)
 
-        elif isinstance(sound, list) and all([isinstance(sound_, Sound) for sound_ in sound]):
+        elif isinstance(sound, list) and all(
+            [isinstance(sound_, Sound) for sound_ in sound]
+        ):
             features = []
             for sound_ in sound:
                 if parallelize:

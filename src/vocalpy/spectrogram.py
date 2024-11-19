@@ -20,7 +20,11 @@ METHODS = [
 
 
 def spectrogram(
-    sound: Sound, n_fft: int = 512, hop_length: int = 64, method="librosa-db", params: Mapping | Params | None = None
+    sound: Sound,
+    n_fft: int = 512,
+    hop_length: int = 64,
+    method="librosa-db",
+    params: Mapping | Params | None = None,
 ) -> Spectrogram:
     """Get a spectrogram from audio.
 
@@ -67,21 +71,31 @@ def spectrogram(
         computed according to `method`
     """
     if not isinstance(sound, Sound):
-        raise TypeError(f"audio must be an instance of `vocalpy.Sound` but was: {type(sound)}")
+        raise TypeError(
+            f"audio must be an instance of `vocalpy.Sound` but was: {type(sound)}"
+        )
 
     if method not in METHODS:
-        raise ValueError(f"Invalid `method`: {method}.\n" f"Valid methods are: {METHODS}\n")
+        raise ValueError(
+            f"Invalid `method`: {method}.\n" f"Valid methods are: {METHODS}\n"
+        )
 
     if method == "librosa-db":
         S = librosa.stft(sound.data, n_fft=n_fft, hop_length=hop_length)
         S = librosa.amplitude_to_db(np.abs(S))
-        t = librosa.frames_to_time(frames=np.arange(S.shape[-1]), sr=sound.samplerate, hop_length=hop_length)
+        t = librosa.frames_to_time(
+            frames=np.arange(S.shape[-1]),
+            sr=sound.samplerate,
+            hop_length=hop_length,
+        )
         f = librosa.fft_frequencies(sr=sound.samplerate, n_fft=n_fft)
         spect = Spectrogram(data=S, frequencies=f, times=t)
     elif method == "sat-multitaper":
         spect: Spectrogram = spectral.sat_multitaper(sound, n_fft, hop_length)
     elif method == "soundsig-spectro":
-        spect: Spectrogram = spectral.soundsig_spectro(sound, n_fft, hop_length, **params)
+        spect: Spectrogram = spectral.soundsig_spectro(
+            sound, n_fft, hop_length, **params
+        )
     else:
         raise ValueError(f"Unknown method: {method}")
 

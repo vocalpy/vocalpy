@@ -37,11 +37,14 @@ def is_1d_ndarray(y: npt.NDArray, name: str | None = None) -> bool:
         name = ""
 
     if not isinstance(y, np.ndarray):
-        raise TypeError(f"Input {name}should be a numpy array, but type was: {type(y)}")
+        raise TypeError(
+            f"Input {name}should be a numpy array, but type was: {type(y)}"
+        )
 
     if not len(y.shape) == 1:
         raise ValueError(
-            f"Input {name}should be a 1-dimensional numpy array, " f"but number of dimensions was: {y.ndim}"
+            f"Input {name}should be a 1-dimensional numpy array, "
+            f"but number of dimensions was: {y.ndim}"
         )
     return True
 
@@ -92,11 +95,18 @@ def is_valid_boundaries_array(y: npt.NDArray, name: str | None = None) -> bool:
     else:
         name = ""
 
-    if not (issubclass(y.dtype.type, np.floating) or issubclass(y.dtype.type, np.integer)):
-        raise TypeError(f"Dtype of boundaries array {name}must be either float or int but was: {y.dtype}")
+    if not (
+        issubclass(y.dtype.type, np.floating)
+        or issubclass(y.dtype.type, np.integer)
+    ):
+        raise TypeError(
+            f"Dtype of boundaries array {name}must be either float or int but was: {y.dtype}"
+        )
 
     if not np.all(y >= 0.0):
-        raise ValueError(f"Values of boundaries array {name}must all be non-negative")
+        raise ValueError(
+            f"Values of boundaries array {name}must all be non-negative"
+        )
 
     if y.size <= 1:
         # It's a valid boundary array but there's no boundaries or just one boundary,
@@ -104,12 +114,19 @@ def is_valid_boundaries_array(y: npt.NDArray, name: str | None = None) -> bool:
         return True
 
     if not np.all(y[1:] > y[:-1]):
-        raise ValueError(f"Values of boundaries array {name}must be strictly increasing")
+        raise ValueError(
+            f"Values of boundaries array {name}must be strictly increasing"
+        )
 
     return True
 
 
-def have_same_dtype(arr1: npt.NDArray, arr2: npt.NDArray, name1: str | None = None, name2: str | None = None) -> bool:
+def have_same_dtype(
+    arr1: npt.NDArray,
+    arr2: npt.NDArray,
+    name1: str | None = None,
+    name2: str | None = None,
+) -> bool:
     """Validates that two arrays, ``arr1`` and ``arr2``, have the same :class:`~numpy.dtype`.
 
     Parameters
@@ -136,6 +153,8 @@ def have_same_dtype(arr1: npt.NDArray, arr2: npt.NDArray, name1: str | None = No
         else:
             names = ""
 
-        raise ValueError(f"Two arrays {names}must have the same dtype, but dtypes were: {arr1.dtype} and {arr2.dtype}")
+        raise ValueError(
+            f"Two arrays {names}must have the same dtype, but dtypes were: {arr1.dtype} and {arr2.dtype}"
+        )
 
     return True

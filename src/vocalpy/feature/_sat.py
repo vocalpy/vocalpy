@@ -26,7 +26,9 @@ from .. import spectral
 EPS = np.finfo(np.double).eps
 
 
-def goodness_of_pitch(cepstrogram: npt.NDArray, quefrencies: npt.NDArray, max_F0: float = 1830.0) -> npt.NDArray:
+def goodness_of_pitch(
+    cepstrogram: npt.NDArray, quefrencies: npt.NDArray, max_F0: float = 1830.0
+) -> npt.NDArray:
     """Calculate goodness of pitch
 
     Finds the max in each column of ``cepstrogram``
@@ -68,7 +70,9 @@ def goodness_of_pitch(cepstrogram: npt.NDArray, quefrencies: npt.NDArray, max_F0
        by Therese Koch, specifically the acoustics module
     """
     if max_F0 <= 0:
-        raise ValueError(f"`max_F0` must be greater than zero but was: {max_F0}")
+        raise ValueError(
+            f"`max_F0` must be greater than zero but was: {max_F0}"
+        )
     quefrency_cutoff = 1 / max_F0
     if quefrency_cutoff > quefrencies.max():
         raise ValueError(
@@ -80,7 +84,11 @@ def goodness_of_pitch(cepstrogram: npt.NDArray, quefrencies: npt.NDArray, max_F0
     return np.max(cepstrogram[:, min_quef_idx:max_quef_idx, :], axis=1)
 
 
-def mean_frequency(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_freq: float = 11025.0) -> npt.NDArray:
+def mean_frequency(
+    power_spectrogram: Spectrogram,
+    min_freq: float = 380.0,
+    max_freq: float = 11025.0,
+) -> npt.NDArray:
     """Calculate mean frequency.
 
     Finds the mean for each column in ``power_spectrogram``,
@@ -124,7 +132,9 @@ def mean_frequency(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_
     --------
     pitch
     """
-    freq_inds = (power_spectrogram.frequencies > min_freq) & (power_spectrogram.frequencies < max_freq)
+    freq_inds = (power_spectrogram.frequencies > min_freq) & (
+        power_spectrogram.frequencies < max_freq
+    )
     P = power_spectrogram.data[:, freq_inds, :]
     P[P == 0.0] += np.finfo(P.dtype).eps
     frequencies = power_spectrogram.frequencies[freq_inds]
@@ -165,7 +175,10 @@ def frequency_modulation(dSdt: npt.NDArray, dSdf: npt.NDArray) -> npt.NDArray:
     .. [4] Bradbury, Jack W., and Sandra Lee Vehrencamp. Principles of animal communication. Vol. 132.
        Sunderland, MA: Sinauer Associates, 1998.
     """
-    return np.arctan(np.max(dSdt, axis=1) / (np.max(dSdf, axis=1) + np.finfo(dSdt.dtype).eps))
+    return np.arctan(
+        np.max(dSdt, axis=1)
+        / (np.max(dSdf, axis=1) + np.finfo(dSdt.dtype).eps)
+    )
 
 
 def amplitude_modulation(dSdt: npt.NDArray) -> npt.NDArray:
@@ -202,7 +215,11 @@ def amplitude_modulation(dSdt: npt.NDArray) -> npt.NDArray:
     return np.sum(dSdt, axis=1)
 
 
-def entropy(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_freq: float = 11025.0) -> npt.NDArray:
+def entropy(
+    power_spectrogram: Spectrogram,
+    min_freq: float = 380.0,
+    max_freq: float = 11025.0,
+) -> npt.NDArray:
     """Calculate Wiener entropy
 
     Computes the Wiener entropy for each column in ``power_spectrogram``,
@@ -246,7 +263,9 @@ def entropy(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_freq: f
     .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_
        by Therese Koch, specifically the acoustics module
     """
-    freq_inds = (power_spectrogram.frequencies > min_freq) & (power_spectrogram.frequencies < max_freq)
+    freq_inds = (power_spectrogram.frequencies > min_freq) & (
+        power_spectrogram.frequencies < max_freq
+    )
     P = power_spectrogram.data[:, freq_inds, :]
     P[P == 0.0] += np.finfo(P.dtype).eps
     # calculate entropy for current frame
@@ -256,7 +275,10 @@ def entropy(power_spectrogram: Spectrogram, min_freq: float = 380.0, max_freq: f
 
 
 def amplitude(
-    power_spectrogram: Spectrogram, min_freq: float = 380.0, max_freq: float = 11025.0, baseline: float = 70.0
+    power_spectrogram: Spectrogram,
+    min_freq: float = 380.0,
+    max_freq: float = 11025.0,
+    baseline: float = 70.0,
 ) -> npt.NDArray:
     """Calculate amplitude.
 
@@ -298,7 +320,9 @@ def amplitude(
     .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_
        by Therese Koch, specifically the acoustics module
     """
-    freq_inds = (power_spectrogram.frequencies > min_freq) & (power_spectrogram.frequencies < max_freq)
+    freq_inds = (power_spectrogram.frequencies > min_freq) & (
+        power_spectrogram.frequencies < max_freq
+    )
     P = power_spectrogram.data[:, freq_inds, :]
     P[P == 0.0] += np.finfo(P.dtype).eps
     return 10 * np.log10(np.sum(P, axis=1)) + baseline
@@ -372,7 +396,9 @@ def pitch(
     )
 
 
-def _get_cepstral(spectra1: npt.NDArray, n_fft: int, samplerate: int) -> tuple[npt.NDArray, npt.NDArray]:
+def _get_cepstral(
+    spectra1: npt.NDArray, n_fft: int, samplerate: int
+) -> tuple[npt.NDArray, npt.NDArray]:
     """Get cepstrogram and quefrencies from a spectrogram
 
     Helper function used by :func:`similarity_features` to compute
@@ -394,8 +420,12 @@ def _get_cepstral(spectra1: npt.NDArray, n_fft: int, samplerate: int) -> tuple[n
     # next line is a fancy way of adding eps to zero values
     # so we don't get the enigmatic divide-by-zero error, and we don't get np.inf values
     # see https://github.com/numpy/numpy/issues/21560
-    spectra1_for_cepstrum[spectra1_for_cepstrum == 0.0] += np.finfo(spectra1_for_cepstrum.dtype).eps
-    cepstrogram = np.fft.ifft(np.log(np.abs(spectra1_for_cepstrum)), n=n_fft, axis=1).real
+    spectra1_for_cepstrum[spectra1_for_cepstrum == 0.0] += np.finfo(
+        spectra1_for_cepstrum.dtype
+    ).eps
+    cepstrogram = np.fft.ifft(
+        np.log(np.abs(spectra1_for_cepstrum)), n=n_fft, axis=1
+    ).real
     quefrencies = np.array(np.arange(n_fft)) / samplerate
     return cepstrogram, quefrencies
 
@@ -491,7 +521,9 @@ def sat(
             f"to use when extracting features with a frequency range"
         )
 
-    power_spectrogram, spectra1, spectra2 = spectral.sat._sat_multitaper(sound, n_fft, hop_length)
+    power_spectrogram, spectra1, spectra2 = spectral.sat._sat_multitaper(
+        sound, n_fft, hop_length
+    )
 
     # in SAT, freq_range means "use first `freq_range` percent of frequencies". Next line finds that range.
     f = power_spectrogram.frequencies
@@ -501,7 +533,12 @@ def sat(
     # ---- now extract features
     # -------- features that require sound
     pitch_ = pitch(
-        sound, min_freq, fmax_yin, frame_length=n_fft, hop_length=hop_length, trough_threshold=trough_threshold
+        sound,
+        min_freq,
+        fmax_yin,
+        frame_length=n_fft,
+        hop_length=hop_length,
+        trough_threshold=trough_threshold,
     )
 
     # -------- features that require power spectrogram and max_freq

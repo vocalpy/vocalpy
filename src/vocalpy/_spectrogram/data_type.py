@@ -59,7 +59,10 @@ class Spectrogram:
     @data.validator
     def validate_data(self, attribute, value):
         if not isinstance(value, np.ndarray):
-            raise TypeError(f"Spectrogram array `data` should be a numpy array, " f"but type was {type(value)}.")
+            raise TypeError(
+                f"Spectrogram array `data` should be a numpy array, "
+                f"but type was {type(value)}."
+            )
 
         if value.ndim not in (2, 3):
             raise ValueError(
@@ -68,7 +71,9 @@ class Spectrogram:
                 f"but number of dimensions was {value.ndim}."
             )
 
-    frequencies: npt.NDArray = attrs.field(validator=validators.attrs.is_1d_ndarray)
+    frequencies: npt.NDArray = attrs.field(
+        validator=validators.attrs.is_1d_ndarray
+    )
     times: npt.NDArray = attrs.field(validator=validators.attrs.is_1d_ndarray)
 
     def __attrs_post_init__(self):
@@ -144,7 +149,9 @@ class Spectrogram:
         """
         path = pathlib.Path(path)
         if not path.exists():
-            raise FileNotFoundError(f"File with spectrogram not found at path specified:\n{path}")
+            raise FileNotFoundError(
+                f"File with spectrogram not found at path specified:\n{path}"
+            )
 
         if not path.suffix == VALID_SPECT_FILE_EXTENSION:
             raise ValueError(
@@ -159,7 +166,9 @@ class Spectrogram:
             try:
                 kwargs[key] = np.array(spect_file_dict[key])
             except KeyError as e:
-                raise KeyError(f"Did not find key '{key}' in path: {path}") from e
+                raise KeyError(
+                    f"Did not find key '{key}' in path: {path}"
+                ) from e
 
         return cls(**kwargs)
 
@@ -184,7 +193,12 @@ class Spectrogram:
             representing the saved spectrogram.
         """
         path = pathlib.Path(path)
-        np.savez(path, data=self.data, frequencies=self.frequencies, times=self.times)
+        np.savez(
+            path,
+            data=self.data,
+            frequencies=self.frequencies,
+            times=self.times,
+        )
         return SpectrogramFile(path=path)
 
     def __iter__(self):
@@ -208,4 +222,6 @@ class Spectrogram:
                     f"Invalid integer or slice for Spectrogram with {self.data.shape[0]} channels: {key}"
                 ) from e
         else:
-            raise TypeError(f"Spectrogram can be indexed with integer or slice, but type was: {type(key)}")
+            raise TypeError(
+                f"Spectrogram can be indexed with integer or slice, but type was: {type(key)}"
+            )

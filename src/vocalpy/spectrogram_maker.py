@@ -15,7 +15,9 @@ from .params import Params
 from .sound import Sound
 
 
-def validate_sound(sound: Sound | AudioFile | Sequence[Sound | AudioFile]) -> None:
+def validate_sound(
+    sound: Sound | AudioFile | Sequence[Sound | AudioFile],
+) -> None:
     if not isinstance(sound, (Sound, AudioFile, list, tuple)):
         raise TypeError(
             "`sound` must be a `vocalpy.Sound` instance, "
@@ -26,7 +28,8 @@ def validate_sound(sound: Sound | AudioFile | Sequence[Sound | AudioFile]) -> No
 
     if isinstance(sound, list) or isinstance(sound, tuple):
         if not (
-            all([isinstance(item, Sound) for item in sound]) or all([isinstance(item, AudioFile) for item in sound])
+            all([isinstance(item, Sound) for item in sound])
+            or all([isinstance(item, AudioFile) for item in sound])
         ):
             types_in_sound = set([type(sound) for sound in sound])
             raise TypeError(
@@ -56,7 +59,11 @@ class SpectrogramMaker:
         Passed as keyword arguments to ``callback``.
     """
 
-    def __init__(self, callback: Callable | None = None, params: Mapping | Params | None = None):
+    def __init__(
+        self,
+        callback: Callable | None = None,
+        params: Mapping | Params | None = None,
+    ):
         if callback is None:
             import vocalpy.spectrogram
 
@@ -76,11 +83,15 @@ class SpectrogramMaker:
                         params[name] = param.default
 
         if not callable(callback):
-            raise ValueError(f"`callback` should be callable, but `callable({callback})` returns False")
+            raise ValueError(
+                f"`callback` should be callable, but `callable({callback})` returns False"
+            )
         self.callback = callback
 
         if not isinstance(params, (collections.abc.Mapping, Params)):
-            raise TypeError(f"`params` should be a `Mapping` or `Params` but type was: {type(params)}")
+            raise TypeError(
+                f"`params` should be a `Mapping` or `Params` but type was: {type(params)}"
+            )
 
         if isinstance(params, Params):
             # coerce to dict
@@ -88,9 +99,12 @@ class SpectrogramMaker:
 
         signature = inspect.signature(callback)
         if not all([param in signature.parameters for param in params]):
-            invalid_params = [param for param in params if param not in signature.parameters]
+            invalid_params = [
+                param for param in params if param not in signature.parameters
+            ]
             raise ValueError(
-                f"Invalid params for callback: {invalid_params}\n" f"Callback parameters are: {signature.parameters}"
+                f"Invalid params for callback: {invalid_params}\n"
+                f"Callback parameters are: {signature.parameters}"
             )
 
         self.params = params

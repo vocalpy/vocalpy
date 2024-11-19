@@ -113,7 +113,9 @@ def segments(
             labelset = set(lbl)
             cmap = plt.get_cmap("tab20")
             colors = [cmap(ind) for ind in range(len(labelset))]
-            label_color_map = {label: color for label, color in zip(labelset, colors)}
+            label_color_map = {
+                label: color for label, color in zip(labelset, colors)
+            }
 
     labels_to_plot = []
     label_plot_times = []
@@ -147,7 +149,13 @@ def segments(
         rectangles.append(rectangle)
 
     if labels_to_plot is not None:
-        text_list = labels(labels_to_plot, t=label_plot_times, y=y_labels, text_kwargs=text_kwargs, ax=ax)
+        text_list = labels(
+            labels_to_plot,
+            t=label_plot_times,
+            y=y_labels,
+            text_kwargs=text_kwargs,
+            ax=ax,
+        )
     else:
         text_list = None
 

@@ -12,7 +12,11 @@ import scipy.signal
 
 
 def lowpass_filter(
-    data: npt.NDArray, samplerate: int, cutoff_freq: int, filter_order: int = 5, rescale: bool = False
+    data: npt.NDArray,
+    samplerate: int,
+    cutoff_freq: int,
+    filter_order: int = 5,
+    rescale: bool = False,
 ) -> npt.NDArray:
     """Apply a low-pass filter to a sound.
 
@@ -62,12 +66,18 @@ def gaussian_window(N: int, nstd: int) -> tuple[npt.NDArray, npt.NDArray]:
     hnwinlen = (N + (1 - N % 2)) // 2
     gauss_t = np.arange(-hnwinlen, hnwinlen + 1, 1.0)
     gauss_std = float(N) / float(nstd)
-    gauss_window = np.exp(-(gauss_t**2) / (2.0 * gauss_std**2)) / (gauss_std * np.sqrt(2 * np.pi))
+    gauss_window = np.exp(-(gauss_t**2) / (2.0 * gauss_std**2)) / (
+        gauss_std * np.sqrt(2 * np.pi)
+    )
     return gauss_t, gauss_window
 
 
 def correlation_function(
-    s1: npt.NDArray, s2: npt.NDArray, lags: npt.NDArray, mean_subtract: bool = True, normalize: bool = True
+    s1: npt.NDArray,
+    s2: npt.NDArray,
+    lags: npt.NDArray,
+    mean_subtract: bool = True,
+    normalize: bool = True,
 ) -> npt.NDArray:
     """Computes the cross-correlation function between signals s1 and s2.
 
@@ -99,7 +109,12 @@ def correlation_function(
     ``cf(k) = sum_over_t( (s1(t) - s1.mean()) * (s2(t+k) - s2.mean()) ) / s1.std()*s2.std()``
     """
 
-    assert len(s1) == len(s2), "Signals must be same length! len(s1)=%d, len(s2)=%d" % (len(s1), len(s2))
+    assert len(s1) == len(
+        s2
+    ), "Signals must be same length! len(s1)=%d, len(s2)=%d" % (
+        len(s1),
+        len(s2),
+    )
     assert np.sum(np.isnan(s1)) == 0, "There are NaNs in s1"
     assert np.sum(np.isnan(s2)) == 0, "There are NaNs in s2"
 
@@ -128,7 +143,9 @@ def correlation_function(
         elif lag > 0:
             cf[k] = np.dot(s1_centered[:-lag], s2_centered[lag:]) / (N - lag)
         elif lag < 0:
-            cf[k] = np.dot(s1_centered[np.abs(lag) :], s2_centered[:lag]) / (N + lag)  # noqa : E203
+            cf[k] = np.dot(s1_centered[np.abs(lag) :], s2_centered[:lag]) / (
+                N + lag
+            )  # noqa : E203
 
     if normalize:
         cf /= s1_std * s2_std

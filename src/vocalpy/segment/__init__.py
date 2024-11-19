@@ -11,4 +11,11 @@ to the start and stop times.
 from .ava import JOURJINEETAL2023, PETERSONETAL2023, AvaParams, ava
 from .meansquared import MeanSquaredParams, meansquared
 
-__all__ = ["ava", "AvaParams", "meansquared", "MeanSquaredParams", "JOURJINEETAL2023", "PETERSONETAL2023"]
+__all__ = [
+    "ava",
+    "AvaParams",
+    "meansquared",
+    "MeanSquaredParams",
+    "JOURJINEETAL2023",
+    "PETERSONETAL2023",
+]
