@@ -430,8 +430,8 @@ def estimate_f0(
         fhigh = np.where(f >= high_fc)[0][0]
 
         powSound = 20.0 * np.log10(
-            np.abs(Y[0 : (win_len + 1) // 2 + 1])
-        )  # This is the power spectrum  # noqa : E203
+            np.abs(Y[0 : (win_len + 1) // 2 + 1])  # noqa : E203
+        )  # This is the power spectrum
         powSoundGood = powSound[0:fhigh]
         maxPow = max(powSoundGood)
         powSoundGood = powSoundGood - maxPow  # Set zero as the peak amplitude

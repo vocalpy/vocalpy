@@ -432,8 +432,8 @@ def ava(
     local_maxima = []
     for i in range(1, len(amps) - 1, 1):
         if amps[i] > thresh_max and amps[i] == np.max(
-            amps[i - 1 : i + 2]
-        ):  # noqa: E203
+            amps[i - 1 : i + 2]  # noqa: E203
+        ):
             local_maxima.append(i)
 
     # Then search to the left and right for onsets and offsets.
@@ -457,8 +457,8 @@ def ava(
                 onsets.append(i)
                 break
             elif amps[i] < thresh_min and amps[i] == np.min(
-                amps[i - 1 : i + 2]
-            ):  # noqa: E203
+                amps[i - 1 : i + 2]  # noqa: E203
+            ):
                 onsets.append(i)
                 break
             i -= 1
@@ -479,8 +479,8 @@ def ava(
                 offsets.append(i)
                 break
             elif amps[i] < thresh_min and amps[i] == np.min(
-                amps[i - 1 : i + 2]
-            ):  # noqa: E203
+                amps[i - 1 : i + 2]  # noqa: E203
+            ):
                 offsets.append(i)
                 break
             i += 1

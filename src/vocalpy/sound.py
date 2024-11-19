@@ -418,10 +418,12 @@ class Sound:
         for start_ind, length in zip(segments.start_inds, segments.lengths):
             sounds_out.append(
                 Sound(
-                    data=self.data[:, start_ind : start_ind + length],
+                    data=self.data[
+                        :, start_ind : start_ind + length  # noqa : E203
+                    ],
                     samplerate=self.samplerate,
-                )  # noqa : E203
-            )  # noqa: E203
+                )
+            )
         return sounds_out
 
     def clip(self, start: float = 0.0, stop: float | None = None) -> Sound:
