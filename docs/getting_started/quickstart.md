@@ -4,7 +4,7 @@ jupytext:
     extension: .md
     format_name: myst
     format_version: 0.13
-    jupytext_version: 1.16.1
+    jupytext_version: 1.16.4
 kernelspec:
   display_name: Python 3 (ipykernel)
   language: python
@@ -36,12 +36,98 @@ Then we get some example data, from the [Bengalese Finch song repository](https:
 ```{code-cell} ipython3
 :tags: [hide-output]
 
-sounds = voc.example('bfsongrepo', return_type='sound')
+bfsongrepo = voc.example('bfsongrepo', return_path=True)
 ```
+
+This gives us back an :class:`~vocalpy.examples.ExampleData` instance with `sound` and `annotation` attributes.
+
+```{code-cell} ipython3
+bfsongrepo
+```
+
+The :class:`~vocalpy.examples.ExampleData` is just a Python :class:`dict` that lets us access the values through dot notation, by saying `bfsongrepo.sound` as well as `bfsongrepo["sound"]`, like the [`Bunch` class](https://scikit-learn.org/1.5/modules/generated/sklearn.utils.Bunch.html) returned by functions in the scikit-learn [`datasets` module](https://scikit-learn.org/1.5/api/sklearn.datasets.html).
+
+Since we set the argument `return_path=True`, these attributes are each a :class:`list` of :class:`pathlib.Path` instances. The default for `return_path` is `False`, and when it is `False`, we get back the data types built into VocalPy that we will introduce below.
+
+Here we want the paths so we can show how to load data in with VocalPy.
+
++++
 
 ## Data types for acoustic communication
 
 +++
+
+One of the main goals of VocalPy is to make it easier to read and write code for bioacoustics and acoustic communication. One way VocalPy achieves that is by providing data types that map onto concepts from those research domains. The benefit of these data types is that they let as researchers write and read code with the same words we use when we talk to each other. Another benefit of the data types are that they make our code more succinct. 
+
+Before we walk through the data types, we show two snippets of code.
+
+The first is written in standard scientific Python.
+
+```python
+import soundfile
+from scipy.signal import spectrogram
+
+# we write a helper function to compute a spectrogram
+def spect(data, fs, fft=1024, window='Hann'):
+    f, t, s = spectrogram(data, fs, fft=fft, window=window)
+    return f, t, s
+
+# notice that we need two variables for one sound
+data_bird1, fs_bird1 = soundfile.read('./path/to/bird1.wav')
+# that turn into three more variables for the spectrogram
+f_bird1, t_bird1, s_bird1 = spect(data_bird1, fs_bird1)
+# and another two variables for another sound
+data_bird2, fs_bird2 = soundfile.read('./path/to/bird2.wav')
+# and that again turns into three more variables for the spectrogram
+f_bird2, t_bird2, s_bird2 = spect(data_bird2, fs_bird2)
+# these variables are cluttering up our code!
+# of course, it's common for most audio signals in your data to have the same sampling rate
+# but this is definitely not always true!
+# and likewise it's common to generate spectrograms all with the same frequency bins
+# but still we need to do all this book-keeping with variables
+
+# definitions of functions below are not shown in snippet
+ftrs_bird1 = extract_features(s_bird1, t_bird1, f_bird1)
+ftrs_bird2 = extract_features(s_bird2, t_bird2, f_bird2)
+rejected_h0, pval = stats_helper(ftrs_bird1, ftrs_bird2)
+```
+
+The second snippet is written with VocalPy.
+
+```python
+import vocalpy as voc
+from scipy.signal import spectrogram
+
+# we write a helper function to compute a spectrogram
+# but notice we get rid of one of the arguments
+# instead of "data" and "sampling rate" we just have a Sound
+# we'll see below that the sound "encapsulates" the `data` and `samplerate` attributes
+def spect(sound, fft=1024, window='Hann'):
+    f, t, s = spectrogram(audio.data, audio.samplerate,
+    fft=fft, window=window)
+    # instead of returning three variables we just return one Spectrogram instance
+    # that again encapsulates the spectrogram matrix, the frequencies, and the times
+    return voc.Spectrogram(data=s, frequencies=f, times=t)
+
+# we can also reduce some duplication using a dictionary that maps IDs to variables
+ftrs = {}
+for bird in ('bird1', 'bird2'):
+    # here we load the Sound with the data and samplerate attributes
+    # so we only have one variable instead of two
+    sound = voc.Sound.read(f'./path/to/{bird}.wav')
+    
+    spect = spect(audio)
+    ftrs[bird] = extract_features(spect)
+rejected_h0, pval = stats_helper(ftrs['bird1'], ftrs['bird2'])
+```
+
+As the comments indicate, using VocalPy makes the code more succinct, and more readable.  
+For more s
+
+```{code-cell} ipython3
+
+```
+
 
 Let's look at the data types that VocalPy provides for acoustic comunication.
 
@@ -51,15 +137,16 @@ Let's look at the data types that VocalPy provides for acoustic comunication.
 
 +++
 
-Calling `vocalpy.example('bfsongrepo')` gave us back a list of of `vocalpy.Sound` instances.
-Let's inspect one of them.
+The first data type we'll learn about is one that represents sounds. We start here since all our analyses start with sound.
+We can load sound data using the :meth:`vocalpy.Sound.read` method.
 
 ```{code-cell} ipython3
-a_sound = sounds[0]
+wav_path = bfsongrepo.sound[0]  # we write this out just to make it explicit that we have a pathlib.Path pointing to a wav audio file
+a_sound = voc.Sound.read(wav_path)
 print(a_sound)
 ```
 
-We can see that it has three attributes:
+A sound has two attributes:
 
 1. `data`, the audio signal itself, with two dimensions: (channels, samples)
 
@@ -71,14 +158,6 @@ print(a_sound.data)
 
 ```{code-cell} ipython3
 print(a_sound.samplerate)
-```
-
-and finally,  
-
-3. `path`, the path to the file that the sound was read from
-
-```{code-cell} ipython3
-print(a_sound.path)
 ```
 
 A `Sound` also has three properties, derived from its data:
@@ -102,7 +181,8 @@ When you are working with your own data, instead of example data built into Voca
 1. Load all the sound files from a directory using a convenience function that VocalPy gives us in its `paths` module, `vocalpy.paths.from_dir`
 2. Load all the wav files into the data type that VocalPy provides for sound, `vocalpy.Sound`, using the method `vocalpy.Sound.read`:
 
-This is shown in the snippet below.
+This is shown in the snippet below
+
 ```python
 data_dir = ('data/bfsongrepo/gy6or6/032312/')
 wav_paths = voc.paths.from_dir(data_dir, 'wav')
@@ -111,7 +191,37 @@ sounds = [
 ]
 ```
 
-+++
+We'll demonstrate this now. 
+To demonstrate, we use the `parent` attribute of one of the paths to the wav files in our example `bfsongrepo` data.
+In this case, the `parent` is the directory that the wav file is in.
+
+We can be sure that all the wav files are in this directory, because when you call :func:`vocalpy.example` with the name of the example dataset, `'bfsongrepo'`, VocalPy uses the library [`pooch'] to "fetch" that dataset off of Zenodo and download it into a local "cache" directory.
+
+```{code-cell} ipython3
+data_dir = bfsongrepo.sound[0].parent
+print(data_dir)
+```
+
+We then use the :func:`vocalpy.paths.from_dir` function to get all the wav files from that directory.
+
+```{code-cell} ipython3
+wav_paths = voc.paths.from_dir(data_dir, 'wav')
+```
+
+Not surprisingly, these are the wav files we already have in our `bfsongrepo` example data.
+
+```{code-cell} ipython3
+sorted(wav_paths) == sorted(bfsongrepo.sound)
+```
+
+But we're just showing how you would do this with a directory of your data.  
+Finally we can load all these files as shown in the last line of the snippet.
+
+```{code-cell} ipython3
+sounds = [
+    voc.Sound.read(wav_path) for wav_path in wav_paths
+]
+```
 
 ## Classes for steps in pipelines for processing data in acoustic communication
 
@@ -127,6 +237,7 @@ We'll write a brief snippet to do so, and then we'll explain what we did.
 
 ```{code-cell} ipython3
 :tags: [hide-output]
+
 params = {'n_fft': 512, 'hop_length': 64}
 callback = voc.spectrogram
 spect_maker = voc.SpectrogramMaker(callback=callback, params=params)
@@ -137,7 +248,7 @@ Notice a couple of things about this snippet:
 - In line 1, you declare the parameters that you use to generate spectrograms explicitly, as a dictionary. This helps with reproducibility by encouraging you to document those parameters
 - In line 2, you also decide what function you will use to generate the spectrograms. Here we use the helper function `vocalpy.spectrogram`.
 - In line 3, you create an instance of the `SpectrogramMaker` class with the function you want to use to generate spectrograms, and the parameters to use with that function. We refer to the function we pass in as a `callback`, because the `SpectrogramMaker` will "call back" to this function when it makes a spectrogram.
-- In line 4, you make the spectrograms, with a single call to the method `vocalpy.SpectrogramMaker.make`. You pass in the audio we loaded earlier, and you tell VocalPy that you want to parallelize the generation of the spectrograms. This is done for you, using the library `dask`.
+- In line 4, you make the spectrograms, with a single call to the method `vocalpy.SpectrogramMaker.make`. You pass in the sounds we loaded earlier, and you tell VocalPy that you want to parallelize the generation of the spectrograms. This is done for you, using the library :mod:`dask`.
 
 +++
 
@@ -177,9 +288,9 @@ Now that we know what we're working with, let's actually inspect the attributes 
 
 +++
 
-There are five attributes we care about here.
+There are three attributes we care about here.
 
-1. `data`: this is the spectrogram itself -- as with the other data types,like `vocalpy.Sound`, the attribute name `data` indiciates this main data we care about
+1. `data`: this is the spectrogram itself -- as with the other data types,like `vocalpy.Sound`, the attribute name `data` indicates this main data we care about
 
 ```{code-cell} ipython3
 print(a_spect.data)
@@ -201,17 +312,19 @@ We see that we have an array with dimensions (channels, frequencies, times). The
 print(a_spect.frequencies[:10])
 ```
 
+And we can confirm it has a length equal to the number of rows in the spectrogram.
+
 ```{code-cell} ipython3
 print(a_spect.frequencies.shape)
 ```
-
-(We see it is equal to the number of rows.)
 
 3. `times`, a vector of the time for each column in the spectrogram.
 
 ```{code-cell} ipython3
 print(a_spect.times[:10])
 ```
+
+We can likewise see it that the `times` vector has a shape equal to the number of columns in the spectrogram.
 
 ```{code-cell} ipython3
 print(a_spect.times.shape)
@@ -229,9 +342,9 @@ import pathlib
 DATA_DIR = pathlib.Path('./data')
 DATA_DIR.mkdir(exist_ok=True)
 
-for spect in spects:
+for spect, wav_path in zip(spects, wav_paths):
     spect.write(
-        DATA_DIR / (spect.audio_path.name + '.spect.npz')
+        DATA_DIR / (wav_path.name + '.spect.npz')
     )
 ```
 
@@ -254,14 +367,16 @@ spects_loaded = [
 
 We compare with the equality operator to confirm we loaded what we saved.
 
-Before doing so, we sort the original ``spects`` by the ``audio_path`` of the sound they were generated from, and the ``spects_loaded`` by the path they were loaded from. In this case, doing so puts both lists in the same order, because we used the audio file's filename as part of the spectrogram file's filename. (It might not work more generally, if you name your files differently.)
-
 ```{code-cell} ipython3
-spects = sorted(spects, key=lambda spect: spect.audio_path)
-spects_loaded = sorted(spects_loaded, key=lambda spect: spect.path)
-for spect, spect_loaded in zip(spects, spects_loaded):
-    assert spect == spect_loaded
+all([
+    spect == spect_loaded
+    for spect, spect_loaded in zip(spects, spects_loaded)
+])  
 ```
+
+Notice that we can be sure that `spects` and `spects_loaded` are in the same order, because :func:`vocalpy.paths.from_dir` calls :func:`sorted` on the paths that it finds, and our spectrogram files will be in the same order as the audio files because of the naming convention we used: the name of the audio file, plus the extension "`.spect.npz`". If you used a different naming convention, you'd need to make sure both lists are in the same order a different way (you can tell :func:`sorted` how to sort using its `key` argument).
+
++++
 
 ### Data type: `vocalpy.Annotation`
 
@@ -271,16 +386,11 @@ The last data type we'll look at is for annotations. Such annotations are import
 
 ```{code-cell} ipython3
 import vocalpy as voc
-
-# We get back the paths to all the files in this example dataset, 
-# but only keep the ones that are csv files, because those are the annotations.
-# This filters out the wav files.
-csv_paths = [path for path in voc.example('bfsongrepo') if path.name.endswith('csv')]
 ```
 
 ```{code-cell} ipython3
 annots = [voc.Annotation.read(notmat_path, format='simple-seq') 
-          for notmat_path in csv_paths]
+          for notmat_path in bfsongrepo.annotation]
 ```
 
 We inspect one of the annotations. Again as with other data types, we can see there is a `data` attribute. In this case it contains the `crowsetta.Annotation`.
