@@ -122,14 +122,12 @@ rejected_h0, pval = stats_helper(ftrs['bird1'], ftrs['bird2'])
 ```
 
 As the comments indicate, using VocalPy makes the code more succinct, and more readable.  
-For more s
 
-```{code-cell} ipython3
+To learn more about the design and goals of VocalPy, please check out our Forum Acusticum 2023 Proceedings Paper, ["Introducing VocalPy"](https://github.com/vocalpy/vocalpy/blob/main/docs/fa2023/Introducing_VocalPy__a_core_Python_package_for_researchers_studying_animal_acoustic_communication.pdf), this [PyData Global 2023 talk](https://youtu.be/53S5xM6s70g?feature=shared) and this [Python Exchange talk](https://youtu.be/PtTegIM6m1o?feature=shared).
 
-```
++++
 
-
-Let's look at the data types that VocalPy provides for acoustic comunication.
+Now let's look at the data types that VocalPy provides for acoustic comunication.
 
 +++
 
@@ -410,4 +408,8 @@ voc.plot.annotated_spectrogram(
 );
 ```
 
-This crash course in VocalPy has introduced you to the key features and goals of the library. To learn more, please check out [the documentation](https://vocalpy.readthedocs.io/en/latest/) and read our Forum Acusticum 2023 Proceedings Paper, ["Introducing VocalPy"](https://github.com/vocalpy/vocalpy/blob/main/docs/fa2023/Introducing_VocalPy__a_core_Python_package_for_researchers_studying_animal_acoustic_communication.pdf). We are actively developing the library to meet your needs and would love to hear your feedback in [our forum](https://forum.vocalpy.org/).
+This crash course in VocalPy has introduced you to the key features and goals of the library. We are actively developing the library to meet your needs and would love to hear your feedback in [our forum](https://forum.vocalpy.org/).
+
+```{code-cell} ipython3
+
+```
