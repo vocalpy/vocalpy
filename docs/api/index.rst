@@ -51,6 +51,11 @@ Signal processing
    segment
    spectral
 
+.. autosummary::
+   :toctree: generated
+
+   spectrogram
+
 Feature Extraction
 ------------------
 
@@ -82,6 +87,21 @@ Visualization
    :recursive:
 
    plot
+
+Example Data
+------------
+
+.. autosummary::
+   :toctree: generated
+
+   example
+
+.. autosummary::
+   :toctree: generated
+   :template: module.rst
+   :recursive:
+
+   examples
 
 Other
 -------
