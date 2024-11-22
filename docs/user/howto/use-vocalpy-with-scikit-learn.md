@@ -30,7 +30,7 @@ import vocalpy as voc
 For this how-to, we use a subset of data from [this dataset](https://figshare.com/articles/dataset/Vocal_repertoires_from_adult_and_chick_male_and_female_zebra_finches_Taeniopygia_guttata_/11905533). 
 To get this subset, we can call the `vocalpy.example` function (that, under the hood, "fetches" the data using the excellent library [`pooch`](https://www.fatiando.org/pooch/latest/index.html)).
 
-By default, the function gives us back vocalpy data types like :class:`vocalpy.Sound`, but in this case we want the paths to the files. That's because the filenames contain the ID of the zebra finch that made the sound, and below we are going to train a model to classify IDs. To get back the paths instead of :class:`vocalpy.Sound` instances, we set the argument `return_path` to `True`.
+By default, the function gives us back vocalpy data types like {py:class}`vocalpy.Sound`, but in this case we want the paths to the files. That's because the filenames contain the ID of the zebra finch that made the sound, and below we are going to train a model to classify IDs. To get back the paths instead of {py:class}`vocalpy.Sound` instances, we set the argument `return_path` to `True`.
 
 ```{code-cell} ipython3
 zblib = voc.example("zblib", return_path=True)
@@ -75,7 +75,7 @@ params = dict(ftr_groups=("temporal", "spectral"))
 extractor = voc.FeatureExtractor(callback, params)
 ```
 
-Notice that we are going to only use channel of the audio to extract features. The function we will use to extract features, `vocalpy.feature.biosound`, will work on audio with multiple channels, but for demonstration purposes we just need one.
+Notice that we are going to only use channel of the audio to extract features. The function we will use to extract features, {py:func}`vocalpy.feature.biosound`, will work on audio with multiple channels, but for demonstration purposes we just need one.
 
 ```{code-cell} ipython3
 sounds = []
@@ -96,11 +96,11 @@ Now what we want to get from our extracted features is two NumPy arrays, `X` and
 These represent the samples $X_i$ in our dataset with their features $x$, and the labels for those samples $y_i$. In this case we have a total of $m=$91 samples (where $i \in 1, 2, ... m$).
 
 We get these arrays as follows (noting there are always multiple ways to do things when you're programming):
-- Take the `data` attribute of the `Features` we got back from the `FeatureExtractor` and convert it to a `pandas.DataFrame` with one row: the scalar set of features for exactly one sound
-- Use `pandas` to concatenate all those `DataFrame`s, so we end up with 91 rows
+- Take the `data` attribute of the {py:class}`~vocalpy.Features` we got back from the {py:class}`~vocalpy.FeatureExtractor` and convert it to a {py:class}`pandas.DataFrame` with one row: the scalar set of features for exactly one sound
+- Use {py:mod}`pandas` to concatenate all those {py:class}`~pandas.DataFrame`s, so we end up with 91 rows
 - Add a column to this `DataFrame` with the IDs of the birds -- we then have $X$ and $y$ in a single table we could save to a csv file, to do further analysis on later
 - We get $X$ by using the `values` attribute of the `DataFrame`, which is a numpy array
-- We get $y$ using `pandas.factorize`, that converts the unique set of strings in the `"id"` column into integer class labels: i.e., since there are 4 birds, for every row we get a value from $\{0, 1, 2, 3\}$
+- We get $y$ using {py:func}`pandas.factorize`, that converts the unique set of strings in the `"id"` column into integer class labels: i.e., since there are 4 birds, for every row we get a value from $\{0, 1, 2, 3\}$
 
 ```{code-cell} ipython3
 df = pd.concat(
