@@ -6,15 +6,16 @@ import reprlib
 class ExampleData(dict):
     """A :class:`dict`-like container for example data.
 
-    Returned by :func:`voc.example` for any example
+    Returned by :func:`vocalpy.example` for any example
     that is more than a single file.
     The :class:`ExampleData` class extends :class:`dict`
-    by enabling values to be accessed by key, `example["data"]`,
-    or by attribute with dot notation, `example.data`.
+    by enabling values to be accessed by key, ``example["data"]``,
+    or by attribute with dot notation, ``example.data``.
 
     Examples
     --------
-    >>> from voc.examples.example_data import ExampleData
+
+    >>> from vocalpy.examples import ExampleData
     >>> bells = voc.example("bells.wav")
     >>> samba = voc.example("samba.wav")
     >>> zb_examples = ExampleData(bells=bells, samba=samba)
@@ -28,7 +29,8 @@ class ExampleData(dict):
 
     Notes
     -----
-    Adapted from scikit-learn
+
+    Adapted from the scikit-learn ``Bunch`` class: 
     https://github.com/scikit-learn/scikit-learn/blob/d5082d32d/sklearn/utils/_bunch.py
     """
 
