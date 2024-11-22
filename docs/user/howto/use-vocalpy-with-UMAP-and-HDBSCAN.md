@@ -35,26 +35,26 @@ import vocalpy as voc
 
 +++
 
-We start by loading the example data, that is given to us as :class:`vocalpy.Sound` and :class:`vocalpy.Segments` instances.
+We start by loading the example data, that is given to us as {py:class}`vocalpy.Sound` and {py:class}`vocalpy.Segments` instances.
 
 ```{code-cell} ipython3
 twopup = voc.example("twopup")
 ```
 
-We can see that :func:`vocalpy.example` gives us back a :class:`vocalpy.examples.ExampleData` instance with two attributes, `sound` and `segments`.
+We can see that {py:func}`vocalpy.example` gives us back a {py:class}`vocalpy.examples.ExampleData` instance with two attributes, `sound` and `segments`.
 
 ```{code-cell} ipython3
 twopup
 ```
 
-We use the :meth:`~vocalpy.Sound.segment` method of the :class:`~vocalpy.Sound` class with the :class:`vocalpy.Segments` to get a list of :class:`~vocalpy.Sound` instances, one for each segment in the sound.
+We use the :meth:`~vocalpy.Sound.segment` method of the {py:class}`~vocalpy.Sound` class with the {py:class}`vocalpy.Segments` to get a list of {py:class}`~vocalpy.Sound` instances, one for each segment in the sound.
 
 ```{code-cell} ipython3
 sound, segments = twopup.sound, twopup.segments
 all_sounds = sound.segment(segments)
 ```
 
-Typically in research code you would have done that by looping through start and stop times of segments, e.g., in a csv file, that is the output of some function that segments for you. E.g., this audio was segmented with the :func:`vocalpy.segment.ava` function -- you can replicate the results of the paper with .
+Typically in research code you would have done that by looping through start and stop times of segments, e.g., in a csv file, that is the output of some function that segments for you. E.g., this audio was segmented with the {py:func}`vocalpy.segment.ava` function -- you can replicate the results of the paper with .
 
 What we wrote above is just concise "syntactice sugar" that does the same thing under the hood. Now we have a list of sounds.
 
