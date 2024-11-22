@@ -13,12 +13,10 @@ kernelspec:
 
 # How to use VocalPy with scikit-learn to fit supervised learning models to acoustic features
 
-Many analyses in bioacoustics and communication rely on machine learning models. For example, it is common to fit a classifier to acoustic features extracted from a set of sounds so that the classifier predicts the individual that emitted the sound. Many papers argue based on the accuracy of the fit classifier that information is present in the sound that tells other conspecifics the identity of the individual.
+Many analyses in bioacoustics and communication rely on machine learning models. For example, it is common to use supervised machine learning models to support the idea that vocalizations contain information about individual identity or emotional valence. 
+This is done by showing that a classifier can successfully predict the identity or valence of vocalizations when fit to acoustic features extracted from the sounds. See for example [1] or [2].
 
-scikit-learn is one of the most widely used library in the Python programming language for fitting supervised machine learning models. How can you extract acoustic features from sounds and then fit a model to those features with scikit-learn? 
-In this notebook we walk through an example of classifying individual zebra finches using acoustic parameters extracted from their calls.
-
-Please note that material here is adapted in part from https://github.com/theunissenlab/BioSoundTutorial
+scikit-learn is one of the most widely used library in the Python programming language for fitting supervised machine learning models. Here we will show you how to extract acoustics features from sounds using VocalPy, and then fit a model to those features with scikit-learn. The example we will walk through is of classifying individual zebra finches using acoustic parameters extracted from their calls. The material here is adapted in part from the BioSound tutorial from the Theunissen lab (https://github.com/theunissenlab/BioSoundTutorial) that demonstrates how to use their library soundsig (https://github.com/theunissenlab/soundsig).
 
 ```{code-cell} ipython3
 import numpy as np
@@ -27,14 +25,19 @@ import sklearn
 import vocalpy as voc
 ```
 
-For this how-to, we use a subset of data from [this dataset](https://figshare.com/articles/dataset/Vocal_repertoires_from_adult_and_chick_male_and_female_zebra_finches_Taeniopygia_guttata_/11905533). 
-To get this subset, we can call the `vocalpy.example` function (that, under the hood, "fetches" the data using the excellent library [`pooch`](https://www.fatiando.org/pooch/latest/index.html)).
-
-By default, the function gives us back vocalpy data types like {py:class}`vocalpy.Sound`, but in this case we want the paths to the files. That's because the filenames contain the ID of the zebra finch that made the sound, and below we are going to train a model to classify IDs. To get back the paths instead of {py:class}`vocalpy.Sound` instances, we set the argument `return_path` to `True`.
+For this how-to, we use a subset of data from [this dataset](https://figshare.com/articles/dataset/Vocal_repertoires_from_adult_and_chick_male_and_female_zebra_finches_Taeniopygia_guttata_/11905533) shared by Elie and Theunissen, as used in their [2016 paper](https://link.springer.com/article/10.1007/s10071-015-0933-6) and their [2018 paper](https://www.nature.com/articles/s41467-018-06394-9). To get the subset of data we will use, we can call the {py:func}`vocalpy.example` function (that, under the hood, "fetches" the data using the excellent library [`pooch`](https://www.fatiando.org/pooch/latest/index.html)).
 
 ```{code-cell} ipython3
 zblib = voc.example("zblib", return_path=True)
 ```
+
+Since this example data is more than one file, when we call {py:func}`vocalpy.example` we will get back an instance of the {py:class}`~vocalpy.example.ExampleData` class. This class is like a {py:class}`dict` where you can get the values by using dot notation instead of keys, e.g. by writing `zblib.sound` instead of `zblib["sound"]`.
+
+```{code-cell} ipython3
+print(zblib)
+```
+
+By default, the {py:func}`vocalpy.example` function gives us back an {} that contains VocalPy data types like {py:class}`vocalpy.Sound`, but in this case we want the paths to the files. We want the paths to the files because the filenames contain the ID of the zebra finch that made the sound, and below we will need to extract those IDs from the filenames so we can train a model to classify IDs.  To get back a {py:class}`list` of {py:class}`pathlib.Path` instances, instead of {py:class}`vocalpy.Sound` instances, we set the argument `return_path` to `True`. We confirm that we got back paths by printing the first element of the list.
 
 ```{code-cell} ipython3
 print(zblib.sound[0])
@@ -46,15 +49,17 @@ We will use this below when we want to predict the bird ID from the extracted fe
 
 ```{code-cell} ipython3
 def bird_id_from_path(wav_path):
-    """Helper functoin that gets a bird ID from a path"""
+    """Helper function that gets a bird ID from a path"""
     return wav_path.name.split('_')[0]
 ```
+
+We run a quick test to confirm this works as we expect.
 
 ```{code-cell} ipython3
 bird_id_from_path(zblib.sound[0])
 ```
 
-We use a list comprehension to get the ID from all 91 files.
+Then we use a list comprehension to get the ID from all 91 files.
 
 ```{code-cell} ipython3
 bird_ids = [
@@ -66,8 +71,15 @@ bird_ids = [
 ## Feature extraction
 
 Now we extract the acoustic features we will use to classify.  
+To extract the acoustic features, we will use the function {py:func}`vocalpy.feature.biosound`.
 
-For this example we use the temporal and spectral features from `soundsig`, since those are relatively quick to extract. For an example that uses fundamental frequency estimation, see https://github.com/theunissenlab/BioSoundTutorial/blob/master/BioSound4.ipynb
+We will extract a subset of the features used by Elie and Theunissen in the articles linked above (and related work), that are depicted schematically below ([figure 1](https://link.springer.com/article/10.1007/s10071-015-0933-6/figures/1) from their 2016 paper):  
+
+![Figure 1 from Elie Theunissen 2016](elie-theunissen-2016-fig1.png)
+
+For this example we use only the features extracted from the temporal and spectral envelope, since those are relatively quick to extract. For an example that uses fundamental frequency estimation, see the notebook that this is adapted from: https://github.com/theunissenlab/BioSoundTutorial/blob/master/BioSound4.ipynb
+
+Here we are going to use the {py:class}`~vocalpy.FeatureExtractor` class. This works like other pipeline classes in VocalPy, where we tell the {py:class}`~vocalpy.FeatureExtractor` what `callback` we want to use, and we explicitly declare a set of parameters `params` to use with the callback function. This design is meant to help us document the methods we use more clearly and concisely.
 
 ```{code-cell} ipython3
 callback = voc.feature.biosound
@@ -75,7 +87,7 @@ params = dict(ftr_groups=("temporal", "spectral"))
 extractor = voc.FeatureExtractor(callback, params)
 ```
 
-Notice that we are going to only use channel of the audio to extract features. The function we will use to extract features, {py:func}`vocalpy.feature.biosound`, will work on audio with multiple channels, but for demonstration purposes we just need one.
+We are going to only use channel of the audio to extract features. The function we will use to extract features, {py:func}`vocalpy.feature.biosound`, will work on audio with multiple channels, but for demonstration purposes we just need one. To just get the first channel from each sound, we can use indexing (for more detail and examples of how this works, see the API documentation for this class: {py:class}`vocalpy.Sound`).
 
 ```{code-cell} ipython3
 sounds = []
@@ -84,6 +96,8 @@ for wav_path in zblib.sound:
         voc.Sound.read(wav_path)[0]  # indexing with `[0]` gives us the first channel
     )
 ```
+
+Now finally we can pass this list of (single-channel) sounds into the {py:meth}`~vocalpy.FeatureExtractor.extract` method, and get back a list of {py:class}`~vocalpy.Features`, one for every sound.
 
 ```{code-cell} ipython3
 features_list = extractor.extract(sounds, parallelize=True)
@@ -121,11 +135,13 @@ X = df.values[:, :-1]  # -1 because we don't want 'id' column
 
 ## Fitting a Random Forest classifier
 
-Finally we will train a classifer from `scikit-learn` to classify these individuals.
+Finally we will train a classifer from `scikit-learn` to classify these individuals. The original paper uses Linear Discriminant Analysis, but here we fit a random forest classifier, again simply because the random forest models are fast to fit.
 
 ```{code-cell} ipython3
 import sklearn.model_selection
 ```
+
+First we split the data into training and test splits using {py:func}`sklearn.model_selection.train_test_split`.
 
 ```{code-cell} ipython3
 X_train, X_val, y_train, y_val = sklearn.model_selection.train_test_split(
@@ -137,13 +153,21 @@ X_train, X_val, y_train, y_val = sklearn.model_selection.train_test_split(
 from sklearn.ensemble import RandomForestClassifier
 ```
 
+Finally we can instantiate our model and fit it.
+
 ```{code-cell} ipython3
 clf = RandomForestClassifier(max_depth=2, random_state=0)
 clf.fit(X_train, y_train)
 ```
+
+And we can evaluate the model's performance on a test set.
 
 ```{code-cell} ipython3
 print(
     f"Accuracy: {clf.score(X_val, y_val) * 100:0.2f}%"
 )
 ```
+
+Looks pretty good!
+
+Now you have seen a simple example of how to extract acoustic features from your data with VocalPy, and fit a model to them with scikit-learn.
