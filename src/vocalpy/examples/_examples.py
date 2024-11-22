@@ -367,8 +367,8 @@ def example(name: str, return_path: bool = False) -> ExampleType:
     If you want the path(s) to where the data
     is on your local machine,
     set `return_path` to `True`.
-    This is useful for :mod:`vocalpy: functionality
-    that loads files, or to work with the data
+    This is useful to demonstrate :mod:`vocalpy` 
+    functionality that loads files, or to work with the data
     in the files in some other way.
 
     >>> sound_path = voc.example('bells.wav', return_path=True)
