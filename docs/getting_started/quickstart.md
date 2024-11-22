@@ -39,15 +39,15 @@ Then we get some example data, from the [Bengalese Finch song repository](https:
 bfsongrepo = voc.example('bfsongrepo', return_path=True)
 ```
 
-This gives us back an :class:`~vocalpy.examples.ExampleData` instance with `sound` and `annotation` attributes.
+This gives us back an {py:class}`~vocalpy.examples.example_data.ExampleData` instance with `sound` and `annotation` attributes.
 
 ```{code-cell} ipython3
 bfsongrepo
 ```
 
-The :class:`~vocalpy.examples.ExampleData` is just a Python :class:`dict` that lets us access the values through dot notation, by saying `bfsongrepo.sound` as well as `bfsongrepo["sound"]`, like the [`Bunch` class](https://scikit-learn.org/1.5/modules/generated/sklearn.utils.Bunch.html) returned by functions in the scikit-learn [`datasets` module](https://scikit-learn.org/1.5/api/sklearn.datasets.html).
+The {py:class}`~vocalpy.examples.example_data.ExampleData` is just a Python {py:class}`dict` that lets us access the values through dot notation, by saying `bfsongrepo.sound` as well as `bfsongrepo["sound"]`, like the [`Bunch` class](https://scikit-learn.org/1.5/modules/generated/sklearn.utils.Bunch.html) returned by functions in the scikit-learn [`datasets` module](https://scikit-learn.org/1.5/api/sklearn.datasets.html).
 
-Since we set the argument `return_path=True`, these attributes are each a :class:`list` of :class:`pathlib.Path` instances. The default for `return_path` is `False`, and when it is `False`, we get back the data types built into VocalPy that we will introduce below.
+Since we set the argument `return_path=True`, these attributes are each a {py:class}`list` of {py:class}`pathlib.Path` instances. The default for `return_path` is `False`, and when it is `False`, we get back the data types built into VocalPy that we will introduce below.
 
 Here we want the paths so we can show how to load data in with VocalPy.
 
@@ -131,12 +131,13 @@ Now let's look at the data types that VocalPy provides for acoustic comunication
 
 +++
 
-### Data type for sound: `vocalpy.Sound`
+### Data type for sound: {py:class}`vocalpy.Sound`
 
 +++
 
-The first data type we'll learn about is one that represents sounds. We start here since all our analyses start with sound.
-We can load sound data using the :meth:`vocalpy.Sound.read` method.
+The first data type we'll learn about is one that represents a sound, not suprisingly named {py:class}`vocalpy.Sound`. 
+We start here since all our analyses start with sound.
+We can load an audio signal from a file using the {py:meth}`vocalpy.Sound.read` method.
 
 ```{code-cell} ipython3
 wav_path = bfsongrepo.sound[0]  # we write this out just to make it explicit that we have a pathlib.Path pointing to a wav audio file
@@ -176,8 +177,8 @@ One of the reasons VocalPy provides this data type, and the others we're about t
 
 When you are working with your own data, instead of example data built into VocalPy, you will do something like:  
 
-1. Load all the sound files from a directory using a convenience function that VocalPy gives us in its `paths` module, `vocalpy.paths.from_dir`
-2. Load all the wav files into the data type that VocalPy provides for sound, `vocalpy.Sound`, using the method `vocalpy.Sound.read`:
+1. Get all the paths to the sound files in a directory using a convenience function that VocalPy gives us in its {py:mod}`~vocalpy.paths` module, {py:func}`vocalpy.paths.from_dir`
+2. Read all the sound files into memory using the method {py:meth}`vocalpy.Sound.read`:
 
 This is shown in the snippet below
 
@@ -193,14 +194,14 @@ We'll demonstrate this now.
 To demonstrate, we use the `parent` attribute of one of the paths to the wav files in our example `bfsongrepo` data.
 In this case, the `parent` is the directory that the wav file is in.
 
-We can be sure that all the wav files are in this directory, because when you call :func:`vocalpy.example` with the name of the example dataset, `'bfsongrepo'`, VocalPy uses the library [`pooch'] to "fetch" that dataset off of Zenodo and download it into a local "cache" directory.
+We can be sure that all the wav files are in this directory, because when you call {py:func}`vocalpy.example` with the name of the example dataset, `'bfsongrepo'`, VocalPy uses the library `pooch` (https://www.fatiando.org/pooch/latest/index.html) to "fetch" that dataset off of Zenodo and download it into a local "cache" directory.
 
 ```{code-cell} ipython3
 data_dir = bfsongrepo.sound[0].parent
 print(data_dir)
 ```
 
-We then use the :func:`vocalpy.paths.from_dir` function to get all the wav files from that directory.
+We then use the {py:func}`vocalpy.paths.from_dir` function to get all the wav files from that directory.
 
 ```{code-cell} ipython3
 wav_paths = voc.paths.from_dir(data_dir, 'wav')
@@ -212,14 +213,20 @@ Not surprisingly, these are the wav files we already have in our `bfsongrepo` ex
 sorted(wav_paths) == sorted(bfsongrepo.sound)
 ```
 
-But we're just showing how you would do this with a directory of your data.  
-Finally we can load all these files as shown in the last line of the snippet.
+(We're just showing how you would do this with a directory of your data.)  
+Finally we can load all these files, as was shown in the last line of the snippet.
 
 ```{code-cell} ipython3
 sounds = [
     voc.Sound.read(wav_path) for wav_path in wav_paths
 ]
 ```
+
+Next we'll show how to work with sound in a pipeline for processing data. 
+For more detail on how to use the {py:class}`vocalpy.Sound` class, 
+please see the "examples" section of the API documentation 
+(that you can go to by clicking on the name of the class 
+in this sentence).
 
 ## Classes for steps in pipelines for processing data in acoustic communication
 
@@ -229,7 +236,7 @@ In addition to data types for acoustic communication, VocalPy provides you with 
 
 +++
 
-Let's use one of those classes, `SpectrogramMaker`, to make a spectrogram from each one of the wav files that we loaded above.
+Let's use one of those classes, {py:class}`~vocalpy.SpectrogramMaker`, to make a spectrogram from each one of the wav files that we loaded above.
 
 We'll write a brief snippet to do so, and then we'll explain what we did.
 
@@ -244,17 +251,17 @@ spects = spect_maker.make(sounds, parallelize=True)
 
 Notice a couple of things about this snippet:
 - In line 1, you declare the parameters that you use to generate spectrograms explicitly, as a dictionary. This helps with reproducibility by encouraging you to document those parameters
-- In line 2, you also decide what function you will use to generate the spectrograms. Here we use the helper function `vocalpy.spectrogram`.
-- In line 3, you create an instance of the `SpectrogramMaker` class with the function you want to use to generate spectrograms, and the parameters to use with that function. We refer to the function we pass in as a `callback`, because the `SpectrogramMaker` will "call back" to this function when it makes a spectrogram.
-- In line 4, you make the spectrograms, with a single call to the method `vocalpy.SpectrogramMaker.make`. You pass in the sounds we loaded earlier, and you tell VocalPy that you want to parallelize the generation of the spectrograms. This is done for you, using the library :mod:`dask`.
+- In line 2, you also decide what function you will use to generate the spectrograms. Here we use the helper function {py:func}`vocalpy.spectrogram`.
+- In line 3, you create an instance of the {py:class}`~vocalpy.SpectrogramMaker` class with the function you want to use to generate spectrograms, and the parameters to use with that function. We refer to the function we pass in as a `callback`, because the {py:class}`~vocalpy.SpectrogramMaker` will "call back" to this function when it makes a spectrogram.
+- In line 4, you make the spectrograms, with a single call to the method {py:meth}`vocalpy.SpectrogramMaker.make`. You pass in the sounds we loaded earlier, and you tell VocalPy that you want to parallelize the generation of the spectrograms. This is done for you, using the library {py:mod}`dask`.
 
 +++
 
-### Data type: `vocalpy.Spectrogram`
+### Data type: {py:class}`vocalpy.Spectrogram`
 
 +++
 
-As you might have guessed, when we call `SpectrogramMaker.make`, we get back a list of spectrograms.
+As you might have guessed, when we call {py:meth}`vocalpy.SpectrogramMaker.make`, we get back a list of spectrograms.
 
 This is the next data type we'll look at.
 
@@ -270,7 +277,7 @@ print(a_spect)
 As before, we'll walk through the attributes of this class.
 But since the whole point of a spectrogram is to let us see sound, let's actually look at the spectrogram, instead of staring at arrays of numbers.
 
-We do so by calling `vocalpy.plot.spectrogram`.
+We do so by calling {py:func}`vocalpy.plot.spectrogram`.
 
 ```{code-cell} ipython3
 voc.plot.spectrogram(
@@ -282,7 +289,7 @@ voc.plot.spectrogram(
 
 We see that we have a spectrogram of Bengalese finch song.
 
-Now that we know what we're working with, let's actually inspect the attributes of the `vocalpy.Spectrogram` instance.
+Now that we know what we're working with, let's actually inspect the attributes of the {py:class}`vocalpy.Spectrogram` instance.
 
 +++
 
@@ -350,7 +357,7 @@ Notice that the extension is `'npz'`; this is a file format that NumPy uses to s
 
 +++
 
-We can confirm that reading and writing spectrograms to disk works as we expect using the method `vocalpy.Spectrogram.read`
+We can confirm that reading and writing spectrograms to disk works as we expect using the method {py:meth}`vocalpy.Spectrogram.read`
 
 ```{code-cell} ipython3
 spect_paths = voc.paths.from_dir(DATA_DIR, '.spect.npz')
@@ -372,7 +379,7 @@ all([
 ])  
 ```
 
-Notice that we can be sure that `spects` and `spects_loaded` are in the same order, because :func:`vocalpy.paths.from_dir` calls :func:`sorted` on the paths that it finds, and our spectrogram files will be in the same order as the audio files because of the naming convention we used: the name of the audio file, plus the extension "`.spect.npz`". If you used a different naming convention, you'd need to make sure both lists are in the same order a different way (you can tell :func:`sorted` how to sort using its `key` argument).
+Notice that we can be sure that `spects` and `spects_loaded` are in the same order, because {py:func}`vocalpy.paths.from_dir` calls {py:func}`sorted` on the paths that it finds, and our spectrogram files will be in the same order as the audio files because of the naming convention we used: the name of the audio file, plus the extension "`.spect.npz`". If you used a different naming convention, you'd need to make sure both lists are in the same order a different way (you can tell {py:func}`sorted` how to sort using its `key` argument).
 
 +++
 
@@ -380,7 +387,7 @@ Notice that we can be sure that `spects` and `spects_loaded` are in the same ord
 
 +++
 
-The last data type we'll look at is for annotations. Such annotations are important for analysis of aocustic communication and behavior. Under the hood, VocalPy uses the pyOpenSci package [crowsetta](https://github.com/vocalpy/crowsetta).
+The last data type we'll look at is for annotations. Such annotations are important for analysis of aocustic communication and behavior. Under the hood, VocalPy uses the pyOpenSci package {py:mod}`crowsetta` (https://github.com/vocalpy/crowsetta).
 
 ```{code-cell} ipython3
 import vocalpy as voc
@@ -391,7 +398,7 @@ annots = [voc.Annotation.read(notmat_path, format='simple-seq')
           for notmat_path in bfsongrepo.annotation]
 ```
 
-We inspect one of the annotations. Again as with other data types, we can see there is a `data` attribute. In this case it contains the `crowsetta.Annotation`.
+We inspect one of the annotations. Again as with other data types, we can see there is a `data` attribute. In this case it contains the {py:class}`crowsetta.Annotation`.
 
 ```{code-cell} ipython3
 print(annots[1])
@@ -409,7 +416,3 @@ voc.plot.annotated_spectrogram(
 ```
 
 This crash course in VocalPy has introduced you to the key features and goals of the library. We are actively developing the library to meet your needs and would love to hear your feedback in [our forum](https://forum.vocalpy.org/).
-
-```{code-cell} ipython3
-
-```
