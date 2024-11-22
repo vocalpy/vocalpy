@@ -103,6 +103,12 @@ Example Data
 
    examples
 
+.. autosummary::
+   :toctree: generated
+
+   examples.ExampleData
+
+
 Other
 -------
 
