@@ -105,6 +105,7 @@ Example Data
 
 .. autosummary::
    :toctree: generated
+   :template: class.rst
 
    examples.ExampleData
 
