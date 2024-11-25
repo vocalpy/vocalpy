@@ -12,7 +12,7 @@ kernelspec:
 ---
 
 (quickstart)=
-![VocalPy logo](./images/vocalpy-primary.png)
+![VocalPy logo](../images/vocalpy-primary.png)
 # Quickstart: VocalPy 🐍 💬 in 15 minutes ⏲️
 
 +++
