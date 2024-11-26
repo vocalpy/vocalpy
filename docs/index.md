@@ -26,7 +26,7 @@ A core package for acoustic communication research in Python.
 :::{grid-item}
 :columns: 4
 
-```{image} ./_static/vocalpy-secondary.png
+```{image} ./images/vocalpy-secondary.png
 :width: 150px
 ```
 :::
