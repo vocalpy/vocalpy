@@ -121,11 +121,17 @@ font_size = 12
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
-    "librosa": ("https://librosa.org/doc/0.10.0", None),
+    "crowsetta": ("https://crowsetta.readthedocs.io/en/stable/", None),
+    "dask": ("https://docs.dask.org/en/stable/", None),
+    "librosa": ("https://librosa.org/doc/stable/", None),
     "python": ("https://docs.python.org/3/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
+    "pooch": ("https://www.fatiando.org/pooch/latest/", None),
+    "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "soundfile": ("https://python-soundfile.readthedocs.io/en/latest/", None),
+    "sklearn": ("https://scikit-learn.org/stable/", None),
+    "umap": ("https://umap-learn.readthedocs.io/en/stable/", None),
 }
 
 # -- Options for nitpicky mode
