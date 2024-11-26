@@ -11,7 +11,7 @@ kernelspec:
   name: python3
 ---
 
-## How to use VocalPy with UMAP and HDBScan for dimensionality reduction and clustering
+# How to use VocalPy with UMAP and HDBScan for dimensionality reduction and clustering
 
 It is becoming more and more common for researchers studying acoustic communication to apply dimensionality reduction methods to their data, and then cluster the data once it is embedded in that lower dimensional space. Many researchers use the UMAP method for dimensionality reduction, via the Python library that implements it, and the HDBSCAN method to cluster, as implemented in the HDBSCAN library. You can install these by running `pip install umap-learn` and `pip install hdbscan`, respectively. Note that an implementation of HDBSCAN is now provided by [scikit-learn](https://scikit-learn.org/1.5/modules/generated/sklearn.cluster.HDBSCAN.html), but here we show using the HDBSCAN package. Our understanding is that as of this writing, there are cases where using the original package may be more computationally efficient (see [this issue](https://github.com/scikit-learn-contrib/hdbscan/issues/633), but that is beyond the scope of this how-to.
 
