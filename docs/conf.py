@@ -81,14 +81,14 @@ myst_enable_extensions = [
 
 html_theme = 'sphinx_book_theme'
 
-html_logo = "_static/vocalpy-primary-logo.png"
+html_logo = "images/vocalpy-primary-logo.png"
 
 html_theme_options = {
     "logo_only": True,
     "show_toc_level": 1,
 }
 
-html_static_path = ['_static']
+html_static_path = ['images']
 
 # -- Extension configuration -------------------------------------------------
 autosummary_ignore_module_all = False
