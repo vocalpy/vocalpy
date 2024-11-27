@@ -1,4 +1,4 @@
-"""functions for plotting annotations for vocalizations"""
+"""Functions for plotting annotations."""
 
 from __future__ import annotations
 

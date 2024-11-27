@@ -1,9 +1,14 @@
-"""Functions for plotting spectrograms"""
+"""Functions for plotting spectrograms."""
 
 from __future__ import annotations
 
+from typing import TYPE_CHECKING
+
 import matplotlib.pyplot as plt
 import numpy as np
+if TYPE_CHECKING:
+    import matplotlib.figure
+    import matplotlib.axes
 
 from .._spectrogram.data_type import Spectrogram
 from ..annotation import Annotation
@@ -16,7 +21,7 @@ def spectrogram(
     flim: tuple | list | None = None,
     ax: plt.Axes | None = None,
     pcolormesh_kwargs: dict | None = None,
-) -> None:
+) -> tuple[matplotlib.figure.Figure, matplotlib.axes.Axes]:
     """Plot a spectrogram.
 
     Parameters
@@ -38,6 +43,20 @@ def spectrogram(
     pcolormesh_kwargs : dict
         keyword arguments passed to :meth:`matplotlib.axes.Axes.pcolormesh`
         method used to plot spectrogram. Default is None.
+
+    Returns
+    -------
+    fig : matplotlib.figure.Figure
+    ax : matplotlib.axes.Axes
+
+    Examples
+    --------
+
+    .. plot::
+
+       >>> samba = voc.example("samba.wav")
+       >>> spect = voc.spectrogram(samba)
+       >>> fig, ax = voc.plot.spectrogram(spect)
     """
     if spect.data.shape[0] > 1:
         raise ValueError(
@@ -53,6 +72,8 @@ def spectrogram(
 
     if ax is None:
         fig, ax = plt.subplots()
+    else:
+        fig = ax.get_figure()
 
     if pcolormesh_kwargs is None:
         pcolormesh_kwargs = {}
@@ -69,6 +90,8 @@ def spectrogram(
 
     if flim is not None:
         ax.set_ylim(flim)
+
+    return fig, ax
 
 
 def annotated_spectrogram(
@@ -127,6 +150,15 @@ def annotated_spectrogram(
         The axes containing the spectrogram is ``axes['spect']``
         and the axes containing the annotated segments
         is ``axes['annot']``.
+
+    Examples
+    --------
+    .. plot::
+
+       >>> bfsongrepo = voc.example("bfsongrepo")
+       >>> spect_maker = voc.SpectrogramMaker(callback=voc.spectrogram)
+       >>> spects = spect_maker.make(bfsongrepo.sound)
+       >>> voc.plot.annotated_spectrogram(spect=spects[0], annot=bfsongrepo.annotation[0], tlim = [3.2, 3.9], flim=[500,12500]) 
     """
     fig, axs = plt.subplot_mosaic(
         [
@@ -138,7 +170,7 @@ def annotated_spectrogram(
         sharex=True,
     )
 
-    spectrogram(
+    _, _ = spectrogram(
         spect, tlim, flim, ax=axs["spect"], pcolormesh_kwargs=pcolormesh_kwargs
     )
 
