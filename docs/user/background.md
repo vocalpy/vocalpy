@@ -55,7 +55,7 @@ The goals of VocalPy are to:
     [research software engineers](https://www.nature.com/articles/d41586-022-01516-2) 
     developing libraries and applications
 
-To see how VocalPy achieves these goals, and to get an overview of its features, please read through the (#quickstart).
+To see how VocalPy achieves these goals, and to get an overview of its features, please read through the [](#quickstart).
 
 ### References
 
