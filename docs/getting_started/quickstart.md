@@ -415,4 +415,10 @@ voc.plot.annotated_spectrogram(
 );
 ```
 
-This crash course in VocalPy has introduced you to the key features and goals of the library. We are actively developing the library to meet your needs and would love to hear your feedback in [our forum](https://forum.vocalpy.org/).
+This crash course in VocalPy has introduced you to the key features and goals of the library.
+
+To learn more and see specific examples of usage, please see the [how-to](#how-tos) section of the [user guide](#user-guide)).
+For example, there you can find walkthroughs of [how to use VocalPy to extract acoustic features that you fit a classifier to with scikit-learn](#how-to-sklearn),
+and [how to use VocalPy to prepare your data for dimensionality reduction and clustering with UMAP and HDBSCAN](#how-to-umap-hdbscan).
+
+We are actively developing the library to meet your needs and would love to hear your feedback in [our forum](https://forum.vocalpy.org/).
