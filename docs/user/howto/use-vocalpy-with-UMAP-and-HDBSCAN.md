@@ -11,7 +11,8 @@ kernelspec:
   name: python3
 ---
 
-# How to use VocalPy with UMAP and HDBScan for dimensionality reduction and clustering
+(how-to-umap-hdbscan)=
+# How to use VocalPy with UMAP and HDBSCAN for dimensionality reduction and clustering
 
 It is becoming more and more common for researchers studying acoustic communication to apply dimensionality reduction methods to their data, and then cluster the data once it is embedded in that lower dimensional space. Many researchers use the UMAP method for dimensionality reduction, via the Python library that implements it, and the HDBSCAN method to cluster, as implemented in the HDBSCAN library. You can install these by running `pip install umap-learn` and `pip install hdbscan`, respectively. Note that an implementation of HDBSCAN is now provided by [scikit-learn](https://scikit-learn.org/1.5/modules/generated/sklearn.cluster.HDBSCAN.html), but here we show using the HDBSCAN package. Our understanding is that as of this writing, there are cases where using the original package may be more computationally efficient (see [this issue](https://github.com/scikit-learn-contrib/hdbscan/issues/633), but that is beyond the scope of this how-to.
 
@@ -20,6 +21,7 @@ Here we provide a brief walkthrough of how you would use VocalPy to work with yo
 For a more detailed tutorial on applying UMAP to animal sounds, please see [this paper](https://besjournals.onlinelibrary.wiley.com/doi/full/10.1111/1365-2656.13754) from [Mara Thomas](https://www.ab.mpg.de/person/109360/2736) and co-authors. Material here is adapted in part from [this project](https://github.com/marathomas/tutorial_repo) shared under CC-BY-4.0 license, that accompanied the paper from Thomas, et al. We encourage you to also read [Tim Sainburg](https://timsainburg.com/)'s [earlier work](https://journals.plos.org/ploscompbiol/article?id=10.1371/journal.pcbi.1008228) demonstrating how UMAP can be used with animal sounds. Some code is also adapted from the [repository that reproduces the paper results](https://github.com/nickjourjine/peromyscus-pup-vocal-evolution). Thank you to [Nick Jourjine](https://nickjourjine.github.io/) for helping us pick a subset of their data that is a good size for a tutorial. The original material for this how-to comes from a [bootcamp](https://github.com/vocalpy/acoustic-communication-and-bioacoustics-bootcamp) at the [Neural Mechanism of Acoustic Communciation 2024 Graduate Research Seminar](https://www.grc.org/neural-mechanisms-of-acoustic-communication-grs-conference/2024/) organized by Nick and [Diana Liao](https://scholar.google.com/citations?user=QeqBfDMAAAAJ&hl=en).
 
 ```{code-cell} ipython3
+:tags: [hide-output]
 import pathlib
 
 import librosa
@@ -47,7 +49,7 @@ We can see that {py:func}`vocalpy.example` gives us back a {py:class}`vocalpy.ex
 twopup
 ```
 
-We use the :meth:`~vocalpy.Sound.segment` method of the {py:class}`~vocalpy.Sound` class with the {py:class}`vocalpy.Segments` to get a list of {py:class}`~vocalpy.Sound` instances, one for each segment in the sound.
+We use the {py:meth}`~vocalpy.Sound.segment` method of the {py:class}`~vocalpy.Sound` class with the {py:class}`vocalpy.Segments` to get a list of {py:class}`~vocalpy.Sound` instances, one for each segment in the sound.
 
 ```{code-cell} ipython3
 sound, segments = twopup.sound, twopup.segments
@@ -99,6 +101,7 @@ spect_maker = voc.SpectrogramMaker(callback)
 ```
 
 ```{code-cell} ipython3
+:tags: [hide-output]
 all_spects = spect_maker.make(all_sounds, parallelize=True)
 ```
 
@@ -219,6 +222,7 @@ reducer = umap.UMAP(
 We call {py:meth}`umap.UMAP.fit_transform` so we get back our data embedded in the lower dimensional space.
 
 ```{code-cell} ipython3
+:tags: [hide-output]
 embedding = reducer.fit_transform(data)
 ```
 
