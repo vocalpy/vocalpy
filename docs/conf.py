@@ -80,7 +80,7 @@ myst_enable_extensions = [
 
 html_theme = 'sphinx_book_theme'
 
-html_logo = "images/vocalpy-primary-logo.png"
+html_logo = "images/vocalpy-primary.png"
 
 html_theme_options = {
     "logo_only": True,
