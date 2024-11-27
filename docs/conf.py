@@ -107,6 +107,7 @@ autosummary_filename_map = {
     "vocalpy.spectrogram": "spectrogram-function",
 }
 
+# ---- Options for doctest extension
 doctest_global_setup = """
 import numpy as np
 import vocalpy as voc
