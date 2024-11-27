@@ -90,6 +90,8 @@ html_theme_options = {
 html_static_path = ['images']
 
 # -- Extension configuration -------------------------------------------------
+# https://www.sphinx-doc.org/en/master/usage/extensions/autosummary.html#confval-autosummary_ignore_module_all
+# If `False`` and a module has the `__all__` attribute set, autosummary documents every member listed in `__all__` and no others
 autosummary_ignore_module_all = False
 
 # -- doctest -----------------------------------------------------------------
