@@ -387,7 +387,7 @@ Notice that we can be sure that `spects` and `spects_loaded` are in the same ord
 
 +++
 
-The last data type we'll look at is for annotations. Such annotations are important for analysis of aocustic communication and behavior. Under the hood, VocalPy uses the pyOpenSci package {py:mod}`crowsetta` (https://github.com/vocalpy/crowsetta).
+The last data type we'll look at is for annotations. Such annotations are important for analysis of aocustic communication and behavior. Under the hood, VocalPy uses the pyOpenSci package {py:mod}`crowsetta` (<https://github.com/vocalpy/crowsetta>).
 
 ```{code-cell} ipython3
 import vocalpy as voc
