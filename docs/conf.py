@@ -130,13 +130,13 @@ plot_html_show_formats = False
 
 font_size = 12
 
-# -- Options for intersphinx extension ---------------------------------------
+# ---- Options for intersphinx extension
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {
     "crowsetta": ("https://crowsetta.readthedocs.io/en/stable/", None),
     "dask": ("https://docs.dask.org/en/stable/", None),
-    "librosa": ("https://librosa.org/doc/stable/", None),
+    "librosa": ("https://librosa.org/doc/latest/", None),
     "matplotlib": ("https://matplotlib.org/stable/", None),
     "numpy": ("https://numpy.org/doc/stable/", None),
     "pandas": ("https://pandas.pydata.org/pandas-docs/stable/", None),
@@ -145,7 +145,7 @@ intersphinx_mapping = {
     "scipy": ("https://docs.scipy.org/doc/scipy/", None),
     "soundfile": ("https://python-soundfile.readthedocs.io/en/latest/", None),
     "sklearn": ("https://scikit-learn.org/stable/", None),
-    "umap": ("https://umap-learn.readthedocs.io/en/stable/", None),
+    "umap": ("https://umap-learn.readthedocs.io/en/latest/", None),
 }
 
 # -- Options for nitpicky mode
