@@ -11,6 +11,7 @@ kernelspec:
   name: python3
 ---
 
+(how-to-sklearn)=
 # How to use VocalPy with scikit-learn to fit supervised learning models to acoustic features
 
 Many analyses in bioacoustics and communication rely on machine learning models. For example, it is common to use supervised machine learning models to support the idea that vocalizations contain information about individual identity or emotional valence. 
@@ -100,6 +101,7 @@ for wav_path in zblib.sound:
 Now finally we can pass this list of (single-channel) sounds into the {py:meth}`~vocalpy.FeatureExtractor.extract` method, and get back a list of {py:class}`~vocalpy.Features`, one for every sound.
 
 ```{code-cell} ipython3
+:tags: [hide-output]
 features_list = extractor.extract(sounds, parallelize=True)
 ```
 
