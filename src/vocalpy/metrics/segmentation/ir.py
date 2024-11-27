@@ -311,7 +311,7 @@ def precision_recall_fscore(
        Advances in Binary and Multiclass Sound Segmentation with Deep Learning Techniques.
 
     .. [3] NIST. (2009). The 2009 (RT-09) Rich Transcription Meeting Recognition Evaluation Plan.
-       https://web.archive.org/web/20100606041157if_/http://www.itl.nist.gov/iad/mig/thyps/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf
+       <https://web.archive.org/web/20100606041157if_/http://www.itl.nist.gov/iad/mig/thyps/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf>
 
     .. [4] Du, P., & Troyer, T. W. (2006).
        A segmentation algorithm for zebra finch song at the note level.
