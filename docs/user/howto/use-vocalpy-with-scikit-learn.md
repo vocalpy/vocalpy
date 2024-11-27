@@ -31,7 +31,7 @@ For this how-to, we use a subset of data from [this dataset](https://figshare.co
 zblib = voc.example("zblib", return_path=True)
 ```
 
-Since this example data is more than one file, when we call {py:func}`vocalpy.example` we will get back an instance of the {py:class}`~vocalpy.example.ExampleData` class. This class is like a {py:class}`dict` where you can get the values by using dot notation instead of keys, e.g. by writing `zblib.sound` instead of `zblib["sound"]`.
+Since this example data is more than one file, when we call {py:func}`vocalpy.example` we will get back an instance of the {py:class}`~vocalpy.examples.ExampleData` class. This class is like a {py:class}`dict` where you can get the values by using dot notation instead of keys, e.g. by writing `zblib.sound` instead of `zblib["sound"]`.
 
 ```{code-cell} ipython3
 print(zblib)
