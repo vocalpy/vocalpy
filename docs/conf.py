@@ -12,7 +12,7 @@ import sys
 # https://www.sphinx-doc.org/en/master/usage/configuration.html#project-information
 
 project = 'VocalPy'
-copyright = '2023, David Nicholson'
+copyright = '2023-present, David Nicholson'
 author = 'David Nicholson'
 release = ''
 
