@@ -360,27 +360,27 @@ def ava(
     References
     ----------
     .. [1] Goffinet, J., Brudner, S., Mooney, R., & Pearson, J. (2021).
-    Low-dimensional learned feature spaces quantify individual and group differences in vocal repertoires.
-    eLife, 10:e67855. https://doi.org/10.7554/eLife.67855
+      Low-dimensional learned feature spaces quantify individual and group differences in vocal repertoires.
+      eLife, 10:e67855. https://doi.org/10.7554/eLife.67855
 
     .. [2] https://github.com/pearsonlab/autoencoded-vocal-analysis
 
     .. [3] Goffinet, J., Brudner, S., Mooney, R., & Pearson, J. (2021).
-    Data from: Low-dimensional learned feature spaces quantify individual
-    and group differences in vocal repertoires. Duke Research Data Repository.
-    https://doi.org/10.7924/r4gq6zn8w
+      Data from: Low-dimensional learned feature spaces quantify individual
+      and group differences in vocal repertoires. Duke Research Data Repository.
+      https://doi.org/10.7924/r4gq6zn8w
 
     .. [4] Nicholas Jourjine, Maya L. Woolfolk, Juan I. Sanguinetti-Scheck, John E. Sabatini,
-    Sade McFadden, Anna K. Lindholm, Hopi E. Hoekstra,
-    Two pup vocalization types are genetically and functionally separable in deer mice,
-    Current Biology, 2023 https://doi.org/10.1016/j.cub.2023.02.045
+      Sade McFadden, Anna K. Lindholm, Hopi E. Hoekstra,
+      Two pup vocalization types are genetically and functionally separable in deer mice,
+      Current Biology, 2023 https://doi.org/10.1016/j.cub.2023.02.045
 
     .. [5] https://github.com/nickjourjine/peromyscus-pup-vocal-evolution/blob/main/src/segmentation.py
 
     .. [6] Peterson, Ralph Emilio, Aman Choudhri, Catalin MItelut, Aramis Tanelus, Athena Capo-Battaglia,
-    Alex H. Williams, David M. Schneider, and Dan H. Sanes.
-    "Unsupervised discovery of family specific vocal usage in the Mongolian gerbil."
-    bioRxiv (2023): 2023-03.
+      Alex H. Williams, David M. Schneider, and Dan H. Sanes.
+      "Unsupervised discovery of family specific vocal usage in the Mongolian gerbil."
+      bioRxiv (2023): 2023-03.
 
     .. [7] https://github.com/ralphpeterson/gerbil-vocal-dialects/blob/main/vocalization_segmenting.py
     """
