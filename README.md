@@ -161,15 +161,11 @@ section of the [user guide](https://vocalpy.readthedocs.io/en/latest/user/index.
 ## Installation
 #### With `pip`
 ```
-$ conda create -n vocalpy python=3.10
-$ conda activate vocalpy
-$ pip install vocalpy
+pip install vocalpy
 ```
 #### With `conda`
 ```
-$ conda create -n vocalpy python=3.10
-$ conda activate vocalpy    
-$ conda install vocalpy -c conda-forge
+conda install vocalpy -c conda-forge
 ```
 For more detail see [Getting Started - Installation](https://vocalpy.readthedocs.io/en/latest/getting_started/installation.html)
 
