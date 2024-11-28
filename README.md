@@ -151,57 +151,12 @@ for -tests / source / audio_cbin_annot_notmat / gy6or6 / 032312 / gy6or6_baselin
 >>> spects = spect_maker.make(audios, parallelize=True)
 ```
 
-### `Dataset`s you flexibly build from pipelines and convert to databases
+### And more!
 
-- The `vocalpy.dataset` module contains classes that represent common types of datasets 
-- You make these classes with outputs of your pipelines, e.g. a `list` of `vocalpy.Sequence`s 
-  or `vocalpy.Spectrogram`s
-- Because of the design of `vocalpy`, these datasets capture key metadata from your pipeline: 
-  - parameters and data provenance details; 
-    e.g., what parameters did you use to segment? What audio file did this sequence come from?
-- Then you can save the dataset along with metadata to databases, or later load from databases
-  - `vocalpy` comes with built-in support for persisting to [SQLite](https://www.sqlite.org/index.html), 
-    a lightweight, efficient single-file database format.
-    It is the only database file format 
-    [recommended by the US Library of Congress for archival data](https://www.sqlite.org/locrsf.html),
-    and it's [built into Python](https://docs.python.org/3/library/sqlite3.html) 
-    -- no need to install separate database software like MySQL
-
-#### A `SequenceDataset` for common analyses of sequences of units
-
-```python
->>> import evfuncs
->>> import vocalpy as voc
->>> data_dir = 'tests/data-for-tests/source/audio_cbin_annot_notmat/gy6or6/032312/'
->>> cbin_paths = voc.paths.from_dir(data_dir, 'cbin')
->>> audios = [voc.Sound.read(cbin_path) for cbin_path in cbin_paths]
->>> segment_params = {
-  'threshold': 1500,
-  'min_syl_dur': 0.01,
-  'min_silent_dur': 0.006,
-}
->>> segmenter = voc.Segmenter(
-  callback=evfuncs.segment_song,
-  segment_params=segment_params
-)
->>> seqs = segmenter.segment(audios)
->>> seq_dataset = voc.dataset.SequenceDataset(sequences=seqs)
->>> seq_dataset.to_sqlite(db_name='gy6or6-032312.db', replace=True)
->>> print(seq_dataset)
-SequenceDataset(sequences=[Sequence(units=[Unit(onset=2.18934375, offset=2.21, label='-', audio=None, spectrogram=None),
-                                           Unit(onset=2.346125, offset=2.373125, label='-', audio=None,
-                                                spectrogram=None), Unit(onset=2.50471875, offset=2.51546875,
-                                                                        label='-', audio=None, spectrogram=None),
-                                           Unit(onset=2.81909375, offset=2.84740625, label='-', audio=None,
-                                                spectrogram=None),
-                                           ...
-                                          >>>  # test that we can load the dataset
-                                          >>> seq_dataset_loaded = voc.dataset.SequenceDataset.from_sqlite(
-  db_name='gy6or6-032312.db')
-                                                                    >>> seq_dataset_loaded == seq_dataset
-True
-```
-
+For a crash course in VocalPy, please see the [quickstart](https://vocalpy.readthedocs.io/en/latest/getting_started/quickstart.html) 
+in the [documentation](https://vocalpy.readthedocs.io/en/latest/index.html). 
+And for walkthroughs on how to use VocalPy for common tasks, please see the [How-Tos](https://vocalpy.readthedocs.io/en/latest/user/howto/index.html) 
+section of the [user guide](https://vocalpy.readthedocs.io/en/latest/user/index.html).
 
 ## Installation
 #### With `pip`
@@ -220,7 +175,7 @@ For more detail see [Getting Started - Installation](https://vocalpy.readthedocs
 
 ### Support
 
-To report a bug or request a feature (such as a new annotation format), 
+To report a bug or request a feature, 
 please use the issue tracker on GitHub:  
 <https://github.com/vocalpy/vocalpy/issues>
 
