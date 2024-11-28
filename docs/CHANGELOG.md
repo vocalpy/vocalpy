@@ -4,6 +4,88 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## Unreleased
+### Added
+- Add `clip` method to `Sound`, to clip a sound at a given stop and start time
+  [#189](https://github.com/vocalpy/vocalpy/pull/189).
+  Fixes [#149](https://github.com/vocalpy/vocalpy/issues/149).
+- Add `segment` method to `Sound`, that returns a list of `Sound`s given a set of `Segments`  
+  [#189](https://github.com/vocalpy/vocalpy/pull/189).
+  This makes it possible to actually *do something* with `Segments` once we have them.
+  Fixes [#150](https://github.com/vocalpy/vocalpy/issues/150).
+- Add single example files of Bengalese finch song and deer mouse pup calls
+  [#189](https://github.com/vocalpy/vocalpy/pull/189).
+  Fixes [#182](https://github.com/vocalpy/vocalpy/issues/182).
+- Add `Segments.from_csv` method that makes it possible to load segmentation
+  from an existing csv, since people will typically save segmentation in 
+  a csv file, e.g. via the `pandas.DataFrame.to_csv` method; 
+  we want to make it easy to work with those existing segmentations 
+  [#189](https://github.com/vocalpy/vocalpy/pull/189).
+  Fixes [#182](https://github.com/vocalpy/vocalpy/issues/182).
+- Add mouse pup call data and zebra finch call data used in 
+  [ACAB bootcamp](https://github.com/vocalpy/acoustic-communication-and-bioacoustics-bootcamp)
+  [#189](https://github.com/vocalpy/vocalpy/pull/189) 
+  so that we can use in example vignettes.
+  Fixes [#183](https://github.com/vocalpy/vocalpy/issues/183).
+- Add `to_mono` method to `Sound`, to speed up feature extraction in the case where we don't need per-channel features
+  [#189](https://github.com/vocalpy/vocalpy/pull/189).
+  Fixes [#192](https://github.com/vocalpy/vocalpy/issues/192).
+- Add vignette on how to use VocalPy with scikit-learn
+  [#189](https://github.com/vocalpy/vocalpy/pull/189).
+  Fixes [#165](https://github.com/vocalpy/vocalpy/issues/165).
+- Add vignette on how to use VocalPy with UMAP and HDBSCAN
+  [#189](https://github.com/vocalpy/vocalpy/pull/189).
+  Fixes [#166](https://github.com/vocalpy/vocalpy/issues/166).
+- Add tests for `FeatureExtractor`
+  [#189](https://github.com/vocalpy/vocalpy/pull/189).
+  Fixes [#161](https://github.com/vocalpy/vocalpy/issues/161).
+
+### Changed
+- Have `FeatureExtractor` only take `Sound` or list of `Sound`s
+  [#189](https://github.com/vocalpy/vocalpy/pull/189).
+  Fixes [#163](https://github.com/vocalpy/vocalpy/issues/163).
+- Decouple `Segments` from `Sound`,
+  so that you can work with `Segments` without needing to have the source `Sound`
+  [#189](https://github.com/vocalpy/vocalpy/pull/189).
+  Fixes [#154](https://github.com/vocalpy/vocalpy/issues/154).
+- Remove `path` attribute from `Sound`; the goal is to make it as easy as possible 
+  to treat `Sound`s as functional data types, instead of treating them as if they are 
+  tied to specific files
+  [#189](https://github.com/vocalpy/vocalpy/pull/189).
+  Fixes [#162](https://github.com/vocalpy/vocalpy/issues/162).
+- Refactor `examples` API
+    - instead of having to specify a `return_type`, 
+    we default to returning VocalPy's domain-specific data types, e.g. a `Sound`,
+    but we allow specifying `return_path=True` to get the path when that is needed,
+    e.g. to demonstrate functionality like the `vocalpy.Sound.read` method
+    - add an `ExampleData` class, a `dict`-like where values can be accessed with 
+    dot notation (adapted from scikit-learn `Bunch`); we return this for any example
+    data that consists of multiple files
+  [#189](https://github.com/vocalpy/vocalpy/pull/189).
+  Fixes [#185](https://github.com/vocalpy/vocalpy/issues/185).
+- Rename feature extraction functions to keep the API terse:
+  `vocalpy.feature.sat.similarity_features` -> `vocalpy.feature.sat` and 
+  `vocalpy.features.soundsig.predefined_acoustic_features` -> `vocalpy.feature.biosound`  
+  [#189](https://github.com/vocalpy/vocalpy/pull/189).
+  Fixes [#190](https://github.com/vocalpy/vocalpy/issues/190).
+- Make nox session "dev" download data for tests if needed
+  [#189](https://github.com/vocalpy/vocalpy/pull/189).
+  Fixes [#196](https://github.com/vocalpy/vocalpy/issues/196).
+
+### Fixed
+- `FeatureExtractor` does not make `vocalpy.Features` instances
+  [#189](https://github.com/vocalpy/vocalpy/pull/189).
+  Fixes [#146](https://github.com/vocalpy/vocalpy/issues/146).
+- `feature.soundsig.predefined_acoustic_features` returns `vocalpy.Features`
+  [#189](https://github.com/vocalpy/vocalpy/pull/189).
+  Fixes [#145](https://github.com/vocalpy/vocalpy/issues/145).
+
+### Removed
+- Remove `Segment` class -- our abstractions don't require representing a single `Segment`
+  since we just use `Segments` to convert a `Sound` into multiple `Sound`s
+  [#189](https://github.com/vocalpy/vocalpy/pull/189).
+  Fixes [#154](https://github.com/vocalpy/vocalpy/issues/154).
+
 ## [0.9.5]
 ### Fixed
 - Remove upper bound on numpy version, and 
