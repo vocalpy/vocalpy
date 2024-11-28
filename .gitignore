@@ -31,6 +31,7 @@ src/scripts/example_data
 
 # test data
 tests/data-for-tests/source/
+tests/data-for-tests/generated/feature/
 tests/data-for-tests/generated/paths/
 tests/data-for-tests/generated/segment/
 tests/data-for-tests/generated/spectrogram/

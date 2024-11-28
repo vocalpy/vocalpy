@@ -1,7 +1,9 @@
 """Feature extraction"""
-from . import sat, soundsig
+
+from ._biosound import biosound
+from ._sat import sat
 
 __all__ = [
     "sat",
-    "soundsig",
+    "biosound",
 ]

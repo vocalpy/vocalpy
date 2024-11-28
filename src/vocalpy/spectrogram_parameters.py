@@ -1,4 +1,5 @@
 """Class that represents the parameters used to compute a spectrogram."""
+
 from __future__ import annotations
 
 import attrs
@@ -23,5 +24,8 @@ class SpectrogramParameters:
     n_fft: int
     hop_length: int
     sandbox: dict | None = attrs.field(
-        validator=attrs.validators.optional(attrs.validators.instance_of(dict)), default=None
+        validator=attrs.validators.optional(
+            attrs.validators.instance_of(dict)
+        ),
+        default=None,
     )

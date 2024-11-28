@@ -1,53 +1,23 @@
 """Class that represents the step in a pipeline that makes spectrograms from audio."""
+
 from __future__ import annotations
 
 import collections.abc
 import inspect
-import pathlib
-from typing import Callable, List, Mapping, Sequence, Union
+from typing import Callable, List, Mapping, Sequence
 
 import dask
 import dask.diagnostics
-
-import vocalpy.constants
 
 from ._spectrogram.data_type import Spectrogram
 from .audio_file import AudioFile
 from .params import Params
 from .sound import Sound
-from .spectrogram_file import SpectrogramFile
 
 
-def default_spect_fname_func(audio_path: Union[str, pathlib.Path]):
-    """Default function for naming spectrogram files.
-    Adds the extension `.spect.npz` to an audio path.
-
-    Parameters
-    ----------
-    audio_path : str, pathlib.Path
-        A path to an audio file.
-
-    Returns
-    -------
-    spect_fname : pathlib.Path
-        Sound filename with extension added.
-        Default extension is :data:`vocalpy.constants.SPECT_FILE_EXT`.
-
-    Notes
-    -----
-    Adding an extension to the audio path
-    (instead of changing it)
-    makes it possible to recover the audio path
-    from the spectrogram path.
-    Adding a longer extension `.spect.npz`
-    makes it less likely that the spectrogram file
-    will overwrite an existing `.npz` file.
-    """
-    audio_path = pathlib.Path(audio_path)
-    return audio_path.name + vocalpy.constants.SPECT_FILE_EXT
-
-
-def validate_sound(sound: Sound | AudioFile | Sequence[Sound | AudioFile]) -> None:
+def validate_sound(
+    sound: Sound | AudioFile | Sequence[Sound | AudioFile],
+) -> None:
     if not isinstance(sound, (Sound, AudioFile, list, tuple)):
         raise TypeError(
             "`sound` must be a `vocalpy.Sound` instance, "
@@ -58,7 +28,8 @@ def validate_sound(sound: Sound | AudioFile | Sequence[Sound | AudioFile]) -> No
 
     if isinstance(sound, list) or isinstance(sound, tuple):
         if not (
-            all([isinstance(item, Sound) for item in sound]) or all([isinstance(item, AudioFile) for item in sound])
+            all([isinstance(item, Sound) for item in sound])
+            or all([isinstance(item, AudioFile) for item in sound])
         ):
             types_in_sound = set([type(sound) for sound in sound])
             raise TypeError(
@@ -88,7 +59,11 @@ class SpectrogramMaker:
         Passed as keyword arguments to ``callback``.
     """
 
-    def __init__(self, callback: Callable | None = None, params: Mapping | Params | None = None):
+    def __init__(
+        self,
+        callback: Callable | None = None,
+        params: Mapping | Params | None = None,
+    ):
         if callback is None:
             import vocalpy.spectrogram
 
@@ -108,11 +83,15 @@ class SpectrogramMaker:
                         params[name] = param.default
 
         if not callable(callback):
-            raise ValueError(f"`callback` should be callable, but `callable({callback})` returns False")
+            raise ValueError(
+                f"`callback` should be callable, but `callable({callback})` returns False"
+            )
         self.callback = callback
 
         if not isinstance(params, (collections.abc.Mapping, Params)):
-            raise TypeError(f"`params` should be a `Mapping` or `Params` but type was: {type(params)}")
+            raise TypeError(
+                f"`params` should be a `Mapping` or `Params` but type was: {type(params)}"
+            )
 
         if isinstance(params, Params):
             # coerce to dict
@@ -120,9 +99,12 @@ class SpectrogramMaker:
 
         signature = inspect.signature(callback)
         if not all([param in signature.parameters for param in params]):
-            invalid_params = [param for param in params if param not in signature.parameters]
+            invalid_params = [
+                param for param in params if param not in signature.parameters
+            ]
             raise ValueError(
-                f"Invalid params for callback: {invalid_params}\n" f"Callback parameters are: {signature.parameters}"
+                f"Invalid params for callback: {invalid_params}\n"
+                f"Callback parameters are: {signature.parameters}"
             )
 
         self.params = params
@@ -164,7 +146,6 @@ class SpectrogramMaker:
             if isinstance(sound_, AudioFile):
                 sound_ = Sound.read(sound_.path)
             spect = self.callback(sound_, **self.params)
-            spect.audio_path = sound_.path
             return spect
 
         if isinstance(sound, (Sound, AudioFile)):
@@ -183,74 +164,3 @@ class SpectrogramMaker:
                 return graph.compute()
         else:
             return spects
-
-    def write(
-        self,
-        sound: Sound | AudioFile | Sequence[Sound | AudioFile],
-        dir_path: str | pathlib.Path,
-        parallelize: bool = True,
-        namer: Callable = default_spect_fname_func,
-    ) -> SpectrogramFile | List[SpectrogramFile]:
-        """Make spectrogram(s) from audio, and write to file.
-        Writes directly to file without returning the spectrograms,
-        so that datasets can be generated that are too big
-        to fit in memory.
-
-        Makes the spectrograms with `self.callback`
-        using the parameters `self.params`.
-
-        Takes as input :class:`vocalpy.Sound` or :class:`vocalpy.AudioFile`,
-        or a sequence of either,
-        and returns either a :class:`vocalpy.SpectrogramFile`
-        (given a single :class:`vocalpy.Sound` or :class:`vocalpy.AudioFile` instance)
-        or a list of :class:`vocalpy.Spectrogram` instances (given a sequence).
-
-        Parameters
-        ----------
-        sound: vocalpy.Sound, vocalpy.AudioFile, a sequence of either, or a Dataset
-            Source of audio used to make spectrograms.
-        dir_path : string, pathlib.Path
-            The directory where the spectrogram files should be saved.
-        namer : callable
-            Function or class that determines spectrogram file name
-            from audio file name. Default is
-            :func:`vocalpy.domain_model.services.spectrogram_maker.default_spect_name_func`.
-
-        Returns
-        -------
-        spectrogram_file : SpectrogramFile, list of SpectrogramFile
-            The file(s) containing the spectrogram(s).
-        """
-        validate_sound(sound)
-        dir_path = pathlib.Path(dir_path)
-        if not dir_path.exists() or not dir_path.is_dir():
-            raise NotADirectoryError(f"`dir_path` not found or not recognized as a directory:\n{dir_path}")
-
-        # define nested function so vars are in scope and ``dask`` can call it
-        def _to_spect_file(sound_):
-            """Compute a `Spectrogram` from an `Sound` instance,
-            using self.callback"""
-            if isinstance(sound_, AudioFile):
-                sound_ = Sound.read(sound_.path)
-            spect = self.callback(sound_, **self.params)
-            spect_fname = namer(sound_.path)
-            spect_path = dir_path / spect_fname
-            spect_file = spect.write(spect_path)
-            return spect_file
-
-        if isinstance(sound, (Sound, AudioFile)):
-            return _to_spect_file(sound)
-
-        spect_files = []
-        for sound_ in sound:
-            if parallelize:
-                spect_files.append(dask.delayed(_to_spect_file(sound_)))
-            else:
-                spect_files.append(_to_spect_file(sound_))
-
-        if parallelize:
-            graph = dask.delayed()(spect_files)
-            with dask.diagnostics.ProgressBar():
-                return graph.compute()
-        else:
-            return spect_files

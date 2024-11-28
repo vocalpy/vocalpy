@@ -1,4 +1,5 @@
 """Find segments in audio, using algorithm from ``ava`` package."""
+
 from __future__ import annotations
 
 from dataclasses import dataclass
@@ -359,27 +360,27 @@ def ava(
     References
     ----------
     .. [1] Goffinet, J., Brudner, S., Mooney, R., & Pearson, J. (2021).
-    Low-dimensional learned feature spaces quantify individual and group differences in vocal repertoires.
-    eLife, 10:e67855. https://doi.org/10.7554/eLife.67855
+      Low-dimensional learned feature spaces quantify individual and group differences in vocal repertoires.
+      eLife, 10:e67855. https://doi.org/10.7554/eLife.67855
 
     .. [2] https://github.com/pearsonlab/autoencoded-vocal-analysis
 
     .. [3] Goffinet, J., Brudner, S., Mooney, R., & Pearson, J. (2021).
-    Data from: Low-dimensional learned feature spaces quantify individual
-    and group differences in vocal repertoires. Duke Research Data Repository.
-    https://doi.org/10.7924/r4gq6zn8w
+      Data from: Low-dimensional learned feature spaces quantify individual
+      and group differences in vocal repertoires. Duke Research Data Repository.
+      https://doi.org/10.7924/r4gq6zn8w
 
     .. [4] Nicholas Jourjine, Maya L. Woolfolk, Juan I. Sanguinetti-Scheck, John E. Sabatini,
-    Sade McFadden, Anna K. Lindholm, Hopi E. Hoekstra,
-    Two pup vocalization types are genetically and functionally separable in deer mice,
-    Current Biology, 2023 https://doi.org/10.1016/j.cub.2023.02.045
+      Sade McFadden, Anna K. Lindholm, Hopi E. Hoekstra,
+      Two pup vocalization types are genetically and functionally separable in deer mice,
+      Current Biology, 2023 https://doi.org/10.1016/j.cub.2023.02.045
 
     .. [5] https://github.com/nickjourjine/peromyscus-pup-vocal-evolution/blob/main/src/segmentation.py
 
     .. [6] Peterson, Ralph Emilio, Aman Choudhri, Catalin MItelut, Aramis Tanelus, Athena Capo-Battaglia,
-    Alex H. Williams, David M. Schneider, and Dan H. Sanes.
-    "Unsupervised discovery of family specific vocal usage in the Mongolian gerbil."
-    bioRxiv (2023): 2023-03.
+      Alex H. Williams, David M. Schneider, and Dan H. Sanes.
+      "Unsupervised discovery of family specific vocal usage in the Mongolian gerbil."
+      bioRxiv (2023): 2023-03.
 
     .. [7] https://github.com/ralphpeterson/gerbil-vocal-dialects/blob/main/vocalization_segmenting.py
     """
@@ -394,14 +395,18 @@ def ava(
             ">>> channel_segments = [vocalpy.segment.meansquared(sound_) for sound_ in sound_channels]\n"
         )
 
-    data = np.squeeze(sound.data, axis=0)  # get rid of channels dim so we operate on scalars in main loop
+    data = np.squeeze(
+        sound.data, axis=0
+    )  # get rid of channels dim so we operate on scalars in main loop
 
     if scale:
         data = (data * scale_val).astype(scale_dtype)
 
     # ---- compute spectrogram
     # TODO: return Spectrogram for each Segment when we return Segments
-    f, t, spect = stft(data, sound.samplerate, nperseg=nperseg, noverlap=noverlap)
+    f, t, spect = stft(
+        data, sound.samplerate, nperseg=nperseg, noverlap=noverlap
+    )
     i1 = np.searchsorted(f, min_freq)
     i2 = np.searchsorted(f, max_freq)
     f, spect = f[i1:i2], spect[i1:i2]
@@ -426,7 +431,9 @@ def ava(
     # Find local maxima greater than thresh_max.
     local_maxima = []
     for i in range(1, len(amps) - 1, 1):
-        if amps[i] > thresh_max and amps[i] == np.max(amps[i - 1 : i + 2]):  # noqa: E203
+        if amps[i] > thresh_max and amps[i] == np.max(
+            amps[i - 1 : i + 2]  # noqa: E203
+        ):
             local_maxima.append(i)
 
     # Then search to the left and right for onsets and offsets.
@@ -441,13 +448,17 @@ def ava(
 
         # first find onset
         i = local_max - 1
-        while i > 0:  # could we do ``while i > min(0, i - max_syl_length)`` to speed up?
+        while (
+            i > 0
+        ):  # could we do ``while i > min(0, i - max_syl_length)`` to speed up?
             # this if-else can be a single `if` with an `or`
             # and then I think we can remove the `if len(onsets)` blocks
             if amps[i] < thresh_lowest:
                 onsets.append(i)
                 break
-            elif amps[i] < thresh_min and amps[i] == np.min(amps[i - 1 : i + 2]):  # noqa: E203
+            elif amps[i] < thresh_min and amps[i] == np.min(
+                amps[i - 1 : i + 2]  # noqa: E203
+            ):
                 onsets.append(i)
                 break
             i -= 1
@@ -459,13 +470,17 @@ def ava(
 
         # then find offset
         i = local_max + 1
-        while i < len(amps):  # could we do ``while i > min(amps, i + max_syl_length)`` to speed up?
+        while i < len(
+            amps
+        ):  # could we do ``while i > min(amps, i + max_syl_length)`` to speed up?
             # this if-else can be a single `if` with an `or`
             # and then I think we can remove the `if len(onsets)` blocks
             if amps[i] < thresh_lowest:
                 offsets.append(i)
                 break
-            elif amps[i] < thresh_min and amps[i] == np.min(amps[i - 1 : i + 2]):  # noqa: E203
+            elif amps[i] < thresh_min and amps[i] == np.min(
+                amps[i - 1 : i + 2]  # noqa: E203
+            ):
                 offsets.append(i)
                 break
             i += 1
@@ -494,7 +509,7 @@ def ava(
         return Segments(
             np.array([]).astype(int),
             np.array([]).astype(int),
-            sound,
+            sound.samplerate,
         )
 
     # Throw away inter-segment intervals that are too short, as is done in Jourjine et al., 2023
@@ -507,8 +522,12 @@ def ava(
         isi_durs = onsets[1:] - offsets[:-1]
         keep_these = isi_durs > min_isi_dur
         # we don't keep seconds anymore since we're returning samples
-        onsets = np.concatenate((onsets[0, np.newaxis], onsets[1:][keep_these]))
-        offsets = np.concatenate((offsets[:-1][keep_these], offsets[-1, np.newaxis]))
+        onsets = np.concatenate(
+            (onsets[0, np.newaxis], onsets[1:][keep_these])
+        )
+        offsets = np.concatenate(
+            (offsets[:-1][keep_these], offsets[-1, np.newaxis])
+        )
 
     onsets_sample = (onsets * sound.samplerate).astype(int)
     offsets_sample = (offsets * sound.samplerate).astype(int)
@@ -519,4 +538,6 @@ def ava(
     if onsets_sample[-1] + lengths[-1] > sound.samples:
         # set length to be "until the end of the sound"
         lengths[-1] = sound.samples - onsets_sample[-1]
-    return Segments(start_inds=onsets_sample, lengths=lengths, sound=sound)
+    return Segments(
+        start_inds=onsets_sample, lengths=lengths, samplerate=sound.samplerate
+    )

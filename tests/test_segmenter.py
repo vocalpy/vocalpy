@@ -7,14 +7,6 @@ import vocalpy
 from .fixtures.audio import BIRDSONGREC_WAV_LIST
 
 
-def assert_segments_is_expected(segments, sound):
-    assert isinstance(segments, vocalpy.Segments)
-    if isinstance(sound, vocalpy.Sound):
-        assert segments.sound is sound
-    elif isinstance(sound, vocalpy.AudioFile):
-        assert segments.sound == vocalpy.Sound.read(sound.path)
-
-
 class TestSegmenter:
     @pytest.mark.parametrize(
         "callback, params, expected_callback, expected_params",
@@ -80,9 +72,9 @@ class TestSegmenter:
         out = segmenter.segment(sound, parallelize=parallel)
 
         if isinstance(sound, (vocalpy.Sound, vocalpy.AudioFile)):
-            assert_segments_is_expected(out, sound)
+            assert isinstance(out, vocalpy.Segments)
         elif isinstance(sound, list):
             assert isinstance(out, list)
             assert len(sound) == len(out)
-            for sound_, segments in zip(sound, out):
-                assert_segments_is_expected(segments, sound)
+            for segments in out:
+                assert isinstance(segments, vocalpy.Segments)

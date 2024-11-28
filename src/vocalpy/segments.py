@@ -1,205 +1,33 @@
 """Classes that represent line segments returned by segmenting algorithms."""
+
 from __future__ import annotations
 
-import io
 import json
 import numbers
 import pathlib
 import reprlib
-from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
 import pandas as pd
-import xarray as xr
-
-from .sound import Sound
-
-if TYPE_CHECKING:
-    import vocalpy
-
-
-class Segment:
-    """Class that represents a line segment,
-    one of a set of such :class:`Segments`,
-    returned by an algorithm for segmenting audio.
-
-    This class acts a lot like a :class:`Sound`,
-    but we provide a separate abstraction
-    to represent the product of a segmenting algorithm.
-    Like a :class:`Sound`, a :class:`Segment`
-    has ``data`` and a ``samplerate``,
-    that will be taken from the :class:`Sound` that was
-    segmented. But unlike a :class:`Sound`,
-    a :class:`Segment` has a ``start_index`` and a ``length``.
-
-
-
-    Attributes
-    ----------
-    start_ind : int
-        The index of the start of the segment
-        in the audio signal, i.e. the sample number.
-    length: int
-        The length of the segment, in number of samples.
-    label: string
-        The label for the segment.
-        Default is an empty string.
-    data : xarray.DataArray
-        The audio signal of the segment,
-        taking from the :class:`Sound`
-        associated with the set of :class:`Segments`
-        that this :class:`Segment` came from.
-    samplerate : int
-        The sampling rate of the :class:`Sound`
-        that this :class:`Segment` came from.
-    """
-
-    def __init__(
-        self,
-        start_ind: int,
-        length: int,
-        data_array: xr.DataArray,
-        samplerate: int,
-        label: str = "",
-    ) -> None:
-        if not isinstance(start_ind, numbers.Integral):
-            raise TypeError(
-                f"`start_ind` for `Segment` must be instance of `numbers.Integral` but type was: {type(start_ind)}"
-            )
-        if not isinstance(length, numbers.Integral):
-            raise TypeError(
-                f"`length` for `Segment` must be instance of `numbers.Integral` but type was: {type(start_ind)}"
-            )
-        if not isinstance(label, str):
-            raise TypeError(f"`label` for `Segment` should be an instance of `str`, but type was: {type(label)}")
-        # explicitly convert type numpy.str_ to a str instance so we can save as an attribute
-        label = str(label)
-        if not start_ind >= 0:
-            raise ValueError(f"`start_ind` for `Segment` must be a non-negative number but was: {start_ind}")
-        if not length >= 0:
-            raise ValueError(f"`length` for `Segment` must be a non-negative number but was: {start_ind}")
-        if not isinstance(data_array, xr.DataArray):
-            raise TypeError(
-                "`data_array` for `Segment` should be an instance of xarray.DataArray, "
-                f"but type was: {type(data_array)}"
-            )
-
-        if not data_array.ndim == 2:
-            raise ValueError(
-                "`data` for `Segment` should be have two dimensions (channels, samples) "
-                f"but `data.ndim` was: {data_array.ndim}"
-            )
-
-        if not data_array.shape[1] == length:
-            raise ValueError(
-                "`data_array.shape[1]` for `Segment` should equal `length` but `data_array.shape[1]` was "
-                f"{data_array.shape[1]} and `length` was {length}."
-            )
-
-        if not isinstance(samplerate, numbers.Integral):
-            raise TypeError(f"`samplerate` must be `instance` of `numbers.Integral` but type was: {type(samplerate)}")
-
-        if not samplerate > 0:
-            raise ValueError(f"`samplerate` must be a positive integer but was: {samplerate}")
-
-        self.start_ind = start_ind
-        self.length = length
-        self.label = label
-        self._data_array = data_array
-        self.samplerate = samplerate
-
-    @property
-    def data(self):
-        return self._data_array.values
-
-    def __repr__(self):
-        return (
-            f"Segment(start_ind={self.start_ind!r}, length={self.length!r}, "
-            f"label={self.label!r}, data={self.data!r}, samplerate={self.samplerate!r})"
-        )
-
-    def write(self, path: str | pathlib.Path) -> None:
-        """Write this :class:`Segment` to a file.
-
-        Parameters
-        ----------
-        path : str, pathlib.Path
-            Path where :class:`Segment` should be saved.
-        """
-        path = pathlib.Path(path)
-        # we make a new DataArray that points to the same underlying ``values``,
-        # so we can mutate the new DataArray's ``attrs`` without affecting
-        # the ``attrs`` of this instance's ``data``
-        data_array = xr.DataArray(self._data_array)
-        data_array.attrs = {
-            "start_ind": self.start_ind,
-            "length": self.length,
-            "label": self.label,
-            "samplerate": self.samplerate,
-        }
-        data_array.to_netcdf(path, engine="h5netcdf")
-
-    @classmethod
-    def read(cls, path: str | pathlib.Path) -> Segment:
-        """Read a :class:`Segment` from a file.
-
-        Parameters
-        ----------
-        path : str, pathlib.Path
-            Path to read the :class:`Segment` from.
-
-        Returns
-        -------
-        segment: Segment
-            A :class:`Segment` instance with data from ``path``
-            read into it.
-        """
-        path = pathlib.Path(path)
-        data_array = xr.load_dataarray(path)
-        start_ind = data_array.attrs["start_ind"]
-        length = data_array.attrs["length"]
-        label = data_array.attrs["label"]
-        samplerate = data_array.attrs["samplerate"]
-        # throw away metadata; don't want to have "leftover" attrs
-        data_array.attrs = {}
-        return cls(
-            start_ind=start_ind,
-            length=length,
-            label=label,
-            data_array=data_array,
-            samplerate=samplerate,
-        )
-
-    def __eq__(self, other) -> bool:
-        if not isinstance(other, Segment):
-            return False
-        return (
-            (self.start_ind == other.start_ind)
-            and (self.length == other.length)
-            and (self.label == other.label)
-            and np.array_equal(self.data, other.data)
-            and (self.samplerate == other.samplerate)
-        )
 
 
 class Segments:
     """Class that represents a set of line segments
     returned by a segmenting algorithm.
 
-    A set of segments returned by a segmenting algorithm,
-    where each segment is defined by a start index and length.
-
-    More precisely, this class represents the result of algorithms that segment
+    This class represents the result of algorithms that segment
     a signal into a series of consecutive, non-overlapping 2-D line segments :math:`S`.
-    For a list of such algorithms, call :func:`vocalpy.segment.line.list`.
-    For algorithms that segment spectrograms into boxes, see :class:`Boxes`.
-
     Each segment :math:`s_i` in a :class:`Segments` instance
     has an integer start index and length.
     The start index is computed by the segmenting algorithm.
-    a segmenting algorithm. For algorithms that find segments by thresholding energy,
-    the length will be equal to
+    For algorithms that find segments by thresholding energy,
+    the length will be equal to the stop index computed by the algorithm
+    minus the start index, plus one (to account for how Python indexes).
+    The stop index is the last index above threshold
+    for a segment.
+    For a list of such algorithms, call :func:`vocalpy.segment.line.list`.
+    For algorithms that segment spectrograms into boxes, see :class:`Boxes`.
 
     Attributes
     ----------
@@ -217,12 +45,69 @@ class Segments:
     :class:`Segments` are returned by the segmenting algorithms that return a set of line segments
     (as opposed to segmenting algorithms that return a set of boxes).
 
-    >>> sounds = voc.example('bfsongrepo', return_type='sound')
-    >>> segments = voc.segment.meansquared(sounds[0], threshold=1500, min_dur=0.2, min_silent_dur=0.02)
+    >>> bfsongrep = voc.example('bfsongrepo')
+    >>> sound = bfsongrepo.sounds[0]
+    >>> segments = voc.segment.meansquared(sound, threshold=1500, min_dur=0.2, min_silent_dur=0.02)
     >>> segments
-    Segments(start_inds=array([ 13050...3127, 225700]), lengths=array([1032, ..., 2074, 2640]), labels=array(['', ''..., dtype='<U1'), sound=vocalpy.Sound(data=array([[-209,..., dtype=int16), samplerate=32000, path=/home/pimienta/.cache/vocalpy/bfsongrepo.tar.gz.untar/gy6or6_baseline_220312_0836.3.wav))  # noqa
+    Segments(start_inds=array([ 22293...4425, 220495]), lengths=array([ 8012,... 6935,  7896]), samplerate=32000, labels=['', '', '', '', '', '', ...])  # noqa
 
-    :class:`~vocalpy.Segments` can be used to compute metrics for segmentation
+    Because audio data is a digital signal with discrete samples,
+    segments are defined in terms of start indices and lengths.
+    Thus, the start index of each segment is the index of the sample
+    where it starts--also known as a "boundary"--and the length
+    is given in number of samples.
+
+    However, we often want to think of segments times in terms of seconds.
+    We can get the start times of segments in seconds with the :attr:`~Segments.start_times`
+    property, and we can get the duration of segments in seconds with the
+    :attr:`~Segments.durations` property.
+
+    >>> segments.start_times
+    array([0.69665625, 1.801375  , 2.26390625, 2.7535625 , 3.5885    ,
+           6.38828125, 6.89046875])
+    >>> segments.durations
+    array([0.250375  , 0.33278125, 0.31      , 0.23625   , 0.308625  ,
+           0.21671875, 0.24675   ])
+
+    This is possible because each set of :class:`Segments` has a
+    :attr:`~Segments.samplerate` attribute, that can be used to convert
+    from sample numbers to seconds.
+    This attribute is taken from the :class:`vocalpy.Sound` that
+    was segmented to produce the :class:`Segments` in the first place.
+
+    Depending on the segmenting algorithm,
+    the start of one segment may not be the same as the end of
+    the segment that precedes it.
+    In this case we may want to find where the segments stop.
+    We can do so with the :attr:`~Segments.stop_ind`
+    and :attr:`~Segments.stop_ind` properties.
+
+    To actually get a :class:`Sound` for every segment in a set of :class:`Segments`,
+    we can pass the :class:`Segments` into to the :meth:`vocalpy.Sound.segment` method.
+
+    >>> segment_sounds = sound.segment(segments)
+
+    This might seem verbose, but it has a couple of advantages.
+    The first is that the :class:`Segments` can be saved in a json file,
+    so they can be loaded again and used to segment a sound
+    without needed to re-run the segmentation.
+    You can use a naming convention so that each sound file
+    has a segments file paired with it: e.g., if the
+    sound file is named ``"mouse1-day1-bout1.wav"``,
+    then the json file could be named
+    ``"mouse1-day1-bout1.segments.json"``.
+
+    >>> segments.to_json(path='mouse1-day1-bout1.segments.json')
+
+    A set of :class:`Segments` is then loaded with the
+    :meth:`~Segments.from_json` method.
+
+    >>> segments = voc.Segments.from_json(path='mouse1-day1-bout1.segments.json')
+
+    The second advantage of representing :class:`Segments` separately
+    is that they can then be used to compute metrics for segmentation.
+    Note that here we are using the :attr:`~Segments.all_times` property,
+    that gives us all the boundary times in seconds.
 
     >>> sounds = voc.example('bfsongrepo', return_type='sound')
     >>> segments = voc.segment.meansquared(sound, threshold=1500, min_dur=0.2, min_silent_dur=0.02)
@@ -230,64 +115,6 @@ class Segments:
     >>> ref = np.sorted(np.concatenate(annots[0].seq.onsets, annot[0].seq.offsets))
     >>> hyp = segments.all_times
     >>> prec, _ = voc.metrics.segmentation.ir.precision(reference=ref, hypothesis=hyp)
-
-    We can also use :class:`~vocalpy.Segments` to write the data in each :class:`Segment` to disk.
-    This is a common step in workflows, such as those that extract acoustic features from each segment
-    for further analysis.
-
-    >>> sounds = voc.example('bfsongrepo', return_type='sound')
-    >>> segments = voc.segment.meansquared(sounds[0], threshold=1500, min_dur=0.2, min_silent_dur=0.02)
-    >>> import pathlib, shutil
-    >>> dst = pathlib.Path('./tmp')
-    >>> dst.mkdir()
-    >>> for ind, segment in enumerate(segments, 1):
-    ...     print(f"Segment {ind}: {segment}")
-    ...     segment.write(dst / f"{sounds[0].stem}-segment-{ind}.h5")
-    Segment 1: Segment(start_time=..., duration=...,)
-    Segment 2: Segment(start_time=..., duration=...,)
-
-    Like a Python :class:`list`, :class:`Segments` can be iterated and sliced.
-    Iterating through :class:`Segments` results in :class:`Segment` instances.
-    This also allows for filtering by list comprehension.
-
-    >>> sounds = voc.example('bfsongrepo', return_type='sound')
-    >>> segments = voc.segment.meansquared(sounds[0], threshold=1500, min_dur=0.2, min_silent_dur=0.02)
-    >>> # only keep segments longer than 100 ms
-    >>> long_segments = [segment for segment in segments if segment.duration > 0.1]
-    >>> len(long_segments)
-    10
-
-    A :class:`slice` returns a new :class:`~vocalpy.Segments`
-
-    >>> sounds = voc.example('bfsongrepo', return_type='sound')
-    >>> segments = voc.segment.meansquared(sounds[0], threshold=1500, min_dur=0.2, min_silent_dur=0.02)
-    >>> len(segments)
-    150
-    >>> five_segments = Segments[5:10]
-    >>> type(segments)
-    vocalpy.Segments
-    >>> len(five_segments)
-    5
-
-    The segments can be converted to a :class:`pandas.DataFrame`
-    or saved directly to a csv file.
-
-    >>> sounds = voc.example('bfsongrepo', return_type='sound')
-    >>> segments = voc.segment.meansquared(sounds[0], threshold=1500, min_dur=0.2, min_silent_dur=0.02)
-    >>> df = segments.to_df
-    >>> segments.to_csv('gy6or6-segments.csv')
-
-    :class:`Segments` can be loaded from a csv as well.
-    Note that this requires passing in audio or the path to audio,
-    and no validation is done that guarantees the
-    segments are the results of applying a segmentation algorithm
-    to the audio.
-
-    >>> sounds = voc.example('bfsongrepo', return_type='sound')
-    >>> segments = voc.segment.meansquared(sounds[0], threshold=1500, min_dur=0.2, min_silent_dur=0.02)
-    >>> df = segments.to_df
-    >>> segments.to_csv('gy6or6-segments.csv')
-    >>> segments_from_csv = voc.Segments.from_csv('gy6or6-segments.csv', sound_path=sounds[0].path)
 
     See Also
     --------
@@ -298,21 +125,26 @@ class Segments:
         self,
         start_inds: npt.NDArray,
         lengths: npt.NDArray,
-        sound: vocalpy.Sound | None = None,
+        samplerate: int,
         labels: list[str] | None = None,
     ) -> None:
-        if sound is not None:
-            if not isinstance(sound, Sound):
-                raise TypeError(f"`sound` should be an instance of vocalpy.Sound, but type was: {type(sound)}")
         if not isinstance(start_inds, np.ndarray):
-            raise TypeError(f"`start_inds` must be a numpy array but type was: {type(start_inds)}")
+            raise TypeError(
+                f"`start_inds` must be a numpy array but type was: {type(start_inds)}"
+            )
         if not isinstance(lengths, np.ndarray):
-            raise TypeError(f"`lengths` must be a numpy array but type was: {type(lengths)}")
+            raise TypeError(
+                f"`lengths` must be a numpy array but type was: {type(lengths)}"
+            )
 
         if not issubclass(start_inds.dtype.type, numbers.Integral):
-            raise ValueError(f"`start_inds` must have an integer dtype, but dtype was: {start_inds.dtype}")
+            raise ValueError(
+                f"`start_inds` must have an integer dtype, but dtype was: {start_inds.dtype}"
+            )
         if not issubclass(lengths.dtype.type, numbers.Integral):
-            raise ValueError(f"`lengths` must have an integer dtype, but dtype was: {lengths.dtype}")
+            raise ValueError(
+                f"`lengths` must have an integer dtype, but dtype was: {lengths.dtype}"
+            )
 
         if start_inds.size == lengths.size == 0:
             # no need to validate
@@ -333,26 +165,34 @@ class Segments:
                     f"`start_inds` has {start_inds.size} elements and `lengths` has {lengths.size} elements."
                 )
             if not np.all(start_inds >= 0):
-                raise ValueError("Values of `start_inds` for `Segments` must all be non-negative.")
+                raise ValueError(
+                    "Values of `start_inds` for `Segments` must all be non-negative."
+                )
 
             if not np.all(start_inds[1:] > start_inds[:-1]):
-                raise ValueError("Values of `start_inds` for `Segments` must be strictly increasing.")
+                raise ValueError(
+                    "Values of `start_inds` for `Segments` must be strictly increasing."
+                )
 
             if not np.all(lengths >= 1):
-                raise ValueError("Values of `lengths` for `Segments` must all be positive.")
+                raise ValueError(
+                    "Values of `lengths` for `Segments` must all be positive."
+                )
 
-            if sound is not None:
-                if start_inds[-1] + lengths[-1] > sound.data.shape[-1]:
-                    raise ValueError(
-                        # TODO: check for off-by-one errors here and elsewhere where we use lengths
-                        "Length of last segment is longer than number of samples in sound. "
-                        f"Last segment ends at {start_inds[-1] + lengths[-1]} "
-                        f"and sound has {sound.data.shape[-1]} samples."
-                    )
+        if not isinstance(samplerate, int):
+            raise TypeError(
+                f"Type of ``samplerate`` must be int but was: {type(samplerate)}"
+            )
+        if not samplerate > 0:
+            raise ValueError(
+                f"Value of ``samplerate`` must be a positive integer, but was {samplerate}."
+            )
 
         if labels is not None:
             if not isinstance(labels, list):
-                raise TypeError(f"`labels` must be a list but type was: {type(labels)}")
+                raise TypeError(
+                    f"`labels` must be a list but type was: {type(labels)}"
+                )
             if not all([isinstance(lbl, str) for lbl in labels]):
                 types = set([type(lbl) for lbl in labels])
                 raise ValueError(
@@ -369,7 +209,7 @@ class Segments:
 
         self.start_inds = start_inds
         self.lengths = lengths
-        self.sound = sound
+        self.samplerate = samplerate
         self.labels = labels
 
     @property
@@ -398,7 +238,7 @@ class Segments:
 
         Returns ``self.start_inds / self.sound.samplerate``.
         """
-        return self.start_inds / self.sound.samplerate
+        return self.start_inds / self.samplerate
 
     @property
     def durations(self):
@@ -406,7 +246,7 @@ class Segments:
 
         Returns ``self.lengths / self.sound.samplerate``.
         """
-        return self.lengths / self.sound.samplerate
+        return self.lengths / self.samplerate
 
     @property
     def stop_times(self):
@@ -423,66 +263,10 @@ class Segments:
     def __repr__(self):
         return (
             f"Segments(start_inds={reprlib.repr(self.start_inds)}, lengths={reprlib.repr(self.lengths)}, "
-            f"labels={reprlib.repr(self.labels)}, sound={self.sound!r})"
+            f"samplerate={self.samplerate!r}, labels={reprlib.repr(self.labels)})"
         )
 
-    def __str__(self):
-        return (
-            f"Segments(start_times={self.start_times!r}, durations={self.durations!r}, "
-            f"labels={self.labels!r}, sound={self.sound!r})"
-        )
-
-    def to_df(self):
-        """Convert :class:`Segments` to a :class:`pandas.DataFrame`.
-
-        Examples
-        --------
-        >>> sounds = voc.example('bfsongrepo', return_type='sound')
-        >>> segments = voc.segment.meansquared(sounds[0], threshold=1500, min_dur=0.2, min_silent_dur=0.02)
-        >>> df = segments.to_df()
-        >>> df['start_time'] = df['start_ind'] / segments.sound.samplerate
-        """
-        d = {
-            "start_ind": self.start_inds,
-            "length": self.lengths,
-            "label": self.labels,
-        }
-        df = pd.DataFrame(d)
-        return df
-
-    def to_csv(self, csv_path: str | pathlib.Path, **to_csv_kwargs) -> None:
-        """Write :class:`Segments` to a csv file."""
-        df = self.to_df()
-        df.to_csv(csv_path, **to_csv_kwargs)
-
-    @classmethod
-    def from_csv(
-        cls,
-        csv_path: str | pathlib.Path,
-        sound: vocalpy.Sound | None = None,
-        sound_path: str | pathlib.Path | None = None,
-    ) -> Segments:
-        """Read :class:`Segments` from a csv file."""
-        if sound is not None and sound_path is not None:
-            raise ValueError("`Segments.from_csv` can accept either `sound` or `sound_path`, but not both")
-        if sound_path:
-            sound = Sound.read(sound_path)
-        df = pd.read_csv(
-            csv_path,
-            # passing a converter is the only way to make sure that 'label'
-            # is an object array with strings:
-            # if we don't pass a converter, we get NaNs for empty strings,
-            converters={"label": str},
-            # and if we instead specify its dtype as 'string', we get weird StringType "<NA>"s
-            # even when we convert to list (I think). converters take precedence over dtype
-            dtype={"start_ind": int, "length": int},
-        )
-        start_inds = df["start_ind"].values
-        lengths = df["length"].values
-        labels = df["label"].values.tolist()
-        return cls(start_inds, lengths, sound, labels)
-
-    def to_json(self, json_path: str | pathlib.Path) -> None:
+    def to_json(self, path: str | pathlib.Path) -> None:
         """Save :class:`Segments` to a json file.
 
         Parameters
@@ -491,96 +275,233 @@ class Segments:
             The path where the json file should be saved
             with these :class:`Segments`.
         """
-        json_path = pathlib.Path(json_path)
-        df = self.to_df()
-        json_dict = {}
-        json_dict["data"] = df.to_json(orient="table")
-        json_dict["metadata"] = {"sound_path": str(self.sound.path)}
-        with json_path.open("w") as fp:
+        path = pathlib.Path(path)
+        json_dict = {
+            "start_inds": self.start_inds.tolist(),
+            "lengths": self.lengths.tolist(),
+            "samplerate": self.samplerate,
+            "labels": self.labels,
+        }
+        with path.open("w") as fp:
             json.dump(json_dict, fp)
 
     @classmethod
-    def from_json(cls, json_path: str | pathlib.Path) -> Segments:
+    def from_json(cls, path: str | pathlib.Path) -> "Segments":
         """Load :class:`Segments` from a json file.
 
         Parameters
         ----------
-        json_path : str, pathlib.Path
+        path : str, pathlib.Path
             The path to the json file to load the :class:`Segments` from.
 
         Returns
         -------
         segments : Segments
         """
-        json_path = pathlib.Path(json_path)
-        with json_path.open("r") as fp:
+        path = pathlib.Path(path)
+        with path.open("r") as fp:
             json_dict = json.load(fp)
+        start_inds = np.array(json_dict["start_inds"], dtype=int)
+        lengths = np.array(json_dict["lengths"], dtype=int)
+        samplerate = json_dict["samplerate"]
+        labels = json_dict["labels"]
+        return cls(start_inds, lengths, samplerate, labels)
 
-        if json_dict["metadata"]["sound_path"] == "None":
-            sound = None
+    VALID_COLUMNS_MAP_VALUES = ["start_s", "stop_s", "start_ind", "length"]
+
+    @classmethod
+    def from_csv(
+        cls,
+        csv_path: str | pathlib.Path,
+        samplerate: int,
+        columns_map: dict | None = None,
+        default_label: str | None = None,
+        read_csv_kwargs: dict | None = None,
+    ):
+        """Create a :class:`~vocalpy.Segments` instance from a csv file.
+
+        The csv file can either have the column names
+        ``{"start_ind", "length", "label"}``, that will be used directly
+        as the :class:`~vocalpy.Segment` attributes
+        ``start_inds``, ``lengths``, and ``labels``, respectively,
+        or it can have the column names
+        ``{"start_s", "stop_s", "label"}``,
+        where ``"start_s"`` and ``"stop_s""`` refer to times in seconds.
+        The ``label`` column is not required, and if it is not found,
+        the ``labels`` will default to empty strings.
+        You can change this behavior by specifying a ``default_label``
+        that will be used for all the segments if no ``labels`` column
+        is found, instead of an empty string.
+        If one of these sets of columns (``{"start_ind", "length"``}``
+        or ``{"start_s", "stop_s"}``) is not found in the csv,
+        then an error will be raised.
+        You can have the :meth:`vocalpy.Segments.from_csv` method
+        rename columns for you after it loads the csv file into a
+        :class:`pandas.DataFrame` using the ``columns_map`` argument;
+        see example below. All other columns are ignored;
+        you do not need to somehow remove them to load the file.
+
+        Parameters
+        ----------
+        csv_path : string or pathlib.Path
+            Path to csv file.
+        samplerate : int
+            The sampling rate of the audio signal that was segmented
+            to produce these segments.
+        columns_map : dict, optional
+            Mapping that will be used to rename columns in the csv
+        default_label : str, optional
+            String, a default that is assigned as the label to all segments.
+        read_csv_kwargs, dict, optional
+            Keyword arguments to pass to :func:`pandas.read_csv` function.
+
+        Returns
+        -------
+        segments : vocalpy.Segments
+
+        Examples
+        --------
+
+        The main use of this method is to load a set of line segments
+        from a csv file created by another library or a script.
+
+        If the column names in the csv do not match the column names
+        that `vocalpy.Segments` expects, you can have the
+        `vocalpy.Segments.from_csv` method rename the columns for you
+        after loading the csv, using the `columns_map` argument.
+
+        Here is an example of renaming columns to the expected names
+        "start_s" and "stop_s". After renaming, the values in these columns
+        are then converted to the starting indices and lengths of segments
+        using the `samplerate`.
+
+        >>> jourjine = voc.example("jourjine-et-al-2023", return_path=True)
+        >>> sound = voc.Sound.read(jourjine.sound)
+        >>> csv_path = jourjine.segments
+        >>> columns_map = {"start_seconds": "start_s", "stop_seconds": "stop_s"}
+        >>> segments = voc.Segments.from_csv(csv_path, samplerate=sound.samplerate, columns_map=columns_map)
+        >>> print(segments)
+        Segments(start_inds=array([   131...   149767168]), lengths=array([40447,...29696, 25087]),
+        samplerate=250000, labels=['', '', '', '', '', '', ...])
+
+        Notes
+        -----
+        This method is provided as a convenience for the case where
+        you have a segmentation saved in a csv file,
+        e.g., from a :class:`pandas.DataFrame`,
+        that was created by another library or script.
+        If you are working mainly with :mod:`vocalpy`, you should
+        prefer to load a set of segments with :meth:`~vocalpy.Segments.from_json`,
+        and to save the set of segments with :meth:`~vocalpy.Segments.to_json`,
+        since this avoids needing to keep track of the `samplerate` value separately.
+        """
+        if not isinstance(samplerate, int):
+            raise TypeError(
+                f"The `samplerate` argument must be an int but type was: {type(samplerate)}"
+            )
+        if samplerate < 1:
+            raise ValueError(
+                f"The `samplerate` argument must be a positve number but value was: {samplerate}"
+            )
+
+        if read_csv_kwargs is not None:
+            if not isinstance(read_csv_kwargs, dict):
+                raise TypeError(
+                    f"The `read_csv_kwargs` must be a `dict` but type was: {type(read_csv_kwargs)}"
+                )
         else:
-            sound_path = pathlib.Path(json_dict["metadata"]["sound_path"])
-            if sound_path.exists():
-                sound = Sound.read(sound_path)
-            else:
-                sound = None
+            read_csv_kwargs = {}
+        df = pd.read_csv(csv_path, **read_csv_kwargs)
 
-        df = pd.read_json(
-            io.StringIO(json_dict["data"]),
-            orient="table",
-        )
-        start_inds = df["start_ind"].values
-        lengths = df["length"].values
-        labels = df["label"].values.tolist()
-        return cls(start_inds, lengths, sound, labels)
+        if columns_map is not None:
+            if not isinstance(columns_map, dict):
+                raise TypeError(
+                    f"The `columns_map` argument must be a `dict` but type was: {type(dict)}"
+                )
+            if not all(
+                (
+                    isinstance(k, str) and isinstance(v, str)
+                    for k, v in columns_map.items()
+                )
+            ):
+                raise ValueError(
+                    "The `columns_map` argument must be a dict that maps string keys to string values, "
+                    "but not all keys and values were strings."
+                )
+            if not all(
+                v in cls.VALID_COLUMNS_MAP_VALUES for v in columns_map.values()
+            ):
+                invalid_values = [
+                    v
+                    for v in columns_map.values()
+                    if v not in cls.VALID_COLUMNS_MAP_VALUES
+                ]
+                raise ValueError(
+                    f"The `columns_map` argument must map keys (column names in the csv) "
+                    'to either {"start_seconds", "stop_seconds"} or {"start_ind", "length"}. '
+                    f"The following values are invalid: {invalid_values}"
+                )
+            df.columns = [
+                (
+                    columns_map[column_name]
+                    if column_name in columns_map
+                    else column_name
+                )
+                for column_name in df.columns
+            ]
+
+        if "label" not in df.columns and default_label is not None:
+            if not isinstance(default_label, str):
+                raise TypeError(
+                    f"The `default_label` argument must be a string but type was: {type(default_label)}"
+                )
+            df["label"] = default_label
+
+        if "start_ind" in df.columns and "length" in df.columns:
+            return cls(
+                start_inds=df["start_ind"].values,
+                lengths=df["length"].values,
+                labels=(
+                    df["label"].values.tolist()
+                    if "label" in df.columns
+                    else None
+                ),
+                samplerate=samplerate,
+            )
+        elif "start_s" in df.columns and "stop_s" in df.columns:
+            start_inds = (df["start_s"].values * samplerate).astype(int)
+            lengths = (
+                (df["stop_s"].values - df["start_s"].values) * samplerate
+            ).astype(int)
+            return cls(
+                start_inds=start_inds,
+                lengths=lengths,
+                labels=(
+                    df["label"].values.tolist()
+                    if "label" in df.columns
+                    else None
+                ),
+                samplerate=samplerate,
+            )
+        else:
+            raise ValueError(
+                "The csv file loaded from `csv_path must either have columns {'start_ind', 'length'} "
+                "or {'start_s', 'stop_s'}, but neither pair was found. "
+                f"Columns in the `pandas.DataFrame` loaded from the csv file are: {df.columns}\n"
+                "To have the `vocalpy.Segments.from_csv` method rename the columns for you, "
+                "use the `columns_map` argument. Type `help(voc.Segments)` or, in iPython, `voc.Segments?`, "
+                "to see examples of using this and other arguments."
+            )
 
     def __len__(self):
         return len(self.start_times)
 
-    def __eq__(self, other: Segments) -> bool:
+    def __eq__(self, other: "Segments") -> bool:
         if not isinstance(other, Segments):
             return False
         return (
             np.array_equal(self.start_inds, other.start_inds)
             and np.array_equal(self.lengths, other.lengths)
+            and self.samplerate == other.samplerate
             and self.labels == other.labels
         )
-
-    def __iter__(self):
-        if self.sound is None:
-            raise ValueError(
-                "This `Segments` instance does not have a `sound`, " "unable to iterate through each `Segment`."
-            )
-        for start_ind, length, label in zip(self.start_inds, self.lengths, self.labels):
-            data_array = xr.DataArray(data=self.sound.data[..., start_ind : start_ind + length])  # noqa: E203
-            segment = Segment(
-                start_ind=start_ind, length=length, label=label, data_array=data_array, samplerate=self.sound.samplerate
-            )
-            yield segment
-
-    def __getitem__(self, key):
-        cls = type(self)
-        if isinstance(key, numbers.Integral):
-            if self.sound is None:
-                raise ValueError(
-                    "This `Segments` instance does not have a `sound`, " "unable to iterate through each `Segment`."
-                )
-            start_ind = self.start_inds[key]
-            length = self.lengths[key]
-            label = self.labels[key]
-            data_array = xr.DataArray(data=self.sound.data[..., start_ind : start_ind + length])  # noqa: E203
-            return Segment(
-                start_ind=start_ind, length=length, label=label, data_array=data_array, samplerate=self.sound.samplerate
-            )
-        elif isinstance(key, slice):
-            start_inds = self.start_inds[key]
-            lengths = self.lengths[key]
-            labels = self.labels[key]
-            return cls(
-                start_inds,
-                lengths,
-                self.sound,
-                labels,
-            )
-        else:
-            raise TypeError(f"{cls.__name__} indices must be integers or slice")

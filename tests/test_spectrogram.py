@@ -12,8 +12,8 @@ from .fixtures.audio import BIRDSONGREC_WAV_LIST
         'librosa-db',
     ]
 )
-def test_spectrogram(method, a_wav_path):
-    sound = vocalpy.Sound.read(a_wav_path)
+def test_spectrogram(method, all_wav_paths):
+    sound = vocalpy.Sound.read(all_wav_paths)
     if method is not None:
         spectrogram = vocalpy.spectrogram(sound, method=method)
     else:

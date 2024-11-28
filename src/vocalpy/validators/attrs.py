@@ -3,6 +3,7 @@
 .. autosummary::
    :toctree: generated
 """
+
 from . import validators
 
 
@@ -14,7 +15,10 @@ def is_1d_ndarray(instance, attribute, value):
     try:
         validators.is_1d_ndarray(value)
     except TypeError as e:
-        raise TypeError(f"{attribute} of {instance} should be a numpy array, " f"but type was: {type(value)}") from e
+        raise TypeError(
+            f"{attribute} of {instance} should be a numpy array, "
+            f"but type was: {type(value)}"
+        ) from e
     except ValueError as e:
         raise ValueError(
             f"{attribute} of {instance} should be a 1-dimensional numpy array, "

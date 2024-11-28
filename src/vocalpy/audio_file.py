@@ -2,6 +2,7 @@
 as part of a dataset used to study
 animal acoustic communication.
 """
+
 from __future__ import annotations
 
 import pathlib
@@ -21,4 +22,7 @@ class AudioFile:
         The path to the audio file.
     """
 
-    path: pathlib.Path = attrs.field(converter=pathlib.Path, validator=attrs.validators.instance_of(pathlib.Path))
+    path: pathlib.Path = attrs.field(
+        converter=pathlib.Path,
+        validator=attrs.validators.instance_of(pathlib.Path),
+    )

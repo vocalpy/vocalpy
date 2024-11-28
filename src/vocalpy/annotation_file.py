@@ -1,6 +1,7 @@
 """Class that represents an annotation file,
 as part of a dataset used to study
 animal acoustic communication."""
+
 from __future__ import annotations
 
 import pathlib
@@ -26,7 +27,13 @@ class AnnotationFile:
     """
 
     path: pathlib.Path = attrs.field()
-    annotates: AudioFile | SpectrogramFile | list[AudioFile] | list[SpectrogramFile] | None = attrs.field()
+    annotates: (
+        AudioFile
+        | SpectrogramFile
+        | list[AudioFile]
+        | list[SpectrogramFile]
+        | None
+    ) = attrs.field()
 
     @annotates.validator
     def is_file_or_list_of_files(self, attribute, value):

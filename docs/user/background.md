@@ -1,5 +1,14 @@
-(background)=
+(what-is-vocalpy)=
+# What is VocalPy?
 
+You read on the landing page of the documentation 
+that VocalPy is the core package of the [VocalPy community](http://www.vocalpy.org/).
+You also learned that it is a Python library,
+meant for researchers studying how animals communicate with sound.
+This page explains the goals of the VocalPy library in more detail, 
+and gives some background on research in acoustic communication.
+
+(background)=
 ### Background
 
 Are humans unique among animals? 
@@ -31,9 +40,22 @@ In particular, acoustic communication researchers working with the Python progra
 How can our scripts and libraries talk to each other?
 Luckily, Python is a great glue language! Let's use it to solve these problems.
 
-A [paper introducing VocalPy and its design](docs/fa2023/Introducing_VocalPy__a_core_Python_package_for_researchers_studying_animal_acoustic_communication.pdf) 
-was presented at [Forum Acusticum 2023](https://www.fa2023.org/) 
-as part of the session "Open-source software and cutting-edge applications in bio-acoustics".
+The goals of VocalPy are to:
+- make it easy for researchers studying acoustic communication to work with a wide array of data formats: audio, array (spectrograms, features), annotation
+- provide classes that represent commonly-used data types: audio, spectograms, features, annotations
+- provide classes that represent common processes and steps in pipelines: segmenting audio, computing spectrograms, 
+  extracting acoustic features
+- make it easier for scientist-coders to flexibly and iteratively build datasets, 
+  without needing to deal directly with a database if they don't want to
+- make it possible to re-use code you have already written for your own research group
+- and finally: 
+  - make code easier to share and read across research groups, by providing these classes, and *idiomiatic* ways 
+    of coding with them; think of VocalPy as an interoperability layer and a common language
+  - facilitate collaboration between scientist-coders writing imperative analysis scripts and 
+    [research software engineers](https://www.nature.com/articles/d41586-022-01516-2) 
+    developing libraries and applications
+
+To see how VocalPy achieves these goals, and to get an overview of its features, please read through the [](#quickstart).
 
 ### References
 

@@ -1,6 +1,7 @@
 """Class that represents a spectrogram file,
 as part of a dataset used to study
 animal acoustic communication."""
+
 from __future__ import annotations
 
 import pathlib
@@ -33,10 +34,19 @@ class SpectrogramFile:
         The audio file from which the spectrogram was computed.
     """
 
-    path: pathlib.Path = attrs.field(converter=pathlib.Path, validator=attrs.validators.instance_of(pathlib.Path))
+    path: pathlib.Path = attrs.field(
+        converter=pathlib.Path,
+        validator=attrs.validators.instance_of(pathlib.Path),
+    )
     spectrogram_parameters: SpectrogramParameters | None = attrs.field(
-        validator=attrs.validators.optional(attrs.validators.instance_of(SpectrogramParameters)), default=None
+        validator=attrs.validators.optional(
+            attrs.validators.instance_of(SpectrogramParameters)
+        ),
+        default=None,
     )
     source_audio_file: AudioFile | None = attrs.field(
-        validator=attrs.validators.optional(attrs.validators.instance_of(AudioFile)), default=None
+        validator=attrs.validators.optional(
+            attrs.validators.instance_of(AudioFile)
+        ),
+        default=None,
     )

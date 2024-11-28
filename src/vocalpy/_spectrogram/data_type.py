@@ -1,4 +1,5 @@
 """Class that represents a spectrogram."""
+
 from __future__ import annotations
 
 import pathlib
@@ -9,7 +10,6 @@ import numpy as np
 import numpy.typing as npt
 
 from .. import validators
-from ..audio_file import AudioFile
 from ..spectrogram_file import SpectrogramFile
 
 VALID_SPECT_FILE_EXTENSION = ".npz"
@@ -33,13 +33,6 @@ class Spectrogram:
     times : numpy.ndarray
         Vector of size :math:`t` where values are times
         at center of time bins in spectrogram.
-    path : pathlib.Path, optional
-        Path to .npz file that spectrogram was loaded from.
-        Optional, added automatically by the :meth:`~vocalpy.Spectrogram.read` method.
-    audio_path : pathlib.Path, optional
-        Path to audio file from which spectrogram was generated.
-        Optional, default is None. Can be specified as argument
-        to :meth:`~vocalpy.Spectrogram.read` method.
 
     Examples
     --------
@@ -58,15 +51,18 @@ class Spectrogram:
 
     >>> spect = voc.Spectrogram.read("llb3_0066_2018_04_23_17_31_55.wav.npz")
     >>> spect
-    Spectrogram(data=array([[0.561... 0.        ]]), fequencies=array([[    0...50.        ]]), times=array([[0.000...6053968e+01]]),
-    spect_path=PosixPath('llb3_0066_2018_04_23_17_31_55.wav.mat'), audio_path=None)
+    Spectrogram(data=array([[0.561... 0.        ]]), fequencies=array([[    0...50.        ]]), times=array([[0.000...6053968e+01]]))
     """
+
     data: npt.NDArray = attrs.field()
 
     @data.validator
     def validate_data(self, attribute, value):
         if not isinstance(value, np.ndarray):
-            raise TypeError(f"Spectrogram array `data` should be a numpy array, " f"but type was {type(value)}.")
+            raise TypeError(
+                f"Spectrogram array `data` should be a numpy array, "
+                f"but type was {type(value)}."
+            )
 
         if value.ndim not in (2, 3):
             raise ValueError(
@@ -75,19 +71,10 @@ class Spectrogram:
                 f"but number of dimensions was {value.ndim}."
             )
 
-    frequencies: npt.NDArray = attrs.field(validator=validators.attrs.is_1d_ndarray)
+    frequencies: npt.NDArray = attrs.field(
+        validator=validators.attrs.is_1d_ndarray
+    )
     times: npt.NDArray = attrs.field(validator=validators.attrs.is_1d_ndarray)
-
-    path: pathlib.Path = attrs.field(
-        converter=attrs.converters.optional(pathlib.Path),
-        validator=attrs.validators.optional(attrs.validators.instance_of(pathlib.Path)),
-        default=None,
-    )
-    audio_path: pathlib.Path = attrs.field(
-        converter=attrs.converters.optional(pathlib.Path),
-        validator=attrs.validators.optional(attrs.validators.instance_of(pathlib.Path)),
-        default=None,
-    )
 
     def __attrs_post_init__(self):
         if self.data.ndim == 2:
@@ -112,9 +99,7 @@ class Spectrogram:
             f"vocalpy.{self.__class__.__name__}("
             f"data={reprlib.repr(self.data)}, "
             f"frequencies={reprlib.repr(self.frequencies)}, "
-            f"times={reprlib.repr(self.times)}, "
-            f"path={self.path!r}, "
-            f"audio_path={self.audio_path!r})"
+            f"times={reprlib.repr(self.times)})"
         )
 
     def asdict(self):
@@ -146,7 +131,7 @@ class Spectrogram:
         return not self.__eq__(other)
 
     @classmethod
-    def read(cls, path: str | pathlib.Path, audio_path: str | pathlib.Path | None = None):
+    def read(cls, path: str | pathlib.Path):
         """Read spectrogram and associated arrays from a Numpy npz file
         at the given ``path``.
 
@@ -155,11 +140,6 @@ class Spectrogram:
         path : str, pathlib.Path
             The path to the file containing the spectrogram ``s``
             and associated arrays ``f`` and ``t``.
-        audio_path : str or pathlib.Path, optional
-            Path to audio file from which spectrogram was generated.
-            Optional, default None. Note this argument is not validated
-            (to guarantee that the spectrogram was actually generated
-            from the specified audio path.)
 
         Returns
         -------
@@ -169,7 +149,9 @@ class Spectrogram:
         """
         path = pathlib.Path(path)
         if not path.exists():
-            raise FileNotFoundError(f"File with spectrogram not found at path specified:\n{path}")
+            raise FileNotFoundError(
+                f"File with spectrogram not found at path specified:\n{path}"
+            )
 
         if not path.suffix == VALID_SPECT_FILE_EXTENSION:
             raise ValueError(
@@ -184,9 +166,11 @@ class Spectrogram:
             try:
                 kwargs[key] = np.array(spect_file_dict[key])
             except KeyError as e:
-                raise KeyError(f"Did not find key '{key}' in path: {path}") from e
+                raise KeyError(
+                    f"Did not find key '{key}' in path: {path}"
+                ) from e
 
-        return cls(path=path, audio_path=audio_path, **kwargs)
+        return cls(**kwargs)
 
     def write(self, path: [str, pathlib.Path]) -> SpectrogramFile:
         """Write this :class:`vocalpy.Spectrogram`
@@ -209,12 +193,13 @@ class Spectrogram:
             representing the saved spectrogram.
         """
         path = pathlib.Path(path)
-        np.savez(path, data=self.data, frequencies=self.frequencies, times=self.times)
-        if self.audio_path:
-            source_audio_file = AudioFile(path=self.audio_path)
-        else:
-            source_audio_file = None
-        return SpectrogramFile(path=path, source_audio_file=source_audio_file)
+        np.savez(
+            path,
+            data=self.data,
+            frequencies=self.frequencies,
+            times=self.times,
+        )
+        return SpectrogramFile(path=path)
 
     def __iter__(self):
         for channel in self.data:
@@ -222,7 +207,6 @@ class Spectrogram:
                 data=channel[np.newaxis, ...],
                 frequencies=self.frequencies,
                 times=self.times,
-                path=self.path,
             )
 
     def __getitem__(self, key):
@@ -232,11 +216,12 @@ class Spectrogram:
                     data=self.data[key],
                     frequencies=self.frequencies,
                     times=self.times,
-                    path=self.path,
                 )
             except IndexError as e:
                 raise IndexError(
                     f"Invalid integer or slice for Spectrogram with {self.data.shape[0]} channels: {key}"
                 ) from e
         else:
-            raise TypeError(f"Spectrogram can be indexed with integer or slice, but type was: {type(key)}")
+            raise TypeError(
+                f"Spectrogram can be indexed with integer or slice, but type was: {type(key)}"
+            )

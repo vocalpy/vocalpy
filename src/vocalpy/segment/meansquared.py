@@ -183,11 +183,16 @@ def meansquared(
         from .. import Sound
 
         sound_copy = Sound(
-            data=(sound.data * scale_val).astype(scale_dtype), samplerate=sound.samplerate, path=sound.path
+            data=(sound.data * scale_val).astype(scale_dtype),
+            samplerate=sound.samplerate,
         )
-        meansquared_ = signal.audio.meansquared(sound_copy, freq_cutoffs, smooth_win)
+        meansquared_ = signal.audio.meansquared(
+            sound_copy, freq_cutoffs, smooth_win
+        )
     else:
-        meansquared_ = signal.audio.meansquared(sound, freq_cutoffs, smooth_win)
+        meansquared_ = signal.audio.meansquared(
+            sound, freq_cutoffs, smooth_win
+        )
 
     # we get rid of the channel dimension *after* calling ``signal.audio.meansquared``
     # because that function *does* work on multi-channel data
@@ -211,11 +216,19 @@ def meansquared(
     # get rid of silent intervals that are shorter than min_silent_dur
     silent_gap_durs = onsets_s[1:] - offsets_s[:-1]  # duration of silent gaps
     keep_these = np.nonzero(silent_gap_durs > min_silent_dur)
-    onsets_s = np.concatenate((onsets_s[0, np.newaxis], onsets_s[1:][keep_these]))
-    offsets_s = np.concatenate((offsets_s[:-1][keep_these], offsets_s[-1, np.newaxis]))
+    onsets_s = np.concatenate(
+        (onsets_s[0, np.newaxis], onsets_s[1:][keep_these])
+    )
+    offsets_s = np.concatenate(
+        (offsets_s[:-1][keep_these], offsets_s[-1, np.newaxis])
+    )
     # we do some double-bookkeeping here, not sure if there's a smarter way
-    onsets_sample = np.concatenate((onsets_sample[0, np.newaxis], onsets_sample[1:][keep_these]))
-    offsets_sample = np.concatenate((offsets_sample[:-1][keep_these], offsets_sample[-1, np.newaxis]))
+    onsets_sample = np.concatenate(
+        (onsets_sample[0, np.newaxis], onsets_sample[1:][keep_these])
+    )
+    offsets_sample = np.concatenate(
+        (offsets_sample[:-1][keep_these], offsets_sample[-1, np.newaxis])
+    )
 
     # eliminate syllables with duration shorter than min_dur
     above_th_segment_durs = offsets_s - onsets_s
@@ -225,4 +238,6 @@ def meansquared(
     offsets_sample = offsets_sample[keep_these]
     lengths = offsets_sample - onsets_sample
 
-    return Segments(start_inds=onsets_sample, lengths=lengths, sound=sound)
+    return Segments(
+        start_inds=onsets_sample, lengths=lengths, samplerate=sound.samplerate
+    )

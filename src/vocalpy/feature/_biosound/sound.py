@@ -3,6 +3,7 @@ Adapted under MIT license.
 
 .. [1] https://github.com/theunissenlab/soundsig
 """
+
 from __future__ import annotations
 
 import numpy as np
@@ -14,7 +15,11 @@ from .signal import lowpass_filter
 
 
 def temporal_envelope(
-    data: npt.NDArray, samplerate: int, cutoff_freq: int = 200, filter_order: int = 4, resample_rate: int | None = None
+    data: npt.NDArray,
+    samplerate: int,
+    cutoff_freq: int = 200,
+    filter_order: int = 4,
+    resample_rate: int | None = None,
 ) -> npt.NDArray | tuple[npt.NDArray, npt.NDArray]:
     """Get the temporal envelope from the sound pressure waveform.
 
@@ -40,14 +45,18 @@ def temporal_envelope(
     srect = np.abs(data - np.mean(data))
 
     if cutoff_freq is not None:
-        srect = lowpass_filter(srect, samplerate, cutoff_freq, filter_order=filter_order)
+        srect = lowpass_filter(
+            srect, samplerate, cutoff_freq, filter_order=filter_order
+        )
         srect[srect < 0] = 0
 
     if resample_rate is not None:
         lensound = len(srect)
         t = (np.array(range(lensound), dtype=float)) / samplerate
         lenresampled = int(round(float(lensound) * resample_rate / samplerate))
-        srectresampled, tresampled = scipy.signal.resample(srect, lenresampled, t=t, axis=0, window=None)
+        srectresampled, tresampled = scipy.signal.resample(
+            srect, lenresampled, t=t, axis=0, window=None
+        )
         return srectresampled, tresampled
     else:
         return srect

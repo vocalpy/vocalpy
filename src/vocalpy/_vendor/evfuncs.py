@@ -2,6 +2,7 @@
 
 Python implementations of functions used with EvTAF and evsonganaly.m
 """
+
 from pathlib import Path
 
 import numpy as np
@@ -81,7 +82,9 @@ def readrecf(filename):
             elif "ADFREQ" in line:
                 ind = line.find("=")
                 try:
-                    rec_dict["sample_freq"] = int(line[ind + 1 :])  # noqa: E203
+                    rec_dict["sample_freq"] = int(
+                        line[ind + 1 :]  # noqa: E203
+                    )
                 except ValueError:
                     # if written with scientific notation
                     # first parse as float, then cast to int
@@ -175,6 +178,8 @@ def load_cbin(filename, channel=0):
     data = np.fromfile(filename, dtype=">i2")
     recfile = filename.parent.joinpath(filename.stem + ".rec")
     rec_dict = readrecf(recfile)
-    data = data[channel :: rec_dict["num_channels"]]  # noqa: E203  # step by number of channels
+    data = data[
+        channel :: rec_dict["num_channels"]  # noqa: E203
+    ]  # step by number of channels
     sample_freq = rec_dict["sample_freq"]
     return data, sample_freq

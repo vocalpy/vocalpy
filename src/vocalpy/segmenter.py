@@ -1,4 +1,5 @@
 """Class that represents the segmenting step in a pipeline."""
+
 from __future__ import annotations
 
 import collections.abc
@@ -44,7 +45,11 @@ class Segmenter:
         :const:`vocalpy.segmenter.DEFAULT_SEGMENT_PARAMS`.
     """
 
-    def __init__(self, callback: Callable | None = None, params: Mapping | Params | None = None):
+    def __init__(
+        self,
+        callback: Callable | None = None,
+        params: Mapping | Params | None = None,
+    ):
         """Initialize a new :class:`vocalpy.Segmenter` instance.
 
         Parameters
@@ -82,12 +87,16 @@ class Segmenter:
                         params[name] = param.default
 
         if not callable(callback):
-            raise ValueError(f"`callback` should be callable, but `callable({callback})` returns False")
+            raise ValueError(
+                f"`callback` should be callable, but `callable({callback})` returns False"
+            )
 
         self.callback = callback
 
         if not isinstance(params, (collections.abc.Mapping, Params)):
-            raise TypeError(f"`params` should be a `Mapping` or `Params` but type was: {type(params)}")
+            raise TypeError(
+                f"`params` should be a `Mapping` or `Params` but type was: {type(params)}"
+            )
 
         if isinstance(params, Params):
             # coerce to dict
@@ -95,9 +104,12 @@ class Segmenter:
 
         signature = inspect.signature(callback)
         if not all([param in signature.parameters for param in params]):
-            invalid_params = [param for param in params if param not in signature.parameters]
+            invalid_params = [
+                param for param in params if param not in signature.parameters
+            ]
             raise ValueError(
-                f"Invalid params for callback: {invalid_params}\n" f"Callback parameters are: {signature.parameters}"
+                f"Invalid params for callback: {invalid_params}\n"
+                f"Callback parameters are: {signature.parameters}"
             )
 
         self.params = params

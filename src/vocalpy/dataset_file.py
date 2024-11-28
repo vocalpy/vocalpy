@@ -17,6 +17,7 @@ The list created by :class:`vocalpy.dataset.Dataset`
 becomes the central table in a relational database
 representing the dataset.
 """
+
 from __future__ import annotations
 
 import enum
@@ -37,7 +38,9 @@ class DatasetFileTypeEnum(enum.Enum):
     SPECTROGRAM = SpectrogramFile
 
 
-DatasetFileType = Union[AnnotationFile, AudioFile, FeatureFile, SpectrogramFile]
+DatasetFileType = Union[
+    AnnotationFile, AudioFile, FeatureFile, SpectrogramFile
+]
 
 
 @attrs.define
@@ -67,7 +70,9 @@ class DatasetFile:
     """
 
     file: DatasetFileType = attrs.field(
-        validator=attrs.validators.instance_of((AnnotationFile, AudioFile, FeatureFile, SpectrogramFile))
+        validator=attrs.validators.instance_of(
+            (AnnotationFile, AudioFile, FeatureFile, SpectrogramFile)
+        )
     )
 
     def __attrs_post_init__(self):

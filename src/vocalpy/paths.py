@@ -1,5 +1,6 @@
 """Functions for working with paths.
 """
+
 from __future__ import annotations
 
 import pathlib
@@ -30,7 +31,9 @@ def from_dir(dir: str | pathlib.Path, ext: str, recurse: bool = False):
     """
     dir = pathlib.Path(dir)
     if not dir.is_dir():
-        raise NotADirectoryError(f"`dir` argument not recognized as a directory: {dir}")
+        raise NotADirectoryError(
+            f"`dir` argument not recognized as a directory: {dir}"
+        )
 
     if recurse:
         paths = sorted(dir.glob(f"**/*{ext}"))
