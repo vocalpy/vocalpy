@@ -215,7 +215,9 @@ def precision_recall_fscore(
     metric: str,
     tolerance: float | int | None = None,
     decimals: int | bool | None = None,
-) -> tuple[float, int, IRMetricData]:
+    labels_ref: npt.NDArray | None = None,
+    labels_hyp: npt.NDArray | None = None,
+) -> tuple[float, int, IRMetricData] | tuple[float, int, IRMetricData, dict[int | str, tuple[float, int, IRMetricData]]]:
     r"""Helper function that computes precision, recall, and the F-score.
 
     Since all these metrics require computing the number of true positives,
@@ -237,7 +239,7 @@ def precision_recall_fscore(
     arrays of non-negative, strictly increasing values.
     If you have two arrays ``onsets`` and ``offsets``,
     you can concatenate those into a single valid array
-    of boundary times using :func:`concat_starts_and_stops`
+    of boundary times using :func:`concat_starts_and_stops`0
     that you can then pass to this function.
 
     Parameters
@@ -311,7 +313,7 @@ def precision_recall_fscore(
        Advances in Binary and Multiclass Sound Segmentation with Deep Learning Techniques.
 
     .. [3] NIST. (2009). The 2009 (RT-09) Rich Transcription Meeting Recognition Evaluation Plan.
-       <https://web.archive.org/web/20100606041157if_/http://www.itl.nist.gov/iad/mig/thyps/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf>
+       https://web.archive.org/web/20100606041157if_/http://www.itl.nist.gov/iad/mig/thyps/rt/2009/docs/rt09-meeting-eval-plan-v2.pdf
 
     .. [4] Du, P., & Troyer, T. W. (2006).
        A segmentation algorithm for zebra finch song at the note level.
@@ -321,6 +323,32 @@ def precision_recall_fscore(
         raise ValueError(
             f'``metric`` must be one of: {{"precision", "recall", "fscore"}} but was: {metric}'
         )
+
+    if labels_ref is not None and labels_hyp is None:
+        raise ValueError(
+            "If `labels_ref` is provided then `labels_hyp` must also be provided, but `labels_hyp` is None"
+        )
+    if labels_ref is None and labels_hyp is not None:
+        raise ValueError(
+            "If `labels_hyp` is provided then `labels_ref` must also be provided, but `labels_ref` is None"
+        )
+    if labels_ref is not None and labels_hyp is not None:
+        for labels_arr, labels_arr_name in zip(
+            (labels_ref, labels_hyp),
+            ("labels_ref", "labels_hyp"),
+        ):
+            if not isinstance(labels_arr, np.ndarray):
+                raise TypeError(
+                    f"`{labels_arr_name}` must be instance of numpy.ndarray but type was: {type(labels_arr)}"
+                )
+            validators.is_1d_ndarray(labels_arr, labels_arr_name)
+            if not (
+                np.issubdtype(labels_arr.dtype, np.integer) or np.issubdtype(labels_arr.dtype, np.str_)
+            ):
+                raise TypeError(
+                    f"`{labels_arr_name}` must have integer or string dtype, but dtype was: {labels_arr.dtype}"
+                )
+        validators.have_same_dtype(labels_ref, labels_hyp, "labels_ref", "labels_hyp")
 
     # edge case: if both reference and hypothesis have a length of zero, we have a score of 1.0
     # but no hits. This is to avoid punishing the correct hypothesis that there are no boundaries.
@@ -354,19 +382,66 @@ def precision_recall_fscore(
     metric_data = IRMetricData(hits_ref, hits_hyp, diffs)
     n_tp = hits_hyp.size
     if metric == "precision":
-        precision_ = n_tp / hypothesis.size
-        return precision_, n_tp, metric_data
+        metric_val = n_tp / hypothesis.size
     elif metric == "recall":
-        recall_ = n_tp / reference.size
-        return recall_, n_tp, metric_data
+        metric_val = n_tp / reference.size
     elif metric == "fscore":
         precision_ = n_tp / hypothesis.size
         recall_ = n_tp / reference.size
         if np.isclose(precision_, 0.0) and np.isclose(recall_, 0.0):
             # avoids divide-by-zero that would give NaN
-            return 0.0, n_tp, metric_data
-        fscore_ = 2 * (precision_ * recall_) / (precision_ + recall_)
-        return fscore_, n_tp, metric_data
+            metric_val = 0.0
+        else:
+            metric_val = 2 * (precision_ * recall_) / (precision_ + recall_)
+
+    if labels_ref is not None:
+        per_label_metrics = {}
+
+        uniq_ref_labels = np.unique(labels_ref)
+        for label in uniq_ref_labels:
+            # for `label_inds_ref` and `label_inds_hyp`,
+            # we know these are 1-d since we validated that above
+            # and we want to use the arrays below to get their indices back
+            # from `hypothesis` and `reference`
+            label_inds_ref = np.nonzero(labels_ref == label)[0]
+            reference_label = reference[label_inds_ref]
+            label_inds_hyp = np.nonzero(labels_hyp == label)[0]
+            hypothesis_label = hypothesis[label_inds_hyp]
+            (hits_ref_in_label,
+             hits_hyp_in_label,
+             diffs_label
+            ) = find_hits(
+                hypothesis_label, reference_label, tolerance, decimals
+            )
+            n_tp_label = hits_hyp_in_label.size
+            if metric == "precision":
+                label_metric_val = n_tp_label / hypothesis_label.size
+            elif metric == "recall":
+                label_metric_val = n_tp_label / reference_label.size
+            elif metric == "fscore":
+                precision_ = label_metric_val = n_tp_label / hypothesis_label.size
+                recall_ = n_tp_label / reference_label.size
+                if np.isclose(precision_, 0.0) and np.isclose(recall_, 0.0):
+                    # avoids divide-by-zero that would give NaN
+                    label_metric_val = 0.0
+                else:
+                    label_metric_val = 2 * (precision_ * recall_) / (precision_ + recall_)
+            if np.issubdtype(labels_ref.dtype, np.integer):
+                label = int(label)
+            elif np.issubdtype(labels_ref.dtype, np.str_):
+                label = str(label)
+            # map hits_ref + hits_hyp back to indices in hypothesis / reference
+            hits_ref_label = label_inds_ref[hits_ref_in_label]
+            hits_hyp_label = label_inds_hyp[hits_hyp_in_label]
+            per_label_metrics[label] = (
+                label_metric_val,
+                IRMetricData(hits_ref_label, hits_hyp_label, diffs_label)
+            )
+
+    if per_label_metrics is None:
+        return metric_val, n_tp, metric_data
+    else:
+        return metric_val, n_tp, metric_data, per_label_metrics
 
 
 def precision(
@@ -374,6 +449,8 @@ def precision(
     reference: npt.NDArray,
     tolerance: float | int | None = None,
     decimals: int | bool | None = None,
+    labels_ref: npt.NDArray | None = None,
+    labels_hyp: npt.NDArray | None = None,
 ) -> tuple[float, int, IRMetricData]:
     r"""Compute precision :math:`P` for a segmentation.
 
@@ -393,7 +470,6 @@ def precision(
     :func:`vocalpy.metrics.segmentation.ir.compute_true_positives`.
     This function then computes the precision as
     ``precision = n_tp / hypothesis.size``.
-
 
     Both ``hypothesis`` and ``reference`` must be 1-dimensional
     arrays of non-negative, strictly increasing values.
@@ -494,8 +570,9 @@ def precision(
        Neurocomputing, 69(10-12), 1375-1379.
     """
     return precision_recall_fscore(
-        hypothesis, reference, "precision", tolerance, decimals
+        hypothesis, reference, "precision", tolerance, decimals, labels_ref, labels_hyp
     )
+
 
 
 def recall(
@@ -503,6 +580,8 @@ def recall(
     reference: npt.NDArray,
     tolerance: float | int | None = None,
     decimals: int | bool | None = None,
+    labels_ref: npt.NDArray | None = None,
+    labels_hyp: npt.NDArray | None = None,
 ) -> tuple[float, int, IRMetricData]:
     r"""Compute recall :math:`R` for a segmentation.
 
@@ -622,7 +701,7 @@ def recall(
        Neurocomputing, 69(10-12), 1375-1379.
     """
     return precision_recall_fscore(
-        hypothesis, reference, "recall", tolerance, decimals
+        hypothesis, reference, "recall", tolerance, decimals, labels_ref, labels_hyp
     )
 
 
@@ -631,6 +710,8 @@ def fscore(
     reference: npt.NDArray,
     tolerance: float | int | None = None,
     decimals: int | bool | None = None,
+    labels_ref: npt.NDArray | None = None,
+    labels_hyp: npt.NDArray | None = None,
 ) -> tuple[float, int, IRMetricData]:
     r"""Compute the F-score for a segmentation.
 
@@ -747,7 +828,7 @@ def fscore(
        Neurocomputing, 69(10-12), 1375-1379.
     """
     return precision_recall_fscore(
-        hypothesis, reference, "fscore", tolerance, decimals
+        hypothesis, reference, "fscore", tolerance, decimals, labels_ref, labels_hyp
     )
 
 
