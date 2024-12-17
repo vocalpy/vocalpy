@@ -1,0 +1,30 @@
+[tool.poetry]
+name = "seqanalysis"
+version = "0.1.0"
+description = "Scripts for analysing not.mat data to get transiongraphs and the matrix"
+authors = ["wendtalexander <wendtalexander@protonmail.com>"]
+readme = "README.md"
+package-mode = true
+
+[tool.poetry.dependencies]
+python = "^3.11"
+matplotlib = "^3.8.4"
+scipy = "^1.13.0"
+ipython = "^8.23.0"
+pyyaml = "^6.0.1"
+networkx = "^3.3"
+pandas = "^2.2.2"
+seaborn = "^0.13.2"
+rich = "^13.7.1"
+setuptools = "^69.5.1"
+polars = "^0.20.25"
+evfuncs = "^0.3.5.post1"
+plotly = "^5.22.0"
+nbformat = "^5.10.4"
+dash = "^2.17.0"
+dash-cytoscape = "^1.0.1"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
