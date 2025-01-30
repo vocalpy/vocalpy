@@ -625,7 +625,8 @@ def sat(
             "pitch": (["channel", "time"], pitch_),
             "pitch_no_center": (["channel", "time"], pitch_(center=False))
             "goodness_of_pitch": (["channel", "time"], goodness_),
-            "mean_frequency": (["channel", "time"], mean_frequency_)
+            "mean_frequency": (["channel", "time"], mean_frequency_),
+            "peak_frequency": (["channel", "time"], peak_frequency_),
             "frequency_modulation": (["channel", "time"], FM),
             "amplitude_modulation": (["channel", "time"], AM),
             "entropy": (["channel", "time"], entropy_),
