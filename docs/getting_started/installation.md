@@ -74,7 +74,7 @@ then pip should only be used after conda [^5].)
 
 
 ```console
-conda create --n vocalpy python=3.11
+conda create -n vocalpy python=3.11
 conda activate vocalpy
 conda install vocalpy -c conda-forge
 ```
