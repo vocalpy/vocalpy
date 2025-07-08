@@ -9,7 +9,7 @@
 [![Project Status: WIP – Initial development is in progress, but there has not yet been a stable, usable release suitable for the public.](https://www.repostatus.org/badges/latest/wip.svg)](https://www.repostatus.org/#wip)
 [![Build Status](https://github.com/vocalpy/vocalpy/actions/workflows/ci.yml/badge.svg)](https://github.com/vocalpy/vocalpy/actions)
 [![Documentation Status](https://readthedocs.org/projects/vocalpy/badge/?version=latest)](https://vocalpy.readthedocs.io/en/latest/?badge=latest)
-[![DOI](https://zenodo.org/badge/159904494.svg)](https://zenodo.org/badge/latestdoi/159904494)
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.14237724.svg)](https://doi.org/10.5281/zenodo.14237724)
 [![PyPI version](https://badge.fury.io/py/vocalpy.svg)](https://badge.fury.io/py/vocalpy)
 [![PyPI Python versions](https://img.shields.io/pypi/pyversions/vocalpy)](https://img.shields.io/pypi/pyversions/vocalpy)
 [![codecov](https://codecov.io/gh/vocalpy/vocalpy/branch/main/graph/badge.svg?token=TXtNTxXKmb)](https://codecov.io/gh/vocalpy/vocalpy)

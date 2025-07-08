@@ -1,0 +1,32 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: vocalpy
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: David
+    family-names: Nicholson
+    email: nicholdav@gmail.com
+    orcid: 'https://orcid.org/0000-0002-4261-4719'
+    affiliation: Independent researcher
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.7905425
+    description: Zenodo
+repository-code: 'https://github.com/vocalpy/vocalpy'
+url: 'https://vocalpy.readthedocs.io/en/latest/'
+abstract: >-
+  A core package for acoustic communication research in
+  Python 
+keywords:
+  - acoustic communication
+  - bioacoustics
+  - Python
+license: BSD-3-Clause
+commit: 2fbd08b16cfd0dc4e5f9a749903d3d7258991b8b
+version: 0.10.0.post1
+date-released: '2024-11-28'
