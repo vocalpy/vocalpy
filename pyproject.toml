@@ -24,7 +24,7 @@ readme = "README.md"
 license = {file = "LICENSE"}
 dependencies = [
     "attrs >=23.1.0",
-    "crowsetta >=5.1.0",
+    "crowsetta >=5.1.1",
     "dask[dataframe] >=2.10.1",
     "h5netcdf >= 1.3.0",
     "librosa >= 0.10.2.post1",
