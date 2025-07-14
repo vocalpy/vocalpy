@@ -16,9 +16,9 @@ VENV_DIR = pathlib.Path('./.venv').resolve()
 
 # ---- the top half of this noxfile are more standard sessions: lint, tests, docs, build --------------------------
 TEST_PYTHONS = [
-    "3.10",
     "3.11",
     "3.12",
+    "3.13",
 ]
 
 
@@ -31,7 +31,7 @@ def test(session) -> None:
     session.run("pytest", *session.posargs)
 
 
-@nox.session
+@nox.session(python=TEST_PYTHONS[1])
 def lint(session: nox.Session) -> None:
     """
     Run the linter.
@@ -43,7 +43,7 @@ def lint(session: nox.Session) -> None:
     session.run("flake8", "./src", "--max-line-length", "120")
 
 
-@nox.session
+@nox.session(python=TEST_PYTHONS[1])
 def docs(session: nox.Session) -> None:
     """
     Build the docs.
@@ -272,7 +272,7 @@ def test_data_download_generated(session) -> None:
     _test_data_download_generated(session)
 
 
-@nox.session(python="3.10")
+@nox.session(python=TEST_PYTHONS[1])
 def dev(session: nox.Session) -> None:
     """
     Sets up a python development environment for the project.
