@@ -141,6 +141,64 @@ def mean_frequency(
     return np.sum(P * frequencies[:, np.newaxis], axis=1) / np.sum(P, axis=1)
 
 
+def peak_frequency(
+    power_spectrogram: Spectrogram,
+    min_freq: float = 380.0,
+    max_freq: float = 11025.0,
+) -> npt.NDArray:
+    """Calculate peak frequency.
+    *** https://github.com/theresekoch/avn/blob/main/avn/timing.py
+    # https://github.com/theresekoch/avn/blob/a77f6a9bce90a65a56c61171593e9d2d70d0ae1f/avn/timing.py#L427
+    https://github.com/theresekoch/avn/blob/a77f6a9bce90a65a56c61171593e9d2d70d0ae1f/avn/timing.py#L376
+    Finds the mean for each column in ``power_spectrogram``,
+    between the frequencies specified by ``min_freq`` and ``max_freq``.
+    To find the mean, the frequencies are weighted by their power
+    in ``power_spectrogram`` and then divided by the sum of that power.
+
+    Parameters
+    ----------
+    power_spectrogram : vocalpy.Spectrogram
+        Spectrogram, returned by :func:`vocalpy.spectral.sat`.
+    min_freq : float
+        The minimum frequency to consider in ``power_spectrogram``.
+    max_freq : float
+        The maximum frequency to consider in ``power_spectrogram``.
+        Returned by :func`:vocalpy.spectral.sat`, computing using the
+        ``freq_range`` argument to that function.
+
+    Returns
+    -------
+    values : numpy.ndarray
+        The mean frequency of each column in ``power_spectrogram``.
+
+    Notes
+    -----
+    This is one way to estimate the pitch of a signal.
+    It is the center of the distribution of power across frequencies in the signal.
+    For another estimate of pitch, see :func:`vocalpy.features.sat.pitch`.
+
+    Code adapted from [1]_, [2]_, and [3]_.
+    Docs adapted from [1]_ and [3]_.
+
+    References
+    ----------
+    .. [1] `Sound Analysis Tools <http://soundanalysispro.com/matlab-sat>`_ for Matlab (SAT) by Ofer Tchernichovski
+    .. [2] `birdsonganalysis <https://github.com/PaulEcoffet/birdsonganalysis>`_  by Paul Ecoffet
+    .. [3] `avn <https://github.com/theresekoch/avn/blob/main/avn/acoustics.py>`_
+       by Therese Koch, specifically the acoustics module
+
+    See Also
+    --------
+    pitch
+    """
+    freq_inds = (power_spectrogram.frequencies > min_freq) & (
+        power_spectrogram.frequencies < max_freq
+    )
+    P = power_spectrogram.data[:, freq_inds, :]
+    frequencies = power_spectrogram.frequencies[freq_inds]
+    return frequencies[np.argmax(P, axis=1)]
+
+
 def frequency_modulation(dSdt: npt.NDArray, dSdf: npt.NDArray) -> npt.NDArray:
     """Calculate frequency modulation.
 
@@ -335,6 +393,7 @@ def pitch(
     frame_length: int = 400,
     hop_length: int = 40,
     trough_threshold: float = 0.1,
+    center: bool = True
 ):
     """Estimates the fundamental frequency (or pitch) using the YIN algorithm [1]_.
 
@@ -393,6 +452,7 @@ def pitch(
         frame_length=frame_length,
         hop_length=hop_length,
         trough_threshold=trough_threshold,
+        center=center
     )
 
 
@@ -468,6 +528,7 @@ def sat(
     max_F0: float = 1830.0,
     fmax_yin: float = 8000.0,
     trough_threshold: float = 0.1,
+    center: bool = True
 ) -> Features:
     """Extract all features used to compute similarity with
     the Sound Analysis Toolbox for Matlab (SAT).
@@ -539,11 +600,14 @@ def sat(
         frame_length=n_fft,
         hop_length=hop_length,
         trough_threshold=trough_threshold,
+        center=center
     )
 
     # -------- features that require power spectrogram and max_freq
     amp_ = amplitude(power_spectrogram, min_freq, max_freq, amp_baseline)
     entropy_ = entropy(power_spectrogram, min_freq, max_freq)
+    mean_frequency_ = mean_frequency(power_spectrogram, min_freq, max_freq)
+    peak_frequency_ = peak_frequency(power_spectrogram, min_freq, max_freq) 
 
     # -------- features that require cepstrogram
     cepstrogram, quefrencies = _get_cepstral(spectra1, n_fft, sound.samplerate)
@@ -559,7 +623,10 @@ def sat(
         {
             "amplitude": (["channel", "time"], amp_),
             "pitch": (["channel", "time"], pitch_),
+            "pitch_no_center": (["channel", "time"], pitch_(center=False))
             "goodness_of_pitch": (["channel", "time"], goodness_),
+            "mean_frequency": (["channel", "time"], mean_frequency_),
+            "peak_frequency": (["channel", "time"], peak_frequency_),
             "frequency_modulation": (["channel", "time"], FM),
             "amplitude_modulation": (["channel", "time"], AM),
             "entropy": (["channel", "time"], entropy_),
