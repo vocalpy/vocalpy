@@ -49,9 +49,6 @@ def find_hits(
     reference : numpy.ndarray
         Ground truth boundaries that the hypothesized
         boundaries ``hypothesis`` are compared to.
-    metric : str
-        The name of the metric to compute.
-        One of: ``{"precision", "recall", "fscore"}``.
     tolerance : float or int
         Tolerance, in seconds.
         Elements in ``hypothesis`` are considered
