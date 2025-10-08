@@ -179,7 +179,7 @@ class IRMetricData:
     The class attributes are the variables
     returned by
     :func:`vocalpy.metrics.segmentation.find_hits`.
-    Instances of this class are returned by
+    Instances of this class are returned 
     along with the value of the computed metrics.
 
     The values can be useful when computing
