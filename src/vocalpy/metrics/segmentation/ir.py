@@ -387,7 +387,7 @@ def precision(
     :math:`P = \\frac{T_p}{T_p+F_p}`.
 
     The number of true positives ``n_tp`` is computed by calling
-    :func:`vocalpy.metrics.segmentation.ir.compute_true_positives`.
+    :func:`vocalpy.metrics.segmentation.ir.find_hits`.
     This function then computes the precision as
     ``precision = n_tp / hypothesis.size``.
 
@@ -516,7 +516,7 @@ def recall(
     :math:`R = \\frac{T_p}{T_p + F_n}`
 
     The number of true positives ``n_tp`` is computed by calling
-    :func:`vocalpy.metrics.segmentation.ir.compute_true_positives`.
+    :func:`vocalpy.metrics.segmentation.ir.find_hits`.
     This function then computes the recall as
     ``recall = n_tp / reference.size``.
 
