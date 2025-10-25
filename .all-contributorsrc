@@ -37,6 +37,16 @@
       "contributions": [
         "ideas"
       ]
+    },
+    {
+      "login": "eintzandt",
+      "name": "Estelle in 't  Zandt",
+      "avatar_url": "https://avatars.githubusercontent.com/u/92999423?v=4",
+      "profile": "https://github.com/eintzandt",
+      "contributions": [
+        "bug",
+        "data"
+      ]
     }
   ],
   "contributorsPerLine": 7,
