@@ -27,7 +27,9 @@ def test(session) -> None:
     """
     Run the unit and regular tests.
     """
-    session.install(".[test]")
+    session.install(".")
+    pyproject = nox.project.load_toml("pyproject.toml")
+    session.install(*nox.project.dependency_groups(pyproject, "test"))
     session.run("pytest", *session.posargs)
 
 
@@ -36,7 +38,8 @@ def lint(session: nox.Session) -> None:
     """
     Run the linter.
     """
-    session.install("isort", "black", "flake8")
+    pyproject = nox.project.load_toml("pyproject.toml")
+    session.install(*nox.project.dependency_groups(pyproject, "lint"))
     # run isort first since black disagrees with it
     session.run("isort", "./src")
     session.run("black", "./src", "--line-length=79")
@@ -48,7 +51,9 @@ def docs(session: nox.Session) -> None:
     """
     Build the docs.
     """
-    session.install(".[doc]")
+    session.install(".")
+    pyproject = nox.project.load_toml("pyproject.toml")
+    session.install(*nox.project.dependency_groups(pyproject, "doc"))
 
     if session.posargs:
         if "autobuild" in session.posargs:
@@ -63,22 +68,13 @@ def docs(session: nox.Session) -> None:
 @nox.session
 def coverage(session: nox.Session) -> None:
     """Run tests and measure coverage"""
+    session.install(".")
+    pyproject = nox.project.load_toml("pyproject.toml")
+    session.install(*nox.project.dependency_groups(pyproject, "test"))
+    session.install("pytest-cov")
     session.run(
-        "pytest", "--cov=./", "--cov-report=xml", *session.posargs
+                "pytest", "-n", "auto", "--cov=vocalpy", "--cov-report=xml", *session.posargs
     )
-
-
-@nox.session
-def build(session: nox.Session) -> None:
-    """
-    Build an SDist and wheel with ``flit``.
-    """
-    dist_p = DIR.joinpath("dist")
-    if dist_p.exists():
-        shutil.rmtree(dist_p)
-
-    session.install("flit")
-    session.run("flit", "build")
 
 
 # ---- used by sessions that "clean up" data, for example data and for tests
@@ -297,7 +293,9 @@ def dev(session: nox.Session) -> None:
 
     # Use the venv's interpreter to install the project along with
     # all it's dev dependencies, this ensures it's installed in the right way
-    session.run(python, "-m", "pip", "install", "-e", ".[dev]", external=True)
+    pyproject = nox.project.load_toml("pyproject.toml")
+    session.install(*nox.project.dependency_groups(pyproject, "dev"))
+    session.run(python, "-m", "pip", "install", "-e", ".", external=True)
 
     # ---- if data for tests is not downloaded, then download it
     source_dir_contents = os.listdir(SOURCE_TEST_DATA_DIR)
