@@ -33,6 +33,7 @@ dependencies = [
     "pooch >= 1.8.2",
     "scipy >=1.12.0",
     "SoundFile >=0.13.1",
+    "sounddevice >= 0.5.3",
     "xarray >= 2023.11.0",
 ]
 
