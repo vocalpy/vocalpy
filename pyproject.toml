@@ -8,7 +8,7 @@ authors = [
     {name = "David Nicholson", email = "nickledave@users.noreply.github.com"}
 ]
 description = "A core package for acoustic communication research in Python"
-version = "0.10.3"
+version = "0.10.3.post1"
 classifiers = [
         'License :: OSI Approved :: BSD License',
         'Development Status :: 5 - Production/Stable',
