@@ -547,3 +547,10 @@ class Sound:
             return Sound(
                 data=librosa.to_mono(self.data), samplerate=self.samplerate
             )
+
+    def play(self, start: float = 0.0, stop: float | None = None):
+        start = float(start)
+        if start < 0.0:
+            raise ValueError(
+                f"`start` must be a non-negative value but was: {start}"
+            )
