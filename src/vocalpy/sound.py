@@ -1,5 +1,4 @@
 """Class that represents a sound."""
-
 from __future__ import annotations
 
 import pathlib
@@ -9,6 +8,7 @@ from typing import TYPE_CHECKING
 
 import numpy as np
 import numpy.typing as npt
+import soundcard
 import soundfile
 
 from ._vendor import evfuncs
@@ -548,9 +548,33 @@ class Sound:
                 data=librosa.to_mono(self.data), samplerate=self.samplerate
             )
 
-    def play(self, start: float = 0.0, stop: float | None = None):
+    def play(self, start: float = 0.0, stop: float | None = None, speaker: str | None = None, channels: list[int] | None = None):
         start = float(start)
         if start < 0.0:
             raise ValueError(
                 f"`start` must be a non-negative value but was: {start}"
             )
+        if stop is None:
+            stop = self.duration
+        else:
+            stop = float(stop)
+        if stop < 0.0:
+            raise ValueError(
+                f"`stop` must be a non-negative value but was: {start}"
+            )
+        if start >+ stop:
+            raise ValueError(
+                f"`start` time for `Sound.play` must be less than `stop`, but `start` was {start} and `stop` was {stop}"
+            )
+        start_ind = int(start * self.samplerate)
+        stop_ind = int(stop * self.samplerate)
+
+        if speaker:
+            spkr = soundcard.get_speaker(speaker)
+        else:
+            spkr = soundcard.default_speaker()
+        if channels:
+            data = self.data[channels, start_ind:stop_ind]
+        else:
+            data = self.data[:, start_ind:stop_ind]
+        spkr.play(data, samplerate=self.samplerate)
