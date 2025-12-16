@@ -14,23 +14,23 @@ classifiers = [
         'Development Status :: 5 - Production/Stable',
         'Programming Language :: Python',
         'Programming Language :: Python :: 3',
+        'Programming Language :: Python :: 3.11',
         'Programming Language :: Python :: 3.12',
         'Programming Language :: Python :: 3.13',
-        'Programming Language :: Python :: 3.14',
         'Programming Language :: Python :: Implementation :: CPython'
 ]
-requires-python = ">=3.12"
+requires-python = ">=3.11"
 readme = "README.md"
 license = {file = "LICENSE"}
 dependencies = [
     "attrs >=25.3.0",
-    "crowsetta >=5.1.3",
+    "crowsetta >=5.1.2",
     "dask[dataframe] >=2025.5.1",
     "h5netcdf >= 1.3.0",
-    "librosa >= 0.11.0",
-    "matplotlib >=3.9.0",
-    "numpy >=2.0.0",
-    "pandas >= 2.2.0",
+    "librosa >= 0.10.2.post1",
+    "matplotlib >=3.7.1",
+    "numpy >=1.26.0",
+    "pandas >= 2.1.0",
     "pooch >= 1.8.2",
     "scipy >=1.12.0",
     "SoundFile >=0.13.1",
@@ -41,16 +41,16 @@ dependencies = [
 Home = "https://github.com/vocalpy/vocalpy"
 Docs = "https://vocalpy.readthedocs.io"
 
-[project.optional-dependencies]
+[dependency-groups]
 test = [
     "pytest >=6.2.5",
-    "pytest-cov >=2.12.0",
+    "pytest-cov >=2.11.1",
     "pytest-xdist >=3.2.0",
 ]
 doc = [
     # for UMAP/HDBSCAN how-to
     "hdbscan>=0.8.40",
-    "ipython >= 8.20.0",
+    "ipython != 8.7.0",
     "jupyterlab >=3.0.3",
     "jupytext >=1.13.8",
     "myst-nb >=0.15.0",
@@ -68,12 +68,17 @@ doc = [
     # for UMAP/HDBSCAN how-to
     "umap-learn>=0.5.7",
 ]
+lint = [
+    "black >=21.12b0",
+    'flake8 >=6.0.0',
+    'isort >=5.12.0',
+    'pycln >=2.1.3',
+]
 dev = [
     "twine >=3.7.1",
-    "black >=21.12b0",
-    "ipython >= 8.20.0",
+    "ipython >=8.0.0",
     "nox >= 2022.1.7",
-    "vocalpy[doc, test]"
+    "vocalpy[doc, test, lint]"
 ]
 
 [tool.pytest.ini_options]
