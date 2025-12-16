@@ -16,4 +16,4 @@ build:
       - python -m pip install --upgrade --upgrade-strategy only-if-needed --no-cache-dir --group doc .
 
 sphinx:
-   configuration: doc/conf.py
+   configuration: docs/conf.py
