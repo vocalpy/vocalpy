@@ -16,9 +16,9 @@ VENV_DIR = pathlib.Path('./.venv').resolve()
 
 # ---- the top half of this noxfile are more standard sessions: lint, tests, docs, build --------------------------
 TEST_PYTHONS = [
-    "3.11",
     "3.12",
     "3.13",
+    "3.14",
 ]
 
 
