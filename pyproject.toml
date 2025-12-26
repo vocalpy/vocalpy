@@ -16,6 +16,7 @@ classifiers = [
         'Programming Language :: Python :: 3',
         'Programming Language :: Python :: 3.12',
         'Programming Language :: Python :: 3.13',
+        'Programming Language :: Python :: 3.14',
         'Programming Language :: Python :: Implementation :: CPython'
 ]
 requires-python = ">=3.12"
@@ -80,7 +81,6 @@ dev = [
     {include-group = "doc"},
     {include-group = "test"},
     {include-group = "lint"},
-    # "vocalpy[doc, test, lint]"
 ]
 
 [tool.pytest.ini_options]
