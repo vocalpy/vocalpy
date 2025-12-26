@@ -77,7 +77,10 @@ dev = [
     "twine >=3.7.1",
     "ipython >= 8.20.0",
     "nox >= 2022.1.7",
-    "vocalpy[doc, test, lint]"
+    {include-group = "doc"},
+    {include-group = "test"},
+    {include-group = "lint"},
+    # "vocalpy[doc, test, lint]"
 ]
 
 [tool.pytest.ini_options]
