@@ -29,6 +29,7 @@ import numpy as np
 import numpy.typing as npt
 import scipy.signal
 
+from .audio import bandpass_filtfilt
 from ..sound import Sound
 
 
