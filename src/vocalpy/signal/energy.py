@@ -305,4 +305,9 @@ def ava(
         amps = np.sum(spect, axis=0)
     amps = gaussian_filter(amps, smoothing_timescale / dt)
 
-    return amps
+    if return_spect:
+        from ..spectrogram import Spectrogram
+        spect = Spectrogram(spect, f, t)
+        return amps, dt, spect
+    else:
+        return amps, dt
