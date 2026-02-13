@@ -17,9 +17,6 @@ if TYPE_CHECKING:
     from .. import Sound
 
 
-EPSILON = 1e-9
-
-
 @dataclass
 class AvaParams(Params):
     """Data class that represents parameters
@@ -203,6 +200,7 @@ def ava(
     scale: bool = True,
     scale_val: int | float = 2**15,
     scale_dtype: npt.DTypeLike = np.int16,
+    epsilon: float = 1e-9,
 ) -> Segments:
     """Find segments in audio, using algorithm
     from ``ava`` package.
@@ -384,49 +382,24 @@ def ava(
 
     .. [7] https://github.com/ralphpeterson/gerbil-vocal-dialects/blob/main/vocalization_segmenting.py
     """
-    if sound.data.shape[0] > 1:
-        raise ValueError(
-            f"The ``sound`` has {sound.data.shape[0]} channels, but segmentation is not implemented "
-            "for sounds with multiple channels. This is because there can be a different number of segments "
-            "per channel, which cannot be represented as a rectangular array. To segment each channel, "
-            "first split the channels into separate ``vocalpy.Sound`` instances, then pass each to this function."
-            "For example,\n"
-            ">>> sound_channels = [sound_ for sound_ in sound]  # split with a list comprehension\n"
-            ">>> channel_segments = [vocalpy.segment.meansquared(sound_) for sound_ in sound_channels]\n"
-        )
+    from .. import signal
 
-    data = np.squeeze(
-        sound.data, axis=0
-    )  # get rid of channels dim so we operate on scalars in main loop
-
-    if scale:
-        data = (data * scale_val).astype(scale_dtype)
-
-    # ---- compute spectrogram
-    # TODO: return Spectrogram for each Segment when we return Segments
-    f, t, spect = stft(
-        data, sound.samplerate, nperseg=nperseg, noverlap=noverlap
+    amps, dt = signal.energy.ava(
+        sound,
+        nperseg,
+        noverlap,
+        min_freq,
+        max_freq,
+        spect_min_val,
+        spect_max_val,
+        use_softmax_amp,
+        temperature,
+        smoothing_timescale,
+        scale,
+        scale_val,
+        scale_dtype,
+        epsilon,
     )
-    i1 = np.searchsorted(f, min_freq)
-    i2 = np.searchsorted(f, max_freq)
-    f, spect = f[i1:i2], spect[i1:i2]
-    spect = np.log(np.abs(spect) + EPSILON)
-    spect -= spect_min_val
-    spect /= spect_max_val - spect_min_val
-    spect = np.clip(spect, 0.0, 1.0)
-
-    # we determine `dt` here in case we need it for `amps`
-    # we also use it below to remove segments shorter than the minimum allowed value
-    dt = t[1] - t[0]
-
-    # ---- calculate amplitude and smooth.
-    if use_softmax_amp:
-        temp = np.exp(spect / temperature)
-        temp /= np.sum(temperature, axis=0) + EPSILON
-        amps = np.sum(np.multiply(spect, temp), axis=0)
-    else:
-        amps = np.sum(spect, axis=0)
-    amps = gaussian_filter(amps, smoothing_timescale / dt)
 
     # Find local maxima greater than thresh_max.
     local_maxima = []
