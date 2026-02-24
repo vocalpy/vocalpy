@@ -47,6 +47,17 @@
         "bug",
         "data"
       ]
+    },
+    {
+      "login": "Akseli-Ilmanen",
+      "name": "Akseli-Ilmanen",
+      "avatar_url": "https://avatars.githubusercontent.com/u/107996462?v=4",
+      "profile": "https://linktr.ee/akseli_ilmanen",
+      "contributions": [
+        "ideas",
+        "bug",
+        "test"
+      ]
     }
   ],
   "contributorsPerLine": 7,
