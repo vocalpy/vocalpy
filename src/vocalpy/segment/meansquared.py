@@ -186,7 +186,7 @@ def meansquared(
             data=(sound.data * scale_val).astype(scale_dtype),
             samplerate=sound.samplerate,
         )
-        meansquared_ = signal.audio.meansquared(
+        meansquared_ = signal.energy.meansquared(
             sound_copy, freq_cutoffs, smooth_win
         )
     else:
