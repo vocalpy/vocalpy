@@ -288,6 +288,10 @@ def ava(
     i2 = np.searchsorted(f, max_freq)
     f, spect = f[i1:i2], spect[i1:i2]
     spect = np.log(np.abs(spect) + epsilon)
+    if spect_min_val is None:
+        spect_min_val = spect.min()
+    if spect_max_val is None:
+        spect_max_val = spect.max()
     spect -= spect_min_val
     spect /= spect_max_val - spect_min_val
     spect = np.clip(spect, 0.0, 1.0)
