@@ -125,7 +125,6 @@ def soundsig_spectro(
         sound = Sound(
             data=(sound.data * scale_val).astype(scale_dtype),
             samplerate=sound.samplerate,
-            path=sound.path,
         )
 
     # ---- soundsig.sound.spectrogram
