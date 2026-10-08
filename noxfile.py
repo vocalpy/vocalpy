@@ -71,7 +71,6 @@ def coverage(session: nox.Session) -> None:
     session.install(".")
     pyproject = nox.project.load_toml("pyproject.toml")
     session.install(*nox.project.dependency_groups(pyproject, "test"))
-    session.install("pytest-cov")
     session.run(
                 "pytest", "-n", "auto", "--cov=vocalpy", "--cov-report=xml", *session.posargs
     )
