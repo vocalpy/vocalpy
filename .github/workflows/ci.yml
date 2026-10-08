@@ -23,7 +23,6 @@ jobs:
       - name: run tests
         run: |
           pip install nox
-          pip install '.[test]'
           nox -s test-data-download-source
           nox -s test-data-download-generated
           nox -s coverage
